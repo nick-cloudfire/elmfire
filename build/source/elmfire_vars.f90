@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ! *****************************************************************************
 MODULE ELMFIRE_VARS
 ! *****************************************************************************
@@ -231,6 +230,7 @@ LOGICAL*1, ALLOCATABLE, DIMENSION (:,:) :: TAGGED
 LOGICAL*1, POINTER, DIMENSION (:,:) :: ISNONBURNABLE
 REAL, ALLOCATABLE, DIMENSION(:,:) :: PHIP
 LOGICAL*1, ALLOCATABLE, DIMENSION(:,:) :: EVERTAGGED
+
 REAL, ALLOCATABLE, DIMENSION (:,:) :: TIME_OF_ARRIVAL, EMBER_TIGN
 
 ! 1D geospatial arrays
@@ -522,6 +522,10 @@ TYPE NODE
    REAL :: WS20_NOW                      = 0.
    REAL :: WSMF                          = 0.
    REAL :: VELOCITY_DMS_SURFACE          = 0.
+   REAL :: SDI                           = 0.
+   REAL :: TAU_EMBERGEN                  = 0.
+   REAL :: VELOCITY_DMS_SURFACE          = 0.
+   REAL :: LOCAL_EMBERGEN_DURATION       = 0.
 
 ! For optimization purposes
    LOGICAL   :: NEED_SLOPE_CALC = .TRUE.
@@ -583,6 +587,7 @@ TYPE NODE
    REAL :: T_START_SPOTTING        = -1. 
    REAL :: T_END_SPOTTING          = -1. 
 #endif
+
 END TYPE NODE
 
 ! Wrapper of pointers DWI_SU

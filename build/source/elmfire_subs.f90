@@ -26,6 +26,9 @@ DO I = 1, 62
 ENDDO
 CLOSE(LU)
 
+OPEN(20250202, FILE="TIME_CHECK.csv", STATUS='UNKNOWN', POSITION='APPEND', ACTION='WRITE')
+WRITE(20250202,*) (TIMINGS(IR+1,1), IR=0, NPROC_HOST-1), STATS_SURFACE_FIRE_AREA(1)
+
 100 FORMAT (A,128(I3,','))
 300 FORMAT (I3,',',128(F11.5,','))
 
@@ -1067,8 +1070,8 @@ END IF
  
 ! Add new element ot the end
 DL2%NUM_NODES = DL2%NUM_NODES + 1
-N = SIZE(DL2%NODE_POINTERS)+1  ! Store the new count DWI_SU + YIREN DEBUG
 
+N = SIZE(DL2%NODE_POINTERS)+1  ! Store the new count DWI_SU + YIREN DEBUG
 
 NP => DL2%TAIL
 ALLOCATE(DL2%TAIL)
@@ -1077,9 +1080,11 @@ DL2%TAIL%IY         =  IY
 DL2%TAIL%TIME_ADDED =  T
 
 DL2%TAIL%IFBFM   =  FBFM%I2(IX,IY,1)
+
 #ifdef _WUI
 IF (USE_BLDG_SPREAD_MODEL) DL2%TAIL%IBLDGFM =  BLDG_FUEL_MODEL%I2(IX,IY,1)
 #endif
+
 DL2%TAIL%ADJ     =  ADJ%R4(IX,IY,1)
 DL2%TAIL%TANSLP2 =  TANSLP2(MAX(MIN(NINT(SLP%R4(IX,IY,1)),90),0))
 
@@ -1099,11 +1104,10 @@ DEALLOCATE(TEMP)
 NULLIFY(DL2%NODE_POINTERS(N)%PTR)
 DL2%NODE_POINTERS(N)%PTR => DL2%TAIL
 #endif
-   
+
 ! *****************************************************************************   
 END SUBROUTINE APPEND
 ! *****************************************************************************
-
 
 ! *****************************************************************************
 SUBROUTINE APPEND_TO_DYNAMIC_ARRAY(IX, IY, N_ROWS, DYNAMIC_ARRAY)
@@ -1140,8 +1144,6 @@ SUBROUTINE APPEND_TO_DYNAMIC_ARRAY(IX, IY, N_ROWS, DYNAMIC_ARRAY)
 ! *****************************************************************************
 END SUBROUTINE APPEND_TO_DYNAMIC_ARRAY
 ! *****************************************************************************
-
-
 
 ! *****************************************************************************
 ELEMENTAL SUBROUTINE INIT(DL2, IX, IY, T)
@@ -1180,15 +1182,19 @@ TYPE(NODE), POINTER :: NP
 
 NP => CURRENT
 CONTINUE
+
 IF (ASSOCIATED(CURRENT%PREV) .AND. ASSOCIATED(CURRENT%NEXT)) THEN !Deleting intermediate node
    CURRENT%PREV%NEXT => CURRENT%NEXT
    CURRENT%NEXT%PREV => CURRENT%PREV
    CURRENT => CURRENT%PREV
+
 CONTINUE
+
 ELSE IF (ASSOCIATED(CURRENT%PREV) .AND. (.NOT. ASSOCIATED(CURRENT%NEXT))) THEN ! Deleting tail node
    CURRENT%PREV%NEXT => NULL()
    CURRENT => CURRENT%PREV
    DL2%TAIL => CURRENT
+
 CONTINUE
 ELSE IF (.NOT. ASSOCIATED(CURRENT%PREV) .AND. ASSOCIATED(CURRENT%NEXT)) THEN ! Deleting head node
    DL2%HEAD => CURRENT%NEXT
@@ -1200,6 +1206,7 @@ CONTINUE
 ENDIF
 
 DEALLOCATE(NP)
+
 DL2%NUM_NODES = DL2%NUM_NODES - 1
 
 ! *****************************************************************************
