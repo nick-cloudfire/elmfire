@@ -525,7 +525,6 @@ TYPE NODE
    REAL :: SDI                           = 0.
    REAL :: TAU_EMBERGEN                  = 0.
    REAL :: VELOCITY_DMS_SURFACE          = 0.
-   REAL :: LOCAL_EMBERGEN_DURATION       = 0.
 
 ! For optimization purposes
    LOGICAL   :: NEED_SLOPE_CALC = .TRUE.
