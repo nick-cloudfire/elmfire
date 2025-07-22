@@ -1953,6 +1953,41 @@ END SUBROUTINE UX_AND_UY_ELLIPTICAL
 ! *****************************************************************************
 
 ! *****************************************************************************
+SUBROUTINE CALC_CFL(DT)
+! *****************************************************************************
+
+REAL, INTENT(INOUT) :: DT
+INTEGER :: I
+REAL :: CFL, U, UX, UY, UMAX
+TYPE(NODE), POINTER :: C
+
+UMAX = 0.
+C => LIST_TAGGED%HEAD
+DO I = 1, LIST_TAGGED%NUM_NODES
+   IF (.NOT. C%BURNED) THEN
+      UX=ABS(C%UX)
+      UY=ABS(C%UY)
+      U=MAX(UX,UY)
+      ! APPLY WIND-BASED CFL
+      ! U=MAX(U, C%WS20_NOW*0.447)
+      IF (U .GT. UMAX) UMAX = U
+   ENDIF
+   C => C%NEXT
+ENDDO
+
+CFL = UMAX * DT / ANALYSIS_CELLSIZE
+IF (CFL .GT. 0.) THEN
+   DT = MIN(TARGET_CFL * DT / CFL, SIMULATION_DTMAX)
+ELSE
+   DT = SIMULATION_DTMAX
+ENDIF
+CONTINUE
+
+! *****************************************************************************
+END SUBROUTINE CALC_CFL
+! *****************************************************************************
+
+! *****************************************************************************
 SUBROUTINE RK2_INTEGRATE(DT,ISTEP)
 ! *****************************************************************************
 
