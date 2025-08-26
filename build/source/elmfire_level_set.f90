@@ -2004,11 +2004,21 @@ IF (ISTEP .EQ. 1) THEN
       IF ( PHIP(C%IX,C%IY) .NE. PHIP(C%IX,C%IY)) PHIP(C%IX,C%IY) = 1.0
       IF ( PHIP(C%IX,C%IY) .LT. -100.0 ) PHIP(C%IX,C%IY) = -100.0
       IF ( PHIP(C%IX,C%IY) .GT.  100.0 ) PHIP(C%IX,C%IY) =  100.0
+
+      IF (C%WTU_SPREAD) THEN 
+         PHIP (C%IX, C%IY) = -1.0   ! Interface Model
+      ENDIF
+      
       C => C%NEXT
    ENDDO
 ELSE
    DO I = 1, LIST_TAGGED%NUM_NODES
       PHIP(C%IX,C%IY) = 0.5 * (C%PHIP_OLD + (PHIP(C%IX,C%IY) - DT * (C%UX * C%DPHIDX_LIMITED + C%UY * C%DPHIDY_LIMITED )))
+
+      IF (C%WTU_SPREAD) THEN 
+         PHIP (C%IX, C%IY) = -1.0   ! Interface Model
+      ENDIF
+      
       C => C%NEXT
    ENDDO
 ENDIF
