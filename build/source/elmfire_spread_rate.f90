@@ -522,9 +522,9 @@ ENDIF
 
 ! Interface Model
 IF (C%TEST_INTERFACE) THEN
-   C%VELOCITY_DMS = 0
-   C%VBACK = 0
-   C%LOW = 0
+   C%VELOCITY_DMS = 0.0
+   C%VBACK = 0.0
+   C%LOW = 1.0
    ! PRINT *, C%VELOCITY_DMS
 ENDIF
 
