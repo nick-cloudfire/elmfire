@@ -200,7 +200,7 @@ ENDIF
 
 MU_SPANWISE = 0.0
 SIGMA_SPANWISE = 0.92 * LC
-SARDOY_PDF_PARAMETERS(1) = MIN(MU_DIST,5.0)
+SARDOY_PDF_PARAMETERS(1) = MU_DIST
 SARDOY_PDF_PARAMETERS(2) = SIGMA_DIST
 SARDOY_PDF_PARAMETERS(3) = MU_SPANWISE
 SARDOY_PDF_PARAMETERS(4) = SIGMA_SPANWISE
@@ -1085,4 +1085,4 @@ END FUNCTION ERFINV_LOCAL
 
 ! *****************************************************************************
 END MODULE ELMFIRE_SPOTTING
-! *****************************************************************************
+*****************************************************************************
