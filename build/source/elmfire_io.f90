@@ -1358,7 +1358,9 @@ IF (CSV_FIXED_IGNITION_LOCATIONS .AND. ONLY_READ_NEEDED_WX_BANDS .AND. RASTER%NB
    NBANDS = 1 + IGN_IWX_BAND_HI - IGN_IWX_BAND_LO
 ELSE
    NBANDS = RASTER%NBANDS
-ENDIF
+endif
+
+RASTER%HEADERISSET = .TRUE.
 
 SELECT CASE(TRIM(RASTER%PIXELTYPE))
 
@@ -1445,6 +1447,222 @@ CLOSE(LUINPUT,IOSTAT=IOS)
 ! *****************************************************************************
 END SUBROUTINE READ_BSQ_RASTER
 ! *****************************************************************************
+
+! *****************************************************************************
+!> Read slice of raster contained in .bsq file FN in directory INDIR and save it to RASTER. Slice is BANDSTART and BANDSTART + 1
+SUBROUTINE READ_BSQ_RASTER_SLICE(RASTER,INDIR,FN,BANDSTART)
+! *****************************************************************************
+
+#ifdef __INTEL_COMPILER
+USE IFPORT
+#endif
+
+TYPE (RASTER_TYPE) :: RASTER
+CHARACTER(400), INTENT (IN) :: INDIR,FN
+INTEGER, intent (IN) :: BANDSTART
+CHARACTER(400) :: FNHDR, FNBSQ, FNTIF, TEMPSTR, SHELLSTR
+INTEGER :: I, IOS, IBAND, IROW1, IROW2, IDUMMY, J, IBANDCOUNT, NBANDS
+INTEGER*8 :: LRECL
+LOGICAL :: FOUND, HDR_EXISTS, BSQ_EXISTS
+REAL, ALLOCATABLE, DIMENSION(:) :: RVALUES
+REAL, ALLOCATABLE, DIMENSION(:,:) :: RTEMP
+INTEGER*2, ALLOCATABLE, DIMENSION(:) :: I2VALUES
+INTEGER*2, ALLOCATABLE, DIMENSION(:,:) :: I2TEMP
+
+IF (VRT_INSTEAD_OF_TIF) THEN
+   FNTIF = TRIM(INDIR) // TRIM(FN) // '.vrt'
+ELSE
+   FNTIF = TRIM(INDIR) // TRIM(FN) // '.tif'
+ENDIF
+
+IF (TRIM(SCRATCH) .EQ. 'null') THEN
+   FNHDR = TRIM(INDIR) // TRIM(FN) // '.hdr'
+   FNBSQ = TRIM(INDIR) // TRIM(FN) // '.bsq'
+ELSE
+   FNHDR = TRIM(SCRATCH) // TRIM(FN) // '.hdr'
+   FNBSQ = TRIM(SCRATCH) // TRIM(FN) // '.bsq'
+ENDIF
+
+if (.not. RASTER%HEADERISSET) then
+
+   ! Convert to ENVI header BSQ format if files don't already exist
+   INQUIRE(FILE=TRIM(FNHDR),EXIST=HDR_EXISTS)
+   INQUIRE(FILE=TRIM(FNBSQ),EXIST=BSQ_EXISTS)
+   IF (.NOT. HDR_EXISTS .OR. .NOT. BSQ_EXISTS) THEN
+      SHELLSTR = TRIM(PATH_TO_GDAL) // 'gdal_translate -of ENVI -co "INTERLEAVE=BSQ" ' // TRIM(FNTIF) // " " // TRIM(FNBSQ)
+      WRITE(*,100) TRIM(SHELLSTR); CALL EXECUTE_COMMAND_LINE(TRIM(SHELLSTR))
+   ENDIF
+
+   IF (USE_BSQ_XML_HEADER) THEN
+      CALL READ_BSQ_XML_HEADER (RASTER , INDIR, FN, .FALSE.)
+
+   ! Now open and parse BSQ .hdr file:
+      OPEN(LUINPUT,FILE=TRIM(FNHDR),FORM='FORMATTED',STATUS='OLD',IOSTAT=IOS) 
+      IF (IOS .GT. 0) THEN
+         WRITE(*,*) 'Problem opening bsq header ', TRIM(FNHDR)
+      ENDIF
+
+      IF (DEBUG_LEVEL .GT. 100) WRITE(*,*) 'Reading bsq header'
+
+   ! Skip 11 lines
+      DO I = 1, 11
+         READ(LUINPUT,100,IOSTAT=IOS)
+      ENDDO
+
+   ! Read easting, northing, and cell size info:
+      READ(LUINPUT,100,IOSTAT=IOS) TEMPSTR
+      FOUND=.FALSE.; I=1
+      DO WHILE (.NOT. FOUND)
+         IF(TEMPSTR(I:I) .EQ. ',') THEN
+            FOUND=.TRUE.
+         ELSE
+            I=I+1
+         ENDIF
+      ENDDO
+      J=I+1
+      DO I=1,130
+         IF (TEMPSTR(I:I) .EQ. '}') TEMPSTR(I:I)=' '
+      ENDDO
+      READ(TEMPSTR(J:),*) IDUMMY, IDUMMY, RASTER%XLLCORNER, RASTER%YLLCORNER, RASTER%XDIM, RASTER%YDIM
+      RASTER%YLLCORNER = RASTER%YLLCORNER - RASTER%YDIM * RASTER%NROWS
+      CLOSE(LUINPUT)
+
+   ! Check to make sure x and y cell sizes are the same:
+      IF (RASTER%XDIM .NE. RASTER%YDIM) THEN
+         WRITE(*,*) 'Error opening ', TRIM(FNHDR), ' because XDIM is not equal to YDIM.'
+         STOP
+      ELSE
+         RASTER%CELLSIZE=RASTER%XDIM
+      ENDIF
+
+   ! Set ULXMAP and ULYMAP
+      RASTER%ULXMAP = RASTER%XLLCORNER + 0.5 * RASTER%CELLSIZE
+      RASTER%ULYMAP = RASTER%YLLCORNER + RASTER%NROWS * RASTER%CELLSIZE - 0.5 * RASTER%CELLSIZE
+
+   ! Set BYTEORDER and LAYOUT
+      RASTER%BYTEORDER = '0'
+      RASTER%LAYOUT    = 'BSQ'
+
+   ! This is for bil:
+      RASTER%BYTEORDER = 'I'
+      RASTER%LAYOUT    = 'BIL'
+   ELSE
+      CALL READ_BSQ_HDR_HEADER(RASTER, INDIR, FN, .FALSE.)
+   ENDIF
+   RASTER%HEADERISSET = .TRUE.
+ENDIF
+
+IF (CSV_FIXED_IGNITION_LOCATIONS .AND. ONLY_READ_NEEDED_WX_BANDS .AND. RASTER%NBANDS .GT. 1) THEN
+   NBANDS = 1 + IGN_IWX_BAND_HI - IGN_IWX_BAND_LO
+ELSE
+   NBANDS = RASTER%NBANDS
+ENDIF
+
+IF (BANDSTART .ge. NBANDS .or. BANDSTART .le. 0) then
+   WRITE(*,*) 'Error processing ', TRIM(FNHDR), ' slice band start (', BANDSTART, ') is outside the bounds of (', 0, ',',NBANDS,')'
+   STOP
+endif
+
+SELECT CASE(TRIM(RASTER%PIXELTYPE))
+
+   CASE('FLOAT')
+!     Allocate arrays as appropriate:
+      IF (.NOT. ASSOCIATED(RASTER%R4)) ALLOCATE(RASTER%R4(1:RASTER%NCOLS,1:RASTER%NROWS,1:2))
+      ALLOCATE(RVALUES(1:RASTER%NROWS*RASTER%NCOLS))
+      ALLOCATE(RTEMP(1:RASTER%NCOLS,1:RASTER%NROWS))
+
+!Open raster bsq file:
+      INQUIRE (IOLENGTH=LRECL) RVALUES(:) 
+
+      OPEN(LUINPUT, FILE=TRIM(FNBSQ), ACCESS='DIRECT', STATUS='OLD', RECL=LRECL, IOSTAT=IOS) 
+      IF (IOS .GT. 0) THEN
+         WRITE(*,*) 'Problem opening raster file ', TRIM(FNBSQ)
+         STOP
+      ENDIF
+
+      IF (CSV_FIXED_IGNITION_LOCATIONS .AND. ONLY_READ_NEEDED_WX_BANDS) THEN
+         IBANDCOUNT = 0
+         DO IBAND = BANDSTART, BANDSTART + 1
+            IF (IBAND .LT. IGN_IWX_BAND_LO .AND. RASTER%NBANDS .GT. 1) CYCLE
+            IF (IBAND .GT. IGN_IWX_BAND_HI .AND. RASTER%NBANDS .GT. 1) CYCLE
+            IBANDCOUNT = IBANDCOUNT + 1
+
+            READ(LUINPUT,REC=IBAND,IOSTAT=IOS) RVALUES(:)
+            RTEMP(:,:) = RESHAPE(RVALUES, (/RASTER%NCOLS,RASTER%NROWS/))
+            DO IROW1 = 1, RASTER%NROWS
+               IROW2 = RASTER%NROWS + 1 - IROW1 
+               RASTER%R4(:,IROW1,IBAND - BANDSTART + 1) = RTEMP(:,IROW2)
+            ENDDO
+         ENDDO
+         RASTER%NBANDS = NBANDS
+      ELSE
+         DO IBAND = BANDSTART, BANDSTART + 1
+            READ(LUINPUT,REC=IBAND,IOSTAT=IOS) RVALUES(:)
+            RTEMP(:,:) = RESHAPE(RVALUES, (/RASTER%NCOLS,RASTER%NROWS/))
+            DO IROW1 = 1, RASTER%NROWS
+               IROW2 = RASTER%NROWS + 1 - IROW1 
+               RASTER%R4(:,IROW1,IBAND - BANDSTART + 1) = RTEMP(:,IROW2)
+            ENDDO
+         ENDDO
+      ENDIF
+
+      DEALLOCATE(RVALUES, RTEMP)
+
+   CASE('SIGNEDINT')
+!     Allocate arrays as appropriate:
+      IF (.NOT. ASSOCIATED(RASTER%I2)) ALLOCATE(RASTER%I2(1:RASTER%NCOLS,1:RASTER%NROWS,1:2) )
+      ALLOCATE(I2VALUES(1:RASTER%NROWS*RASTER%NCOLS))
+      ALLOCATE(I2TEMP(1:RASTER%NCOLS,1:RASTER%NROWS))
+
+!Open raster bsq file:
+      INQUIRE (IOLENGTH=LRECL) I2VALUES(:) 
+
+      OPEN(LUINPUT, FILE=TRIM(FNBSQ), ACCESS='DIRECT', STATUS='OLD', RECL=LRECL, IOSTAT=IOS) 
+      IF (IOS .GT. 0) THEN
+         WRITE(*,*) 'Problem opening raster file ', TRIM(FNBSQ)
+         STOP
+      ENDIF
+
+      DO IBAND = BANDSTART, BANDSTART + 1
+         READ(LUINPUT,REC=IBAND,IOSTAT=IOS) I2VALUES(:)
+         I2TEMP(:,:) = RESHAPE(I2VALUES, (/RASTER%NCOLS,RASTER%NROWS/))
+
+         DO IROW1 = 1, RASTER%NROWS
+            IROW2 = RASTER%NROWS + 1 - IROW1 
+            RASTER%I2(:,IROW1,IBAND - BANDSTART + 1) = I2TEMP(:,IROW2)
+         ENDDO
+
+      ENDDO
+
+      DEALLOCATE(I2VALUES, I2TEMP)
+
+   CASE DEFAULT
+      CONTINUE
+
+END SELECT
+
+CLOSE(LUINPUT,IOSTAT=IOS)
+
+100 FORMAT(A)
+
+! *****************************************************************************
+END SUBROUTINE READ_BSQ_RASTER_SLICE
+! *****************************************************************************
+
+! *****************************************************************************
+SUBROUTINE UPDATE_WEATHER_SLICE(RASTER,IBAND)
+! *****************************************************************************
+
+
+
+! *****************************************************************************
+END SUBROUTINE UPDATE_WEATHER_SLICE
+! *****************************************************************************
+
+
+
+
+
 
 ! *****************************************************************************
 !> Read split raster contained in FNIN.bsq file and save it to RASTER.

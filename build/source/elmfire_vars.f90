@@ -270,7 +270,8 @@ TYPE :: RASTER_TYPE
    REAL          :: CELLSIZE
    REAL          :: XLLCORNER
    REAL          :: YLLCORNER
-   REAL,POINTER, DIMENSION(:,:,:) :: R4 =>NULL()
+   logical       :: HEADERISSET
+   REAL*2,POINTER, DIMENSION(:,:,:) :: R4 =>NULL()
    INTEGER*2,POINTER, DIMENSION(:,:,:) :: I2 =>NULL()
 END TYPE
 
