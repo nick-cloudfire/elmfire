@@ -820,7 +820,13 @@ DO WHILE (T .LE. TSTOP .OR. IDUMPCOUNT .LE. NDUMPS)
             BINARY_OUTPUTS_CROWN_FIRE   (LIST_BURNED%NUM_NODES) = C%CROWN_FIRE
          ENDIF
 
-         IF (.NOT. USE_BARRIERS .OR. (CHECK_BARRIER_BREACH(C))) THEN
+         IF (USE_BARRIERS) THEN
+            IF (CHECK_BARRIER_BREACH(C)) THEN
+               N_TO_TAG = N_TO_TAG + 1
+               IX_TO_TAG(N_TO_TAG) = IX
+               IY_TO_TAG(N_TO_TAG) = IY
+            ENDIF
+         ELSE
             N_TO_TAG = N_TO_TAG + 1
             IX_TO_TAG(N_TO_TAG) = IX
             IY_TO_TAG(N_TO_TAG) = IY
