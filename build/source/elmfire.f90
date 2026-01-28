@@ -19,7 +19,7 @@ IMPLICIT NONE
 INTEGER :: COLOR, I, IASP, IBAND, IBIN, ICASE, ICASE_RECV, ICOL, IDEST=0, IERR=0, IOS, &
            IRANK_TO_RUN_METEOROLOGY_BAND(0:10000)=-1,  IWX_BAND, IWX_BAND_LAST=-9999, &
            IRANK_FROM, IROW, J, IT1, IT2, IX, IY, IWD20_TIMES10, M, N, &
-           NTIMESTEPS, TOTALCASESRUN
+           NTIMESTEPS, TOTALCASESRUN, IWX_MEM_BAND
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: K
 
@@ -29,7 +29,7 @@ REAL :: APHIW, COSASPMPI, PHIMAG, PHIWX, PHIWY, PHIX, PHIY, SINASPMPI
 
 CHARACTER(3) :: THREE_IWX_BAND
 CHARACTER(4) :: FOUR_IWX_BAND
-CHARACTER(60) :: VERSIONSTRING='ELMFIRE 2026.0105.memopt'
+CHARACTER(60) :: VERSIONSTRING='ELMFIRE 2026.0128.memopt'
 CHARACTER(400) :: FN, MESSAGESTR
 
 TYPE (RASTER_TYPE), POINTER :: R
@@ -226,7 +226,8 @@ IF (IRANK_WORLD .EQ. 0) WRITE(*,*) 'Reading weather, fuel, and topography raster
 IF (USE_TILED_IO) THEN
    CALL READ_WEATHER_FUEL_TOPOGRAPHY_TILED
 ELSE
-   CALL READ_WEATHER_FUEL_TOPOGRAPHY
+   CALL READ_FUEL_TOPOGRAPHY
+   CALL UPDATE_WEATHER_SLICE(1,min(METEOROLOGY_BAND_STOP,HOURS_KEPT_IN_MEM))
 ENDIF
 
 IF (MULTIPLE_HOSTS) CALL BCAST_WEATHER_FUEL_TOPOGRAPHY
@@ -451,138 +452,143 @@ IF (MODE .NE. 1) THEN
       IF (I .EQ. NPROC) I = 0
       IRANK_TO_RUN_METEOROLOGY_BAND(IWX_BAND) = I
    ENDDO
-   DO IWX_BAND = METEOROLOGY_BAND_START, METEOROLOGY_BAND_STOP
-      IF (IRANK_WORLD .NE. IRANK_TO_RUN_METEOROLOGY_BAND(IWX_BAND)) CYCLE
+   DO IWX_MEM_BAND = METEOROLOGY_BAND_START, METEOROLOGY_BAND_STOP, HOURS_KEPT_IN_MEM
+      ! if (METEOROLOGY_BAND_STOP .le. IWX_MEM_BAND + HOURS_KEPT_IN_MEM) then
+      CALL UPDATE_WEATHER_SLICE(IWX_MEM_BAND, min(IWX_MEM_BAND+HOURS_KEPT_IN_MEM-1, METEOROLOGY_BAND_STOP))
+      ! endif
+      DO IWX_BAND = 1, min(HOURS_KEPT_IN_MEM, METEOROLOGY_BAND_STOP - IWX_MEM_BAND +1)
+         IF (IRANK_WORLD .NE. IRANK_TO_RUN_METEOROLOGY_BAND(IWX_BAND + IWX_MEM_BAND -1)) CYCLE
 
-      WRITE(THREE_IWX_BAND, '(I3.3)') IWX_BAND
-      WRITE(FOUR_IWX_BAND,  '(I4.4)') IWX_BAND
-      WRITE(*,*) 'IWX_BAND: ', IWX_BAND
-
-      C => LIST_FIRE_POTENTIAL%HEAD
-
-      IF (DEBUG_LEVEL .GE. 20) PRINT *, "TOTAL FIRE NODES: ", LIST_FIRE_POTENTIAL%NUM_NODES
-      DO I = 1, LIST_FIRE_POTENTIAL%NUM_NODES
-         IX               = C%IX
-         IY               = C%IY
-         ICOL             = ICOL_ANALYSIS_F2C(IX)
-         IROW             = IROW_ANALYSIS_F2C(IY)
-         C%M1             = M1%R4   (ICOL,IROW,IWX_BAND)
-         C%M10            = M10%R4  (ICOL,IROW,IWX_BAND)
-         C%M100           = M100%R4 (ICOL,IROW,IWX_BAND)
-         C%MLH            = MLH%R4  (ICOL,IROW,IWX_BAND)
-         C%MLW            = MLW%R4  (ICOL,IROW,IWX_BAND)
-         C%FMC            = MFOL%R4 (ICOL,IROW,IWX_BAND)
-         C%WS20_NOW       = WS%R4   (ICOL,IROW,IWX_BAND)
-         C%WD20_NOW       = WD%R4   (ICOL,IROW,IWX_BAND)
-         C%WSMF           = C%WS20_NOW * WAF%R4(IX,IY,1) * 5280./60.
-         C%PHIW_CROWN     = 0.
-         C%FLIN_SURFACE   = 0.
-         C%FLIN_CANOPY    = 0.
-         C%CRITICAL_FLIN  = 9E9
-         C%CROWN_FIRE     = 0
-         C => C%NEXT
-      ENDDO
-
-      DO J = 1, 2
-         IF (J .EQ. 1) CALL SURFACE_SPREAD_RATE(LIST_FIRE_POTENTIAL, DUMMY_NODE)
-         IF (J .EQ. 2 .AND. CROWN_FIRE_MODEL .GT. 0) CALL CROWN_SPREAD_RATE  (LIST_FIRE_POTENTIAL, DUMMY_NODE)
+         WRITE(THREE_IWX_BAND, '(I3.3)') IWX_BAND + IWX_MEM_BAND -1
+         WRITE(FOUR_IWX_BAND,  '(I4.4)') IWX_BAND + IWX_MEM_BAND -1
+         WRITE(*,*) 'IWX_BAND: ', IWX_BAND + IWX_MEM_BAND -1
 
          C => LIST_FIRE_POTENTIAL%HEAD
+
+         IF (DEBUG_LEVEL .GE. 20) PRINT *, "TOTAL FIRE NODES: ", LIST_FIRE_POTENTIAL%NUM_NODES
          DO I = 1, LIST_FIRE_POTENTIAL%NUM_NODES
-            IX = C%IX
-            IY = C%IY
-
-            IF ( J .EQ. 1) THEN 
-               IASP = MIN(MAX(NINT(ASP%R4(C%IX,C%IY,1)),0),360)
-               SINASPMPI = SINASPM180(IASP)
-               COSASPMPI = COSASPM180(IASP) 
-               C%PHISX   = C%PHIS_SURFACE * SINASPMPI
-               C%PHISY   = C%PHIS_SURFACE * COSASPMPI
-            ENDIF
-
-            APHIW = C%PHIW_SURFACE
-
-            IF (J .EQ. 2. .AND. C%FLIN_SURFACE .GE. C%CRITICAL_FLIN) THEN
-               APHIW = MAX(C%PHIW_SURFACE, C%PHIW_CROWN)
-            ENDIF
-
-            IWD20_TIMES10 = INT(10. * C%WD20_NOW)
-            IF (IWD20_TIMES10 .GT. 3600) IWD20_TIMES10 = 3600
-            IF (IWD20_TIMES10 .LT.    0) IWD20_TIMES10 =    0
-
-            PHIWX = APHIW * SINWDMPI(IWD20_TIMES10)
-
-            PHIX  = C%PHISX + PHIWX
-
-            PHIWY = APHIW * COSWDMPI(IWD20_TIMES10)
-            PHIY  = C%PHISY + PHIWY
-
-            PHIMAG = MAX(SQRT(PHIX*PHIX+PHIY*PHIY),1E-20)
-
-            C%VELOCITY_DMS = C%VS0 * PHIMAG
-
-            C%FLIN_SURFACE = TR(C%IFBFM) * C%IR * C%VELOCITY_DMS * 0.3048 ! kW/m
-            IF (J .EQ. 2) THEN
-               SPREAD_RATE_TO_DUMP%R4(IX,IY,1) = C%VELOCITY_DMS
-               if (PHIMAG .gt. 1.0e-20) then
-                  SPREAD_DIRECTION_TO_DUMP%R4(IX,IY,1) = ATAN2(PHIX, PHIY) * 180.0 / ACOS(-1.0)
-                  if (SPREAD_DIRECTION_TO_DUMP%R4(IX,IY,1) .lt. 0.0) then
-                     SPREAD_DIRECTION_TO_DUMP%R4(IX,IY,1) = SPREAD_DIRECTION_TO_DUMP%R4(IX,IY,1) + 360.0
-                  end if
-               else
-                  SPREAD_DIRECTION_TO_DUMP%R4(IX,IY,1) = 0.0
-               end if
-               CROWN_FIRE_TO_DUMP%R4(IX,IY,1) = REAL(C%CROWN_FIRE)
- 
-               IF (C%FLIN_SURFACE .GT. 0.) THEN
-                  C%FLAME_LENGTH = (0.0775 / 0.3048) * (C%FLIN_SURFACE + C%FLIN_CANOPY) ** 0.46
-               ELSE
-                  C%FLAME_LENGTH = 0.
-               ENDIF
-               FLAME_LENGTH_TO_DUMP%R4(IX,IY,1) = C%FLAME_LENGTH
-            ENDIF
+            IX               = C%IX
+            IY               = C%IY
+            ICOL             = ICOL_ANALYSIS_F2C(IX)
+            IROW             = IROW_ANALYSIS_F2C(IY)
+            C%M1             = M1%R4   (ICOL,IROW,IWX_BAND)
+            C%M10            = M10%R4  (ICOL,IROW,IWX_BAND)
+            C%M100           = M100%R4 (ICOL,IROW,IWX_BAND)
+            C%MLH            = MLH%R4  (ICOL,IROW,IWX_BAND)
+            C%MLW            = MLW%R4  (ICOL,IROW,IWX_BAND)
+            C%FMC            = MFOL%R4 (ICOL,IROW,IWX_BAND)
+            C%WS20_NOW       = WS%R4   (ICOL,IROW,IWX_BAND)
+            C%WD20_NOW       = WD%R4   (ICOL,IROW,IWX_BAND)
+            C%WSMF           = C%WS20_NOW * WAF%R4(IX,IY,1) * 5280./60.
+            C%PHIW_CROWN     = 0.
+            C%FLIN_SURFACE   = 0.
+            C%FLIN_CANOPY    = 0.
+            C%CRITICAL_FLIN  = 9E9
+            C%CROWN_FIRE     = 0
             C => C%NEXT
+         ENDDO
 
-         ENDDO !I
-      ENDDO !J
+         DO J = 1, 2
+            IF (J .EQ. 1) CALL SURFACE_SPREAD_RATE(LIST_FIRE_POTENTIAL, DUMMY_NODE)
+            IF (J .EQ. 2 .AND. CROWN_FIRE_MODEL .GT. 0) CALL CROWN_SPREAD_RATE  (LIST_FIRE_POTENTIAL, DUMMY_NODE)
 
-      IF (DUMP_FLAME_LENGTH) THEN
-         IF (USE_FOUR_DIGITS_IN_IWX_BAND) THEN
-            FN = 'head_fire_flame_length_' // FOUR_IWX_BAND
-         ELSE
-            FN = 'head_fire_flame_length_' // THREE_IWX_BAND
+            C => LIST_FIRE_POTENTIAL%HEAD
+            DO I = 1, LIST_FIRE_POTENTIAL%NUM_NODES
+               IX = C%IX
+               IY = C%IY
+
+               IF ( J .EQ. 1) THEN 
+                  IASP = MIN(MAX(NINT(ASP%R4(C%IX,C%IY,1)),0),360)
+                  SINASPMPI = SINASPM180(IASP)
+                  COSASPMPI = COSASPM180(IASP) 
+                  C%PHISX   = C%PHIS_SURFACE * SINASPMPI
+                  C%PHISY   = C%PHIS_SURFACE * COSASPMPI
+               ENDIF
+
+               APHIW = C%PHIW_SURFACE
+
+               IF (J .EQ. 2. .AND. C%FLIN_SURFACE .GE. C%CRITICAL_FLIN) THEN
+                  APHIW = MAX(C%PHIW_SURFACE, C%PHIW_CROWN)
+               ENDIF
+
+               IWD20_TIMES10 = INT(10. * C%WD20_NOW)
+               IF (IWD20_TIMES10 .GT. 3600) IWD20_TIMES10 = 3600
+               IF (IWD20_TIMES10 .LT.    0) IWD20_TIMES10 =    0
+
+               PHIWX = APHIW * SINWDMPI(IWD20_TIMES10)
+
+               PHIX  = C%PHISX + PHIWX
+
+               PHIWY = APHIW * COSWDMPI(IWD20_TIMES10)
+               PHIY  = C%PHISY + PHIWY
+
+               PHIMAG = MAX(SQRT(PHIX*PHIX+PHIY*PHIY),1E-20)
+               
+               C%VELOCITY_DMS = C%VS0 * PHIMAG
+
+               C%FLIN_SURFACE = TR(C%IFBFM) * C%IR * C%VELOCITY_DMS * 0.3048 ! kW/m
+               
+               IF (J .EQ. 2) THEN
+                  SPREAD_RATE_TO_DUMP%R4(IX,IY,1) = C%VELOCITY_DMS
+                  if (PHIMAG .gt. 1.0e-20) then
+                     SPREAD_DIRECTION_TO_DUMP%R4(IX,IY,1) = ATAN2(PHIX, PHIY) * 180.0 / ACOS(-1.0)
+                     if (SPREAD_DIRECTION_TO_DUMP%R4(IX,IY,1) .lt. 0.0) then
+                        SPREAD_DIRECTION_TO_DUMP%R4(IX,IY,1) = SPREAD_DIRECTION_TO_DUMP%R4(IX,IY,1) + 360.0
+                     end if
+                  else
+                     SPREAD_DIRECTION_TO_DUMP%R4(IX,IY,1) = 0.0
+                  end if
+                  CROWN_FIRE_TO_DUMP%R4(IX,IY,1) = REAL(C%CROWN_FIRE)
+   
+                  IF (C%FLIN_SURFACE .GT. 0.) THEN
+                     C%FLAME_LENGTH = (0.0775 / 0.3048) * (C%FLIN_SURFACE + C%FLIN_CANOPY) ** 0.46
+                  ELSE
+                     C%FLAME_LENGTH = 0.
+                  ENDIF
+                  FLAME_LENGTH_TO_DUMP%R4(IX,IY,1) = C%FLAME_LENGTH
+               ENDIF
+               C => C%NEXT
+
+            ENDDO !I
+         ENDDO !J
+         print *, SPREAD_RATE_TO_DUMP%R4(1,1,1)
+         IF (DUMP_FLAME_LENGTH) THEN
+            IF (USE_FOUR_DIGITS_IN_IWX_BAND) THEN
+               FN = 'head_fire_flame_length_' // FOUR_IWX_BAND
+            ELSE
+               FN = 'head_fire_flame_length_' // THREE_IWX_BAND
+            ENDIF
+            CALL WRITE_BIL_RASTER(FLAME_LENGTH_TO_DUMP,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IWX_BAND + IWX_MEM_BAND -1)
          ENDIF
-         CALL WRITE_BIL_RASTER(FLAME_LENGTH_TO_DUMP,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IWX_BAND)
-      ENDIF
 
-      IF (DUMP_SPREAD_RATE) THEN
-         IF (USE_FOUR_DIGITS_IN_IWX_BAND) THEN
-            FN = 'head_fire_spread_rate_' // FOUR_IWX_BAND
-         ELSE
-            FN = 'head_fire_spread_rate_' // THREE_IWX_BAND
+         IF (DUMP_SPREAD_RATE) THEN
+            IF (USE_FOUR_DIGITS_IN_IWX_BAND) THEN
+               FN = 'head_fire_spread_rate_' // FOUR_IWX_BAND
+            ELSE
+               FN = 'head_fire_spread_rate_' // THREE_IWX_BAND
+            ENDIF
+            CALL WRITE_BIL_RASTER(SPREAD_RATE_TO_DUMP,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IWX_BAND + IWX_MEM_BAND -1)
          ENDIF
-         CALL WRITE_BIL_RASTER(SPREAD_RATE_TO_DUMP,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IWX_BAND)
-      ENDIF
 
-      IF (DUMP_SPREAD_DIRECTION) THEN
-         IF (USE_FOUR_DIGITS_IN_IWX_BAND) THEN
-            FN = 'head_fire_spread_direction_' // FOUR_IWX_BAND
-         ELSE
-            FN = 'head_fire_spread_direction_' // THREE_IWX_BAND
+         IF (DUMP_SPREAD_DIRECTION) THEN
+            IF (USE_FOUR_DIGITS_IN_IWX_BAND) THEN
+               FN = 'head_fire_spread_direction_' // FOUR_IWX_BAND
+            ELSE
+               FN = 'head_fire_spread_direction_' // THREE_IWX_BAND
+            ENDIF
+            CALL WRITE_BIL_RASTER(SPREAD_DIRECTION_TO_DUMP,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IWX_BAND + IWX_MEM_BAND -1)
          ENDIF
-         CALL WRITE_BIL_RASTER(SPREAD_DIRECTION_TO_DUMP,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IWX_BAND)
-      ENDIF
 
-      IF (DUMP_CROWN_FIRE) THEN
-         IF (USE_FOUR_DIGITS_IN_IWX_BAND) THEN
-            FN = 'crown_fire_' // FOUR_IWX_BAND
-         ELSE
-            FN = 'crown_fire_' // THREE_IWX_BAND
+         IF (DUMP_CROWN_FIRE) THEN
+            IF (USE_FOUR_DIGITS_IN_IWX_BAND) THEN
+               FN = 'crown_fire_' // FOUR_IWX_BAND
+            ELSE
+               FN = 'crown_fire_' // THREE_IWX_BAND
+            ENDIF
+            CALL WRITE_BIL_RASTER(CROWN_FIRE_TO_DUMP,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IWX_BAND + IWX_MEM_BAND -1)
          ENDIF
-         CALL WRITE_BIL_RASTER(CROWN_FIRE_TO_DUMP,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IWX_BAND)
-      ENDIF
-
-   ENDDO !IWX_BAND
+      ENDDO !IWX_BAND
+   ENDDO !IWX_MEM_BAND
 
 ENDIF ! (MODE .GT. 1)
 
@@ -640,7 +646,7 @@ IF (MODE .NE. 2) THEN
       CALL ACCUMULATE_CPU_USAGE(12, IT1, IT2)
 
       IF (ICASE .GT. NUM_CASES_TOTAL) CYCLE
-
+      !Will probably need to change these as well for the new weather memopt
       IWX_BAND = STATS_IWX_BAND_START(ICASE)
 
       IF (IWX_BAND .NE. IWX_BAND_LAST) THEN

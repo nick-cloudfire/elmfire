@@ -171,40 +171,38 @@ ENDIF
 END SUBROUTINE SETUP_PARALLEL_IO
 ! *****************************************************************************
 
-! *****************************************************************************
-!> Read Weather, Fuel, Topography, Building inputs (constant or raster) in parallel.
-SUBROUTINE READ_WEATHER_FUEL_TOPOGRAPHY
-! *****************************************************************************
+SUBROUTINE UPDATE_WEATHER_SLICE(BANDSTART, BANDEND)
 
-INTEGER :: ICOL, IROW
-REAL :: CONSTANT_LH, CONSTANT_LW, CONSTANT_FMC, RX
+INTEGER, intent(in):: BANDSTART, BANDEND
+REAL :: CONSTANT_LH, CONSTANT_LW, CONSTANT_FMC
 INTEGER :: IERR
-LOGICAL, PARAMETER :: NOISE=.TRUE.
+
+PRINT *, "Getting weather bands ", BANDSTART, " to ", BANDEND
 
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(3)) THEN
-   CALL READ_BSQ_RASTER (WS,   WEATHER_DIRECTORY, WS_FILENAME)
+   CALL READ_BSQ_RASTER_SLICE (WS,   WEATHER_DIRECTORY, WS_FILENAME, BANDSTART, BANDEND)
    IF (WS_AT_10M) WHERE(WS%R4(:,:,:) .NE. WS%NODATA_VALUE) WS%R4(:,:,:) = 0.87 * WS%R4(:,:,:)
 ENDIF
 
-IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(4)) CALL READ_BSQ_RASTER (WD,   WEATHER_DIRECTORY, WD_FILENAME)
+IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(4)) CALL READ_BSQ_RASTER_SLICE (WD,   WEATHER_DIRECTORY, WD_FILENAME, BANDSTART, BANDEND)
 
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(5)) THEN
-   CALL READ_BSQ_RASTER (M1,   WEATHER_DIRECTORY, M1_FILENAME)
+   CALL READ_BSQ_RASTER_SLICE (M1,   WEATHER_DIRECTORY, M1_FILENAME, BANDSTART, BANDEND)
    IF (DEAD_MC_IN_PERCENT) WHERE (M1%R4  (:,:,:) .NE. M1%NODATA_VALUE  ) M1%R4  (:,:,:) = 0.01 * M1%R4  (:,:,:)
 ENDIF
 
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(6)) THEN
-   CALL READ_BSQ_RASTER (M10,  WEATHER_DIRECTORY, M10_FILENAME)
+   CALL READ_BSQ_RASTER_SLICE (M10,  WEATHER_DIRECTORY, M10_FILENAME, BANDSTART, BANDEND)
    IF (DEAD_MC_IN_PERCENT) WHERE (M10%R4 (:,:,:) .NE. M10%NODATA_VALUE ) M10%R4 (:,:,:) = 0.01 * M10%R4 (:,:,:)
 ENDIF
 
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(7)) THEN
-   CALL READ_BSQ_RASTER (M100, WEATHER_DIRECTORY, M100_FILENAME)
+   CALL READ_BSQ_RASTER_SLICE (M100, WEATHER_DIRECTORY, M100_FILENAME, BANDSTART, BANDEND)
    IF (DEAD_MC_IN_PERCENT) WHERE (M100%R4(:,:,:) .NE. M100%NODATA_VALUE) M100%R4(:,:,:) = 0.01 * M100%R4(:,:,:)
 ENDIF
 
 IF (USE_ERC .AND. IRANK_WORLD .EQ. PARALLEL_IO_RANK(8) ) THEN
-   CALL READ_BSQ_RASTER(ERC, WEATHER_DIRECTORY, ERC_FILENAME)
+   CALL READ_BSQ_RASTER_SLICE(ERC, WEATHER_DIRECTORY, ERC_FILENAME, BANDSTART, BANDEND)
    CALL ERC_IGNITION_FACTOR (ERC, IGNFAC, 1, ERC%NBANDS)
 ENDIF
 
@@ -217,7 +215,7 @@ IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(9)) THEN
    IF (CONSTANT_LH .GT. 0. ) THEN
       MLH%R4 (:,:,:) = CONSTANT_LH
    ELSE
-      CALL READ_BSQ_RASTER(MLH, WEATHER_DIRECTORY, MLH_FILENAME)
+      CALL READ_BSQ_RASTER_SLICE(MLH, WEATHER_DIRECTORY, MLH_FILENAME, BANDSTART, BANDEND)
       IF (LIVE_MC_IN_PERCENT) MLH%R4(:,:,:) = 0.01 * MLH%R4(:,:,:)
    ENDIF
 ENDIF
@@ -231,7 +229,7 @@ IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(10)) THEN
    IF (CONSTANT_LW .GT. 0. ) THEN
       MLW%R4 (:,:,:) = CONSTANT_LW
    ELSE
-      CALL READ_BSQ_RASTER(MLW, WEATHER_DIRECTORY, MLW_FILENAME)
+      CALL READ_BSQ_RASTER_SLICE(MLW, WEATHER_DIRECTORY, MLW_FILENAME, BANDSTART, BANDEND)
       IF (LIVE_MC_IN_PERCENT) MLW%R4(:,:,:) = 0.01 * MLW%R4(:,:,:)
    ENDIF
 ENDIF
@@ -244,7 +242,7 @@ IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(11)) THEN
    IF (CONSTANT_FMC .GT. 0. ) THEN
       MFOL%R4 (:,:,:) = CONSTANT_FMC
    ELSE
-      CALL READ_BSQ_RASTER(MFOL, WEATHER_DIRECTORY, FMC_FILENAME)
+      CALL READ_BSQ_RASTER_SLICE(MFOL, WEATHER_DIRECTORY, FMC_FILENAME, BANDSTART, BANDEND)
    ENDIF
 ENDIF
 
@@ -260,6 +258,18 @@ IF (NPROC .GT. 1) THEN
       CALL MPI_BCAST_RASTER_HEADER(IGNFAC , PARALLEL_IO_RANK(8), .FALSE.)
    ENDIF
 ENDIF
+
+END SUBROUTINE UPDATE_WEATHER_SLICE
+
+! *****************************************************************************
+!> Read Weather, Fuel, Topography, Building inputs (constant or raster) in parallel.
+SUBROUTINE READ_FUEL_TOPOGRAPHY
+! *****************************************************************************
+
+INTEGER :: ICOL, IROW
+REAL :: RX
+INTEGER :: IERR
+LOGICAL, PARAMETER :: NOISE=.TRUE.
 
 IF (IRANK_WORLD .EQ. 0) WRITE(*,*) 'Reading fuel and topography rasters'
 
@@ -414,7 +424,7 @@ IF (NPROC .GT. 1) THEN
 ENDIF
 
 ! *****************************************************************************
-END SUBROUTINE READ_WEATHER_FUEL_TOPOGRAPHY
+END SUBROUTINE READ_FUEL_TOPOGRAPHY
 ! *****************************************************************************
 
 ! *****************************************************************************
@@ -1450,7 +1460,7 @@ END SUBROUTINE READ_BSQ_RASTER
 
 ! *****************************************************************************
 !> Read slice of raster contained in .bsq file FN in directory INDIR and save it to RASTER. Slice is BANDSTART and BANDSTART + 1
-SUBROUTINE READ_BSQ_RASTER_SLICE(RASTER,INDIR,FN,BANDSTART)
+SUBROUTINE READ_BSQ_RASTER_SLICE(RASTER,INDIR,FN,BANDSTART,BANDEND)
 ! *****************************************************************************
 
 #ifdef __INTEL_COMPILER
@@ -1459,7 +1469,7 @@ USE IFPORT
 
 TYPE (RASTER_TYPE) :: RASTER
 CHARACTER(400), INTENT (IN) :: INDIR,FN
-INTEGER, intent (IN) :: BANDSTART
+INTEGER, intent (IN) :: BANDSTART, BANDEND
 CHARACTER(400) :: FNHDR, FNBSQ, FNTIF, TEMPSTR, SHELLSTR
 INTEGER :: I, IOS, IBAND, IROW1, IROW2, IDUMMY, J, IBANDCOUNT, NBANDS
 INTEGER*8 :: LRECL
@@ -1554,12 +1564,26 @@ ENDIF
 
 IF (CSV_FIXED_IGNITION_LOCATIONS .AND. ONLY_READ_NEEDED_WX_BANDS .AND. RASTER%NBANDS .GT. 1) THEN
    NBANDS = 1 + IGN_IWX_BAND_HI - IGN_IWX_BAND_LO
-ELSE
+ELSE IF (RASTER%NBANDS .EQ. 1 .OR. RASTER%NBANDS .LT. HOURS_KEPT_IN_MEM) THEN
    NBANDS = RASTER%NBANDS
-ENDIF
+ELSE
+   NBANDS = HOURS_KEPT_IN_MEM
+endif
 
-IF (BANDSTART .ge. NBANDS .or. BANDSTART .le. 0) then
-   WRITE(*,*) 'Error processing ', TRIM(FNHDR), ' slice band start (', BANDSTART, ') is outside the bounds of (', 0, ',',NBANDS,')'
+IF (BANDSTART .ge. RASTER%NBANDS .or. BANDSTART .le. 0) then
+   WRITE(*,*) 'Error processing ', TRIM(FNHDR), ' slice band start (', BANDSTART, ') is outside the bounds of (', 0, ',',RASTER%NBANDS,')'
+   STOP
+endif
+IF (BANDEND .gt. RASTER%NBANDS .or. BANDSTART .le. 0) then
+   WRITE(*,*) 'Error processing ', TRIM(FNHDR), ' slice band end (', BANDEND, ') is outside the bounds of (', 0, ',',RASTER%NBANDS,')'
+   STOP
+endif
+IF (BANDSTART .ge. BANDEND) then
+   WRITE(*,*) 'Error processing ', TRIM(FNHDR), ' slice band start (', BANDSTART, ') greater than band end (',BANDEND,')'
+   STOP
+endif
+IF (BANDEND-BANDSTART .gt. HOURS_KEPT_IN_MEM) then
+   WRITE(*,*) 'Error processing ', TRIM(FNHDR), ' slice band range (', BANDSTART, ') - (',BANDEND,') greater than target range (',HOURS_KEPT_IN_MEM,') '
    STOP
 endif
 
@@ -1567,7 +1591,8 @@ SELECT CASE(TRIM(RASTER%PIXELTYPE))
 
    CASE('FLOAT')
 !     Allocate arrays as appropriate:
-      IF (.NOT. ASSOCIATED(RASTER%R4)) ALLOCATE(RASTER%R4(1:RASTER%NCOLS,1:RASTER%NROWS,1:2))
+      if (associated(RASTER%R4) .AND. size(RASTER%R4,3) .ne. NBANDS) deallocate(RASTER%R4); nullify(RASTER%R4)
+      IF (.NOT. ASSOCIATED(RASTER%R4)) ALLOCATE(RASTER%R4(1:RASTER%NCOLS,1:RASTER%NROWS,1:NBANDS))
       ALLOCATE(RVALUES(1:RASTER%NROWS*RASTER%NCOLS))
       ALLOCATE(RTEMP(1:RASTER%NCOLS,1:RASTER%NROWS))
 
@@ -1582,7 +1607,7 @@ SELECT CASE(TRIM(RASTER%PIXELTYPE))
 
       IF (CSV_FIXED_IGNITION_LOCATIONS .AND. ONLY_READ_NEEDED_WX_BANDS) THEN
          IBANDCOUNT = 0
-         DO IBAND = BANDSTART, BANDSTART + 1
+         DO IBAND = BANDSTART, BANDEND
             IF (IBAND .LT. IGN_IWX_BAND_LO .AND. RASTER%NBANDS .GT. 1) CYCLE
             IF (IBAND .GT. IGN_IWX_BAND_HI .AND. RASTER%NBANDS .GT. 1) CYCLE
             IBANDCOUNT = IBANDCOUNT + 1
@@ -1596,7 +1621,7 @@ SELECT CASE(TRIM(RASTER%PIXELTYPE))
          ENDDO
          RASTER%NBANDS = NBANDS
       ELSE
-         DO IBAND = BANDSTART, BANDSTART + 1
+         DO IBAND = BANDSTART, BANDEND
             READ(LUINPUT,REC=IBAND,IOSTAT=IOS) RVALUES(:)
             RTEMP(:,:) = RESHAPE(RVALUES, (/RASTER%NCOLS,RASTER%NROWS/))
             DO IROW1 = 1, RASTER%NROWS
@@ -1610,7 +1635,8 @@ SELECT CASE(TRIM(RASTER%PIXELTYPE))
 
    CASE('SIGNEDINT')
 !     Allocate arrays as appropriate:
-      IF (.NOT. ASSOCIATED(RASTER%I2)) ALLOCATE(RASTER%I2(1:RASTER%NCOLS,1:RASTER%NROWS,1:2) )
+      if (associated(RASTER%I2) .AND. size(RASTER%I2,3) .ne. NBANDS) deallocate(RASTER%I2); nullify(RASTER%I2)
+      IF (.NOT. ASSOCIATED(RASTER%I2)) ALLOCATE(RASTER%I2(1:RASTER%NCOLS,1:RASTER%NROWS,1:NBANDS))
       ALLOCATE(I2VALUES(1:RASTER%NROWS*RASTER%NCOLS))
       ALLOCATE(I2TEMP(1:RASTER%NCOLS,1:RASTER%NROWS))
 
@@ -1623,7 +1649,7 @@ SELECT CASE(TRIM(RASTER%PIXELTYPE))
          STOP
       ENDIF
 
-      DO IBAND = BANDSTART, BANDSTART + 1
+      DO IBAND = BANDSTART, BANDEND
          READ(LUINPUT,REC=IBAND,IOSTAT=IOS) I2VALUES(:)
          I2TEMP(:,:) = RESHAPE(I2VALUES, (/RASTER%NCOLS,RASTER%NROWS/))
 
@@ -1648,21 +1674,6 @@ CLOSE(LUINPUT,IOSTAT=IOS)
 ! *****************************************************************************
 END SUBROUTINE READ_BSQ_RASTER_SLICE
 ! *****************************************************************************
-
-! *****************************************************************************
-SUBROUTINE UPDATE_WEATHER_SLICE(RASTER,IBAND)
-! *****************************************************************************
-
-
-
-! *****************************************************************************
-END SUBROUTINE UPDATE_WEATHER_SLICE
-! *****************************************************************************
-
-
-
-
-
 
 ! *****************************************************************************
 !> Read split raster contained in FNIN.bsq file and save it to RASTER.
