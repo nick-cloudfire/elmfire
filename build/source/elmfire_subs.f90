@@ -86,14 +86,11 @@ ENDIF
 END SUBROUTINE MPI_BCAST_RASTER_HEADER
 ! *****************************************************************************
 
-! *****************************************************************************
-SUBROUTINE BCAST_WEATHER_FUEL_TOPOGRAPHY
-! *****************************************************************************
+SUBROUTINE BCAST_WEATHER 
 
-INTEGER :: IERR, FUEL_TOPO_COUNT, WEATHER_COUNT
+INTEGER :: IERR, WEATHER_COUNT
 
-FUEL_TOPO_COUNT = ASP%NCOLS * ASP%NROWS
-WEATHER_COUNT= WS%NCOLS * WS%NROWS * WS%NBANDS
+WEATHER_COUNT= WS%NCOLS * WS%NROWS * SIZE(WS%R4, 3)
 
 CALL MPI_BCAST(WS%R4  , WEATHER_COUNT, MPI_REAL, 0, MPI_COMM_HOST_IRANK0, IERR)
 CALL MPI_BCAST(WD%R4  , WEATHER_COUNT, MPI_REAL, 0, MPI_COMM_HOST_IRANK0, IERR)
@@ -108,6 +105,16 @@ IF (USE_ERC) THEN
    CALL MPI_BCAST(ERC%R4, WEATHER_COUNT, MPI_REAL, 0, MPI_COMM_HOST_IRANK0, IERR)
    CALL MPI_BCAST(IGNFAC%R4, WEATHER_COUNT, MPI_REAL, 0, MPI_COMM_HOST_IRANK0, IERR)
 ENDIF
+
+END SUBROUTINE BCAST_WEATHER
+
+! *****************************************************************************
+SUBROUTINE BCAST_FUEL_TOPOGRAPHY
+! *****************************************************************************
+
+INTEGER :: IERR, FUEL_TOPO_COUNT
+
+FUEL_TOPO_COUNT = ASP%NCOLS * ASP%NROWS
 
 IF (USE_IGNITION_MASK) CALL MPI_BCAST(IGN_MASK%R4, FUEL_TOPO_COUNT, MPI_REAL, 0, MPI_COMM_HOST_IRANK0, IERR)
 
@@ -146,7 +153,7 @@ ENDIF
 IF (USE_PYROMES) CALL MPI_BCAST(PYROMES%I2, FUEL_TOPO_COUNT, MPI_SHORT, 0, MPI_COMM_HOST_IRANK0, IERR)
 
 ! *****************************************************************************
-END SUBROUTINE BCAST_WEATHER_FUEL_TOPOGRAPHY
+END SUBROUTINE BCAST_FUEL_TOPOGRAPHY
 ! *****************************************************************************
 
 ! *****************************************************************************
