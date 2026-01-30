@@ -171,7 +171,9 @@ ENDIF
 END SUBROUTINE SETUP_PARALLEL_IO
 ! *****************************************************************************
 
+! *****************************************************************************
 SUBROUTINE UPDATE_WEATHER_SLICE(BANDSTART, BANDEND)
+! *****************************************************************************
 
 INTEGER, intent(in):: BANDSTART, BANDEND
 REAL :: CONSTANT_LH, CONSTANT_LW, CONSTANT_FMC
@@ -259,7 +261,10 @@ IF (NPROC .GT. 1) THEN
    ENDIF
 ENDIF
 
+! *****************************************************************************
 END SUBROUTINE UPDATE_WEATHER_SLICE
+! *****************************************************************************
+
 
 ! *****************************************************************************
 !> Read Weather, Fuel, Topography, Building inputs (constant or raster) in parallel.
@@ -1564,10 +1569,10 @@ ENDIF
 
 IF (CSV_FIXED_IGNITION_LOCATIONS .AND. ONLY_READ_NEEDED_WX_BANDS .AND. RASTER%NBANDS .GT. 1) THEN
    NBANDS = 1 + IGN_IWX_BAND_HI - IGN_IWX_BAND_LO
-ELSE IF (RASTER%NBANDS .EQ. 1 .OR. RASTER%NBANDS .LT. HOURS_KEPT_IN_MEM) THEN
+ELSE IF (RASTER%NBANDS .EQ. 1 .OR. RASTER%NBANDS .LT. WX_BANDS_KEPT_IN_MEM) THEN
    NBANDS = RASTER%NBANDS
 ELSE
-   NBANDS = HOURS_KEPT_IN_MEM
+   NBANDS = WX_BANDS_KEPT_IN_MEM
 endif
 
 IF (BANDSTART .ge. RASTER%NBANDS .or. BANDSTART .le. 0) then
@@ -1582,8 +1587,8 @@ IF (BANDSTART .ge. BANDEND) then
    WRITE(*,*) 'Error processing ', TRIM(FNHDR), ' slice band start (', BANDSTART, ') greater than band end (',BANDEND,')'
    STOP
 endif
-IF (BANDEND-BANDSTART .gt. HOURS_KEPT_IN_MEM) then
-   WRITE(*,*) 'Error processing ', TRIM(FNHDR), ' slice band range (', BANDSTART, ') - (',BANDEND,') greater than target range (',HOURS_KEPT_IN_MEM,') '
+IF (BANDEND-BANDSTART .gt. WX_BANDS_KEPT_IN_MEM) then
+   WRITE(*,*) 'Error processing ', TRIM(FNHDR), ' slice band range (', BANDSTART, ') - (',BANDEND,') greater than target range (',WX_BANDS_KEPT_IN_MEM,') '
    STOP
 endif
 
@@ -1595,6 +1600,8 @@ SELECT CASE(TRIM(RASTER%PIXELTYPE))
       IF (.NOT. ASSOCIATED(RASTER%R4)) ALLOCATE(RASTER%R4(1:RASTER%NCOLS,1:RASTER%NROWS,1:NBANDS))
       ALLOCATE(RVALUES(1:RASTER%NROWS*RASTER%NCOLS))
       ALLOCATE(RTEMP(1:RASTER%NCOLS,1:RASTER%NROWS))
+
+      RASTER%R4(:,:,:) = RASTER%NODATA_VALUE
 
 !Open raster bsq file:
       INQUIRE (IOLENGTH=LRECL) RVALUES(:) 
@@ -1640,6 +1647,7 @@ SELECT CASE(TRIM(RASTER%PIXELTYPE))
       ALLOCATE(I2VALUES(1:RASTER%NROWS*RASTER%NCOLS))
       ALLOCATE(I2TEMP(1:RASTER%NCOLS,1:RASTER%NROWS))
 
+      RASTER%I2(:,:,:) = RASTER%NODATA_VALUE
 !Open raster bsq file:
       INQUIRE (IOLENGTH=LRECL) I2VALUES(:) 
 
