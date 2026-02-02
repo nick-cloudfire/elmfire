@@ -1453,6 +1453,8 @@ CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
 CALL MPI_FINALIZE(IERR)
 
+if (IRANK_WORLD .eq. 0) call execute_command_line("rm -f " // trim(SCRATCH) // "/*")
+
 IF (IRANK_WORLD .EQ. 0) WRITE(*,*) 'End of simulation reached successfully. Shutting down.'
 
 ! *****************************************************************************
