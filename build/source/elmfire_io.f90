@@ -1464,7 +1464,7 @@ END SUBROUTINE READ_BSQ_RASTER
 ! *****************************************************************************
 
 ! *****************************************************************************
-!> Read slice of raster contained in .bsq file FN in directory INDIR and save it to RASTER. Slice is BANDSTART and BANDSTART + 1
+!> Read slice of raster contained in .bsq file FN in directory INDIR and save it to RASTER. 
 SUBROUTINE READ_BSQ_RASTER_SLICE(RASTER,INDIR,FN,BANDSTART,BANDEND)
 ! *****************************************************************************
 
@@ -1596,7 +1596,7 @@ SELECT CASE(TRIM(RASTER%PIXELTYPE))
 
    CASE('FLOAT')
 !     Allocate arrays as appropriate:
-      if (associated(RASTER%R4) .AND. size(RASTER%R4,3) .ne. NBANDS) deallocate(RASTER%R4); nullify(RASTER%R4)
+      ! if (associated(RASTER%R4) .AND. size(RASTER%R4,3) .ne. NBANDS) deallocate(RASTER%R4); nullify(RASTER%R4)
       IF (.NOT. ASSOCIATED(RASTER%R4)) ALLOCATE(RASTER%R4(1:RASTER%NCOLS,1:RASTER%NROWS,1:NBANDS))
       ALLOCATE(RVALUES(1:RASTER%NROWS*RASTER%NCOLS))
       ALLOCATE(RTEMP(1:RASTER%NCOLS,1:RASTER%NROWS))
@@ -1642,7 +1642,7 @@ SELECT CASE(TRIM(RASTER%PIXELTYPE))
 
    CASE('SIGNEDINT')
 !     Allocate arrays as appropriate:
-      if (associated(RASTER%I2) .AND. size(RASTER%I2,3) .ne. NBANDS) deallocate(RASTER%I2); nullify(RASTER%I2)
+      ! if (associated(RASTER%I2) .AND. size(RASTER%I2,3) .ne. NBANDS) deallocate(RASTER%I2); nullify(RASTER%I2)
       IF (.NOT. ASSOCIATED(RASTER%I2)) ALLOCATE(RASTER%I2(1:RASTER%NCOLS,1:RASTER%NROWS,1:NBANDS))
       ALLOCATE(I2VALUES(1:RASTER%NROWS*RASTER%NCOLS))
       ALLOCATE(I2TEMP(1:RASTER%NCOLS,1:RASTER%NROWS))
