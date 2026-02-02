@@ -75,8 +75,20 @@ CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 CALL UPDATE_WEATHER_SLICE(BAND_L, BAND_H)
 IF (MULTIPLE_HOSTS) CALL BCAST_WEATHER()
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+WSP   => WS%R4    
+WDP   => WD%R4  
+M1P   => M1%R4  
+M10P  => M10%R4 
+M100P => M100%R4
+MLHP  => MLH%R4 
+MLWP  => MLW%R4 
+MFOLP => MFOL%R4
+IF (USE_ERC) THEN
+   ERCP    => ERC%R4   
+   IGNFACP => IGNFAC%R4
+ENDIF
 
-DO WHILE (T < NUM_METEOROLOGY_TIMES * DT_METEOROLOGY)
+DO WHILE (T < WS%NBANDS * DT_METEOROLOGY)
    IF (T > BAND_H * DT_METEOROLOGY) THEN ! LOAD NEXT WEATHER SLICE
       CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
       BAND_L = BAND_H 
@@ -84,23 +96,22 @@ DO WHILE (T < NUM_METEOROLOGY_TIMES * DT_METEOROLOGY)
       CALL UPDATE_WEATHER_SLICE(BAND_L, BAND_H)
       IF (MULTIPLE_HOSTS) CALL BCAST_WEATHER()
       CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+      WSP   => WS%R4    
+      WDP   => WD%R4  
+      M1P   => M1%R4  
+      M10P  => M10%R4 
+      M100P => M100%R4
+      MLHP  => MLH%R4 
+      MLWP  => MLW%R4 
+      MFOLP => MFOL%R4
+      IF (USE_ERC) THEN
+         ERCP    => ERC%R4   
+         IGNFACP => IGNFAC%R4
+      ENDIF
 
    ENDIF
    IF (T .ge. SIMULATION_TSTART + (IWX_BAND - 1) * DT_METEOROLOGY .and. .not. INITIATED) THEN ! START SIM
       ! ***************************************************************************************
-      if (DEBUG_LEVEL .ge.20) print *, "  LS: INITIATING VARIABLES"
-      WSP  (1:,1:,1:) => WS%R4  (1:,1:,1:)
-      WDP  (1:,1:,1:) => WD%R4  (1:,1:,1:)
-      M1P  (1:,1:,1:) => M1%R4  (1:,1:,1:)
-      M10P (1:,1:,1:) => M10%R4 (1:,1:,1:)
-      M100P(1:,1:,1:) => M100%R4(1:,1:,1:)
-      MLHP (1:,1:,1:) => MLH%R4 (1:,1:,1:)
-      MLWP (1:,1:,1:) => MLW%R4 (1:,1:,1:)
-      MFOLP(1:,1:,1:) => MFOL%R4(1:,1:,1:)
-      IF (USE_ERC) THEN
-         ERCP   (1:,1:,1:) => ERC%R4   (1:,1:,1:)
-         IGNFACP(1:,1:,1:) => IGNFAC%R4(1:,1:,1:)
-      ENDIF
 
       IF (.NOT. ALLOCATED(PHIP)) FIRSTCALL = .TRUE.
 
@@ -1347,8 +1358,6 @@ DO WHILE (T < NUM_METEOROLOGY_TIMES * DT_METEOROLOGY)
    T = T + DT
 
    IF ((T .ge. TSTOP + (IWX_BAND - 1)*DT_METEOROLOGY) .and. START_CALCS) THEN ! END SIM
-
-      print *, "  LS: STOPPING SIMULATION, STARTING EXPORT"
       CALL SYSTEM_CLOCK(IT1)
 
       NTIMESTEPS = ITIMESTEP

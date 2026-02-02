@@ -1576,11 +1576,11 @@ ELSE
 endif
 
 IF (BANDSTART .ge. RASTER%NBANDS .or. BANDSTART .le. 0) then
-   WRITE(*,*) 'Error processing ', TRIM(FNHDR), ' slice band start (', BANDSTART, ') is outside the bounds of (', 0, ',',RASTER%NBANDS,')'
+   WRITE(*,*) 'Error processing ', TRIM(FNHDR), ' slice band start (', BANDSTART, ') is outside the bounds of (', 1, ',',RASTER%NBANDS,')'
    STOP
 endif
-IF (BANDEND .gt. RASTER%NBANDS .or. BANDSTART .le. 0) then
-   WRITE(*,*) 'Error processing ', TRIM(FNHDR), ' slice band end (', BANDEND, ') is outside the bounds of (', 0, ',',RASTER%NBANDS,')'
+IF (BANDEND .gt. RASTER%NBANDS .or. BANDEND .le. 0) then
+   WRITE(*,*) 'Error processing ', TRIM(FNHDR), ' slice band end (', BANDEND, ') is outside the bounds of (', 1, ',',RASTER%NBANDS,')'
    STOP
 endif
 IF (BANDSTART .ge. BANDEND) then
