@@ -760,7 +760,7 @@ IF (MODE .NE. 2) THEN
                      DO IBIN = 1, NUM_FLAME_LENGTH_BINS
                         IF (BINARY_OUTPUTS_FLAME_LENGTH(I) .GE. FLAME_LENGTH_BIN_LO(IBIN) ) THEN
                            IF (BINARY_OUTPUTS_FLAME_LENGTH(I) .LT. FLAME_LENGTH_BIN_HI(IBIN) ) THEN
-                              FLAME_LENGTH_BIN_COUNT%I2(IX,IY,IBIN) = FLAME_LENGTH_BIN_COUNT%I2(IX,IY,IBIN) + 1
+                              FLAME_LENGTH_BIN_COUNT%I2(IX,IY,IBIN) = FLAME_LENGTH_BIN_COUNT%I2(IX,IY,IBIN) + INT(1, KIND=KIND(FLAME_LENGTH_BIN_COUNT%I2(1,1,1)))
                            ENDIF
                         ENDIF
                      ENDDO
@@ -796,7 +796,7 @@ IF (MODE .NE. 2) THEN
                   DO IBIN = 1, NUM_EMBER_COUNT_BINS
                      IF (EMBER_OUTPUTS_COUNT(I) .GT. EMBER_COUNT_BIN_LO(IBIN) ) THEN
                         IF (EMBER_OUTPUTS_COUNT(I) .LE. EMBER_COUNT_BIN_HI(IBIN) ) THEN
-                           EMBER_BIN_COUNT%I2(IX,IY,IBIN) = EMBER_BIN_COUNT%I2(IX,IY,IBIN) + 1
+                           EMBER_BIN_COUNT%I2(IX,IY,IBIN) = EMBER_BIN_COUNT%I2(IX,IY,IBIN) + INT(1, KIND=KIND(EMBER_BIN_COUNT%I2(1,1,1)))
                            CYCLE
                         ENDIF
                      ENDIF
