@@ -29,7 +29,7 @@ INTEGER :: I, ILOC, J, IX, IY, ITIMESTEP, IX_IGN, IY_IGN, ISTEP, K, LU, IT1, IT2
            ITSTART, ITNOW, IDUMPCOUNT, ICOUNT, IXSTART, IYSTART, IXSTOP, IYSTOP, IX2, IY2, &
            ITLO_METEOROLOGY, ITHI_METEOROLOGY, BINARY_OUTPUTS_SIZE, IT_EA, IXCEN, IYCEN, IOS, IPYROME, &
            N_TO_TAG, N_SPOT_FIRES, ILH, IT2_LSP, IFBFM, IBLDGFM, ICOL, IROW, YEAR, MONTH, DAY_OF_MONTH, HOUR, &
-           BAND_L, BAND_H, IERR=0
+           BAND_L, BAND_H, IERR=0, DAY_OF_SIM
 INTEGER, SAVE :: NX, NY, NDUMPS
 INTEGER, POINTER, SAVE, DIMENSION(:) :: IX_TO_TAG, IY_TO_TAG, IX_SPOT_FIRE, IY_SPOT_FIRE
 
@@ -79,11 +79,12 @@ CALL UPDATE_WEATHER_SLICE(BAND_L, BAND_H)
 IF (MULTIPLE_HOSTS) CALL BCAST_WEATHER()
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
-DO WHILE (T < min(WS%NBANDS, M1%NBANDS) * DT_METEOROLOGY)
+DO WHILE (T < WS%NBANDS * DT_METEOROLOGY)
+   DAY_OF_SIM = ceiling(((12 + mod(HOUR_OF_YEAR, 24) + IWX_BAND + floor(T/3600) - 1)/24.0))
    IF (T > BAND_H * DT_METEOROLOGY) THEN ! LOAD NEXT WEATHER SLICE
       CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
       BAND_L = BAND_H 
-      BAND_H = min(min(WS%NBANDS, M1%NBANDS), BAND_H - 1 + WX_BANDS_KEPT_IN_MEM)
+      BAND_H = min(WS%NBANDS, BAND_H - 1 + WX_BANDS_KEPT_IN_MEM)
       CALL UPDATE_WEATHER_SLICE(BAND_L, BAND_H)
       IF (MULTIPLE_HOSTS) CALL BCAST_WEATHER()
       CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
@@ -427,7 +428,11 @@ DO WHILE (T < min(WS%NBANDS, M1%NBANDS) * DT_METEOROLOGY)
          continue
          IF (ASSOCIATED(C)) DEALLOCATE(C)
             continue
-         CALL SURFACE_SPREAD_RATE(LIST_BURNED, C)
+         if (USE_CFFDRS) then
+            CALL CFFDRS_SURFACE_SPREAD_RATE(LIST_BURNED, C, daily_bui(DAY_OF_SIM))
+         ELSE
+            CALL ROTHERMEL_SURFACE_SPREAD_RATE(LIST_BURNED,C)
+         ENDIF
 
          ! Adjust spread rate for passive and active crown fire (Cruz):
          ! Note that this adjusts spread rate in not only burned cells but nearby cells
@@ -699,8 +704,14 @@ DO WHILE (T < min(WS%NBANDS, M1%NBANDS) * DT_METEOROLOGY)
       CALL ACCUMULATE_CPU_USAGE(38, IT1, IT2)
       
    ! Main call to get spread rate:
-      IF (JUST_INTERPOLATED) CALL SURFACE_SPREAD_RATE(LIST_TAGGED,DUMMY_NODE)
-      CALL ACCUMULATE_CPU_USAGE(39, IT1, IT2)
+      IF (JUST_INTERPOLATED) THEN
+         if (USE_CFFDRS) then
+            CALL CFFDRS_SURFACE_SPREAD_RATE(LIST_TAGGED, DUMMY_NODE, daily_bui(DAY_OF_SIM))
+         ELSE
+            CALL ROTHERMEL_SURFACE_SPREAD_RATE(LIST_TAGGED,DUMMY_NODE)
+         ENDIF
+      ENDIF
+         CALL ACCUMULATE_CPU_USAGE(39, IT1, IT2)
 
    ! Adjust spread rate for passive and active crown fire (Cruz):
    ! Note that this adjusts spread rate in not only burned cells but nearby cells
@@ -1081,7 +1092,11 @@ DO WHILE (T < min(WS%NBANDS, M1%NBANDS) * DT_METEOROLOGY)
             ENDIF
             
             CALL INTERP_WD_RASTER_SINGLE(C, WD20_LO(:,:), WD20_HI(:,:), F_METEOROLOGY)
-            CALL SURFACE_SPREAD_RATE(LIST_TAGGED,C)
+            if (USE_CFFDRS) then
+               CALL CFFDRS_SURFACE_SPREAD_RATE(LIST_TAGGED, C, daily_bui(DAY_OF_SIM))
+            ELSE
+               CALL ROTHERMEL_SURFACE_SPREAD_RATE(LIST_TAGGED,C)
+            ENDIF
             IF (CROWN_FIRE_MODEL .GT. 0) CALL CROWN_SPREAD_RATE(LIST_TAGGED,C)
 #ifdef _SUPPRESSION
             IF (ENABLE_EXTENDED_ATTACK .AND. USE_SDI) C%SDI = SDI_FACTOR * SDI%R4(C%IX,C%IY,1)
@@ -1852,7 +1867,6 @@ IF (ISTEP .EQ. 1) THEN
             C%UYOUSY = 1. - ABSCOSASP(IASP) * OMCOSSLPRAD%R4(C%IX,C%IY,1)
             C%NEED_SLOPE_CALC = .FALSE.
          ENDIF
-
          DONE = .FALSE.
          NITER = 0
          DO WHILE (.NOT. DONE)
@@ -1892,7 +1906,16 @@ IF (ISTEP .EQ. 1) THEN
             IF (C%FLIN_SURFACE .LT. C%CRITICAL_FLIN .OR. CROWN_FIRE_MODEL .LE. 0) WSMFEFF = MIN(WSMFEFF, 0.9*KWPM2_TO_BTUPFT2MIN*C%IR)
 
 ! Calculate length over width:
-            C%LOW = MIN( 0.936*EXP(0.2566*WSMFEFF*WSMFEFF_LOW_MULT) + 0.461*EXP(-0.1548*WSMFEFF*WSMFEFF_LOW_MULT) - 0.397, MAX_LOW)
+            if (USE_CFFDRS) then
+               if (C%IFBFM .ge. 31 .and. C%IFBFM .le. 33) then !grass
+                  C%LOW = max(1.0,1.1+C%WSV**0.464)
+               else
+                  C%LOW = 1+8.729*(1-exp(-0.03*C%WSV))**2.155
+               endif
+            else
+               C%LOW = MIN( 0.936*EXP(0.2566*WSMFEFF*WSMFEFF_LOW_MULT) + 0.461*EXP(-0.1548*WSMFEFF*WSMFEFF_LOW_MULT) - 0.397, MAX_LOW)
+            endif
+            
             IF (C%LOW .GT. 0.999 .AND. C%LOW .LT. 1.001) THEN
                BOH = 1.0
             ELSE
@@ -1943,8 +1966,11 @@ IF (ISTEP .EQ. 1) THEN
             end if
 
             ILH = MAX(MIN(NINT(100.*C%MLH),120),30)
-            C%FLIN_SURFACE = FUEL_MODEL_TABLE_2D(C%IFBFM,ILH)%TR * C%IR * C%VELOCITY * 0.3048 ! kW/m
-
+            if (USE_CFFDRS) then
+               C%FLIN_SURFACE = C%FLIN_DMS_SURFACE * C%VELOCITY / C%VELOCITY_DMS_SURFACE
+            else
+               C%FLIN_SURFACE = FUEL_MODEL_TABLE_2D(C%IFBFM,ILH)%TR * C%IR * C%VELOCITY * 0.3048 ! kW/m
+            endif
             IF (NO_SURFACE_FIRE) THEN
                C%UX = 1E-5
                C%UY = 1E-5
@@ -2002,14 +2028,17 @@ ELSE !ISTEP .EQ. 2
          end if
 
          ILH = MAX(MIN(NINT(100.*C%MLH),120),30)
-         C%FLIN_SURFACE = FUEL_MODEL_TABLE_2D(C%IFBFM,ILH)%TR * C%IR * C%VELOCITY * 0.3048 ! kW/m
+         if (USE_CFFDRS) then
+            C%FLIN_SURFACE = C%FLIN_DMS_SURFACE * C%VELOCITY / C%VELOCITY_DMS_SURFACE
+         else
+            C%FLIN_SURFACE = FUEL_MODEL_TABLE_2D(C%IFBFM,ILH)%TR * C%IR * C%VELOCITY * 0.3048 ! kW/m
+         endif
          IF (NO_SURFACE_FIRE) THEN
                C%UX = 1E-5
                C%UY = 1E-5
          ENDIF
 
          IF (CROWN_FIRE_MODEL .GT. 0 .AND. C%FLIN_SURFACE .GE. C%CRITICAL_FLIN) C%FLIN_CANOPY = C%HPUA_CANOPY * C%VELOCITY * 5.08E-3
-
 
 #ifdef _UMDSPOTTING
          IF (USE_UMD_SPOTTING_MODEL .AND. USE_PHYSICAL_SPOTTING_DURATION) THEN

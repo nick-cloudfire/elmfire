@@ -10,7 +10,7 @@ IMPLICIT NONE
 CONTAINS
 
 ! *****************************************************************************
-RECURSIVE SUBROUTINE SURFACE_SPREAD_RATE(L,DUMMY_NODE)
+RECURSIVE SUBROUTINE ROTHERMEL_SURFACE_SPREAD_RATE(L,DUMMY_NODE)
 ! *****************************************************************************
 ! Applies Rothermel suface fire spread model to calculate surface fire rate
 ! of spread, heat per unit area, fireline intensity, flame length, and 
@@ -48,7 +48,6 @@ DO I = 1, NUM_NODES
       C%PHIS_SURFACE = 0.
       C%VS0 = 0.
       C%VELOCITY_DMS_SURFACE = 0.
-      C%IR = 0.
       C%HPUA_SURFACE = 0.
       C%FLIN_DMS_SURFACE = 0.
       C => C%NEXT
@@ -130,8 +129,153 @@ DO I = 1, NUM_NODES
 ENDDO
 
 ! *****************************************************************************
-END SUBROUTINE SURFACE_SPREAD_RATE
+END SUBROUTINE ROTHERMEL_SURFACE_SPREAD_RATE
 ! *****************************************************************************
+
+! *****************************************************************************
+SUBROUTINE CFFDRS_SURFACE_SPREAD_RATE(L,DUMMY_NODE, BUI_c)
+! *****************************************************************************
+
+TYPE (DLL), INTENT(INOUT) :: L
+TYPE (NODE), POINTER, INTENT(INOUT) :: DUMMY_NODE
+
+INTEGER :: NUM_NODES, slope, aspect, I
+TYPE(NODE), POINTER :: C
+REAL :: BUI_c, M, FF, SF, RSF, ISF_c, WSE, WSE1, WSE2, WSX, WSY, &
+         RAZ, FW, ISI, RSI_c, BE, ROS, FFMC, CF
+
+IF (ASSOCIATED (DUMMY_NODE) ) THEN
+   NUM_NODES = 1
+   C => DUMMY_NODE
+ELSE
+   NUM_NODES = L%NUM_NODES
+   C => L%HEAD
+ENDIF
+
+DO I = 1, NUM_NODES
+
+   IF (USE_BLDG_SPREAD_MODEL .AND. C%IFBFM .EQ. 101) THEN
+      C => C%NEXT
+      CYCLE
+   ENDIF
+
+   IF ( C%IFBFM .le. 106 .and. C%IFBFM .ge. 100 ) THEN
+      C%IR = 0.
+      C%PHIW_SURFACE = 0.
+      C%PHIS_SURFACE = 0.
+      C%VS0 = 0.
+      C%VELOCITY_DMS_SURFACE = 0.
+      C%IR = 0.
+      C%HPUA_SURFACE = 0.
+      C%FLIN_DMS_SURFACE = 0.
+      C => C%NEXT
+      CYCLE
+   ENDIF
+
+   M  = C%M1
+   slope = SLP%R4(C%IX,C%IY,1)
+   aspect = ASP%R4(C%IX,C%IY,1)
+
+   ! ---------------- INITIAL SPREAD INDEX ----------------
+
+   FF = 91.9*exp(-0.1386*M)*(1+(M**5.31)/(4.93*10**7))
+   if (slope .le. 63) then 
+      SF = exp(3.533*(tan(slope * PIO180))**1.2)
+   ELSE
+      SF=10
+   ENDIF
+   
+   IF (c%IFBFM .ge. 31 .and. c%IFBFM .le. 33) then ! O1a, O1b
+      if (C%C .lt. 58.8) then
+         CF = 0.005*(exp(0.061*C%C)-1)
+      else
+         CF = 0.176 + 0.02*(C%C-58.8) 
+      ENDIF
+   ELSE
+      CF=1
+   ENDIF
+
+   RSF = RSI(C%IFBFM, 0.208*FF, CF) * SF
+
+   IF ((C%IFBFM .ge. 40 .and. C%IFBFM .le. 60) .or. (C%IFBFM .ge. 400 .and. C%IFBFM .le. 699)) then ! M1, M2
+      ISF_c = C%PC * ISF(2_2,RSF, CF) + (1-C%PC)*ISF(11_2, RSF, CF)
+   ELSE IF (C%IFBFM .eq. 70 .or. C%IFBFM .eq. 90 .or. (C%IFBFM .ge. 400 .and. C%IFBFM .le. 699) .or. (C%IFBFM .ge. 900 .and. C%IFBFM .le. 999)) THEN ! M3
+      ISF_c = C%PDF*ISF(70_2, RSF, CF) + (1-C%PDF)*ISF(11_2, RSF, CF)
+   ELSE IF (c%IFBFM .eq. 80 .or. (C%IFBFM .ge. 700 .and. C%IFBFM .le. 799)) THEN ! M4
+      ISF_c = C%PDF*ISF(80_2, RSF, CF) + (1-C%PDF)*ISF(11_2, RSF, CF)
+   ELSE
+      ISF_c = ISF(C%IFBFM, RSF, CF)
+   ENDIF
+
+   WSE1 = log(ISF_c/(0.208*FF))/0.05039
+   if (ISF_c .lt. 0.999*2.496*FF) THEN
+      WSE2 = 28-log(1-ISF_c/(2.496*FF))/0.0818
+   ELSE
+      WSE2 = 112.45 
+   endif
+
+   if (WSE1 .le. 40) then
+      WSE=WSE1
+   else
+      WSE = WSE2 
+   endif
+
+   WSX = C%WS20_NOW*1.61*1.15*sin(C%WD20_NOW * PIO180) + WSE*sin(aspect * PIO180)
+   WSY = C%WS20_NOW*1.61*1.15*cos(C%WD20_NOW * PIO180) + WSE*cos(aspect * PIO180)
+
+   C%WSV = sqrt(WSX**2+WSY**2)
+   RAZ = acos(WSY/C%WSV)
+   if (WSX .lt. 0) RAZ = 360 - RAZ
+
+   if (C%WS20_NOW*1.61 .le. 40) then
+      FW = exp(0.05039*C%WSV)
+   else
+      FW = 12*(1-exp(0.0818*(C%WSV-28)))
+   endif
+
+   ISI = 0.208 * FF * FW
+
+   ! ----------------- RATE OF SPREAD -------------------
+
+   IF ((C%IFBFM .ge. 40 .and. C%IFBFM .le. 60) .or. (C%IFBFM .ge. 400 .and. C%IFBFM .le. 699)) then ! M1, M2
+      RSI_c = C%PC * RSI(2_2,ISI, CF) + (1-C%PC)*RSI(11_2, ISI, CF)
+   ELSE IF (C%IFBFM .eq. 70 .or. C%IFBFM .eq. 90 .or. (C%IFBFM .ge. 400 .and. C%IFBFM .le. 699) .or. (C%IFBFM .ge. 900 .and. C%IFBFM .le. 999)) THEN ! M3
+      RSI_c = C%PDF*RSI(70_2, ISI, CF) + (1-C%PDF)*RSI(11_2, ISI, CF)
+   ELSE IF (c%IFBFM .eq. 80 .or. (C%IFBFM .ge. 700 .and. C%IFBFM .le. 799)) THEN ! M4
+      RSI_c = C%PDF*RSI(80_2, ISI, CF) + 0.2*(1-C%PDF)*RSI(11_2, ISI, CF)
+   ELSE
+      RSI_c = RSI(C%IFBFM, ISI, CF)
+   ENDIF
+
+   BE = exp(50*log(FUEL_MODEL_TABLE_FBP(C%IFBFM)%q)*(1/BUI_c - 1/FUEL_MODEL_TABLE_FBP(C%IFBFM)%BUI0))
+   BE = min(BE, FUEL_MODEL_TABLE_FBP(C%IFBFM)%BE_max)
+   ROS = RSI_c * BE ! m/min
+
+   C%VELOCITY_DMS_SURFACE = ROS * 3.28 * (C%ADJ + PERTURB_ADJ) * DIURNAL_ADJUSTMENT_FACTOR !ft/min
+#ifdef _SUPPRESSION
+   IF (ENABLE_EXTENDED_ATTACK) C%VELOCITY_DMS_SURFACE = C%VELOCITY_DMS_SURFACE * C%SUPPRESSION_ADJUSTMENT_FACTOR
+#endif
+   
+   FFMC = (14867.2 - 59.5*M)/(147.2+M)
+   C%FLIN_DMS_SURFACE = 300 * ROS * SFC(C%IFBFM, FFMC, BUI_c)! kW/m
+   C%VS0 = RSI(C%IFBFM, 0.208*FF, CF) * BE ! RSZ m/min, no wind, no slope
+   C%IR = 0! kW/m2, CANADIAN FBP HAS NO PROVISION FOR RESIDENCE TIME OR HEAT PER UNIT AREA.
+
+   C%PHIS_SURFACE = (RSF* BE/C%VS0) - 1
+   C%PHIW_SURFACE = (ROS-RSF* BE)/C%VS0
+
+   C%VS0 = C%VS0 * 3.28 ! ft/min
+
+   C%HPUA_SURFACE = 0. ! kJ/m2, CANADIAN FBP HAS NO PROVISION FOR RESIDENCE TIME OR HEAT PER UNIT AREA.
+   
+   C => C%NEXT
+
+ENDDO
+
+! ***************************************************************************** 
+end subroutine CFFDRS_SURFACE_SPREAD_RATE
+! *****************************************************************************
+
 
 ! *****************************************************************************
 RECURSIVE SUBROUTINE CROWN_SPREAD_RATE(L,DUMMY_NODE)
