@@ -1544,6 +1544,131 @@ END FUNCTION ERFINV
 ! *****************************************************************************
 
 ! *****************************************************************************
+REAL FUNCTION ISF(FUEL, RSF, CF)
+! *****************************************************************************
+
+REAL,INTENT(IN) :: RSF, CF
+INTEGER*2, intent(in) :: FUEL
+
+ISF = log(max(0.01,1-(RSF/(FUEL_MODEL_TABLE_FBP(FUEL)%a*CF))**(1/FUEL_MODEL_TABLE_FBP(FUEL)%c)))/(-FUEL_MODEL_TABLE_FBP(FUEL)%b)
+
+! *****************************************************************************
+END FUNCTION ISF
+! *****************************************************************************
+
+! *****************************************************************************
+REAL FUNCTION RSI(FUEL, ISI, CF)
+! *****************************************************************************
+
+REAL,INTENT(IN) :: ISI, CF
+INTEGER*2, intent(in) :: FUEL
+
+IF (FUEL .eq. 70 .or. FUEL .eq. 90 .or. (FUEL .ge. 400 .and. FUEL .le. 699) .or. (FUEL .ge. 900 .and. FUEL .le. 999)) THEN ! M3
+   RSI = 120*(1-exp(-0.0572*ISI))**1.4
+ELSE IF (FUEL .eq. 80 .or. (FUEL .ge. 700 .and. FUEL .le. 799)) THEN ! M4
+   RSI = 100*(1-exp(-0.0404*ISI))**1.48
+ELSE
+   RSI = FUEL_MODEL_TABLE_FBP(FUEL)%a*(1-exp(-FUEL_MODEL_TABLE_FBP(FUEL)%b*ISI))**FUEL_MODEL_TABLE_FBP(FUEL)%c*CF
+ENDIF
+
+
+! *****************************************************************************
+END FUNCTION RSI
+! *****************************************************************************
+
+! *****************************************************************************
+RECURSIVE REAL FUNCTION SFC(FUEL, FFMC, BUI) result(out)
+! *****************************************************************************
+INTEGER*2, INTENT(IN) :: FUEL 
+REAL, INTENT(IN) :: FFMC, BUI
+
+REAL :: PC
+PC = 0
+
+select case (FUEL)
+   case (1)
+      if (FFMC .gt. 84) THEN
+         out = 0.75 + 0.75*sqrt((1-exp(-0.23*(FFMC*84))))
+      else
+         out = 0.75 - 0.75*sqrt((1-exp(-0.23*(FFMC*84))))
+      endif
+   case (2, 70, 80, 90, 700:1000)
+      out = 5.0*(1-exp(-0.0115*BUI))
+   case (3, 4)
+      out = 5.0*(1-exp(-0.0164*BUI))**2.24
+   case (5, 6)
+      out = 5.0*(1-exp(-0.0149*BUI))**2.48
+   case (7)
+      out = max(0.0,2*(1-exp(-0.104*(FFMC-70))))+1.5*(1-exp(-0.0201*BUI))
+   case (11, 12, 13)
+      out = 1.5*(1-exp(-0.0183*BUI))
+   case (40, 50, 60, 400:699)
+      PC = mod(FUEL, 100)/100
+      out = PC * SFC(2_2,FFMC,BUI) + (1 - PC) * SFC(11_2,FFMC,BUI)
+   case(31,32,33)
+      out = 0.3
+   case (21)
+      out = max(0.0,4*(1-exp(-0.034*BUI)))+4.0*(1-exp(-0.025*BUI))
+   case (22)
+      out = max(0.0,10*(1-exp(-0.013*BUI)))+6.0*(1-exp(-0.060*BUI))
+   case (23)
+      out = max(0.0,12*(1-exp(-0.0166*BUI)))+20.0*(1-exp(-0.021*BUI))
+   case Default
+      out = 0
+end select
+
+! *****************************************************************************
+END FUNCTION SFC
+! *****************************************************************************
+
+! *****************************************************************************
+REAL FUNCTION BUI(day_of_weather, month_of_weather)
+! *****************************************************************************
+REAL :: V, DC, Q_prev, Q_RT, DC_RT, K, DMC, b, Pe, M_prev, M_RT, DMC_RT
+INTEGER, intent(in) :: day_of_weather, month_of_weather
+! ------------- DROUGHT CODE -------------------------------
+
+V = max(0.0,0.36*(max(0.0,T_midday(day_of_weather) + 2.8)) + Lf(month_of_weather))
+if (precip(day_of_weather) .le. 2.8) THEN
+   DC = DC_prev + 0.5 * V
+ELSE
+   Q_prev = 800 * exp(-DC_prev/400)
+   Q_RT = max(0.0,Q_prev + 3.937*(0.83*precip(day_of_weather) -1.27))
+   DC_RT = 400*log(800/Q_RT)
+   DC=DC_RT + 0.5 * V
+ENDIF
+
+! -------------- DROUGHT MOISTURE CODE ---------------------
+
+K = 1.894*(max(0.0,T_midday(day_of_weather) + 1.1))*(100 - H_midday(day_of_weather))*Le(month_of_weather)*1000000
+if (precip(day_of_weather) .le. 1.5) THEN
+   DMC = DMC_prev + 100 * K
+ELSE
+   if (DMC_prev .le. 33) THEN
+      b=100/(0.5+0.3*DMC_prev)
+   ELSEIF (DMC_prev .le. 65) THEN
+      b=14-1.3*log(DMC_prev)
+   ELSE
+      b=6.2*log(DMC_prev)-17.2
+   ENDIF
+   Pe = 0.92* precip(day_of_weather) - 1.27
+   M_prev = 20 + exp(5.6348-DMC_prev/43.43)
+   M_RT = M_prev + (1000*Pe)/(48.77+b*Pe)
+   DMC_RT = max(0.0,244.72-43.43*log(M_RT-20))
+   DMC=DMC_RT + 100 * K
+ENDIF
+
+DMC_prev = DMC
+DC_prev = DC
+
+! -------------- BUILD-UP INDEX ---------------------
+
+BUI = 0.8*DMC*DC/(DMC+1.4*DC)
+! *****************************************************************************
+END FUNCTION BUI
+! *****************************************************************************
+
+! *****************************************************************************
 CHARACTER(16) FUNCTION HOUR_OF_YEAR_TO_TIMESTAMP(YEAR, HOUR_OF_YEAR)
 ! *****************************************************************************
 

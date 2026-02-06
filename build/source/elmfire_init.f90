@@ -912,6 +912,109 @@ END SUBROUTINE READ_FUEL_MODEL_TABLE
 ! *****************************************************************************
 
 ! *****************************************************************************
+SUBROUTINE READ_FBP_FUEL_MODEL_TABLE
+! *****************************************************************************
+
+CHARACTER(400) :: FNINPUT
+INTEGER :: INUM, IOS
+TYPE(FUEL_MODEL_TABLE_FBP_TYPE) :: FM
+
+FUEL_MODEL_TABLE_FBP(:)%SHORTNAME='NULL' !Initialize fuel model names
+FUEL_MODEL_TABLE_FBP(:)%a=0.0
+FUEL_MODEL_TABLE_FBP(:)%b=0.0
+FUEL_MODEL_TABLE_FBP(:)%c=0.0
+FUEL_MODEL_TABLE_FBP(:)%q=0.0
+FUEL_MODEL_TABLE_FBP(:)%BUI0=0.0
+FUEL_MODEL_TABLE_FBP(:)%CBH=0.0
+FUEL_MODEL_TABLE_FBP(:)%CFL=0.0
+
+FNINPUT = TRIM(MISCELLANEOUS_INPUTS_DIRECTORY) // TRIM(FUEL_MODEL_FILE)
+
+!Attempt to open fuel model table file:
+OPEN(LUINPUT,FILE=TRIM(FNINPUT),FORM='FORMATTED',STATUS='OLD',IOSTAT=IOS)
+IF (IOS .GT. 0) THEN
+   WRITE(*,*) 'Problem opening FBP fuel model table file ', TRIM(FNINPUT)
+   STOP
+ENDIF
+
+!Read fuel models and store in FUEL_MODEL_TABLE
+IOS = 0
+DO WHILE (IOS .EQ. 0)
+   READ(LUINPUT,*,IOSTAT=IOS) INUM, FM%SHORTNAME, FM%a, FM%b, FM%c, FM%q, FM%BUI0, FM%BE_max, FM%CBH, FM%CFL
+   IF (IOS .EQ. 0) THEN
+      FUEL_MODEL_TABLE_FBP(INUM) = FM
+   ENDIF
+ENDDO
+CLOSE(LUINPUT)
+
+! *****************************************************************************
+END SUBROUTINE READ_FBP_FUEL_MODEL_TABLE
+! *****************************************************************************
+
+! *****************************************************************************
+SUBROUTINE READ_WEATHER
+! *****************************************************************************
+INTEGER :: N, I, K, IOS, MM, DD, YYYY
+CHARACTER(LEN=256) :: LINE 
+CHARACTER(len=:), allocatable :: FNINPUT
+
+print *, "CFFDRS: READING WEATHER FILE"
+
+FNINPUT = TRIM(WEATHER_DIRECTORY) // TRIM(DAILY_WEATHER_FILENAME)
+OPEN(LUINPUT,FILE=TRIM(FNINPUT),FORM='FORMATTED',STATUS='OLD',IOSTAT=IOS)
+! --- pass 1: skip header, count rows ---
+READ(LUINPUT,'(A)',IOSTAT=IOS) LINE   ! header
+N = 0
+IOS = 0
+DO WHILE (IOS .EQ. 0)
+   READ(LUINPUT,'(A)',IOSTAT=IOS) LINE
+   IF (IOS .EQ. 0) THEN
+      IF (LEN_TRIM(LINE) .GT. 0) N = N + 1
+   ENDIF
+ENDDO
+
+! allocate arrays
+IF (ALLOCATED(weather_day)) DEALLOCATE(weather_day)
+IF (ALLOCATED(T_midday))    DEALLOCATE(T_midday)
+IF (ALLOCATED(H_midday))    DEALLOCATE(H_midday)
+IF (ALLOCATED(precip))      DEALLOCATE(precip)
+
+ALLOCATE(weather_day(N), T_midday(N), H_midday(N), precip(N), daily_bui(N))
+
+! --- pass 2: rewind, skip header, read data ---
+REWIND(LUINPUT)
+READ(LUINPUT,'(A)',IOSTAT=IOS) LINE   ! header again
+
+IOS = 0
+I = 0
+DO WHILE (IOS .EQ. 0 .AND. I < N)
+   READ(LUINPUT,'(A)',IOSTAT=IOS) LINE
+   IF (IOS .EQ. 0) THEN
+      IF (LEN_TRIM(LINE) == 0) CYCLE
+      I = I + 1
+
+      LINE = ADJUSTL(LINE)
+      DO K = 1, LEN(LINE)
+         IF (LINE(K:K) == ',') LINE(K:K) = ' '
+         IF (LINE(K:K) == '/') LINE(K:K) = ' '
+      END DO
+
+      READ(LINE,*,IOSTAT=IOS) MM, DD, YYYY, T_midday(I), H_midday(I), precip(I)
+      IF (IOS .NE. 0) THEN
+         WRITE(*,*) 'Bad weather row: ', TRIM(LINE)
+         STOP
+      ENDIF
+      weather_day(I) = YYYY*10000 + MM*100 + DD  ! Store as YYYYMMDD
+   ENDIF
+
+ENDDO
+
+CLOSE(LUINPUT)
+! *****************************************************************************
+END SUBROUTINE READ_WEATHER
+! *****************************************************************************
+
+! *****************************************************************************
 SUBROUTINE READ_BUILDING_FUEL_MODEL_TABLE
 ! *****************************************************************************
 
