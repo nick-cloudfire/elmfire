@@ -716,8 +716,10 @@ DO WHILE (T < WS%NBANDS * DT_METEOROLOGY)
    ! Adjust spread rate for passive and active crown fire (Cruz):
    ! Note that this adjusts spread rate in not only burned cells but nearby cells
    ! that are "about to burn"
-      IF (CROWN_FIRE_MODEL .GT. 0 .AND. JUST_INTERPOLATED) CALL CROWN_SPREAD_RATE(LIST_TAGGED,DUMMY_NODE)
-      CALL ACCUMULATE_CPU_USAGE(40, IT1, IT2)
+      IF (CROWN_FIRE_MODEL .GT. 0 .AND. JUST_INTERPOLATED) then 
+         CALL CROWN_SPREAD_RATE(LIST_TAGGED,DUMMY_NODE)
+      endif
+         CALL ACCUMULATE_CPU_USAGE(40, IT1, IT2)
       
       DO ISTEP = 1, 2
 
@@ -1904,7 +1906,6 @@ IF (ISTEP .EQ. 1) THEN
 ! Determine effective mid flame wind speed
             WSMFEFF = FUEL_MODEL_TABLE_2D(C%IFBFM,30)%WSMFEFF_COEFF * PHIMAG ** FUEL_MODEL_TABLE_2D(C%IFBFM,30)%B_COEFF_INVERSE
             IF (C%FLIN_SURFACE .LT. C%CRITICAL_FLIN .OR. CROWN_FIRE_MODEL .LE. 0) WSMFEFF = MIN(WSMFEFF, 0.9*KWPM2_TO_BTUPFT2MIN*C%IR)
-
 ! Calculate length over width:
             if (USE_CFFDRS) then
                if (C%IFBFM .ge. 31 .and. C%IFBFM .le. 33) then !grass
@@ -1977,7 +1978,11 @@ IF (ISTEP .EQ. 1) THEN
             ENDIF
 
             CROWN_FIRE_AT_END = .FALSE.
-            IF (CROWN_FIRE_MODEL .GT. 0 .AND. C%FLIN_SURFACE .GE. C%CRITICAL_FLIN) CROWN_FIRE_AT_END = .TRUE.
+            IF (CROWN_FIRE_MODEL .GT. 0 .AND. C%FLIN_SURFACE .GE. C%CRITICAL_FLIN) then
+               CROWN_FIRE_AT_END = .TRUE.
+            else
+               C%CROWN_FIRE = 0
+            endif
 
             DONE = .TRUE.
             IF (CROWN_FIRE_AT_END .AND. (.NOT. CROWN_FIRE_AT_START)) DONE = .FALSE.
@@ -2038,7 +2043,11 @@ ELSE !ISTEP .EQ. 2
                C%UY = 1E-5
          ENDIF
 
-         IF (CROWN_FIRE_MODEL .GT. 0 .AND. C%FLIN_SURFACE .GE. C%CRITICAL_FLIN) C%FLIN_CANOPY = C%HPUA_CANOPY * C%VELOCITY * 5.08E-3
+         IF (CROWN_FIRE_MODEL .GT. 0 .AND. C%FLIN_SURFACE .GE. C%CRITICAL_FLIN) then 
+            C%FLIN_CANOPY = C%HPUA_CANOPY * C%VELOCITY * 5.08E-3
+         else
+            C%CROWN_FIRE = 0
+         endif
 
 #ifdef _UMDSPOTTING
          IF (USE_UMD_SPOTTING_MODEL .AND. USE_PHYSICAL_SPOTTING_DURATION) THEN
