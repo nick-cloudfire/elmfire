@@ -140,10 +140,10 @@ TYPE (DLL), INTENT(INOUT) :: L
 TYPE (NODE), POINTER, INTENT(INOUT) :: DUMMY_NODE
 REAL, intent(in) :: BUI_c
 
-INTEGER :: NUM_NODES, slope, aspect, I
+INTEGER :: NUM_NODES, aspect, I
 TYPE(NODE), POINTER :: C
 REAL :: M, FF, SF, RSF, ISF_c, WSE, WSE1, WSE2, WSX, WSY, &
-         RAZ, FW, ISI, RSI_c, BE, ROS, FFMC, CF
+         RAZ, FW, RSI_c, BE, ROS, FFMC, CF, slope, RSF_1, RSF_2
 
 IF (ASSOCIATED (DUMMY_NODE) ) THEN
    NUM_NODES = 1
@@ -173,15 +173,15 @@ DO I = 1, NUM_NODES
       CYCLE
    ENDIF
 
-   M  = C%M1
-   slope = SLP%R4(C%IX,C%IY,1)
-   aspect = ASP%R4(C%IX,C%IY,1)
+   M  = C%M1*100
+   slope = tan(SLP%R4(C%IX,C%IY,1)*PIO180) * 100.0 !percent
+   aspect = mod(ASP%R4(C%IX,C%IY,1) + 180.0,360.0)
 
    ! ---------------- INITIAL SPREAD INDEX ----------------
 
    FF = 91.9*exp(-0.1386*M)*(1+(M**5.31)/(4.93*10**7))
    if (slope .le. 63) then 
-      SF = exp(3.533*(tan(slope * PIO180))**1.2)
+      SF = exp(3.533*((slope/100.0)**1.2))
    ELSE
       SF=10
    ENDIF
@@ -197,68 +197,64 @@ DO I = 1, NUM_NODES
    ENDIF
 
    RSF = RSI(C%IFBFM, 0.208*FF, CF) * SF
-
-   IF ((C%IFBFM .ge. 40 .and. C%IFBFM .le. 60) .or. (C%IFBFM .ge. 400 .and. C%IFBFM .le. 699)) then ! M1, M2
-      ISF_c = C%PC * ISF(2_2,RSF, CF) + (1-C%PC)*ISF(11_2, RSF, CF)
-   ELSE IF (C%IFBFM .eq. 70 .or. C%IFBFM .eq. 90 .or. (C%IFBFM .ge. 400 .and. C%IFBFM .le. 699) .or. (C%IFBFM .ge. 900 .and. C%IFBFM .le. 999)) THEN ! M3
-      ISF_c = C%PDF*ISF(70_2, RSF, CF) + (1-C%PDF)*ISF(11_2, RSF, CF)
-   ELSE IF (c%IFBFM .eq. 80 .or. (C%IFBFM .ge. 700 .and. C%IFBFM .le. 799)) THEN ! M4
-      ISF_c = C%PDF*ISF(80_2, RSF, CF) + (1-C%PDF)*ISF(11_2, RSF, CF)
+   
+   IF (C%IFBFM .eq. 40 .or. C%IFBFM .eq. 60 .or. (C%IFBFM .ge. 400 .and. C%IFBFM .le. 699)) then ! M1, M2
+      RSF_1 = RSI(2_2, 0.208*FF, CF) * SF
+      RSF_2 = RSI(11_2, 0.208*FF, CF) * SF
+      ISF_c = C%PC * ISF(2_2,RSF_1, CF) + (1-C%PC)*ISF(11_2, RSF_2, CF)
+   ELSE IF (C%IFBFM .eq. 70 .or. C%IFBFM .eq. 90 .or. (C%IFBFM .ge. 700 .and. C%IFBFM .le. 799) .or. (C%IFBFM .ge. 900 .and. C%IFBFM .le. 999)) THEN ! M3
+      RSF_1 = RSI(795_2, 0.208*FF, CF) * SF
+      RSF_2 = RSI(11_2, 0.208*FF, CF) * SF
+      ISF_c = C%PDF*ISF(795_2, RSF_1, CF) + (1-C%PDF)*ISF(11_2, RSF_2, CF)
+   ELSE IF (c%IFBFM .eq. 80 .or. (C%IFBFM .ge. 800 .and. C%IFBFM .le. 899)) THEN ! M4
+      RSF_1 = RSI(895_2, 0.208*FF, CF) * SF
+      RSF_2 = RSI(11_2, 0.208*FF, CF) * SF
+      ISF_c = C%PDF*ISF(895_2, RSF_1, CF) + (1-C%PDF)*ISF(11_2, RSF_2, CF)
    ELSE
       ISF_c = ISF(C%IFBFM, RSF, CF)
    ENDIF
-
+   
    WSE1 = log(ISF_c/(0.208*FF))/0.05039
    if (ISF_c .lt. 0.999*2.496*FF) THEN
       WSE2 = 28-log(1-ISF_c/(2.496*FF))/0.0818
    ELSE
       WSE2 = 112.45 
    endif
-
    if (WSE1 .le. 40) then
       WSE=WSE1
    else
       WSE = WSE2 
    endif
-
+   print *, RSF_1, RSF_2
    WSX = C%WS20_NOW*1.61*1.15*sin(C%WD20_NOW * PIO180) + WSE*sin(aspect * PIO180)
    WSY = C%WS20_NOW*1.61*1.15*cos(C%WD20_NOW * PIO180) + WSE*cos(aspect * PIO180)
-
    C%WSV = sqrt(WSX**2+WSY**2)
    RAZ = acos(WSY/C%WSV)
    if (WSX .lt. 0) RAZ = 360 - RAZ
 
-   if (C%WS20_NOW*1.61 .le. 40) then
+   if (C%WS20_NOW*1.61*1.15 .le. 40) then
       FW = exp(0.05039*C%WSV)
    else
-      FW = 12*(1-exp(0.0818*(C%WSV-28)))
+      FW = 12*(1-exp(-0.0818*(C%WSV-28)))
    endif
 
-   ISI = 0.208 * FF * FW
+   C%ISI = 0.208 * FF * FW
 
    ! ----------------- RATE OF SPREAD -------------------
-
-   IF ((C%IFBFM .ge. 40 .and. C%IFBFM .le. 60) .or. (C%IFBFM .ge. 400 .and. C%IFBFM .le. 699)) then ! M1, M2
-      RSI_c = C%PC * RSI(2_2,ISI, CF) + (1-C%PC)*RSI(11_2, ISI, CF)
-   ELSE IF (C%IFBFM .eq. 70 .or. C%IFBFM .eq. 90 .or. (C%IFBFM .ge. 400 .and. C%IFBFM .le. 699) .or. (C%IFBFM .ge. 900 .and. C%IFBFM .le. 999)) THEN ! M3
-      RSI_c = C%PDF*RSI(70_2, ISI, CF) + (1-C%PDF)*RSI(11_2, ISI, CF)
-   ELSE IF (c%IFBFM .eq. 80 .or. (C%IFBFM .ge. 700 .and. C%IFBFM .le. 799)) THEN ! M4
-      RSI_c = C%PDF*RSI(80_2, ISI, CF) + 0.2*(1-C%PDF)*RSI(11_2, ISI, CF)
-   ELSE
-      RSI_c = RSI(C%IFBFM, ISI, CF)
-   ENDIF
+   RSI_c = RSI(C%IFBFM, C%ISI, CF)
 
    BE = exp(50*log(FUEL_MODEL_TABLE_FBP(C%IFBFM)%q)*(1/BUI_c - 1/FUEL_MODEL_TABLE_FBP(C%IFBFM)%BUI0))
    BE = min(BE, FUEL_MODEL_TABLE_FBP(C%IFBFM)%BE_max)
+   !print *, C%IFBFM, FUEL_MODEL_TABLE_FBP(C%IFBFM)%BE_max, BUI_c, FUEL_MODEL_TABLE_FBP(C%IFBFM)%BUI0, FUEL_MODEL_TABLE_FBP(C%IFBFM)%q
    ROS = RSI_c * BE ! m/min
-
    C%VELOCITY_DMS_SURFACE = ROS * 3.28 * (C%ADJ + PERTURB_ADJ) * DIURNAL_ADJUSTMENT_FACTOR !ft/min
 #ifdef _SUPPRESSION
    IF (ENABLE_EXTENDED_ATTACK) C%VELOCITY_DMS_SURFACE = C%VELOCITY_DMS_SURFACE * C%SUPPRESSION_ADJUSTMENT_FACTOR
 #endif
    
    FFMC = (14867.2 - 59.5*M)/(147.2+M)
-   C%FLIN_DMS_SURFACE = 300 * ROS * SFC(C%IFBFM, FFMC, BUI_c)! kW/m
+   C%SFC = SFC(C%IFBFM, FFMC, BUI_c)
+   C%FLIN_DMS_SURFACE = 300 * ROS * C%SFC! kW/m
    C%VS0 = RSI(C%IFBFM, 0.208*FF, CF) * BE ! RSZ m/min, no wind, no slope
    C%IR = 0! kW/m2, CANADIAN FBP HAS NO PROVISION FOR RESIDENCE TIME OR HEAT PER UNIT AREA.
 
@@ -268,6 +264,7 @@ DO I = 1, NUM_NODES
    C%VS0 = C%VS0 * 3.28 ! ft/min
 
    C%HPUA_SURFACE = 0. ! kJ/m2, CANADIAN FBP HAS NO PROVISION FOR RESIDENCE TIME OR HEAT PER UNIT AREA.
+   print *, "RSF: ", RSF, "ISF: ", ISF_c, "RSS: ", ROS,  "ISI: ", C%ISI, "WSV: ", C%WSV, "SF: ", SF, 'BE: ', BE, "WSV: ", WSE, "SFI: ", C%FLIN_DMS_SURFACE
    
    C => C%NEXT
 
@@ -286,7 +283,7 @@ TYPE (DLL), INTENT(INOUT) :: L
 TYPE (NODE), POINTER, INTENT(INOUT) :: DUMMY_NODE
 
 INTEGER :: I, IX, IY, NUM_NODES
-REAL :: WS10KMPH, CROSA, R0, CAC, FMCTERM, CBD_EFF, CBH_EFF, CROS, FLIN_SURFACE
+REAL :: WS10KMPH, CROSA, R0, CAC, FMCTERM, CBD_EFF, CBH_EFF, CROS, FLIN_SURFACE, RSO, CFB, CFC, FME, RSC
 TYPE(NODE), POINTER :: C
 REAL, PARAMETER :: MPH_20FT_TO_KMPH_10M = 1.609 / 0.87 ! 1.609 km/h per mi/h; divide by 0.87 to go from 20 ft to 10 m
 !LOGICAL, PARAMETER :: USE_FLIN_DMS_SURFACE = .TRUE.  ! Ignores directional fireline intensity for crown fire activation.
@@ -298,11 +295,9 @@ ELSE
    NUM_NODES = L%NUM_NODES
    C => L%HEAD
 ENDIF
-
 DO I = 1, NUM_NODES
    IX=C%IX
    IY=C%IY
-
    !IF (USE_FLIN_DMS_SURFACE) THEN
    !   FLIN_SURFACE=C%FLIN_DMS_SURFACE
    !ELSE
@@ -311,7 +306,6 @@ DO I = 1, NUM_NODES
    ! print *, C%VS0, C%FLIN_SURFACE, CBD%R4(IX,IY,1), CC%R4(IX,IY,1), CBH%R4(IX,IY,1), CH%R4(IX,IY,1)
    IF (C%VS0 .GT. 0. .AND. CBD%R4(IX,IY,1) .GT. 1E-3 .AND. CC%R4(IX,IY,1) .GT. 1E-3) THEN 
       CROS = 0.
-
       IF (C%CRITICAL_FLIN .GT. 1E9) THEN
          C%HPUA_CANOPY = CBD%R4(IX,IY,1) * MAX(CH%R4(IX,IY,1) - CBH%R4(IX,IY,1),0.) * 12000. !kJ/m2
          IF (CBH%R4(IX,IY,1) .GE. 0.) THEN
@@ -349,6 +343,31 @@ DO I = 1, NUM_NODES
       !ENDIF ! FLIN_SURFACE .GT. C%CRITICAL_FLIN
 
    ENDIF ! CBD .GT. 1E-3 .AND. CC .GT. 1E-3
+
+   IF (USE_CFFDRS) then
+      RSO = C%CRITICAL_FLIN /(300*C%SFC)
+      CFB = 1-exp(-0.23*(C%VELOCITY_DMS_SURFACE/3.28-RSO))
+      C%CFC=0
+      IF ((C%IFBFM .ge. 40 .and. C%IFBFM .le. 60) .or. (C%IFBFM .ge. 400 .and. C%IFBFM .le. 699)) then ! M1, M2
+         C%CFC = FUEL_MODEL_TABLE_FBP(C%IFBFM)%CFL*CFB * C%PC
+      ELSE IF (C%IFBFM .eq. 70 .or. C%IFBFM .eq. 90 .or. C%IFBFM .ge. 700) THEN ! M3, M4
+         C%CFC = FUEL_MODEL_TABLE_FBP(C%IFBFM)%CFL*CFB * C%PDF
+      ELSE
+         C%CFC = FUEL_MODEL_TABLE_FBP(C%IFBFM)%CFL*CFB
+      ENDIF
+
+      if (C%IFBFM .eq. 6) then ! C-6 special condition 
+         FME = 1000*((1.5-0.00275*C%FMC)**4.0)/(460+(25.9*C%FMC))
+         RSC = 60*(1-exp(-0.0497*C%ISI))*FME/0.778
+         C%VELOCITY_DMS_SURFACE = C%VELOCITY_DMS_SURFACE + CFB*(RSC - C%VELOCITY_DMS_SURFACE/3.28) * 3.28 !ft/min
+         Print *, "FME: ", FME, "RSC: ", RSC, "ROS: ", C%VELOCITY_DMS_SURFACE 
+      endif
+
+      C%FLIN_CANOPY = 300 * CFC * C%VELOCITY_DMS_SURFACE/3.28
+      Print *, "CFC: ", CFC, "RSO: ", RSO, "CFB: ", CFB, "ROS: ", C%VELOCITY_DMS_SURFACE 
+
+   endif
+
    C => C%NEXT
 ENDDO ! I = 1, L%NUM_NODES
 

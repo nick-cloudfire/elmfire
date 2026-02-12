@@ -17,12 +17,13 @@ IMPLICIT NONE
 CONTAINS
 
 ! *****************************************************************************
-SUBROUTINE LEVEL_SET_PROPAGATION(IWX_BAND,ICASE,NTIMESTEPS)
+SUBROUTINE LEVEL_SET_PROPAGATION(IWX_BAND,ICASE,NTIMESTEPS, IS_VIRTUAL_RUN)
 ! *****************************************************************************
 
 ! INTENT(IN) and INTENT(OUT) variables:
 INTEGER, INTENT(IN) :: IWX_BAND, ICASE
 INTEGER, INTENT(OUT) :: NTIMESTEPS
+LOGICAL, INTENT(IN) :: IS_VIRTUAL_RUN
 
 ! Local variables & pointers:
 INTEGER :: I, ILOC, J, IX, IY, ITIMESTEP, IX_IGN, IY_IGN, ISTEP, K, LU, IT1, IT2, &
@@ -71,8 +72,11 @@ BAND_H = min(WS%NBANDS, WX_BANDS_KEPT_IN_MEM + IWX_BAND - 1)
 T=0
 INITIATED = .FALSE.
 START_CALCS = .FALSE.
+DT = 30 ! placeholder value, fixes issue where mpi procs > num_cases
+TSTOP = WS%NBANDS * DT_METEOROLOGY - 1 ! placeholder value, fixes issue where mpi procs > num_cases
 
 Print *, "STARTING LEVEL SET PROPAGATION CASE: ", ICASE
+if (IS_VIRTUAL_RUN) print *, "[", ICASE, "]: VIRTUAL RUN CASE"
 
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 CALL UPDATE_WEATHER_SLICE(BAND_L, BAND_H)
@@ -89,7 +93,7 @@ DO WHILE (T < WS%NBANDS * DT_METEOROLOGY)
       IF (MULTIPLE_HOSTS) CALL BCAST_WEATHER()
       CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
    ENDIF
-   IF (T .ge. SIMULATION_TSTART + (IWX_BAND - 1) * DT_METEOROLOGY .and. .not. INITIATED) THEN ! START SIM
+   IF (T .ge. SIMULATION_TSTART + (IWX_BAND - 1) * DT_METEOROLOGY .and. .not. INITIATED .and. .not. IS_VIRTUAL_RUN) THEN ! START SIM
       ! ***************************************************************************************
       print *, "[",ICASE,"] LEVEL SET CASE INITIATED"
       IF (.NOT. ALLOCATED(PHIP)) FIRSTCALL = .TRUE.
@@ -471,11 +475,11 @@ DO WHILE (T < WS%NBANDS * DT_METEOROLOGY)
                GO = .FALSE. 
 
                IF (IXSTOP .GE. IXSTART .AND. IYSTOP .GE. IYSTART) THEN
-               DO IY2 = IYSTART, IYSTOP
-               DO IX2 = IXSTART, IXSTOP
-                     IF (PHIP(IX2,IY2) .GT. 0.) GO = .TRUE. 
-               ENDDO
-               ENDDO
+                  DO IY2 = IYSTART, IYSTOP
+                  DO IX2 = IXSTART, IXSTOP
+                        IF (PHIP(IX2,IY2) .GT. 0.) GO = .TRUE. 
+                  ENDDO
+                  ENDDO
                ENDIF
 
                IF (GO .AND. (.NOT. ISNONBURNABLE(IX,IY)) ) THEN
@@ -509,7 +513,7 @@ DO WHILE (T < WS%NBANDS * DT_METEOROLOGY)
 
       if (DEBUG_LEVEL .GT. 0) THEN
          write(*,'(A)', advance='no') char(13)   ! carriage return
-         write(*,'(A,F0.1,A,F0.1,A,I7)', advance='no') 'Current Timestep: ', T, ' of ', TSTOP, ', tracked nodes: ', LIST_TAGGED%NUM_NODES
+         write(*,'(A,F0.1,A,F0.1,A,I7,A,I4,A,I4)', advance='no') 'Current Timestep: ', T, ' of ', TSTOP, ', tracked nodes: ', LIST_TAGGED%NUM_NODES, ". Weather bands ", BAND_L, " to ", BAND_H
          call flush(6)
       END IF
 
@@ -1351,7 +1355,6 @@ DO WHILE (T < WS%NBANDS * DT_METEOROLOGY)
       ENDIF
    ENDIF
    T = T + DT
-
    IF ((T .ge. TSTOP + (IWX_BAND - 1)*DT_METEOROLOGY) .and. START_CALCS) THEN ! END SIM
       print *, "[",ICASE,"] LEVEL SET CASE ENDED"
       CALL SYSTEM_CLOCK(IT1)
