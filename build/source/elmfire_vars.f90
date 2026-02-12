@@ -555,7 +555,10 @@ TYPE NODE
    REAL :: C  = 0.
    REAL :: PC = 0.
    REAL :: PDF = 0.
-   REAL :: WSV = 0
+   REAL :: WSV = 0.
+   REAL :: SFC = 0.
+   REAL :: CFC = 0.
+   REAL :: ISI = 0.
 
 ! For optimization purposes
    LOGICAL   :: NEED_SLOPE_CALC = .TRUE.

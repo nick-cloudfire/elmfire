@@ -179,8 +179,6 @@ INTEGER, intent(in):: BANDSTART, BANDEND
 REAL :: CONSTANT_LH, CONSTANT_LW, CONSTANT_FMC
 INTEGER :: IERR
 
-if (IRANK_WORLD .eq. 0) PRINT *, "Getting weather bands ", BANDSTART, " to ", BANDEND
-
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(3)) THEN
    CALL READ_BSQ_RASTER_SLICE (WS,   WEATHER_DIRECTORY, WS_FILENAME, BANDSTART, BANDEND)
    IF (WS_AT_10M) WHERE(WS%R4(:,:,:) .NE. WS%NODATA_VALUE) WS%R4(:,:,:) = 0.87 * WS%R4(:,:,:)
@@ -1602,7 +1600,7 @@ ELSE
    NBANDS = WX_BANDS_KEPT_IN_MEM
 endif
 
-IF (BANDSTART .ge. RASTER%NBANDS .or. BANDSTART .le. 0) then
+IF (BANDSTART .gt. RASTER%NBANDS .or. BANDSTART .lt. 1) then
    WRITE(*,*) 'Error processing ', TRIM(FNHDR), ' slice band start (', BANDSTART, ') is outside the bounds of (', 1, ',',RASTER%NBANDS,')'
    STOP
 endif
@@ -1610,7 +1608,7 @@ IF (BANDEND .gt. RASTER%NBANDS .or. BANDEND .le. 0) then
    WRITE(*,*) 'Error processing ', TRIM(FNHDR), ' slice band end (', BANDEND, ') is outside the bounds of (', 1, ',',RASTER%NBANDS,')'
    STOP
 endif
-IF (BANDSTART .ge. BANDEND) then
+IF (BANDSTART .gt. BANDEND) then
    WRITE(*,*) 'Error processing ', TRIM(FNHDR), ' slice band start (', BANDSTART, ') greater than band end (',BANDEND,')'
    STOP
 endif

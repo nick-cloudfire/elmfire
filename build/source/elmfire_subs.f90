@@ -1557,18 +1557,27 @@ END FUNCTION ISF
 ! *****************************************************************************
 
 ! *****************************************************************************
-REAL FUNCTION RSI(FUEL, ISI, CF)
+RECURSIVE REAL FUNCTION RSI(FUEL, ISI, CF) result(rsi_val)
 ! *****************************************************************************
 
 REAL,INTENT(IN) :: ISI, CF
 INTEGER*2, intent(in) :: FUEL
+REAL RSI_100, PDF
 
-IF (FUEL .eq. 70 .or. FUEL .eq. 90 .or. (FUEL .ge. 400 .and. FUEL .le. 699) .or. (FUEL .ge. 900 .and. FUEL .le. 999)) THEN ! M3
-   RSI = 120*(1-exp(-0.0572*ISI))**1.4
-ELSE IF (FUEL .eq. 80 .or. (FUEL .ge. 700 .and. FUEL .le. 799)) THEN ! M4
-   RSI = 100*(1-exp(-0.0404*ISI))**1.48
+PDF = mod(FUEL,100)/100.0
+
+IF (FUEL .eq. 40 .or. FUEL .eq. 60 .or. (FUEL .ge. 400 .and. FUEL .le. 499) .or. (FUEL .ge. 600 .and. FUEL .le. 699)) then ! M1
+   rsi_val = PDF * RSI(2_2, ISI, CF) + (1-PDF)*RSI(11_2, ISI, CF)
+ELSE IF (FUEL .eq. 50 .or. (FUEL .ge. 500 .and. FUEL .le. 599)) then ! M2
+   rsi_val = PDF * RSI(2_2, ISI, CF) + 0.2*(1-PDF)*RSI(11_2, ISI, CF)
+ELSE IF (FUEL .eq. 70 .or. FUEL .eq. 90 .or. (FUEL .ge. 700 .and. FUEL .le. 799) .or. (FUEL .ge. 900 .and. FUEL .le. 999)) THEN ! M3
+   RSI_100 = 120*(1-exp(-0.0572*ISI))**1.4
+   rsi_val = PDF*RSI_100 + (1-PDF)*RSI(11_2, ISI, CF)
+ELSE IF (FUEL .eq. 80 .or. (FUEL .ge. 800 .and. FUEL .le. 899)) THEN ! M4
+   RSI_100 = 100*(1-exp(-0.0404*ISI))**1.48
+   rsi_val = PDF*RSI_100 + 0.2*(1-PDF)*RSI(11_2, ISI, CF)
 ELSE
-   RSI = FUEL_MODEL_TABLE_FBP(FUEL)%a*(1-exp(-FUEL_MODEL_TABLE_FBP(FUEL)%b*ISI))**FUEL_MODEL_TABLE_FBP(FUEL)%c*CF
+   rsi_val = FUEL_MODEL_TABLE_FBP(FUEL)%a*(1-exp(-FUEL_MODEL_TABLE_FBP(FUEL)%b*ISI))**FUEL_MODEL_TABLE_FBP(FUEL)%c*CF
 ENDIF
 
 
@@ -1603,7 +1612,7 @@ select case (FUEL)
    case (11, 12, 13)
       out = 1.5*(1-exp(-0.0183*BUI))
    case (40, 50, 60, 400:699)
-      PC = mod(FUEL, 100)/100
+      PC = mod(FUEL, 100)/100.0
       out = PC * SFC(2_2,FFMC,BUI) + (1 - PC) * SFC(11_2,FFMC,BUI)
    case(31,32,33)
       out = 0.3
@@ -1640,7 +1649,7 @@ ENDIF
 
 ! -------------- DROUGHT MOISTURE CODE ---------------------
 
-K = 1.894*(max(0.0,T_midday(day_of_weather) + 1.1))*(100 - H_midday(day_of_weather))*Le(month_of_weather)*1000000
+K = 1.894*(max(0.0,T_midday(day_of_weather) + 1.1))*(100 - H_midday(day_of_weather))*Le(month_of_weather)*10.0**(-6.0)
 if (precip(day_of_weather) .le. 1.5) THEN
    DMC = DMC_prev + 100 * K
 ELSE
@@ -1663,7 +1672,7 @@ DC_prev = DC
 
 ! -------------- BUILD-UP INDEX ---------------------
 
-BUI = 0.8*DMC*DC/(DMC+1.4*DC)
+BUI = 0.8*DMC*DC/(DMC+0.4*DC)
 ! *****************************************************************************
 END FUNCTION BUI
 ! *****************************************************************************
