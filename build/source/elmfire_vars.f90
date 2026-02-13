@@ -559,6 +559,7 @@ TYPE NODE
    REAL :: SFC = 0.
    REAL :: CFC = 0.
    REAL :: ISI = 0.
+   REAL :: CFB = 0.
 
 ! For optimization purposes
    LOGICAL   :: NEED_SLOPE_CALC = .TRUE.

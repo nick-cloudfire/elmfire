@@ -1615,7 +1615,7 @@ select case (FUEL)
       PC = mod(FUEL, 100)/100.0
       out = PC * SFC(2_2,FFMC,BUI) + (1 - PC) * SFC(11_2,FFMC,BUI)
    case(31,32,33)
-      out = 0.3
+      out = 0.35
    case (21)
       out = max(0.0,4*(1-exp(-0.034*BUI)))+4.0*(1-exp(-0.025*BUI))
    case (22)

@@ -25,7 +25,7 @@ INTEGER, ALLOCATABLE, DIMENSION(:) :: K
 
 LOGICAL :: GOOD_INPUTS, IS_VIRTUAL_RUN
 
-REAL :: APHIW, COSASPMPI, PHIMAG, PHIWX, PHIWY, PHIX, PHIY, SINASPMPI
+REAL :: APHIW, COSASPMPI, PHIMAG, PHIWX, PHIWY, PHIX, PHIY, SINASPMPI, FME, RSC
 
 CHARACTER(3) :: THREE_IWX_BAND
 CHARACTER(4) :: FOUR_IWX_BAND
@@ -565,7 +565,7 @@ IF (MODE .NE. 1) THEN
                C%FLIN_SURFACE = C%FLIN_DMS_SURFACE! kW/m
                
                IF (J .EQ. 2) THEN
-                  SPREAD_RATE_TO_DUMP%R4(IX,IY,1) = C%VELOCITY_DMS
+                  
                   if (C%FLIN_SURFACE .lt. C%CRITICAL_FLIN) then 
                      C%CROWN_FIRE = 0
                      C%FLIN_CANOPY = 0
@@ -573,6 +573,17 @@ IF (MODE .NE. 1) THEN
                   else
                      FLIN_TO_DUMP%R4(IX,IY,1) = 300 * (C%SFC + C%CFC) * C%VELOCITY_DMS_SURFACE / 3.24
                   endif
+
+                  if (C%IFBFM .eq. 6 .and. C%CROWN_FIRE .gt. 0) then ! C-6 special condition 
+                     FME = 1000*((1.5-0.00275*C%FMC)**4.0)/(460+(25.9*C%FMC))
+                     RSC = 60*(1-exp(-0.0497*C%ISI))*FME/0.778
+                     C%VELOCITY_DMS_SURFACE = C%VELOCITY_DMS_SURFACE + C%CFB*(RSC - C%VELOCITY_DMS_SURFACE/3.28) * 3.28 !ft/min
+                     Print *, "FME: ", FME, "RSC: ", RSC, "ROS: ", C%VELOCITY_DMS_SURFACE 
+                  endif
+                  Print *, "CFC: ", C%CFC, "CFB: ", C%CFB, "ROS: ", C%VELOCITY_DMS_SURFACE 
+
+                  SPREAD_RATE_TO_DUMP%R4(IX,IY,1) = C%VELOCITY_DMS_SURFACE
+
                   if (PHIMAG .gt. 1.0e-20) then
                      SPREAD_DIRECTION_TO_DUMP%R4(IX,IY,1) = ATAN2(PHIX, PHIY) * 180.0 / ACOS(-1.0)
                      if (SPREAD_DIRECTION_TO_DUMP%R4(IX,IY,1) .lt. 0.0) then
