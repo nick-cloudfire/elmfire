@@ -224,7 +224,7 @@ def main():
         data_text = replace_datafile_values(data_text, "FOLIAR_MOISTURE_CONTENT", row["fmc"])
         data_text = replace_datafile_values(data_text, "START_DC", row["DC"])
         data_text = replace_datafile_values(data_text, "START_DMC", row["DMC (calculated)"])
-
+        data_text = replace_datafile_values(data_text, "LH_MOISTURE_CONTENT", row["lh"])
 
         out_data_name = f"{folder_name}.data"
         out_data_path = os.path.join(iter_dir, out_data_name)

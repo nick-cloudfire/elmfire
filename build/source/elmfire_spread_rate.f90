@@ -225,7 +225,6 @@ DO I = 1, NUM_NODES
    else
       WSE = WSE2 
    endif
-   print *, RSF_1, RSF_2
    WSX = C%WS20_NOW*1.61*1.15*sin(C%WD20_NOW * PIO180) + WSE*sin(aspect * PIO180)
    WSY = C%WS20_NOW*1.61*1.15*cos(C%WD20_NOW * PIO180) + WSE*cos(aspect * PIO180)
    C%WSV = sqrt(WSX**2+WSY**2)
@@ -264,7 +263,7 @@ DO I = 1, NUM_NODES
    C%VS0 = C%VS0 * 3.28 ! ft/min
 
    C%HPUA_SURFACE = 0. ! kJ/m2, CANADIAN FBP HAS NO PROVISION FOR RESIDENCE TIME OR HEAT PER UNIT AREA.
-   print *, "RSF: ", RSF, "ISF: ", ISF_c, "RSS: ", ROS,  "ISI: ", C%ISI, "WSV: ", C%WSV, "SF: ", SF, 'BE: ', BE, "WSV: ", WSE, "SFI: ", C%FLIN_DMS_SURFACE
+   print *, "SFC: ", C%SFC, "RSF: ", RSF, "ISF: ", ISF_c, "RSS: ", ROS,  "ISI: ", C%ISI, "WSV: ", C%WSV, "SF: ", SF, 'BE: ', BE, "WSV: ", WSE, "SFI: ", C%FLIN_DMS_SURFACE
    
    C => C%NEXT
 
@@ -283,7 +282,7 @@ TYPE (DLL), INTENT(INOUT) :: L
 TYPE (NODE), POINTER, INTENT(INOUT) :: DUMMY_NODE
 
 INTEGER :: I, IX, IY, NUM_NODES
-REAL :: WS10KMPH, CROSA, R0, CAC, FMCTERM, CBD_EFF, CBH_EFF, CROS, FLIN_SURFACE, RSO, CFB, CFC, FME, RSC
+REAL :: WS10KMPH, CROSA, R0, CAC, FMCTERM, CBD_EFF, CBH_EFF, CROS, FLIN_SURFACE, RSO
 TYPE(NODE), POINTER :: C
 REAL, PARAMETER :: MPH_20FT_TO_KMPH_10M = 1.609 / 0.87 ! 1.609 km/h per mi/h; divide by 0.87 to go from 20 ft to 10 m
 !LOGICAL, PARAMETER :: USE_FLIN_DMS_SURFACE = .TRUE.  ! Ignores directional fireline intensity for crown fire activation.
@@ -346,25 +345,18 @@ DO I = 1, NUM_NODES
 
    IF (USE_CFFDRS) then
       RSO = C%CRITICAL_FLIN /(300*C%SFC)
-      CFB = 1-exp(-0.23*(C%VELOCITY_DMS_SURFACE/3.28-RSO))
+      C%CFB = 1-exp(-0.23*(C%VELOCITY_DMS_SURFACE/3.28-RSO))
       C%CFC=0
       IF ((C%IFBFM .ge. 40 .and. C%IFBFM .le. 60) .or. (C%IFBFM .ge. 400 .and. C%IFBFM .le. 699)) then ! M1, M2
-         C%CFC = FUEL_MODEL_TABLE_FBP(C%IFBFM)%CFL*CFB * C%PC
+         C%CFC = FUEL_MODEL_TABLE_FBP(C%IFBFM)%CFL*C%CFB * C%PC
       ELSE IF (C%IFBFM .eq. 70 .or. C%IFBFM .eq. 90 .or. C%IFBFM .ge. 700) THEN ! M3, M4
-         C%CFC = FUEL_MODEL_TABLE_FBP(C%IFBFM)%CFL*CFB * C%PDF
+         C%CFC = FUEL_MODEL_TABLE_FBP(C%IFBFM)%CFL*C%CFB * C%PDF
       ELSE
-         C%CFC = FUEL_MODEL_TABLE_FBP(C%IFBFM)%CFL*CFB
+         C%CFC = FUEL_MODEL_TABLE_FBP(C%IFBFM)%CFL*C%CFB
       ENDIF
 
-      if (C%IFBFM .eq. 6) then ! C-6 special condition 
-         FME = 1000*((1.5-0.00275*C%FMC)**4.0)/(460+(25.9*C%FMC))
-         RSC = 60*(1-exp(-0.0497*C%ISI))*FME/0.778
-         C%VELOCITY_DMS_SURFACE = C%VELOCITY_DMS_SURFACE + CFB*(RSC - C%VELOCITY_DMS_SURFACE/3.28) * 3.28 !ft/min
-         Print *, "FME: ", FME, "RSC: ", RSC, "ROS: ", C%VELOCITY_DMS_SURFACE 
-      endif
 
-      C%FLIN_CANOPY = 300 * CFC * C%VELOCITY_DMS_SURFACE/3.28
-      Print *, "CFC: ", CFC, "RSO: ", RSO, "CFB: ", CFB, "ROS: ", C%VELOCITY_DMS_SURFACE 
+      C%FLIN_CANOPY = 300 * C%CFC * C%VELOCITY_DMS_SURFACE/3.28
 
    endif
 
