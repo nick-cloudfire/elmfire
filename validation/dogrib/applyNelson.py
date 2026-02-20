@@ -72,10 +72,10 @@ def delete_bsq_hdr_xml(folder):
 FIRE_ROOT = Path(r"~/elmfire/elmfire/validation/dogrib").expanduser()
 PREIGNITION_DAYS = 20
 RAWS_FILENAME = "dogrib.wxs"
-CC_FILENAME = "cc"
-DEM_FILENAME = "dem"
-SLOPE_FILENAME = 'slp'
-ASPECT_FILENAME = "asp"
+CC_FILENAME = "cc_zip__clip"
+DEM_FILENAME = "dem_zip__clip"
+SLOPE_FILENAME = 'slp_zip__clip'
+ASPECT_FILENAME = "asp_zip__clip"
 M1_FILENAME = "m1"
 M10_FILENAME = "m10"
 M100_FILENAME = "m100"

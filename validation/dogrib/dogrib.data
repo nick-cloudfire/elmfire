@@ -1,11 +1,11 @@
 &INPUTS
 FUELS_AND_TOPOGRAPHY_DIRECTORY = './inputs'
-ASP_FILENAME                   = 'asp'
-CC_FILENAME                    = 'cc'
-CH_FILENAME                    = 'ch'
-DEM_FILENAME                   = 'dem'
-FBFM_FILENAME                  = 'fbp'
-SLP_FILENAME                   = 'slp'
+ASP_FILENAME                   = 'asp_zip__clip'
+CC_FILENAME                    = 'cc_zip__clip'
+CH_FILENAME                    = 'ch_zip__clip'
+DEM_FILENAME                   = 'dem_zip__clip'
+FBFM_FILENAME                  = 'fbp_zip__clip'
+SLP_FILENAME                   = 'slp_zip__clip'
 ADJ_FILENAME                   = 'adj'
 PHI_FILENAME                   = 'phi'
 DT_METEOROLOGY                 = 3600.0
@@ -16,7 +16,7 @@ WS_AT_10M 					   = .TRUE.
 M1_FILENAME                    = 'm1'
 M10_FILENAME                   = 'm10'
 M100_FILENAME                  = 'm100'
-LH_MOISTURE_CONTENT 		   = 60
+LH_MOISTURE_CONTENT 		   = 30
 FOLIAR_MOISTURE_CONTENT 	   = 93.3
 USE_CFFDRS 					   = .TRUE.
 DAILY_WEATHER_FILENAME 		   = 'daily_weather.txt'
@@ -26,7 +26,7 @@ START_DC 				       = 40
 
 &OUTPUTS
 OUTPUTS_DIRECTORY    	= './outputs'
-DTDUMP 	 	 			= 3600.0
+DTDUMP 	 	 			= 100.0
 DUMP_FLIN            	= .TRUE.
 DUMP_SPREAD_RATE     	= .TRUE.
 DUMP_SPREAD_DIRECTION 	= .TRUE.
@@ -35,37 +35,32 @@ DUMP_CRITICAL_FLIN 		= .TRUE.
 SPREAD_RATE_IN_M     	= .TRUE.
 DUMP_TIME_OF_ARRIVAL 	= .TRUE.
 CONVERT_TO_GEOTIFF   	= .TRUE.
-/
-
-&COMPUTATIONAL_DOMAIN
-A_SRS = '+proj=utm +zone=35 +datum=WGS84 +units=m +no_defs'
-COMPUTATIONAL_DOMAIN_CELLSIZE = 30.000000000000000
-COMPUTATIONAL_DOMAIN_XLLCORNER = 0.0000000
-COMPUTATIONAL_DOMAIN_YLLCORNER = 0.0000000
+DUMP_TAGGED = .TRUE.
+DUMP_PHI = .TRUE.
 /
 
 &TIME_CONTROL
-SIMULATION_DT    = 1.0
-TARGET_CFL       = 0.2
-SIMULATION_TSTOP = 24120.0
-HOUR_OF_YEAR = 0
+SIMULATION_DT    	= 1.0
+TARGET_CFL       	= 0.2
+SIMULATION_TSTOP 	= 24120.0
+HOUR_OF_YEAR 		= 6919
 /
 
 &MONTE_CARLO
-NUM_METEOROLOGY_TIMES = 1
-METEOROLOGY_BAND_START = 1
-METEOROLOGY_BAND_STOP = 1
-METEOROLOGY_BAND_SKIP_INTERVAL = 1
-EDGEBUFFER = 1
+NUM_METEOROLOGY_TIMES 			= 7
+METEOROLOGY_BAND_START 			= 1
+METEOROLOGY_BAND_STOP 			= 7
+METEOROLOGY_BAND_SKIP_INTERVAL 	= 1
+EDGEBUFFER 						= 1
 /
 
 &SIMULATOR
-NUM_IGNITIONS = 1
-X_IGN(1) = 1890
-Y_IGN(1) = 1890
-T_IGN(1)      = 0.0
-DEBUG_LEVEL = 100
-MODE=2
+NUM_IGNITIONS 	= 1
+X_IGN(1) 		= 605391.45
+Y_IGN(1) 		= 5723528.36
+T_IGN(1)    	= 0.0
+DEBUG_LEVEL 	= 100
+MODE=1
 /
 
 &MISCELLANEOUS

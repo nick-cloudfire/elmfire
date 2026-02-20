@@ -415,14 +415,14 @@ DO WHILE (T < WS%NBANDS * DT_METEOROLOGY)
                LIST_BURNED%TAIL%TIME_OF_ARRIVAL        = T
                LIST_BURNED%TAIL%WS20_NOW               = WS20_LO(ICOL,IROW) * (1. - F_METEOROLOGY) + F_METEOROLOGY * WS20_HI(ICOL,IROW)
 #ifdef _UMDSPOTTING
-                  IF (USE_UMD_SPOTTING_MODEL) LIST_BURNED%TAIL%TAU_EMBERGEN = 0.
+               IF (USE_UMD_SPOTTING_MODEL) LIST_BURNED%TAIL%TAU_EMBERGEN = 0.
 #endif
-                  LIST_BURNED%TAIL%BURNED                 = .FALSE.
+               LIST_BURNED%TAIL%BURNED                 = .FALSE.
 #ifdef _WUI
-                  IF (USE_BLDG_SPREAD_MODEL) LIST_BURNED%TAIL%IBLDGFM =BLDG_FUEL_MODEL%I2(IX,IY,1)
+               IF (USE_BLDG_SPREAD_MODEL) LIST_BURNED%TAIL%IBLDGFM =BLDG_FUEL_MODEL%I2(IX,IY,1)
 #endif
 #ifdef _SUPPRESSION
-                  IF (ENABLE_EXTENDED_ATTACK .AND. USE_SDI) C%SDI = SDI_FACTOR * SDI%R4(ICOL,IROW,1)
+               IF (ENABLE_EXTENDED_ATTACK .AND. USE_SDI) C%SDI = SDI_FACTOR * SDI%R4(ICOL,IROW,1)
 #endif
             ENDIF
          ENDDO
@@ -432,8 +432,9 @@ DO WHILE (T < WS%NBANDS * DT_METEOROLOGY)
          continue
          IF (ASSOCIATED(C)) DEALLOCATE(C)
             continue
+
          if (USE_CFFDRS) then
-            CALL CFFDRS_SURFACE_SPREAD_RATE(LIST_BURNED, C, daily_bui(DAY_OF_SIM))
+            CALL CFFDRS_SPREAD_RATE(LIST_BURNED, C, daily_bui(DAY_OF_SIM))
          ELSE
             CALL ROTHERMEL_SURFACE_SPREAD_RATE(LIST_BURNED,C)
          ENDIF
@@ -446,17 +447,21 @@ DO WHILE (T < WS%NBANDS * DT_METEOROLOGY)
             ! Calcaulate components of normal vector
             CALL CALC_NORMAL_VECTORS (ISTEP, HALFRCELLSIZE)
 
+            
+
             ! Calculate x and y components of velocity from elliptical spread dimensions
             CALL UX_AND_UY_ELLIPTICAL(LIST_BURNED, LIST_BURNED, 1.0, ISTEP, T, DYNAMIC_ARRAY)
+
+            call UPDATE_LOCAL_SPREAD_PROPERTIES(LIST_BURNED, C)
          ENDDO
+         
 
          C => LIST_BURNED%HEAD
          DO I = 1, LIST_BURNED%NUM_NODES
-            C%HRRPUA = (C%FLIN_SURFACE + C%FLIN_CANOPY) / ASP%CELLSIZE
             C%BURNED = .TRUE.
             C => C%NEXT
          ENDDO
-         ! End call relevant functions, assign values to FLIN_SURFACE and FLIN_CANOPY
+         
 #ifdef _SUPPRESSION
             IF (ENABLE_EXTENDED_ATTACK) SUPP(0)%ACRES = ACRES
 #endif
@@ -710,7 +715,7 @@ DO WHILE (T < WS%NBANDS * DT_METEOROLOGY)
    ! Main call to get spread rate:
       IF (JUST_INTERPOLATED) THEN
          if (USE_CFFDRS) then
-            CALL CFFDRS_SURFACE_SPREAD_RATE(LIST_TAGGED, DUMMY_NODE, daily_bui(DAY_OF_SIM))
+            CALL CFFDRS_SPREAD_RATE(LIST_TAGGED, DUMMY_NODE, daily_bui(DAY_OF_SIM))
          ELSE
             CALL ROTHERMEL_SURFACE_SPREAD_RATE(LIST_TAGGED,DUMMY_NODE)
          ENDIF
@@ -735,6 +740,9 @@ DO WHILE (T < WS%NBANDS * DT_METEOROLOGY)
          CALL UX_AND_UY_ELLIPTICAL(LIST_TAGGED, LIST_BURNED, SURFACE_ACCELERATION_FACTOR, ISTEP, T, DYNAMIC_ARRAY)
          CALL ACCUMULATE_CPU_USAGE(42, IT1, IT2)
 
+   ! Update local spread properties that depend on canopy / fire velocity
+         CALL UPDATE_LOCAL_SPREAD_PROPERTIES(LIST_TAGGED, DUMMY_NODE)
+
    ! Check CFL criterion, adjust timestep, AND apply flux limiter (merged)
          CALL CFL_AND_FLUX_LIMITER(DT, RCELLSIZE, PHIP, ISTEP, ITIMESTEP)
          CALL ACCUMULATE_CPU_USAGE(43, IT1, IT2)
@@ -753,7 +761,7 @@ DO WHILE (T < WS%NBANDS * DT_METEOROLOGY)
       DO I = 1, LIST_TAGGED%NUM_NODES
          IX = C%IX
          IY = C%IY
-
+        
          IF (PHIP(IX,IY) .LE. 0. .AND. SURFACE_FIRE(IX,IY) .EQ. 0) THEN
          
             ACRES = ACRES + ACRES_PER_PIXEL
@@ -1099,7 +1107,7 @@ DO WHILE (T < WS%NBANDS * DT_METEOROLOGY)
             
             CALL INTERP_WD_RASTER_SINGLE(C, WD20_LO(:,:), WD20_HI(:,:), F_METEOROLOGY)
             if (USE_CFFDRS) then
-               CALL CFFDRS_SURFACE_SPREAD_RATE(LIST_TAGGED, C, daily_bui(DAY_OF_SIM))
+               CALL CFFDRS_SPREAD_RATE(LIST_TAGGED, C, daily_bui(DAY_OF_SIM))
             ELSE
                CALL ROTHERMEL_SURFACE_SPREAD_RATE(LIST_TAGGED,C)
             ENDIF
@@ -1151,7 +1159,6 @@ DO WHILE (T < WS%NBANDS * DT_METEOROLOGY)
       ENDIF
 
       CALL ACCUMULATE_CPU_USAGE(50, IT1, IT2)
-
       IF (LIST_TAGGED%NUM_NODES .LE. 2) THEN
          SIMULATION_TSTOP_HOURS = T / 3600.
          STATS_SIMULATION_TSTOP_HOURS(ICASE) = SIMULATION_TSTOP_HOURS
@@ -1356,6 +1363,7 @@ DO WHILE (T < WS%NBANDS * DT_METEOROLOGY)
    ENDIF
    T = T + DT
    IF ((T .ge. TSTOP + (IWX_BAND - 1)*DT_METEOROLOGY) .and. START_CALCS) THEN ! END SIM
+      print *, ""
       print *, "[",ICASE,"] LEVEL SET CASE ENDED"
       CALL SYSTEM_CLOCK(IT1)
 
@@ -1792,32 +1800,17 @@ TYPE(NODE), POINTER :: C
 REAL, PARAMETER :: EPSILON = 1E-30, BIG=3E4
 
 C => LIST_TAGGED%HEAD
-IF (ISTEP .EQ. 1) THEN
-   DO I = 1, LIST_TAGGED%NUM_NODES
-      IX=C%IX
-      IY=C%IY
-      C%PHIP_OLD = PHIP(IX,IY)
-      DPHIDY = MAX(MIN( HALFRCELLSIZE * (PHIP(IX,IY+1) - PHIP(IX,IY-1)), BIG ), -BIG)
-      DPHIDX = MAX(MIN( HALFRCELLSIZE * (PHIP(IX+1,IY) - PHIP(IX-1,IY)), BIG ), -BIG)
-      RMAGGRADPHI = 1. / MAX(SQRT( DPHIDX * DPHIDX + DPHIDY * DPHIDY ), EPSILON)
-      C%NORMVECTORY = RMAGGRADPHI * DPHIDY
-      C%NORMVECTORX = RMAGGRADPHI * DPHIDX
-      C => C%NEXT
-   ENDDO
-
-ELSE
-   DO I = 1, LIST_TAGGED%NUM_NODES
-      IX=C%IX
-      IY=C%IY
-      DPHIDX = MAX(MIN( HALFRCELLSIZE * (PHIP(IX+1,IY) - PHIP(IX-1,IY)), BIG ), -BIG)
-      DPHIDY = MAX(MIN( HALFRCELLSIZE * (PHIP(IX,IY+1) - PHIP(IX,IY-1)), BIG ), -BIG)
-      RMAGGRADPHI = 1. / MAX(SQRT( DPHIDX * DPHIDX + DPHIDY * DPHIDY ), EPSILON)
-      C%NORMVECTORX = RMAGGRADPHI * DPHIDX
-      C%NORMVECTORY = RMAGGRADPHI * DPHIDY
-      C => C%NEXT
-   ENDDO
-
-ENDIF
+DO I = 1, LIST_TAGGED%NUM_NODES
+   IX=C%IX
+   IY=C%IY
+   IF (ISTEP .EQ. 1) C%PHIP_OLD = PHIP(IX,IY)
+   DPHIDY = MAX(MIN( HALFRCELLSIZE * (PHIP(IX,IY+1) - PHIP(IX,IY-1)), BIG ), -BIG)
+   DPHIDX = MAX(MIN( HALFRCELLSIZE * (PHIP(IX+1,IY) - PHIP(IX-1,IY)), BIG ), -BIG)
+   RMAGGRADPHI = 1. / MAX(SQRT( DPHIDX * DPHIDX + DPHIDY * DPHIDY ), EPSILON)
+   C%NORMVECTORY = RMAGGRADPHI * DPHIDY
+   C%NORMVECTORX = RMAGGRADPHI * DPHIDX
+   C => C%NEXT
+ENDDO
 
 ! *****************************************************************************
 END SUBROUTINE CALC_NORMAL_VECTORS
@@ -1906,9 +1899,6 @@ IF (ISTEP .EQ. 1) THEN
             ENDIF
             C%VELOCITY_DMS = C%VS0 * (ACCELERATION_FACTOR + PHIMAG)
 
-! Determine effective mid flame wind speed
-            WSMFEFF = FUEL_MODEL_TABLE_2D(C%IFBFM,30)%WSMFEFF_COEFF * PHIMAG ** FUEL_MODEL_TABLE_2D(C%IFBFM,30)%B_COEFF_INVERSE
-            IF (C%FLIN_SURFACE .LT. C%CRITICAL_FLIN .OR. CROWN_FIRE_MODEL .LE. 0) WSMFEFF = MIN(WSMFEFF, 0.9*KWPM2_TO_BTUPFT2MIN*C%IR)
 ! Calculate length over width:
             if (USE_CFFDRS) then
                if (C%IFBFM .ge. 31 .and. C%IFBFM .le. 33) then !grass
@@ -1917,6 +1907,9 @@ IF (ISTEP .EQ. 1) THEN
                   C%LOW = 1+8.729*(1-exp(-0.03*C%WSV))**2.155
                endif
             else
+               ! Determine effective mid flame wind speed (not needed for CFFDRS)
+               WSMFEFF = FUEL_MODEL_TABLE_2D(C%IFBFM,30)%WSMFEFF_COEFF * PHIMAG ** FUEL_MODEL_TABLE_2D(C%IFBFM,30)%B_COEFF_INVERSE
+               IF (C%FLIN_SURFACE .LT. C%CRITICAL_FLIN .OR. CROWN_FIRE_MODEL .LE. 0) WSMFEFF = MIN(WSMFEFF, 0.9*KWPM2_TO_BTUPFT2MIN*C%IR)
                C%LOW = MIN( 0.936*EXP(0.2566*WSMFEFF*WSMFEFF_LOW_MULT) + 0.461*EXP(-0.1548*WSMFEFF*WSMFEFF_LOW_MULT) - 0.397, MAX_LOW)
             endif
             
@@ -1937,7 +1930,7 @@ IF (ISTEP .EQ. 1) THEN
                   CALL BLDG_SPREAD_MODEL_3(C, T_ELMFIRE) ! GET C%VELOCITY_DMS, C%VBACK & C%LOW
                ENDIF
             ENDIF
-#endif
+#endif      
 
 ! We can get sin(theta - dms) and cos(theta - dms) directly:
             COSANG   = C%NORMVECTORY*C%NORMVECTORY_DMS + C%NORMVECTORX*C%NORMVECTORX_DMS
@@ -1960,8 +1953,8 @@ IF (ISTEP .EQ. 1) THEN
 
             DYDT_ROTATED = DYDT*C%NORMVECTORY_DMS - DXDT*C%NORMVECTORX_DMS !ft/min, parallel to slope
             C%UY = DYDT_ROTATED * C%UYOUSY * FTPMIN_TO_MPS !m/s, projected
-            
             C%VELOCITY = SQRT(DXDT_ROTATED*DXDT_ROTATED + DYDT_ROTATED*DYDT_ROTATED) ! ft/min, parallel to slope
+                        
             if (ABS(C%UX) + ABS(C%UY) .gt. 1.0e-20) then
                C%SPREAD_DIRECTION = ATAN2(C%UX, C%UY) * 180.0 / ACOS(-1.0)
                if (C%SPREAD_DIRECTION .lt. 0.0) C%SPREAD_DIRECTION = C%SPREAD_DIRECTION + 360.0

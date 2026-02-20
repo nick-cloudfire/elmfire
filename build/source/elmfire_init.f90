@@ -561,25 +561,41 @@ WAF%YLLCORNER     = ADJ%YLLCORNER
 
 DO IROW = 1, WAF%NROWS
 DO ICOL = 1, WAF%NCOLS
-   IF (CC%R4(ICOL,IROW,1) .LT. 0.) THEN
-      WAF%R4(ICOL,IROW,1) = 0.
-   ELSE
-      UNSHELTERED_WAF = FUEL_MODEL_TABLE_2D(MAX(FBFM%I2(ICOL,IROW,1),0),30)%UNSHELTERED_WAF
-
-      ICC = MIN(MAX(NINT(CC%R4(ICOL,IROW,1)*100.),0),100)
-      ICH = MIN(MAX(NINT(CH%R4(ICOL,IROW,1)     ),0),120)
-      SHELTERED_WAF = SHELTERED_WAF_TABLE(ICC,ICH)
-      SHELTERED_WAF = MIN(SHELTERED_WAF, UNSHELTERED_WAF)
-
-      F = 0.3333 * CC%R4(ICOL,IROW,1) * CROWN_RATIO
-
-      IF (F .GE. 0.05) THEN
-         WAF%R4(ICOL,IROW,1) = SHELTERED_WAF
+   if (USE_CFFDRS) then ! Scott (2007) canopy cover based wind adjustment factor calculation for CFFDRS
+      if (CC%R4(ICOL, IROW, 1) .gt. 50) then 
+         WAF%R4(ICOL,IROW,1) = 0.10
+      else if (CC%R4(ICOL, IROW, 1) .gt. 30) then 
+         WAF%R4(ICOL,IROW,1) = 0.15
+      else if (CC%R4(ICOL, IROW, 1) .gt. 15) then 
+         WAF%R4(ICOL,IROW,1) = 0.20
+      else if (CC%R4(ICOL, IROW, 1) .gt. 10) then 
+         WAF%R4(ICOL,IROW,1) = 0.25
+      else if (CC%R4(ICOL, IROW, 1) .gt. 5) then 
+         WAF%R4(ICOL,IROW,1) = 0.30
+      else 
+         WAF%R4(ICOL,IROW,1) = 0.50
+      endif
+   else
+      IF (CC%R4(ICOL,IROW,1) .LT. 0.) THEN
+         WAF%R4(ICOL,IROW,1) = 0.
       ELSE
-         UNSHELTERED_FRAC = 1.0 - 20. * F
-         WAF%R4(ICOL,IROW,1) = UNSHELTERED_FRAC * UNSHELTERED_WAF + (1. - UNSHELTERED_FRAC) * SHELTERED_WAF
+         UNSHELTERED_WAF = FUEL_MODEL_TABLE_2D(MAX(FBFM%I2(ICOL,IROW,1),0),30)%UNSHELTERED_WAF
+
+         ICC = MIN(MAX(NINT(CC%R4(ICOL,IROW,1)*100.),0),100)
+         ICH = MIN(MAX(NINT(CH%R4(ICOL,IROW,1)     ),0),120)
+         SHELTERED_WAF = SHELTERED_WAF_TABLE(ICC,ICH)
+         SHELTERED_WAF = MIN(SHELTERED_WAF, UNSHELTERED_WAF)
+
+         F = 0.3333 * CC%R4(ICOL,IROW,1) * CROWN_RATIO
+
+         IF (F .GE. 0.05) THEN
+            WAF%R4(ICOL,IROW,1) = SHELTERED_WAF
+         ELSE
+            UNSHELTERED_FRAC = 1.0 - 20. * F
+            WAF%R4(ICOL,IROW,1) = UNSHELTERED_FRAC * UNSHELTERED_WAF + (1. - UNSHELTERED_FRAC) * SHELTERED_WAF
+         ENDIF
       ENDIF
-   ENDIF
+   endif
 ENDDO
 ENDDO
 
@@ -1110,7 +1126,6 @@ DO WHILE (IOS .EQ. 0)
    READ(LUINPUT,*,IOSTAT=IOS) INUM, FM%SHORTNAME, FM%a, FM%b, FM%c, FM%q, FM%BUI0, FM%BE_max, FM%CBH, FM%CFL
    IF (IOS .EQ. 0) THEN
       FUEL_MODEL_TABLE_FBP(INUM) = FM
-      !print *, INUM
    ENDIF
 ENDDO
 CLOSE(LUINPUT)
@@ -1147,7 +1162,7 @@ IF (ALLOCATED(T_midday))    DEALLOCATE(T_midday)
 IF (ALLOCATED(H_midday))    DEALLOCATE(H_midday)
 IF (ALLOCATED(precip))      DEALLOCATE(precip)
 
-ALLOCATE(weather_day(N), T_midday(N), H_midday(N), precip(N), daily_bui(N))
+ALLOCATE(weather_day(N), T_midday(N), H_midday(N), precip(N), daily_bui(N+1))
 
 ! --- pass 2: rewind, skip header, read data ---
 REWIND(LUINPUT)
@@ -1167,7 +1182,7 @@ DO WHILE (IOS .EQ. 0 .AND. I < N)
          IF (LINE(K:K) == '/') LINE(K:K) = ' '
       END DO
 
-      READ(LINE,*,IOSTAT=IOS) MM, DD, YYYY, T_midday(I), H_midday(I), precip(I)
+      READ(LINE,*,IOSTAT=IOS) DD, MM, YYYY, T_midday(I), H_midday(I), precip(I)
       IF (IOS .NE. 0) THEN
          WRITE(*,*) 'Bad weather row: ', TRIM(LINE)
          STOP

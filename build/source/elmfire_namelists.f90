@@ -326,36 +326,6 @@ END SUBROUTINE READ_OUTPUTS
 ! *****************************************************************************
 
 ! *****************************************************************************
-SUBROUTINE READ_COMPUTATIONAL_DOMAIN
-! *****************************************************************************
-
-INTEGER :: IOS
-
-NAMELIST /COMPUTATIONAL_DOMAIN/ A_SRS, COMPUTATIONAL_DOMAIN_CELLSIZE, COMPUTATIONAL_DOMAIN_XLLCORNER, &
-         COMPUTATIONAL_DOMAIN_YLLCORNER
-
-IF (IRANK_WORLD .EQ. 0) WRITE(*,*) 'Reading &COMPUTATIONAL_DOMAIN namelist group'
-
-A_SRS                             = 'EPSG:32610'
-COMPUTATIONAL_DOMAIN_CELLSIZE     = 30.0
-COMPUTATIONAL_DOMAIN_XLLCORNER    = 0.0
-COMPUTATIONAL_DOMAIN_YLLCORNER    = 0.0
-
-READ(LUINPUT,NML=COMPUTATIONAL_DOMAIN,IOSTAT=IOS)
-IF (IOS > 0) THEN
-    WRITE(*,*) 'Error: Problem with namelist group &COMPUTATIONAL_DOMAIN.'
-    STOP
-ENDIF
-
-ANALYSIS_CELLSIZE  = COMPUTATIONAL_DOMAIN_CELLSIZE
-ANALYSIS_XLLCORNER = COMPUTATIONAL_DOMAIN_XLLCORNER
-ANALYSIS_YLLCORNER = COMPUTATIONAL_DOMAIN_YLLCORNER
-
-! *****************************************************************************
-END SUBROUTINE READ_COMPUTATIONAL_DOMAIN
-! *****************************************************************************
-
-! *****************************************************************************
 SUBROUTINE READ_TIME_CONTROL
 ! *****************************************************************************
 
