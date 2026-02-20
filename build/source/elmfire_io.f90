@@ -409,7 +409,11 @@ IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(14)) THEN
    if (USE_CFFDRS .and. CBH_FILENAME .eq. ' ') THEN
       do j = 1, size(FBFM%I2,2)
       do i = 1, size(FBFM%I2,1)
-         CBH%R4(i,j,1) = FUEL_MODEL_TABLE_FBP( FBFM%I2(i,j,1) )%CBH
+         if (FBFM%I2(i,j,1) .eq. FBFM%NODATA_VALUE) then
+            CBH%R4(i,j,1) = 0
+         else
+            CBH%R4(i,j,1) = FUEL_MODEL_TABLE_FBP( FBFM%I2(i,j,1) )%CBH
+         endif
       end do
       end do
    endif
@@ -419,7 +423,11 @@ IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(15)) THEN
    if (USE_CFFDRS .and. CBD_FILENAME .eq. ' ') THEN
       do j = 1, size(FBFM%I2,2)
       do i = 1, size(FBFM%I2,1)
-         CBD%R4(i,j,1)=FUEL_MODEL_TABLE_FBP(FBFM%I2(i,j,1))%CFL / (CH%R4(i,j,1) - FUEL_MODEL_TABLE_FBP(FBFM%I2(i,j,1))%CBH)
+         if (FBFM%I2(i,j,1) .eq. FBFM%NODATA_VALUE) then
+            CBD%R4(i,j,1) = 0
+         else
+            CBD%R4(i,j,1)=FUEL_MODEL_TABLE_FBP(FBFM%I2(i,j,1))%CFL / (CH%R4(i,j,1) - FUEL_MODEL_TABLE_FBP(FBFM%I2(i,j,1))%CBH + 0.001) ! added a small 0.001 to avoid division by zero
+         endif
       end do
       end do
    endif

@@ -41,7 +41,7 @@ ELEVATION_M = 1826
 
 # If you want raster stacks: provide a template GeoTIFF (defines grid/CRS/shape).
 WRITE_RASTERS = True
-TEMPLATE_TIF = Path(r"~/elmfire/elmfire/validation/dogrib/degree_of_curing_100.tif").expanduser()  # only used if WRITE_RASTERS=True
+TEMPLATE_TIF = Path(r"~/elmfire/elmfire/validation/dogrib/inputs/fbp_zip__clip.tif").expanduser()  # only used if WRITE_RASTERS=True
 
 # Optional conditioning days (matches your old behavior). If 0, it fetches just the range.
 DAYS_BEFORE = 20

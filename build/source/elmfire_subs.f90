@@ -1780,5 +1780,147 @@ END SUBROUTINE XY_TO_LATLON
 ! *****************************************************************************
 
 ! *****************************************************************************
+subroutine read_geotiff_meta_gdalinfo()
+! ***************Vibe-coded code below**************************************************************
+   character(len=1024) :: cmd, line
+   character(len=256)  :: tmpfile
+   integer :: iu, ios
+   integer :: ncols, nrows
+   real(8) :: x0, y0, dx, dy
+   integer :: epsg
+
+   ! Defaults
+   ncols = -1; nrows = -1
+   x0 = 0d0; y0 = 0d0
+   dx = 0d0; dy = 0d0
+   epsg = -1
+
+   tmpfile = trim(SCRATCH) // '/' // "._gdalinfo_tmp.txt"
+
+   ! Run gdalinfo and redirect output to a temp file
+   write(cmd,'(a)') 'gdalinfo "' // trim(FUELS_AND_TOPOGRAPHY_DIRECTORY) // '/' // &
+                 trim(DEM_FILENAME) // ".tif" // '" > "' // &
+                 trim(tmpfile) // '"'
+   call execute_command_line(trim(cmd))
+
+   open(newunit=iu, file=trim(tmpfile), status="old", action="read", iostat=ios)
+   if (ios /= 0) error stop "Failed to open gdalinfo output file."
+
+   do
+   read(iu, '(A)', iostat=ios) line
+   if (ios /= 0) exit
+
+   call parse_size(line, ncols, nrows)
+   call parse_origin(line, x0, y0)
+   call parse_pixel_size(line, dx, dy)
+   call parse_epsg(line, epsg)
+   end do
+   close(iu)
+
+   ! Basic sanity checks
+   if (ncols <= 0 .or. nrows <= 0) error stop "Could not parse raster Size is ..."
+   if (dx == 0d0 .or. dy == 0d0)   error stop "Could not parse Pixel Size ..."
+   ! Origin can be 0,0 so we don't error-stop on that.
+
+   ! Outputs
+   ANALYSIS_CELLSIZE = abs(dx)          ! assume square; if not, you may want both dx,dy
+   ANALYSIS_XLLCORNER = x0                    ! lower-left x = xmin = origin x for north-up
+   ANALYSIS_YLLCORNER = y0 + dy * dble(nrows) ! lower-left y = ymax + dy*nrows (dy negative)
+
+   if (epsg > 0) then
+   A_SRS = "EPSG:"//trim(int_to_str(epsg))
+   else
+   ! Fallback if EPSG not found: store a readable name
+   A_SRS = "UNKNOWN"
+   end if
+end subroutine read_geotiff_meta_gdalinfo
+
+
+subroutine parse_size(line, ncols, nrows)
+   character(len=*), intent(in) :: line
+   integer, intent(inout) :: ncols, nrows
+   integer :: p, ios
+   character(len=256) :: rest
+
+   p = index(line, "Size is")
+   if (p > 0) then
+   rest = adjustl(line(p+len("Size is"):))
+   ! expects: "50, 50"
+   read(rest, *, iostat=ios) ncols
+   if (ios == 0) then
+      p = index(rest, ",")
+      if (p > 0) read(rest(p+1:), *, iostat=ios) nrows
+   end if
+   end if
+end subroutine parse_size
+
+
+subroutine parse_origin(line, x0, y0)
+   character(len=*), intent(in) :: line
+   real(8), intent(inout) :: x0, y0
+   integer :: p1, p2, ios
+   character(len=256) :: inside
+
+   p1 = index(line, "Origin = (")
+   if (p1 > 0) then
+   p1 = p1 + len("Origin = (")
+   p2 = index(line(p1:), ")")
+   if (p2 > 0) then
+      inside = line(p1:p1+p2-2)  ! between '(' and ')'
+      read(inside, *, iostat=ios) x0, y0
+   end if
+   end if
+end subroutine parse_origin
+
+
+subroutine parse_pixel_size(line, dx, dy)
+   character(len=*), intent(in) :: line
+   real(8), intent(inout) :: dx, dy
+   integer :: p1, p2, ios
+   character(len=256) :: inside
+
+   p1 = index(line, "Pixel Size = (")
+   if (p1 > 0) then
+   p1 = p1 + len("Pixel Size = (")
+   p2 = index(line(p1:), ")")
+   if (p2 > 0) then
+      inside = line(p1:p1+p2-2)
+      read(inside, *, iostat=ios) dx, dy
+   end if
+   end if
+end subroutine parse_pixel_size
+
+
+subroutine parse_epsg(line, epsg)
+   character(len=*), intent(in) :: line
+   integer, intent(inout) :: epsg
+   integer :: p, p2, ios
+   character(len=64) :: tail
+
+   ! gdalinfo WKT snippet often contains: ID["EPSG",32635]]
+   p = index(line, 'ID["EPSG",')
+   if (p > 0) then
+      p = p + len('ID["EPSG",')
+      ! find closing bracket
+      p2 = index(line(p:), ']')
+      if (p2 > 0) then
+         read(line(p:p+p2-2), *) epsg
+      end if
+   end if
+end subroutine parse_epsg
+
+
+pure function int_to_str(i) result(s)
+   integer, intent(in) :: i
+   character(len=:), allocatable :: s
+   character(len=32) :: buf
+   write(buf, '(I0)') i
+   s = trim(buf)
+end function int_to_str
+! *****************************************************************************
+   
+
+
+! *****************************************************************************
 END MODULE ELMFIRE_SUBS
 ! *****************************************************************************
