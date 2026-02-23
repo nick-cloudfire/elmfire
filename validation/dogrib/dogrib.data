@@ -1,16 +1,16 @@
 &INPUTS
 FUELS_AND_TOPOGRAPHY_DIRECTORY = './inputs'
-ASP_FILENAME                   = 'asp_zip__clip'
-CC_FILENAME                    = 'cc_zip__clip'
-CH_FILENAME                    = 'ch_zip__clip'
-DEM_FILENAME                   = 'dem_zip__clip'
-FBFM_FILENAME                  = 'fbp_zip__clip'
-SLP_FILENAME                   = 'slp_zip__clip'
+ASP_FILENAME                   = 'asp'
+CC_FILENAME                    = 'cc'
+CH_FILENAME                    = 'ch'
+DEM_FILENAME                   = 'dem'
+FBFM_FILENAME                  = 'fbp16'
+SLP_FILENAME                   = 'slp'
 ADJ_FILENAME                   = 'adj'
 PHI_FILENAME                   = 'phi'
 DT_METEOROLOGY                 = 3600.0
 WEATHER_DIRECTORY              = './inputs'
-WS_FILENAME                    = 'ws'
+WS_FILENAME                    = 'ws_mph'
 WD_FILENAME                    = 'wd'
 WS_AT_10M 					   = .TRUE.
 M1_FILENAME                    = 'm1'
@@ -26,7 +26,7 @@ START_DC 				       = 40
 
 &OUTPUTS
 OUTPUTS_DIRECTORY    	= './outputs'
-DTDUMP 	 	 			= 100.0
+DTDUMP 	 	 			= 3600.0
 DUMP_FLIN            	= .TRUE.
 DUMP_SPREAD_RATE     	= .TRUE.
 DUMP_SPREAD_DIRECTION 	= .TRUE.
@@ -35,8 +35,8 @@ DUMP_CRITICAL_FLIN 		= .TRUE.
 SPREAD_RATE_IN_M     	= .TRUE.
 DUMP_TIME_OF_ARRIVAL 	= .TRUE.
 CONVERT_TO_GEOTIFF   	= .TRUE.
-DUMP_TAGGED = .TRUE.
-DUMP_PHI = .TRUE.
+DUMP_TAGGED 			= .TRUE.
+DUMP_PHI 				= .TRUE.
 /
 
 &TIME_CONTROL
@@ -56,8 +56,8 @@ EDGEBUFFER 						= 1
 
 &SIMULATOR
 NUM_IGNITIONS 	= 1
-X_IGN(1) 		= 605391.45
-Y_IGN(1) 		= 5723528.36
+X_IGN(1) 		= 467046.582
+Y_IGN(1) 		= 5720246.601
 T_IGN(1)    	= 0.0
 DEBUG_LEVEL 	= 100
 MODE=1

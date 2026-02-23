@@ -1,0 +1,47 @@
+<PAMDataset>
+  <PAMRasterBand band="1">
+    <Description>2021-10-16T07:00:00Z</Description>
+    <Metadata>
+      <MDI key="STATISTICS_APPROXIMATE">YES</MDI>
+      <MDI key="STATISTICS_MINIMUM">6.1515727043152</MDI>
+      <MDI key="STATISTICS_MAXIMUM">6.1515727043152</MDI>
+      <MDI key="STATISTICS_MEAN">6.1515727043152</MDI>
+      <MDI key="STATISTICS_STDDEV">0</MDI>
+      <MDI key="STATISTICS_VALID_PERCENT">100</MDI>
+    </Metadata>
+  </PAMRasterBand>
+  <PAMRasterBand band="2">
+    <Description>2021-10-16T08:00:00Z</Description>
+    <Metadata>
+      <MDI key="STATISTICS_APPROXIMATE">YES</MDI>
+      <MDI key="STATISTICS_MINIMUM">7.270040512085</MDI>
+      <MDI key="STATISTICS_MAXIMUM">7.270040512085</MDI>
+      <MDI key="STATISTICS_MEAN">7.270040512085</MDI>
+      <MDI key="STATISTICS_STDDEV">0</MDI>
+      <MDI key="STATISTICS_VALID_PERCENT">100</MDI>
+    </Metadata>
+  </PAMRasterBand>
+  <PAMRasterBand band="3">
+    <Description>2021-10-16T09:00:00Z</Description>
+    <Metadata>
+      <MDI key="STATISTICS_APPROXIMATE">YES</MDI>
+      <MDI key="STATISTICS_MINIMUM">8.1399602890015</MDI>
+      <MDI key="STATISTICS_MAXIMUM">8.1399602890015</MDI>
+      <MDI key="STATISTICS_MEAN">8.1399602890015</MDI>
+      <MDI key="STATISTICS_STDDEV">0</MDI>
+      <MDI key="STATISTICS_VALID_PERCENT">100</MDI>
+    </Metadata>
+  </PAMRasterBand>
+  <PAMRasterBand band="4">
+    <Description>2021-10-16T10:00:00Z</Description>
+  </PAMRasterBand>
+  <PAMRasterBand band="5">
+    <Description>2021-10-16T11:00:00Z</Description>
+  </PAMRasterBand>
+  <PAMRasterBand band="6">
+    <Description>2021-10-16T12:00:00Z</Description>
+  </PAMRasterBand>
+  <PAMRasterBand band="7">
+    <Description>2021-10-16T13:00:00Z</Description>
+  </PAMRasterBand>
+</PAMDataset>

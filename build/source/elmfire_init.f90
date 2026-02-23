@@ -156,11 +156,19 @@ ENDDO
 DO IY = 1, FBFM%NROWS
 DO IX = 1, FBFM%NCOLS
    J = FBFM%I2(IX,IY,1)
-   IF ( (J .GE. 90 .AND. J .LE. 100) .OR. J .EQ. 256 .OR. J .LE. 0) THEN
-      ISNONBURNABLE(IX,IY) = .TRUE.
-   ELSE
-      ISNONBURNABLE(IX,IY) = .FALSE.
-   ENDIF
+   if (USE_CFFDRS) then
+      IF ( (J .GE. 100 .AND. J .LE. 106) .OR. J .GT. 1000 .OR. J .LE. 0) THEN
+         ISNONBURNABLE(IX,IY) = .TRUE.
+      ELSE
+         ISNONBURNABLE(IX,IY) = .FALSE.
+      ENDIF
+   else
+      IF ( (J .GE. 90 .AND. J .LE. 100) .OR. J .EQ. 256 .OR. J .LE. 0) THEN
+         ISNONBURNABLE(IX,IY) = .TRUE.
+      ELSE
+         ISNONBURNABLE(IX,IY) = .FALSE.
+      endif 
+   endif
    IF (USE_BLDG_SPREAD_MODEL .AND. J .EQ. 91) ISNONBURNABLE(IX,IY) = .FALSE.
 ENDDO
 ENDDO
