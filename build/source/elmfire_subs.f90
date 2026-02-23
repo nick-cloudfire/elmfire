@@ -1549,7 +1549,6 @@ REAL FUNCTION ISF(FUEL, RSF, CF)
 
 REAL,INTENT(IN) :: RSF, CF
 INTEGER*2, intent(in) :: FUEL
-
 ISF = log(max(0.01,1-(RSF/(FUEL_MODEL_TABLE_FBP(FUEL)%a*CF))**(1/FUEL_MODEL_TABLE_FBP(FUEL)%c)))/(-FUEL_MODEL_TABLE_FBP(FUEL)%b)
 
 ! *****************************************************************************
@@ -1597,9 +1596,9 @@ PC = 0
 select case (FUEL)
    case (1)
       if (FFMC .gt. 84) THEN
-         out = 0.75 + 0.75*sqrt((1-exp(-0.23*(FFMC*84))))
+         out = 0.75 + 0.75*sqrt((1-exp(-0.23*(FFMC-84))))
       else
-         out = 0.75 - 0.75*sqrt((1-exp(-0.23*(FFMC*84))))
+         out = 0.75 - 0.75*sqrt((1-exp(-0.23*(84-FFMC))))
       endif
    case (2, 70, 80, 90, 700:1000)
       out = 5.0*(1-exp(-0.0115*BUI))

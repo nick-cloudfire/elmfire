@@ -172,7 +172,10 @@ DO I = 1, NUM_NODES
       C => C%NEXT
       CYCLE
    ENDIF
-
+   
+   C%C = 100*min(1.0,max(0.0,1.33-1.11*MLH%R4(C%IX,C%IY,1)))
+   C%PC = mod(C%IFBFM,100) / 100.0
+   C%PDF = C%PC
    M  = C%M1*100
    slope = tan(SLP%R4(C%IX,C%IY,1)*PIO180) * 100.0 !percent
    aspect = mod(ASP%R4(C%IX,C%IY,1) + 180.0,360.0)

@@ -456,6 +456,7 @@ DO WHILE (T < WS%NBANDS * DT_METEOROLOGY)
          ENDDO
          
 
+
          C => LIST_BURNED%HEAD
          DO I = 1, LIST_BURNED%NUM_NODES
             C%BURNED = .TRUE.
@@ -1961,6 +1962,7 @@ IF (ISTEP .EQ. 1) THEN
             else
                C%SPREAD_DIRECTION = 0.0
             end if
+            !print *, "CELL ", C%IX, ",", C%IY, "ROS: ", C%VELOCITY, ", ISI: ", C%ISI, ", FBFM: ", C%IFBFM, ", ROSMAX: ", C%VELOCITY_DMS_SURFACE 
 
             ILH = MAX(MIN(NINT(100.*C%MLH),120),30)
             if (USE_CFFDRS) then
