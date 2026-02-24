@@ -1,6 +1,7 @@
 MODULE ELMFIRE_INIT
 
 USE ELMFIRE_VARS
+USE ELMFIRE_SUBS
 
 IMPLICIT NONE
 
@@ -65,6 +66,10 @@ if (USE_SDI) GOOD_INPUTS = GOOD_INPUTS .and. CHECK_FILEPATH_IS_SET(SDI_FILENAME,
 if (USE_LAND_VALUE) GOOD_INPUTS = GOOD_INPUTS .and. CHECK_FILEPATH_IS_SET(LAND_VALUE_FILENAME, "LAND_VALUE_FILENAME")
 if (USE_POPULATION_DENSITY) GOOD_INPUTS = GOOD_INPUTS .and. CHECK_FILEPATH_IS_SET(POPULATION_DENSITY_FILENAME, "POPULATION_DENSITY_FILENAME")
 if (USE_REAL_ESTATE_VALUE) GOOD_INPUTS = GOOD_INPUTS .and. CHECK_FILEPATH_IS_SET(REAL_ESTATE_VALUE_FILENAME, "REAL_ESTATE_VALUE_FILENAME")
+if (ADJUSTMENT_FACTORS_BY_PYROME) GOOD_INPUTS = GOOD_INPUTS .and. CHECK_FILEPATH_IS_SET(ADJUSTMENT_FACTORS_FILENAME, "ADJUSTMENT_FACTORS_FILENAME")
+if (DURATION_PDF_BY_PYROME) GOOD_INPUTS = GOOD_INPUTS .and. CHECK_FILEPATH_IS_SET(DURATION_PDF_FILENAME, "DURATION_PDF_FILENAME")
+if (CALIBRATION_CONSTANTS_BY_PYROME) GOOD_INPUTS = GOOD_INPUTS .and. CHECK_FILEPATH_IS_SET(CALIBRATION_CONSTANTS_FILENAME, "CALIBRATION_CONSTANTS_FILENAME")
+
 ! Ignition mask and ignition csv are handled directly in READ_MONTE_CARLO
 IF (USE_BLDG_SPREAD_MODEL) THEN
    IF (.NOT. USE_CONSTANT_BLDG_SPREAD_MODEL_PARAMS) THEN
@@ -97,7 +102,7 @@ FUNCTION CHECK_FILEPATH_IS_SET(filename, testname)
    logical :: CHECK_FILEPATH_IS_SET
 
    CHECK_FILEPATH_IS_SET = .TRUE.
-   if (filename = ' ') then
+   if (filename .eq. ' ') then
       WRITE(*,*) trim(testname), " is not specified and is a required input. Specify it in the &INPUTS section"
       CHECK_FILEPATH_IS_SET = .FALSE.
    endif
@@ -110,6 +115,7 @@ SUBROUTINE CHECK_INPUTS(GOOD_INPUTS)
 ! *****************************************************************************
 
 LOGICAL, INTENT(OUT) :: GOOD_INPUTS
+integer :: I, ix_ign, iy_ign
 
 GOOD_INPUTS = .TRUE. 
 
@@ -120,14 +126,30 @@ IF (MODE .NE. 2 .AND. DT_METEOROLOGY .LE. 0.) THEN
 ENDIF
 
 ! RASTER SIZE MISMATCH
-GOOD_INPUTS = CHECK_RASTER_DIMS(ASP, DEM, "Elevation")
-GOOD_INPUTS = CHECK_RASTER_DIMS(ASP, SLP, "Slope")
-GOOD_INPUTS = CHECK_RASTER_DIMS(DEM, FBFM, "Fuel Model")
-GOOD_INPUTS = CHECK_RASTER_DIMS(DEM, CH, "Canopy Height")
-GOOD_INPUTS = CHECK_RASTER_DIMS(DEM, CC, "Canopy Cover")
+GOOD_INPUTS = GOOD_INPUTS .and. CHECK_RASTER_DIMS(ASP, DEM, "Elevation")
+GOOD_INPUTS = GOOD_INPUTS .and. CHECK_RASTER_DIMS(ASP, SLP, "Slope")
+GOOD_INPUTS = GOOD_INPUTS .and. CHECK_RASTER_DIMS(ASP, FBFM, "Fuel Model")
+GOOD_INPUTS = GOOD_INPUTS .and. CHECK_RASTER_DIMS(ASP, CH, "Canopy Height")
+GOOD_INPUTS = GOOD_INPUTS .and. CHECK_RASTER_DIMS(ASP, CC, "Canopy Cover")
 if (.not. USE_CFFDRS) then
-   GOOD_INPUTS = CHECK_RASTER_DIMS(DEM, CBH, "Canopy Base Height")
-   GOOD_INPUTS = CHECK_RASTER_DIMS(DEM, CBD, "Density")
+   GOOD_INPUTS = GOOD_INPUTS .and. CHECK_RASTER_DIMS(ASP, CBH, "Canopy Base Height")
+   GOOD_INPUTS = GOOD_INPUTS .and. CHECK_RASTER_DIMS(ASP, CBD, "Density")
+endif 
+GOOD_INPUTS = GOOD_INPUTS .and. CHECK_RASTER_DIMS(WS, WD, "Wind Direction")
+GOOD_INPUTS = GOOD_INPUTS .and. CHECK_RASTER_DIMS(WS, M1, "M1")
+GOOD_INPUTS = GOOD_INPUTS .and. CHECK_RASTER_DIMS(WS, M10, "M10")
+GOOD_INPUTS = GOOD_INPUTS .and. CHECK_RASTER_DIMS(WS, M100, "M100")
+
+! Check raster is big enough (too small and edge offset effects kick in)
+if (ASP%NCOLS .lt. 10 .or. ASP%NROWS .lt. 10) then
+   WRITE(*,*) "Error: raster size (", ASP%NROWS, " , ", ASP%NCOLS, ") is smaller than minimum raster size (10 , 10)"
+   GOOD_INPUTS = .FALSE.
+endif 
+
+! Check daily weather stream is enough for the simulation duration.
+if (USE_CFFDRS .and. HOUR_OF_YEAR + size(daily_bui) / 24 .lt. HOUR_OF_YEAR + WS%NBANDS * DT_METEOROLOGY / 3600) then
+   WRITE(*,*) "Error: daily weather values not enough for full fire duration (Input should span as many days as the weather raster bands)"
+   GOOD_INPUTS = .FALSE.
 endif 
 
 ! Not enough weather bands
@@ -144,8 +166,49 @@ endif
 
 !diurnal adjustment factor stuff
 if (USE_DIURNAL_ADJUSTMENT_FACTOR) then
-   if 
+   if (HOUR_OF_YEAR .lt. 0 .and. SUNRISE_HOUR .lt. 0) then
+      WRITE(*,*) "Error: HOUR_OF_YEAR must be specified if USE_DIURNAL_ADJUSTMENT_FACTOR is selected (and SUNRISE_HOUR and SUNSET_HOUR are not specified)."
+      GOOD_INPUTS = .FALSE.
+   endif 
+   if (CURRENT_YEAR .lt. 0 .and. SUNRISE_HOUR .lt. 0) then
+      WRITE(*,*) "Error: CURRENT_YEAR must be specified if USE_DIURNAL_ADJUSTMENT_FACTOR is selected (and SUNRISE_HOUR and SUNSET_HOUR are not specified)."
+      GOOD_INPUTS = .FALSE.
+   endif 
 endif
+
+! fire potential mode
+if (MODE .ne. 1) then
+   if (METEOROLOGY_BAND_START .lt. 0) then
+      WRITE(*,*) "Error: METEOROLOGY_BAND_START must be specified if fire potential mode (MODE = 1 or 3) is used."
+      GOOD_INPUTS = .FALSE.
+   endif 
+   if (METEOROLOGY_BAND_STOP .lt. 0) then
+      WRITE(*,*) "Error: METEOROLOGY_BAND_STOP must be specified if fire potential mode (MODE = 1 or 3) is used."
+      GOOD_INPUTS = .FALSE.
+   endif 
+   if (METEOROLOGY_BAND_SKIP_INTERVAL .lt. 0) then
+      WRITE(*,*) "Error: METEOROLOGY_BAND_SKIP_INTERVAL must be specified if fire potential mode (MODE = 1 or 3) is used."
+      GOOD_INPUTS = .FALSE.
+   endif 
+   if (2 * EDGEBUFFER .gt. 0.8 * ASP%NROWS * ASP%CELLSIZE .or. 2 * EDGEBUFFER .gt. 0.8 * ASP%NCOLS * ASP%CELLSIZE) then
+      WRITE(*,*) "Error: EDGEBUFFER covers more than 80% of raster, consider reducing it (standard value is 3km)."
+      GOOD_INPUTS = .FALSE.
+   endif 
+
+endif
+
+do I = 1, size(X_IGN)
+   if (X_IGN(I) .lt. ASP%XLLCORNER .or. Y_IGN(I) .lt. ASP%YLLCORNER .or. X_IGN(I) .gt. ASP%XLLCORNER + ASP%NROWS * ASP%CELLSIZE .or. Y_IGN(I) .gt. ASP%YLLCORNER + ASP%NCOLS * ASP%CELLSIZE) then
+      WRITE(*,*) "Error: Ignition point ", I, " is outside the bounds of the raster."
+      GOOD_INPUTS = .FALSE.
+   endif
+   ix_ign = ICOL_FROM_X(X_IGN(I), ASP%XLLCORNER, ASP%CELLSIZE)
+   iy_ign = IROW_FROM_Y(Y_IGN(I), ASP%YLLCORNER, ASP%CELLSIZE)
+   if (ISNONBURNABLE(ix_ign, iy_ign)) then
+      WRITE(*,*) "Error: Ignition point ", I, " is on a non-burnable cell."
+      GOOD_INPUTS = .FALSE.
+   endif      
+enddo
 
 
 
@@ -154,7 +217,7 @@ CONTAINS
 
 FUNCTION CHECK_RASTER_DIMS(R1, R2, testname)
    type(RASTER_TYPE) , intent(in) :: R1, R2
-   character(40), intent(in) :: testname
+   character(400), intent(in) :: testname
    logical :: CHECK_RASTER_DIMS
 
    CHECK_RASTER_DIMS = .TRUE.
