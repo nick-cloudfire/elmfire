@@ -1809,12 +1809,12 @@ subroutine read_geotiff_meta_gdalinfo()
       read(iu, '(A)', iostat=ios) line
       if (ios /= 0) exit
 
-      call parse_size(line, ncols, nrows)
-      call parse_origin(line, x0, y0)
-      call parse_pixel_size(line, dx, dy)
-      call parse_epsg(line, epsg)
-      call parse_is_utm(line, is_utm)
-      call parse_is_metre_units(line, is_metre)
+      call parse_size
+      call parse_origin
+      call parse_pixel_size
+      call parse_epsg
+      call parse_is_utm
+      call parse_is_metre_units
    enddo
 
    close(iu)
@@ -1844,131 +1844,116 @@ subroutine read_geotiff_meta_gdalinfo()
    ! Fallback if EPSG not found: store a readable name
    A_SRS = "UNKNOWN"
    end if
-end subroutine read_geotiff_meta_gdalinfo
 
-pure logical function contains_ci(s, pat)
-  implicit none
-  character(len=*), intent(in) :: s, pat
-  character(len=len(s)) :: sl
-  character(len=len(pat)) :: pl
-  integer :: i
+   CONTAINS
 
-  sl = s; pl = pat
-  do i=1,len(sl)
-     if (iachar(sl(i:i))>=iachar('A') .and. iachar(sl(i:i))<=iachar('Z')) sl(i:i)=achar(iachar(sl(i:i))+32)
-  end do
-  do i=1,len(pl)
-     if (iachar(pl(i:i))>=iachar('A') .and. iachar(pl(i:i))<=iachar('Z')) pl(i:i)=achar(iachar(pl(i:i))+32)
-  end do
+   pure logical function contains_ci(s, pat)
+      implicit none
+      character(len=*), intent(in) :: s, pat
+      character(len=len(s)) :: sl
+      character(len=len(pat)) :: pl
+      integer :: i
 
-  contains_ci = index(sl, pl) > 0
-end function
+      sl = s; pl = pat
+      do i=1,len(sl)
+         if (iachar(sl(i:i))>=iachar('A') .and. iachar(sl(i:i))<=iachar('Z')) sl(i:i)=achar(iachar(sl(i:i))+32)
+      end do
+      do i=1,len(pl)
+         if (iachar(pl(i:i))>=iachar('A') .and. iachar(pl(i:i))<=iachar('Z')) pl(i:i)=achar(iachar(pl(i:i))+32)
+      end do
 
-subroutine parse_is_metre_units(line, is_metre)
-  implicit none
-  character(len=*), intent(in) :: line
-  logical, intent(inout) :: is_metre
+      contains_ci = index(sl, pl) > 0
+   end function contains_ci
 
-  ! Handle common gdalinfo formats: WKT1/WKT2 + summary line
-  if (contains_ci(line, 'linear units:') .and. contains_ci(line, 'metre')) then
-     is_metre = .true.
-  else if (contains_ci(line, 'lengthunit["metre"')) then
-     is_metre = .true.
-  else if (contains_ci(line, 'unit["metre"')) then
-     is_metre = .true.
-  end if
-end subroutine
-
-subroutine parse_is_utm(line, is_utm)
-  implicit none
-  character(len=*), intent(in) :: line
-  logical, intent(inout) :: is_utm
-
-  ! UTM usually appears in CRS name lines and/or embedded WKT
-  if (contains_ci(line, 'utm zone')) is_utm = .true.
-end subroutine
-
-subroutine parse_size(line, ncols, nrows)
-   character(len=*), intent(in) :: line
-   integer, intent(inout) :: ncols, nrows
-   integer :: p, ios
-   character(len=256) :: rest
-
-   p = index(line, "Size is")
-   if (p > 0) then
-   rest = adjustl(line(p+len("Size is"):))
-   ! expects: "50, 50"
-   read(rest, *, iostat=ios) ncols
-   if (ios == 0) then
-      p = index(rest, ",")
-      if (p > 0) read(rest(p+1:), *, iostat=ios) nrows
-   end if
-   end if
-end subroutine parse_size
-
-
-subroutine parse_origin(line, x0, y0)
-   character(len=*), intent(in) :: line
-   real(8), intent(inout) :: x0, y0
-   integer :: p1, p2, ios
-   character(len=256) :: inside
-
-   p1 = index(line, "Origin = (")
-   if (p1 > 0) then
-   p1 = p1 + len("Origin = (")
-   p2 = index(line(p1:), ")")
-   if (p2 > 0) then
-      inside = line(p1:p1+p2-2)  ! between '(' and ')'
-      read(inside, *, iostat=ios) x0, y0
-   end if
-   end if
-end subroutine parse_origin
-
-
-subroutine parse_pixel_size(line, dx, dy)
-   character(len=*), intent(in) :: line
-   real(8), intent(inout) :: dx, dy
-   integer :: p1, p2, ios
-   character(len=256) :: inside
-
-   p1 = index(line, "Pixel Size = (")
-   if (p1 > 0) then
-   p1 = p1 + len("Pixel Size = (")
-   p2 = index(line(p1:), ")")
-   if (p2 > 0) then
-      inside = line(p1:p1+p2-2)
-      read(inside, *, iostat=ios) dx, dy
-   end if
-   end if
-end subroutine parse_pixel_size
-
-
-subroutine parse_epsg(line, epsg)
-   character(len=*), intent(in) :: line
-   integer, intent(inout) :: epsg
-   integer :: p, p2, ios
-   character(len=64) :: tail
-
-   ! gdalinfo WKT snippet often contains: ID["EPSG",32635]]
-   p = index(line, 'ID["EPSG",')
-   if (p > 0) then
-      p = p + len('ID["EPSG",')
-      ! find closing bracket
-      p2 = index(line(p:), ']')
-      if (p2 > 0) then
-         read(line(p:p+p2-2), *) epsg
+   subroutine parse_is_metre_units
+      ! Handle common gdalinfo formats: WKT1/WKT2 + summary line
+      if (contains_ci(line, 'linear units:') .and. contains_ci(line, 'metre')) then
+         is_metre = .true.
+      else if (contains_ci(line, 'lengthunit["metre"')) then
+         is_metre = .true.
+      else if (contains_ci(line, 'unit["metre"')) then
+         is_metre = .true.
       end if
-   end if
-end subroutine parse_epsg
+   end subroutine parse_is_metre_units
+
+   subroutine parse_is_utm
+      ! UTM usually appears in CRS name lines and/or embedded WKT
+      if (contains_ci(line, 'utm zone')) is_utm = .true.
+   end subroutine parse_is_utm
+
+   subroutine parse_size
+      integer :: p
+      character(len=256) :: rest
+
+      p = index(line, "Size is")
+      if (p > 0) then
+      rest = adjustl(line(p+len("Size is"):))
+      ! expects: "50, 50"
+      read(rest, *, iostat=ios) ncols
+      if (ios == 0) then
+         p = index(rest, ",")
+         if (p > 0) read(rest(p+1:), *, iostat=ios) nrows
+      end if
+      end if
+   end subroutine parse_size
 
 
-pure function int_to_str(i) result(s)
-   integer, intent(in) :: i
-   character(len=:), allocatable :: s
-   character(len=32) :: buf
-   write(buf, '(I0)') i
-   s = trim(buf)
-end function int_to_str
+   subroutine parse_origin
+      integer :: p1, p2
+      character(len=256) :: inside
+
+      p1 = index(line, "Origin = (")
+      if (p1 > 0) then
+      p1 = p1 + len("Origin = (")
+      p2 = index(line(p1:), ")")
+      if (p2 > 0) then
+         inside = line(p1:p1+p2-2)  ! between '(' and ')'
+         read(inside, *, iostat=ios) x0, y0
+      end if
+      end if
+   end subroutine parse_origin
+
+
+   subroutine parse_pixel_size
+      integer :: p1, p2
+      character(len=256) :: inside
+
+      p1 = index(line, "Pixel Size = (")
+      if (p1 > 0) then
+      p1 = p1 + len("Pixel Size = (")
+      p2 = index(line(p1:), ")")
+      if (p2 > 0) then
+         inside = line(p1:p1+p2-2)
+         read(inside, *, iostat=ios) dx, dy
+      end if
+      end if
+   end subroutine parse_pixel_size
+
+
+   subroutine parse_epsg
+      integer :: p, p2
+
+      ! gdalinfo WKT snippet often contains: ID["EPSG",32635]]
+      p = index(line, 'ID["EPSG",')
+      if (p > 0) then
+         p = p + len('ID["EPSG",')
+         ! find closing bracket
+         p2 = index(line(p:), ']')
+         if (p2 > 0) then
+            read(line(p:p+p2-2), *) epsg
+         end if
+      end if
+   end subroutine parse_epsg
+
+   pure function int_to_str(i) result(s)
+      integer, intent(in) :: i
+      character(len=:), allocatable :: s
+      character(len=32) :: buf
+      write(buf, '(I0)') i
+      s = trim(buf)
+   end function int_to_str
+
+end subroutine read_geotiff_meta_gdalinfo
 ! *****************************************************************************
    
 
