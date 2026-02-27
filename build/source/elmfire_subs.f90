@@ -1786,6 +1786,7 @@ subroutine read_geotiff_meta_gdalinfo()
    integer :: ncols, nrows
    real(8) :: x0, y0, dx, dy
    integer :: epsg
+   logical :: is_utm, is_metre
 
    ! Defaults
    ncols = -1; nrows = -1
@@ -1797,7 +1798,7 @@ subroutine read_geotiff_meta_gdalinfo()
 
    ! Run gdalinfo and redirect output to a temp file
    write(cmd,'(a)') 'gdalinfo "' // trim(FUELS_AND_TOPOGRAPHY_DIRECTORY) // '/' // &
-                 trim(DEM_FILENAME) // ".tif" // '" > "' // &
+                 trim(ASP_FILENAME) // ".tif" // '" > "' // &
                  trim(tmpfile) // '"'
    call execute_command_line(trim(cmd))
 
@@ -1805,15 +1806,27 @@ subroutine read_geotiff_meta_gdalinfo()
    if (ios /= 0) error stop "Failed to open gdalinfo output file."
 
    do
-   read(iu, '(A)', iostat=ios) line
-   if (ios /= 0) exit
+      read(iu, '(A)', iostat=ios) line
+      if (ios /= 0) exit
 
-   call parse_size(line, ncols, nrows)
-   call parse_origin(line, x0, y0)
-   call parse_pixel_size(line, dx, dy)
-   call parse_epsg(line, epsg)
-   end do
+      call parse_size(line, ncols, nrows)
+      call parse_origin(line, x0, y0)
+      call parse_pixel_size(line, dx, dy)
+      call parse_epsg(line, epsg)
+      call parse_is_utm(line, is_utm)
+      call parse_is_metre_units(line, is_metre)
+   enddo
+
    close(iu)
+
+   if (.not. is_utm) then
+      error stop "DEM CRS is not UTM (did not find 'UTM zone' in gdalinfo output)."
+   endif
+
+   if (.not. is_metre) then
+      error stop "DEM CRS does not appear to use metre linear units."
+   endif
+   
 
    ! Basic sanity checks
    if (ncols <= 0 .or. nrows <= 0) error stop "Could not parse raster Size is ..."
@@ -1833,6 +1846,47 @@ subroutine read_geotiff_meta_gdalinfo()
    end if
 end subroutine read_geotiff_meta_gdalinfo
 
+pure logical function contains_ci(s, pat)
+  implicit none
+  character(len=*), intent(in) :: s, pat
+  character(len=len(s)) :: sl
+  character(len=len(pat)) :: pl
+  integer :: i
+
+  sl = s; pl = pat
+  do i=1,len(sl)
+     if (iachar(sl(i:i))>=iachar('A') .and. iachar(sl(i:i))<=iachar('Z')) sl(i:i)=achar(iachar(sl(i:i))+32)
+  end do
+  do i=1,len(pl)
+     if (iachar(pl(i:i))>=iachar('A') .and. iachar(pl(i:i))<=iachar('Z')) pl(i:i)=achar(iachar(pl(i:i))+32)
+  end do
+
+  contains_ci = index(sl, pl) > 0
+end function
+
+subroutine parse_is_metre_units(line, is_metre)
+  implicit none
+  character(len=*), intent(in) :: line
+  logical, intent(inout) :: is_metre
+
+  ! Handle common gdalinfo formats: WKT1/WKT2 + summary line
+  if (contains_ci(line, 'linear units:') .and. contains_ci(line, 'metre')) then
+     is_metre = .true.
+  else if (contains_ci(line, 'lengthunit["metre"')) then
+     is_metre = .true.
+  else if (contains_ci(line, 'unit["metre"')) then
+     is_metre = .true.
+  end if
+end subroutine
+
+subroutine parse_is_utm(line, is_utm)
+  implicit none
+  character(len=*), intent(in) :: line
+  logical, intent(inout) :: is_utm
+
+  ! UTM usually appears in CRS name lines and/or embedded WKT
+  if (contains_ci(line, 'utm zone')) is_utm = .true.
+end subroutine
 
 subroutine parse_size(line, ncols, nrows)
    character(len=*), intent(in) :: line
