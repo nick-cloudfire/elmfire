@@ -161,11 +161,6 @@ IF (USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .NE. 1) CALL READ_BUILDIN
 
 CALL READ_CALIBRATION_BY_PYROME
 
-IF (IRANK_WORLD .EQ. 0) THEN
-   CALL CHECK_INPUTS(GOOD_INPUTS)
-   IF (.NOT. GOOD_INPUTS) CALL SHUTDOWN()
-ENDIF
-
 !-----------------------------------------------------------------------------------------------------------------
 
 ! Initialize random number generator - this has to be done after inputs are read in
@@ -196,8 +191,7 @@ CALL SETUP_PARALLEL_IO
 IF (IRANK_WORLD .EQ. 0) WRITE(*,*) 'Reading headers for fuels/topography and weather rasters'
 
 ! Check that necessary files have been defined before attempting to read them. 
-CALL CHECK_INPUT_RASTERS_EXIST
-CHECK_INPUT_FILEPATHS_SET
+CALL CHECK_INPUT_FILEPATHS_SET
 IF (USE_TILED_IO) THEN
    IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(1)) THEN
       FN = TRIM(FUELS_AND_TOPOGRAPHY_DIRECTORY) // TRIM(ASP_FILENAME)
@@ -246,11 +240,11 @@ IF (IRANK_WORLD .EQ. 0) WRITE(*,*) 'Reading weather, fuel, and topography raster
 IF (METEOROLOGY_BAND_STOP .le. 0) METEOROLOGY_BAND_STOP = WS%NBANDS
 
 IF (USE_TILED_IO) THEN
-   CALL READ_WEATHER_FUEL_TOPOGRAPHY_TILED
+   CALL READ_FUEL_TOPOGRAPHY_TILED
 ELSE
    CALL READ_FUEL_TOPOGRAPHY
-   CALL UPDATE_WEATHER_SLICE(1,min(METEOROLOGY_BAND_STOP,WX_BANDS_KEPT_IN_MEM))
 ENDIF
+CALL UPDATE_WEATHER_SLICE(1,min(METEOROLOGY_BAND_STOP,WX_BANDS_KEPT_IN_MEM))
 
 IF (MULTIPLE_HOSTS) THEN
    CALL BCAST_FUEL_TOPOGRAPHY
@@ -259,6 +253,12 @@ ENDIF
 
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 CALL ACCUMULATE_CPU_USAGE(5, IT1, IT2)
+
+
+IF (IRANK_WORLD .EQ. 0) THEN
+   CALL CHECK_INPUTS(GOOD_INPUTS)
+   IF (.NOT. GOOD_INPUTS) CALL SHUTDOWN()
+ENDIF
 
 !-----------------------------------------------------------------------------------------------------------------
 

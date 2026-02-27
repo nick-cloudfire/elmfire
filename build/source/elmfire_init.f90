@@ -91,19 +91,19 @@ ELSE
 ENDIF
 
 if (.not. GOOD_INPUTS) then
-   WRITE(*,*) "Error with input files, some paths are not set"
+   WRITE(*,*) "[ERROR] Error with input files, some paths are not set"
    CALL SHUTDOWN
 endif
 
 contains 
 
 FUNCTION CHECK_FILEPATH_IS_SET(filename, testname)
-   character(400), intent(in) :: filename, testname
+   character(len=*), intent(in) :: filename, testname
    logical :: CHECK_FILEPATH_IS_SET
 
    CHECK_FILEPATH_IS_SET = .TRUE.
-   if (filename .eq. ' ') then
-      WRITE(*,*) trim(testname), " is not specified and is a required input. Specify it in the &INPUTS section"
+   if (trim(filename) .eq. '') then
+      WRITE(*,*) "[ERROR] ", trim(testname), " is not specified and is a required input. Specify it in the &INPUTS section"
       CHECK_FILEPATH_IS_SET = .FALSE.
    endif
 end function CHECK_FILEPATH_IS_SET
@@ -121,7 +121,7 @@ GOOD_INPUTS = .TRUE.
 
 ! DT_METEOROLOGY must be set for level set spread
 IF (MODE .NE. 2 .AND. DT_METEOROLOGY .LE. 0.) THEN
-   WRITE(*,*) 'DT_METEOROLOGY must be set for level set propagation. Specify DT_METEOROLOGY in the &INPUTS namelist group.'
+   WRITE(*,*) '[ERROR] DT_METEOROLOGY must be set for level set propagation. Specify DT_METEOROLOGY in the &INPUTS namelist group.'
    GOOD_INPUTS = .FALSE. 
 ENDIF
 
@@ -142,36 +142,38 @@ GOOD_INPUTS = GOOD_INPUTS .and. CHECK_RASTER_DIMS(WS, M100, "M100")
 
 ! Check raster is big enough (too small and edge offset effects kick in)
 if (ASP%NCOLS .lt. 10 .or. ASP%NROWS .lt. 10) then
-   WRITE(*,*) "Error: raster size (", ASP%NROWS, " , ", ASP%NCOLS, ") is smaller than minimum raster size (10 , 10)"
+   WRITE(*,*) "[ERROR] Raster size (", ASP%NROWS, " , ", ASP%NCOLS, ") is smaller than minimum raster size (10 , 10)"
    GOOD_INPUTS = .FALSE.
 endif 
 
 ! Check daily weather stream is enough for the simulation duration.
-if (USE_CFFDRS .and. HOUR_OF_YEAR + size(daily_bui) / 24 .lt. HOUR_OF_YEAR + WS%NBANDS * DT_METEOROLOGY / 3600) then
-   WRITE(*,*) "Error: daily weather values not enough for full fire duration (Input should span as many days as the weather raster bands)"
-   GOOD_INPUTS = .FALSE.
+if (USE_CFFDRS) then
+   if (HOUR_OF_YEAR + size(daily_bui) * 24 .lt. HOUR_OF_YEAR + WS%NBANDS * DT_METEOROLOGY / 3600) then
+      WRITE(*,*) "[ERROR] Daily weather values not enough for full fire duration (Input should span as many days as the weather raster bands)"
+      GOOD_INPUTS = .FALSE.
+   endif
 endif 
 
 ! Not enough weather bands
-if (WS%NBANDS * DT_METEOROLOGY .gt. SIMULATION_TSTOP) then
-   WRITE(*,*) "Error: not enough weather bands for given SIMULATION TSTOP"
+if (WS%NBANDS * DT_METEOROLOGY .lt. SIMULATION_TSTOP) then
+   WRITE(*,*) "[ERROR] Not enough weather bands for given SIMULATION TSTOP"
    GOOD_INPUTS = .FALSE.
 endif 
 
 !plain mistakes
 if (SIMULATION_TSTART .gt. SIMULATION_TSTOP) then
-   WRITE(*,*) "Error: SIMULATION_TSTART greater than SIMULATION TSTOP."
+   WRITE(*,*) "[ERROR] SIMULATION_TSTART greater than SIMULATION TSTOP."
    GOOD_INPUTS = .FALSE.
 endif 
 
 !diurnal adjustment factor stuff
 if (USE_DIURNAL_ADJUSTMENT_FACTOR) then
    if (HOUR_OF_YEAR .lt. 0 .and. SUNRISE_HOUR .lt. 0) then
-      WRITE(*,*) "Error: HOUR_OF_YEAR must be specified if USE_DIURNAL_ADJUSTMENT_FACTOR is selected (and SUNRISE_HOUR and SUNSET_HOUR are not specified)."
+      WRITE(*,*) "[ERROR] HOUR_OF_YEAR must be specified if USE_DIURNAL_ADJUSTMENT_FACTOR is selected (and SUNRISE_HOUR and SUNSET_HOUR are not specified)."
       GOOD_INPUTS = .FALSE.
    endif 
    if (CURRENT_YEAR .lt. 0 .and. SUNRISE_HOUR .lt. 0) then
-      WRITE(*,*) "Error: CURRENT_YEAR must be specified if USE_DIURNAL_ADJUSTMENT_FACTOR is selected (and SUNRISE_HOUR and SUNSET_HOUR are not specified)."
+      WRITE(*,*) "[ERROR] CURRENT_YEAR must be specified if USE_DIURNAL_ADJUSTMENT_FACTOR is selected (and SUNRISE_HOUR and SUNSET_HOUR are not specified)."
       GOOD_INPUTS = .FALSE.
    endif 
 endif
@@ -179,70 +181,69 @@ endif
 ! fire potential mode
 if (MODE .ne. 1) then
    if (METEOROLOGY_BAND_START .lt. 0) then
-      WRITE(*,*) "Error: METEOROLOGY_BAND_START must be specified if fire potential mode (MODE = 1 or 3) is used."
+      WRITE(*,*) "[ERROR] METEOROLOGY_BAND_START must be specified if fire potential mode (MODE = 1 or 3) is used."
       GOOD_INPUTS = .FALSE.
    endif 
    if (METEOROLOGY_BAND_STOP .lt. 0) then
-      WRITE(*,*) "Error: METEOROLOGY_BAND_STOP must be specified if fire potential mode (MODE = 1 or 3) is used."
+      WRITE(*,*) "[ERROR] METEOROLOGY_BAND_STOP must be specified if fire potential mode (MODE = 1 or 3) is used."
       GOOD_INPUTS = .FALSE.
    endif 
    if (METEOROLOGY_BAND_SKIP_INTERVAL .lt. 0) then
-      WRITE(*,*) "Error: METEOROLOGY_BAND_SKIP_INTERVAL must be specified if fire potential mode (MODE = 1 or 3) is used."
+      WRITE(*,*) "[ERROR] METEOROLOGY_BAND_SKIP_INTERVAL must be specified if fire potential mode (MODE = 1 or 3) is used."
       GOOD_INPUTS = .FALSE.
    endif 
    if (2 * EDGEBUFFER .gt. 0.8 * ASP%NROWS * ASP%CELLSIZE .or. 2 * EDGEBUFFER .gt. 0.8 * ASP%NCOLS * ASP%CELLSIZE) then
-      WRITE(*,*) "Error: EDGEBUFFER covers more than 80% of raster, consider reducing it (standard value is 3km)."
+      WRITE(*,*) "[ERROR] EDGEBUFFER covers more than 80% of raster, consider reducing it (standard value is 3km)."
       GOOD_INPUTS = .FALSE.
    endif 
 
 endif
 
-do I = 1, size(X_IGN)
-   if (X_IGN(I) .lt. ASP%XLLCORNER .or. Y_IGN(I) .lt. ASP%YLLCORNER .or. X_IGN(I) .gt. ASP%XLLCORNER + ASP%NROWS * ASP%CELLSIZE .or. Y_IGN(I) .gt. ASP%YLLCORNER + ASP%NCOLS * ASP%CELLSIZE) then
-      WRITE(*,*) "Error: Ignition point ", I, " is outside the bounds of the raster."
-      GOOD_INPUTS = .FALSE.
-   endif
-   ix_ign = ICOL_FROM_X(X_IGN(I), ASP%XLLCORNER, ASP%CELLSIZE)
-   iy_ign = IROW_FROM_Y(Y_IGN(I), ASP%YLLCORNER, ASP%CELLSIZE)
-   if (ISNONBURNABLE(ix_ign, iy_ign)) then
-      WRITE(*,*) "Error: Ignition point ", I, " is on a non-burnable cell."
-      GOOD_INPUTS = .FALSE.
+do I = 0, size(X_IGN)-1
+   if (X_IGN(I) .gt. 0) then
+      if (X_IGN(I) .lt. ASP%XLLCORNER .or. Y_IGN(I) .lt. ASP%YLLCORNER .or. X_IGN(I) .gt. ASP%XLLCORNER + ASP%NROWS * ASP%CELLSIZE .or. Y_IGN(I) .gt. ASP%YLLCORNER + ASP%NCOLS * ASP%CELLSIZE) then
+         WRITE(*,*) "[ERROR] Ignition point ", I, " is outside the bounds of the raster."
+         GOOD_INPUTS = .FALSE.
+      endif
+      ix_ign = ICOL_FROM_X(X_IGN(I), ASP%XLLCORNER, ASP%CELLSIZE)
+      iy_ign = IROW_FROM_Y(Y_IGN(I), ASP%YLLCORNER, ASP%CELLSIZE)
+      if (ISNONBURNABLE(ix_ign, iy_ign)) then
+         WRITE(*,*) "[ERROR] Ignition point ", I, " is on a non-burnable cell."
+         GOOD_INPUTS = .FALSE.
+      endif
    endif      
 enddo
-
-
-
 
 CONTAINS 
 
 FUNCTION CHECK_RASTER_DIMS(R1, R2, testname)
    type(RASTER_TYPE) , intent(in) :: R1, R2
-   character(400), intent(in) :: testname
+   character(len=*), intent(in) :: testname
    logical :: CHECK_RASTER_DIMS
 
    CHECK_RASTER_DIMS = .TRUE.
 
    ! Check raster size
    if (R1%NROWS .ne. R2%NROWS .or. R1%NCOLS .ne. R2%NROWS) then
-      WRITE(*,*) TRIM(testname), " raster dimensions mismatch. Please ensure the rasters have the same NROWS and NCOLS."
+      WRITE(*,*) "[ERROR] ", TRIM(testname), " raster dimensions mismatch. Please ensure the rasters have the same NROWS and NCOLS."
       CHECK_RASTER_DIMS = .FALSE.
    endif
 
    ! Check cell size
    if (R1%CELLSIZE .ne. R2%CELLSIZE) then
-      WRITE(*,*) TRIM(testname), " raster cell size mismatch. Please ensure the rasters have consistent CELLSIZE."
+      WRITE(*,*) "[ERROR] ", TRIM(testname), " raster cell size mismatch. Please ensure the rasters have consistent CELLSIZE."
       CHECK_RASTER_DIMS = .FALSE.
    endif
 
    ! Check alignment
    if (R1%XLLCORNER .ne. R2%XLLCORNER .or. R1%YLLCORNER .ne. R2%YLLCORNER) then
-      WRITE(*,*) TRIM(testname), " raster alignment mismatch. Please ensure the rasters have consistent XLL and YLL corners."
+      WRITE(*,*) "[ERROR] ", TRIM(testname), " raster alignment mismatch. Please ensure the rasters have consistent XLL and YLL corners."
       CHECK_RASTER_DIMS = .FALSE.
    endif
 
    ! Check band count (mostly important for weather)
    if (R1%NBANDS .ne. R2%NBANDS) then
-      WRITE(*,*) TRIM(testname), " raster band number mismatch. Please ensure the rasters have consistent band numbers."
+      WRITE(*,*) "[ERROR] ", TRIM(testname), " raster band number mismatch. Please ensure the rasters have consistent band numbers."
       CHECK_RASTER_DIMS = .FALSE.
    endif 
 

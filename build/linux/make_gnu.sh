@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ELMFIRE version:
-ELMFIRE_VER=2025.1002
+ELMFIRE_VER=2026.0224.memopt
 
 # ELMFIRE uses several environment variables for compilation. If the default
 # values specified on lines 14 - 16 below are not appropriate for your system,
@@ -18,12 +18,12 @@ export ELMFIRE_INSTALL_DIR=${ELMFIRE_INSTALL_DIR:-$(pwd)/bin}
 if [ -z ${ELMFIRE_LOWMEM} ]; then
     export ELMFIRE_PRECOMPILER_FLAGS="-D_SMOKE -D_WUI -D_UMDSPOTTING -D_SUPPRESSION"
     export ELMFIRE_BIN_SUFFIX=""
-    export ELMFIRE_OBJECTS="elmfire_vars.o sort.o elmfire_init.o elmfire_namelists.o elmfire_subs.o elmfire_spread_rate.o  elmfire_ignition.o elmfire_io.o elmfire_spotting.o elmfire_suppression.o elmfire_spotting_superseded.o elmfire_calibration.o elmfire_level_set.o elmfire.o"
+    export ELMFIRE_OBJECTS="elmfire_vars.o sort.o elmfire_subs.o elmfire_init.o elmfire_namelists.o elmfire_spread_rate.o  elmfire_ignition.o elmfire_io.o elmfire_spotting.o elmfire_suppression.o elmfire_spotting_superseded.o elmfire_calibration.o elmfire_level_set.o elmfire.o"
 else
     echo "LOWMEM build, removing precompiler flags: smoke wui umdspotting suppression"
     export ELMFIRE_PRECOMPILER_FLAGS=""
     export ELMFIRE_BIN_SUFFIX="_lowmem"
-    export ELMFIRE_OBJECTS="elmfire_vars.o sort.o elmfire_init.o elmfire_namelists.o elmfire_subs.o elmfire_spread_rate.o  elmfire_ignition.o elmfire_io.o elmfire_spotting.o elmfire_spotting_superseded.o elmfire_calibration.o elmfire_level_set.o elmfire.o"
+    export ELMFIRE_OBJECTS="elmfire_vars.o sort.o elmfire_subs.o elmfire_init.o elmfire_namelists.o elmfire_spread_rate.o  elmfire_ignition.o elmfire_io.o elmfire_spotting.o elmfire_spotting_superseded.o elmfire_calibration.o elmfire_level_set.o elmfire.o"
 fi
 
 # Build main ELMFIRE executables:
