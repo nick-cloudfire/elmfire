@@ -301,7 +301,7 @@ DO I = 1, NUM_NODES
       C%CROWN_FIRE = 0
       C%FLIN_CANOPY = 0
    else
-      if (.not. USE_CFFDRS) C%FLIN_CANOPY = C%HPUA_CANOPY * C%VELOCITY * 5.08E-3
+      if (trim(SURFACE_SPREAD_MODEL) .eq. "ROTHERMEL") C%FLIN_CANOPY = C%HPUA_CANOPY * C%VELOCITY * 5.08E-3
    endif
 
    C%FLAME_LENGTH = (0.0775 / 0.3048) * (C%FLIN_SURFACE + C%FLIN_CANOPY) ** 0.46
@@ -371,7 +371,7 @@ DO I = 1, NUM_NODES
          ENDIF
       ENDIF
 
-      IF (USE_CFFDRS) then
+      if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS") then
          C%PHIW_CROWN = 0 ! not included in cffdrs calculations
          RSO = C%CRITICAL_FLIN /(300*C%SFC)
          C%CFB = 1-exp(-0.23*(C%VELOCITY_DMS_SURFACE/3.28-RSO))
