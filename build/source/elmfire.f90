@@ -29,7 +29,7 @@ REAL :: APHIW, COSASPMPI, PHIMAG, PHIWX, PHIWY, PHIX, PHIY, SINASPMPI
 
 CHARACTER(3) :: THREE_IWX_BAND
 CHARACTER(4) :: FOUR_IWX_BAND
-CHARACTER(60) :: VERSIONSTRING='ELMFIRE 2026.0220.memopt'
+CHARACTER(60) :: VERSIONSTRING='ELMFIRE 2026.0227.memopt'
 CHARACTER(400) :: FN, MESSAGESTR
 
 TYPE (RASTER_TYPE), POINTER :: R
@@ -132,18 +132,27 @@ REWIND(LUINPUT); CALL READ_SPOTTING
 REWIND(LUINPUT); CALL READ_SMOKE
 REWIND(LUINPUT); CALL READ_MONTE_CARLO ; NUM_ENSEMBLE_MEMBERS0 = NUM_ENSEMBLE_MEMBERS
 CLOSE(LUINPUT)
-if (USE_CFFDRS .and. IRANK_WORLD .EQ. 0) then 
-   CALL WRITE_FUEL_MODEL_TABLE_FBP
-else 
-   CALL WRITE_FUEL_MODEL_TABLE
+
+!check selected surface spread model is valid
+GOOD_INPUTS = any(VALID_SURFACE_MODELS .eq. trim(SURFACE_SPREAD_MODEL))
+if (.not. GOOD_INPUTS) then 
+   print *, "ERROR: SURFACE_SPREAD_MODEL specified (", trim(SURFACE_SPREAD_MODEL), ") not a valid selection."
+   print *, "  Valid selections:"
+   do i = 1, size(VALID_SURFACE_MODELS)
+      print *, "     ", trim(VALID_SURFACE_MODELS(i)) 
+   enddo
+   CALL SHUTDOWN()
 endif
+
+CALL WRITE_FUEL_MODEL_TABLE
 CALL read_geotiff_meta_gdalinfo()
 IF (TRIM(FUEL_MODEL_FILE) .EQ. 'null') FUEL_MODEL_FILE='fuel_models.csv'
 IF (TRIM(MISCELLANEOUS_INPUTS_DIRECTORY) .EQ. 'null' // PATH_SEPARATOR) MISCELLANEOUS_INPUTS_DIRECTORY=TRIM(FUELS_AND_TOPOGRAPHY_DIRECTORY) // PATH_SEPARATOR
 IF (TRIM(MISCELLANEOUS_INPUTS_DIRECTORY) .EQ. 'null'                  ) MISCELLANEOUS_INPUTS_DIRECTORY=TRIM(FUELS_AND_TOPOGRAPHY_DIRECTORY) // PATH_SEPARATOR
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
-if (USE_CFFDRS) then
-   CALL READ_FBP_FUEL_MODEL_TABLE
+CALL READ_FUEL_MODEL_TABLE
+
+if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS") then
    CALL READ_WEATHER
    DC_prev = START_DC
    DMC_prev = START_DMC
@@ -151,8 +160,6 @@ if (USE_CFFDRS) then
    DO I = 2 , size(daily_bui)
       daily_bui(I) = BUI(I-1, MOD( weather_day(I-1) / 100, 100 ))
    enddo
-ELSE
-   CALL READ_FUEL_MODEL_TABLE
 endif 
 
 #ifdef _WUI
@@ -296,7 +303,7 @@ ENDIF
 
 !-----------------------------------------------------------------------------------------------------------------
 
-if (.not. USE_CFFDRS) THEN
+if (trim(SURFACE_SPREAD_MODEL) .eq. "ROTHERMEL") THEN
    WHERE(FBFM%I2(:,:,1) .GT. 303) FBFM%I2(:,:,1) = 256
    WHERE(FBFM%I2(:,:,1) .LT.   0) FBFM%I2(:,:,1) =  99
 ENDIF
@@ -513,7 +520,7 @@ IF (MODE .NE. 1) THEN
             C%FLIN_CANOPY    = 0.
             C%CRITICAL_FLIN  = 9E9
             C%CROWN_FIRE     = 0
-            if (USE_CFFDRS) then 
+            if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS") then 
                C%C = 100*min(1.0,max(0.0,1.33-1.11*MLH%R4(IX,IY,1)))
                C%PC = mod(C%IFBFM,100) / 100.0
                C%PDF = C%PC
@@ -521,10 +528,10 @@ IF (MODE .NE. 1) THEN
             C => C%NEXT
          ENDDO
 
-         IF (USE_CFFDRS) THEN 
-            CALL CFFDRS_SPREAD_RATE(LIST_FIRE_POTENTIAL, DUMMY_NODE, daily_bui(ceiling((12 + mod(HOUR_OF_YEAR, 24) + IWX_BAND + IWX_MEM_BAND - 2)/24.0)))
-         ELSE 
+         if (trim(SURFACE_SPREAD_MODEL) .eq. "ROTHERMEL") then
             CALL ROTHERMEL_SURFACE_SPREAD_RATE(LIST_FIRE_POTENTIAL, DUMMY_NODE)
+         else if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS") then
+            CALL CFFDRS_SPREAD_RATE(LIST_FIRE_POTENTIAL, DUMMY_NODE, daily_bui(ceiling((12 + mod(HOUR_OF_YEAR, 24) + IWX_BAND + IWX_MEM_BAND - 2)/24.0)))
          ENDIF
 
          C => LIST_FIRE_POTENTIAL%HEAD
@@ -553,9 +560,7 @@ IF (MODE .NE. 1) THEN
             FLAME_LENGTH_TO_DUMP%R4(IX,IY,1) = C%FLAME_LENGTH
 
 
-            if (USE_CFFDRS) then 
-               SPREAD_DIRECTION_TO_DUMP%R4(IX,IY,1) = C%RAZ
-            else
+            if (trim(SURFACE_SPREAD_MODEL) .eq. "ROTHERMEL") then
                IASP = MIN(MAX(NINT(ASP%R4(C%IX,C%IY,1)),0),360)
                SINASPMPI = SINASPM180(IASP)
                COSASPMPI = COSASPM180(IASP) 
@@ -583,6 +588,8 @@ IF (MODE .NE. 1) THEN
                else
                   SPREAD_DIRECTION_TO_DUMP%R4(IX,IY,1) = 0.0
                end if
+            else if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS") then
+               SPREAD_DIRECTION_TO_DUMP%R4(IX,IY,1) = C%RAZ
             endif
 
             C => C%NEXT

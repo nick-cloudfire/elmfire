@@ -433,10 +433,10 @@ DO WHILE (T < WS%NBANDS * DT_METEOROLOGY)
          IF (ASSOCIATED(C)) DEALLOCATE(C)
             continue
 
-         if (USE_CFFDRS) then
+         if (trim(SURFACE_SPREAD_MODEL) .eq. "ROTHERMEL") then
+            CALL ROTHERMEL_SURFACE_SPREAD_RATE(LIST_BURNED, C)
+         else if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS") then
             CALL CFFDRS_SPREAD_RATE(LIST_BURNED, C, daily_bui(DAY_OF_SIM))
-         ELSE
-            CALL ROTHERMEL_SURFACE_SPREAD_RATE(LIST_BURNED,C)
          ENDIF
 
          ! Adjust spread rate for passive and active crown fire (Cruz):
@@ -715,10 +715,10 @@ DO WHILE (T < WS%NBANDS * DT_METEOROLOGY)
       
    ! Main call to get spread rate:
       IF (JUST_INTERPOLATED) THEN
-         if (USE_CFFDRS) then
+         if (trim(SURFACE_SPREAD_MODEL) .eq. "ROTHERMEL") then
+            CALL ROTHERMEL_SURFACE_SPREAD_RATE(LIST_TAGGED, DUMMY_NODE)
+         else if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS") then
             CALL CFFDRS_SPREAD_RATE(LIST_TAGGED, DUMMY_NODE, daily_bui(DAY_OF_SIM))
-         ELSE
-            CALL ROTHERMEL_SURFACE_SPREAD_RATE(LIST_TAGGED,DUMMY_NODE)
          ENDIF
       ENDIF
          CALL ACCUMULATE_CPU_USAGE(39, IT1, IT2)
@@ -1107,11 +1107,11 @@ DO WHILE (T < WS%NBANDS * DT_METEOROLOGY)
             ENDIF
             
             CALL INTERP_WD_RASTER_SINGLE(C, WD20_LO(:,:), WD20_HI(:,:), F_METEOROLOGY)
-            if (USE_CFFDRS) then
-               CALL CFFDRS_SPREAD_RATE(LIST_TAGGED, C, daily_bui(DAY_OF_SIM))
-            ELSE
-               CALL ROTHERMEL_SURFACE_SPREAD_RATE(LIST_TAGGED,C)
-            ENDIF
+         if (trim(SURFACE_SPREAD_MODEL) .eq. "ROTHERMEL") then
+            CALL ROTHERMEL_SURFACE_SPREAD_RATE(LIST_TAGGED, C)
+         else if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS") then
+            CALL CFFDRS_SPREAD_RATE(LIST_TAGGED, C, daily_bui(DAY_OF_SIM))
+         ENDIF
             IF (CROWN_FIRE_MODEL .GT. 0) CALL CROWN_SPREAD_RATE(LIST_TAGGED,C)
 #ifdef _SUPPRESSION
             IF (ENABLE_EXTENDED_ATTACK .AND. USE_SDI) C%SDI = SDI_FACTOR * SDI%R4(C%IX,C%IY,1)
@@ -1901,13 +1901,13 @@ IF (ISTEP .EQ. 1) THEN
             C%VELOCITY_DMS = C%VS0 * (ACCELERATION_FACTOR + PHIMAG)
 
 ! Calculate length over width:
-            if (USE_CFFDRS) then
+            if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS") then
                if (C%IFBFM .ge. 31 .and. C%IFBFM .le. 33) then !grass
                   C%LOW = max(1.0,1.1+C%WSV**0.464)
                else
                   C%LOW = 1+8.729*(1-exp(-0.03*C%WSV))**2.155
                endif
-            else
+            else if (trim(SURFACE_SPREAD_MODEL) .eq. "ROTHERMEL") then
                ! Determine effective mid flame wind speed (not needed for CFFDRS)
                WSMFEFF = FUEL_MODEL_TABLE_2D(C%IFBFM,30)%WSMFEFF_COEFF * PHIMAG ** FUEL_MODEL_TABLE_2D(C%IFBFM,30)%B_COEFF_INVERSE
                IF (C%FLIN_SURFACE .LT. C%CRITICAL_FLIN .OR. CROWN_FIRE_MODEL .LE. 0) WSMFEFF = MIN(WSMFEFF, 0.9*KWPM2_TO_BTUPFT2MIN*C%IR)
@@ -1965,9 +1965,9 @@ IF (ISTEP .EQ. 1) THEN
             !print *, "CELL ", C%IX, ",", C%IY, "ROS: ", C%VELOCITY, ", ISI: ", C%ISI, ", FBFM: ", C%IFBFM, ", ROSMAX: ", C%VELOCITY_DMS_SURFACE 
 
             ILH = MAX(MIN(NINT(100.*C%MLH),120),30)
-            if (USE_CFFDRS) then
+            if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS") then
                C%FLIN_SURFACE = C%FLIN_DMS_SURFACE * C%VELOCITY / C%VELOCITY_DMS_SURFACE
-            else
+            else if (trim(SURFACE_SPREAD_MODEL) .eq. "ROTHERMEL") then
                C%FLIN_SURFACE = FUEL_MODEL_TABLE_2D(C%IFBFM,ILH)%TR * C%IR * C%VELOCITY * 0.3048 ! kW/m
             endif
             IF (NO_SURFACE_FIRE) THEN
@@ -2031,9 +2031,9 @@ ELSE !ISTEP .EQ. 2
          end if
 
          ILH = MAX(MIN(NINT(100.*C%MLH),120),30)
-         if (USE_CFFDRS) then
+         if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS") then
             C%FLIN_SURFACE = C%FLIN_DMS_SURFACE * C%VELOCITY / C%VELOCITY_DMS_SURFACE
-         else
+         else if (trim(SURFACE_SPREAD_MODEL) .eq. "ROTHERMEL") then
             C%FLIN_SURFACE = FUEL_MODEL_TABLE_2D(C%IFBFM,ILH)%TR * C%IR * C%VELOCITY * 0.3048 ! kW/m
          endif
          IF (NO_SURFACE_FIRE) THEN
