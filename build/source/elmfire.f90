@@ -536,29 +536,26 @@ IF (MODE .NE. 1) THEN
 
          C => LIST_FIRE_POTENTIAL%HEAD
          DO I = 1, LIST_FIRE_POTENTIAL%NUM_NODES
-            IX = C%IX
-            IY = C%IY
-            C%VELOCITY = C%VELOCITY_DMS_SURFACE ! output of spread rate methods, cast for the update method below
-            if (FBFM%I2(IX,IY,1) .eq. FBFM%NODATA_VALUE) C%VELOCITY = FBFM%NODATA_VALUE
+            C%VELOCITY =  C%VELOCITY_DMS_SURFACE
             C => C%NEXT
          enddo
-         
+
          IF (CROWN_FIRE_MODEL .GT. 0) then 
             CALL CROWN_SPREAD_RATE  (LIST_FIRE_POTENTIAL, DUMMY_NODE)
             CALL UPDATE_LOCAL_SPREAD_PROPERTIES(LIST_FIRE_POTENTIAL, DUMMY_NODE)
          ENDIF
-
+         
          C => LIST_FIRE_POTENTIAL%HEAD
          DO I = 1, LIST_FIRE_POTENTIAL%NUM_NODES
             IX = C%IX
             IY = C%IY
-
+            if (FBFM%I2(IX,IY,1) .eq. FBFM%NODATA_VALUE) C%VELOCITY = FBFM%NODATA_VALUE
+            
             FLIN_TO_DUMP%R4(IX,IY,1) = C%FLIN_SURFACE + C%FLIN_CANOPY
             SPREAD_RATE_TO_DUMP%R4(IX,IY,1) = C%VELOCITY
             CROWN_FIRE_TO_DUMP%R4(IX,IY,1) = REAL(C%CROWN_FIRE)
             CRITICAL_FLIN_TO_DUMP%R4(Ix,IY,1) = C%CRITICAL_FLIN
             FLAME_LENGTH_TO_DUMP%R4(IX,IY,1) = C%FLAME_LENGTH
-
 
             if (trim(SURFACE_SPREAD_MODEL) .eq. "ROTHERMEL") then
                IASP = MIN(MAX(NINT(ASP%R4(C%IX,C%IY,1)),0),360)
