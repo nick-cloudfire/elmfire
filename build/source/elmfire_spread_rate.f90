@@ -267,6 +267,8 @@ DO I = 1, NUM_NODES
 
    C%HPUA_SURFACE = 0. ! kJ/m2, CANADIAN FBP HAS NO PROVISION FOR RESIDENCE TIME OR HEAT PER UNIT AREA.
    
+   print *, "ISI:", C%ISI, "SFC:", C%SFC, "RSS:", ROS
+
    C => C%NEXT
 
 ENDDO
@@ -374,7 +376,7 @@ DO I = 1, NUM_NODES
       if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS") then
          C%PHIW_CROWN = 0 ! not included in cffdrs calculations
          RSO = C%CRITICAL_FLIN /(300*C%SFC)
-         C%CFB = 1-exp(-0.23*(C%VELOCITY_DMS_SURFACE/3.28-RSO))
+         C%CFB = MAX(0.0,1-exp(-0.23*(C%VELOCITY/3.28-RSO)))
          C%CFC=0
          IF ((C%IFBFM .ge. 40 .and. C%IFBFM .le. 60) .or. (C%IFBFM .ge. 400 .and. C%IFBFM .le. 699)) then ! M1, M2
             C%CFC = FUEL_MODEL_TABLE_FBP(C%IFBFM)%CFL*C%CFB * C%PC
@@ -385,10 +387,11 @@ DO I = 1, NUM_NODES
          ENDIF
          C%FLIN_CANOPY = 0 ! CFFDRS does not really differentiate between surface and canopy FLIN, and requires final ROS for the calculation anyway.
 
-         if (C%IFBFM .eq. 6) then ! C-6 special condition 
+         if (C%IFBFM .eq. 6 .and. C%CFB .gt. 0) then ! C-6 special condition 
             FME = 1000*((1.5-0.00275*C%FMC)**4.0)/(460+(25.9*C%FMC))
             RSC = 60*(1-exp(-0.0497*C%ISI))*FME/0.778
-            C%VELOCITY_DMS_SURFACE = C%VELOCITY_DMS_SURFACE + C%CFB*(RSC - C%VELOCITY_DMS_SURFACE/3.28) * 3.28 !ft/min
+            C%VELOCITY = C%VELOCITY + C%CFB*(RSC - C%VELOCITY/3.28) * 3.28 !ft/min
+            print *, "FMC:", C%FMC, "FME:", FME, "RSC", RSC, "CFB:", C%CFB, "RSS:", C%VELOCITY_DMS_SURFACE/3.28
          endif
       endif
    ENDIF ! CBD .GT. 1E-3 .AND. CC .GT. 1E-3

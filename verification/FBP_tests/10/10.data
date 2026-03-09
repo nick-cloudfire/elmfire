@@ -15,23 +15,23 @@ WD_FILENAME                    = 'wd'
 M1_FILENAME                    = 'm1'
 M10_FILENAME                   = 'm10'
 M100_FILENAME                  = 'm100'
-USE_CFFDRS 					   = .TRUE.
-DAILY_WEATHER_FILENAME 		   = 'daily_weather.txt'
-WS_AT_10M = .TRUE.
-FOLIAR_MOISTURE_CONTENT = 118.7
-LH_MOISTURE_CONTENT = 60.0
-START_DMC = 100.0
-START_DC = 750.0
+SURFACE_SPREAD_MODEL           = 'CFFDRS'
+DAILY_WEATHER_FILENAME         = 'daily_weather.txt'
+WS_AT_10M                      = .TRUE.
+FOLIAR_MOISTURE_CONTENT        = 118.7
+LH_MOISTURE_CONTENT            = 60.0
+START_DMC                      = 100.0
+START_DC                       = 750.0
 /
 
 &OUTPUTS
 OUTPUTS_DIRECTORY    = './outputs'
-DTDUMP = 259200.0
+DTDUMP               = 259200.0
 DUMP_FLIN            = .TRUE.
 DUMP_SPREAD_RATE     = .TRUE.
-DUMP_SPREAD_DIRECTION = .TRUE.
-DUMP_CROWN_FIRE = .TRUE.
-DUMP_CRITICAL_FLIN = .TRUE.
+DUMP_SPREAD_DIRECTION= .TRUE.
+DUMP_CROWN_FIRE      = .TRUE.
+DUMP_CRITICAL_FLIN   = .TRUE.
 SPREAD_RATE_IN_M     = .TRUE.
 DUMP_TIME_OF_ARRIVAL = .TRUE.
 CONVERT_TO_GEOTIFF   = .TRUE.
