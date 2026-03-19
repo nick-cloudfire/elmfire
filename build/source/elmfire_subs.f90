@@ -1725,13 +1725,14 @@ REAL, INTENT(IN)  :: X, Y              ! projected coordinates (meters)
 REAL, INTENT(OUT) :: LAT, LON          ! output lat, lon in degrees
 
 INTEGER :: Z
-CHARACTER(256) :: SHELLSTR
-CHARACTER(256) :: TMPIN, TMPOUT
+CHARACTER(256) :: SHELLSTR, TMPIN, TMPOUT
 INTEGER :: LUIN, LUOUT, IOS
+character(len=32) :: istr
 
 ! Create simple temp file names (you can do something fancier if needed)
-TMPIN  = TRIM(SCRATCH) // 'gdal_xy_to_ll_in.txt'
-TMPOUT = TRIM(SCRATCH) // 'gdal_xy_to_ll_out.txt'
+write(istr,'(I0)') IRANK_WORLD
+TMPIN  = TRIM(SCRATCH) // 'gdal_xy_to_ll_in_'//trim(istr)//'.txt'
+TMPOUT = TRIM(SCRATCH) // 'gdal_xy_to_ll_out_'//trim(istr)//'.txt'
 
 ! 1. Write (x, y) to input file for gdaltransform
 OPEN(NEWUNIT=LUIN, FILE=TMPIN, STATUS='REPLACE', ACTION='WRITE', IOSTAT=IOS)
@@ -1747,7 +1748,7 @@ CLOSE(LUIN)
 SHELLSTR = TRIM(PATH_TO_GDAL) // 'gdaltransform -s_srs "' // TRIM(A_SRS) // '"' // &
             ' -t_srs EPSG:4326 < ' // TRIM(TMPIN) // ' > ' // TRIM(TMPOUT)
 
-!WRITE(*,*) 'Running: ', TRIM(SHELLSTR)
+! WRITE(*,*) 'Running: ', TRIM(SHELLSTR)
 CALL EXECUTE_COMMAND_LINE(TRIM(SHELLSTR), EXITSTAT=IOS)
 
 IF (IOS /= 0) THEN
@@ -1779,94 +1780,133 @@ END SUBROUTINE XY_TO_LATLON
 
 ! *****************************************************************************
 subroutine read_geotiff_meta_gdalinfo()
-! ***************Vibe-coded code below**************************************************************
    character(len=1024) :: cmd, line
-   character(len=256)  :: tmpfile
+   character(len=256)  :: tmpfile, tmpfile_epsg, tempFilename, istr
    integer :: iu, ios
    integer :: ncols, nrows
    real(8) :: x0, y0, dx, dy
    integer :: epsg
-   logical :: is_utm, is_metre
+   logical :: is_metre
 
    ! Defaults
-   ncols = -1; nrows = -1
-   x0 = 0d0; y0 = 0d0
-   dx = 0d0; dy = 0d0
+   ncols = -1
+   nrows = -1
+   x0 = 0d0
+   y0 = 0d0
+   dx = 0d0
+   dy = 0d0
    epsg = -1
+   is_metre = .false.
 
-   tmpfile = trim(SCRATCH) // '/' // "._gdalinfo_tmp.txt"
+   write(istr,'(I0)') IRANK_WORLD
+   tmpfile      = trim(SCRATCH) // '/' // '._gdalinfo_tmp_'//trim(istr)//'.txt'
+   tmpfile_epsg = trim(SCRATCH) // '/' // '._gdalsrsinfo_tmp_'//trim(istr)//'.txt'
 
-   ! Run gdalinfo and redirect output to a temp file
-   write(cmd,'(a)') 'gdalinfo "' // trim(FUELS_AND_TOPOGRAPHY_DIRECTORY) // '/' // &
-                 trim(ASP_FILENAME) // ".tif" // '" > "' // &
-                 trim(tmpfile) // '"'
-   call execute_command_line(trim(cmd))
-
-   open(newunit=iu, file=trim(tmpfile), status="old", action="read", iostat=ios)
-   if (ios /= 0) error stop "Failed to open gdalinfo output file."
-
-   do
-      read(iu, '(A)', iostat=ios) line
-      if (ios /= 0) exit
-
-      call parse_size
-      call parse_origin
-      call parse_pixel_size
-      call parse_epsg
-      call parse_is_utm
-      call parse_is_metre_units
-   enddo
-
-   close(iu)
-
-   if (.not. is_utm) then
-      error stop "DEM CRS is not UTM (did not find 'UTM zone' in gdalinfo output)."
+   tempFilename = trim(ASP_FILENAME)
+   if (USE_TILED_IO) then
+      tempFilename = trim(tempFilename) // '_1_1.bsq'
+   else
+      tempFilename = trim(tempFilename) // '.tif'
    endif
+
+   call read_basic_raster_meta()
+   call read_epsg_with_gdalsrsinfo()
 
    if (.not. is_metre) then
-      error stop "DEM CRS does not appear to use metre linear units."
+      error stop 'DEM CRS does not appear to use metre linear units.'
    endif
-   
 
-   ! Basic sanity checks
-   if (ncols <= 0 .or. nrows <= 0) error stop "Could not parse raster Size is ..."
-   if (dx == 0d0 .or. dy == 0d0)   error stop "Could not parse Pixel Size ..."
-   ! Origin can be 0,0 so we don't error-stop on that.
+   if (ncols <= 0 .or. nrows <= 0) error stop 'Could not parse raster Size is ...'
+   if (dx == 0d0 .or. dy == 0d0)   error stop 'Could not parse Pixel Size ...'
 
-   ! Outputs
-   ANALYSIS_CELLSIZE = abs(dx)          ! assume square; if not, you may want both dx,dy
-   ANALYSIS_XLLCORNER = x0                    ! lower-left x = xmin = origin x for north-up
-   ANALYSIS_YLLCORNER = y0 + dy * dble(nrows) ! lower-left y = ymax + dy*nrows (dy negative)
+   ANALYSIS_CELLSIZE  = abs(dx)
+   ANALYSIS_XLLCORNER = x0
+   ANALYSIS_YLLCORNER = y0 + dy * dble(nrows)
 
    if (epsg > 0) then
-   A_SRS = "EPSG:"//trim(int_to_str(epsg))
+      A_SRS = 'EPSG:' // trim(int_to_str(epsg))
    else
-   ! Fallback if EPSG not found: store a readable name
-   A_SRS = "UNKNOWN"
+      A_SRS = 'UNKNOWN'
    end if
 
-   CONTAINS
+contains
+
+   subroutine read_basic_raster_meta()
+      write(cmd,'(a)') 'gdalinfo "' // trim(FUELS_AND_TOPOGRAPHY_DIRECTORY) // '/' // &
+                       trim(tempFilename) // '" > "' // trim(tmpfile) // '"'
+      call execute_command_line(trim(cmd))
+
+      open(newunit=iu, file=trim(tmpfile), status='old', action='read', iostat=ios)
+      if (ios /= 0) error stop 'Failed to open gdalinfo output file.'
+
+      do
+         read(iu, '(A)', iostat=ios) line
+         if (ios /= 0) exit
+
+         call parse_size
+         call parse_origin
+         call parse_pixel_size
+         call parse_is_metre_units
+      end do
+
+      close(iu)
+   end subroutine read_basic_raster_meta
+
+   subroutine read_epsg_with_gdalsrsinfo()
+      integer :: p
+      character(len=1024) :: text
+
+      write(cmd,'(a)') 'gdalsrsinfo -o epsg "' // trim(FUELS_AND_TOPOGRAPHY_DIRECTORY) // '/' // &
+                     trim(tempFilename) // '" > "' // trim(tmpfile_epsg) // '"'
+      call execute_command_line(trim(cmd))
+
+      open(newunit=iu, file=trim(tmpfile_epsg), status='old', action='read', iostat=ios)
+      if (ios /= 0) return
+
+      do
+         read(iu, '(A)', iostat=ios) line
+         if (ios /= 0) exit
+
+         line = adjustl(line)
+
+         p = index(line, 'EPSG:')
+         if (p > 0) then
+            text = adjustl(line(p+5:))
+            read(text, *, iostat=ios) epsg
+            if (ios /= 0) epsg = -1
+            exit
+         end if
+      end do
+
+      close(iu)
+   end subroutine read_epsg_with_gdalsrsinfo
 
    pure logical function contains_ci(s, pat)
       implicit none
       character(len=*), intent(in) :: s, pat
-      character(len=len(s)) :: sl
+      character(len=len(s))   :: sl
       character(len=len(pat)) :: pl
       integer :: i
 
-      sl = s; pl = pat
-      do i=1,len(sl)
-         if (iachar(sl(i:i))>=iachar('A') .and. iachar(sl(i:i))<=iachar('Z')) sl(i:i)=achar(iachar(sl(i:i))+32)
+      sl = s
+      pl = pat
+
+      do i = 1, len(sl)
+         if (iachar(sl(i:i)) >= iachar('A') .and. iachar(sl(i:i)) <= iachar('Z')) then
+            sl(i:i) = achar(iachar(sl(i:i)) + 32)
+         end if
       end do
-      do i=1,len(pl)
-         if (iachar(pl(i:i))>=iachar('A') .and. iachar(pl(i:i))<=iachar('Z')) pl(i:i)=achar(iachar(pl(i:i))+32)
+
+      do i = 1, len(pl)
+         if (iachar(pl(i:i)) >= iachar('A') .and. iachar(pl(i:i)) <= iachar('Z')) then
+            pl(i:i) = achar(iachar(pl(i:i)) + 32)
+         end if
       end do
 
       contains_ci = index(sl, pl) > 0
    end function contains_ci
 
    subroutine parse_is_metre_units
-      ! Handle common gdalinfo formats: WKT1/WKT2 + summary line
       if (contains_ci(line, 'linear units:') .and. contains_ci(line, 'metre')) then
          is_metre = .true.
       else if (contains_ci(line, 'lengthunit["metre"')) then
@@ -1876,74 +1916,50 @@ subroutine read_geotiff_meta_gdalinfo()
       end if
    end subroutine parse_is_metre_units
 
-   subroutine parse_is_utm
-      ! UTM usually appears in CRS name lines and/or embedded WKT
-      if (contains_ci(line, 'utm zone')) is_utm = .true.
-   end subroutine parse_is_utm
-
    subroutine parse_size
       integer :: p
       character(len=256) :: rest
 
-      p = index(line, "Size is")
+      p = index(line, 'Size is')
       if (p > 0) then
-      rest = adjustl(line(p+len("Size is"):))
-      ! expects: "50, 50"
-      read(rest, *, iostat=ios) ncols
-      if (ios == 0) then
-         p = index(rest, ",")
-         if (p > 0) read(rest(p+1:), *, iostat=ios) nrows
-      end if
+         rest = adjustl(line(p+len('Size is'):))
+         read(rest, *, iostat=ios) ncols
+         if (ios == 0) then
+            p = index(rest, ',')
+            if (p > 0) read(rest(p+1:), *, iostat=ios) nrows
+         end if
       end if
    end subroutine parse_size
-
 
    subroutine parse_origin
       integer :: p1, p2
       character(len=256) :: inside
 
-      p1 = index(line, "Origin = (")
+      p1 = index(line, 'Origin = (')
       if (p1 > 0) then
-      p1 = p1 + len("Origin = (")
-      p2 = index(line(p1:), ")")
-      if (p2 > 0) then
-         inside = line(p1:p1+p2-2)  ! between '(' and ')'
-         read(inside, *, iostat=ios) x0, y0
-      end if
+         p1 = p1 + len('Origin = (')
+         p2 = index(line(p1:), ')')
+         if (p2 > 0) then
+            inside = line(p1:p1+p2-2)
+            read(inside, *, iostat=ios) x0, y0
+         end if
       end if
    end subroutine parse_origin
-
 
    subroutine parse_pixel_size
       integer :: p1, p2
       character(len=256) :: inside
 
-      p1 = index(line, "Pixel Size = (")
+      p1 = index(line, 'Pixel Size = (')
       if (p1 > 0) then
-      p1 = p1 + len("Pixel Size = (")
-      p2 = index(line(p1:), ")")
-      if (p2 > 0) then
-         inside = line(p1:p1+p2-2)
-         read(inside, *, iostat=ios) dx, dy
-      end if
-      end if
-   end subroutine parse_pixel_size
-
-
-   subroutine parse_epsg
-      integer :: p, p2
-
-      ! gdalinfo WKT snippet often contains: ID["EPSG",32635]]
-      p = index(line, 'ID["EPSG",')
-      if (p > 0) then
-         p = p + len('ID["EPSG",')
-         ! find closing bracket
-         p2 = index(line(p:), ']')
+         p1 = p1 + len('Pixel Size = (')
+         p2 = index(line(p1:), ')')
          if (p2 > 0) then
-            read(line(p:p+p2-2), *) epsg
+            inside = line(p1:p1+p2-2)
+            read(inside, *, iostat=ios) dx, dy
          end if
       end if
-   end subroutine parse_epsg
+   end subroutine parse_pixel_size
 
    pure function int_to_str(i) result(s)
       integer, intent(in) :: i
