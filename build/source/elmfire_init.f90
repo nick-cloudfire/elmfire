@@ -792,7 +792,7 @@ SELECT CASE (ITYPE)
       ENDDO
       ENDDO
    CASE (2) ! Wind direction
-      DO IBAND = 1, WD%NBANDS
+      DO IBAND = 1, SIZE(WD%R4(1,1,:))
       DO IROW = 1, WD%NROWS
       DO ICOL = 1, WD%NCOLS
          WD%R4(ICOL,IROW,IBAND) = WD%R4(ICOL,IROW,IBAND) - GRID_DECLINATION

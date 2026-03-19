@@ -61,11 +61,10 @@ DO I = 1, NUM_NODES
    M(5)  = C%MLH
    M(6)  = C%MLW
 
-   ! print *, "M1 =", M(1), ", M2 =", M(2),", M3 =", M(3),", M4 =", M(4),", M5 =", M(5),", M6 =", M(6)
-
+   ! if (IRANK_HOST .gt. 0) print *, "M1 =", M(1), ", M2 =", M(2),", M3 =", M(3),", M4 =", M(4),", M5 =", M(5),", M6 =", M(6)
+   
    ILH = MAX(MIN(NINT(100.*M(5)),120),30)
    FMT=FUEL_MODEL_TABLE_2D(C%IFBFM,ILH)
-
 !Calculate live fuel moisture of extinction:
    MPRIMENUMER(1:4) = FMT%WPRIMENUMER(1:4) * M(1:4)
    SUM_MPRIMENUMER=SUM(MPRIMENUMER(1:4))
@@ -267,7 +266,7 @@ DO I = 1, NUM_NODES
 
    C%HPUA_SURFACE = 0. ! kJ/m2, CANADIAN FBP HAS NO PROVISION FOR RESIDENCE TIME OR HEAT PER UNIT AREA.
    
-   print *, "ISI:", C%ISI, "SFC:", C%SFC, "RSS:", ROS
+   ! print *, "ISI:", C%ISI, "SFC:", C%SFC, "RSS:", ROS
 
    C => C%NEXT
 
@@ -391,7 +390,7 @@ DO I = 1, NUM_NODES
             FME = 1000*((1.5-0.00275*C%FMC)**4.0)/(460+(25.9*C%FMC))
             RSC = 60*(1-exp(-0.0497*C%ISI))*FME/0.778
             C%VELOCITY = C%VELOCITY + C%CFB*(RSC - C%VELOCITY/3.28) * 3.28 !ft/min
-            print *, "FMC:", C%FMC, "FME:", FME, "RSC", RSC, "CFB:", C%CFB, "RSS:", C%VELOCITY_DMS_SURFACE/3.28
+            ! print *, "FMC:", C%FMC, "FME:", FME, "RSC", RSC, "CFB:", C%CFB, "RSS:", C%VELOCITY_DMS_SURFACE/3.28
          endif
       endif
    ENDIF ! CBD .GT. 1E-3 .AND. CC .GT. 1E-3
