@@ -13,6 +13,7 @@ import glob
 import numpy as np
 import pandas as pd
 import rasterio
+import argparse
 
 
 # -----------------------------
@@ -91,6 +92,12 @@ def find_run_id_column(df: pd.DataFrame):
 # Main
 # -----------------------------
 def main():
+    parser = argparse.ArgumentParser(description="Verify ELMFIRE outputs")
+    parser.add_argument("--mode", type=int, choices=[1, 2], required=True,
+                        help="1 = head_fire_* files, 2 = vs_/flin_ files")
+    args = parser.parse_args()
+
+    mode = args.mode
     if not os.path.exists(TARGETS_CSV):
         raise FileNotFoundError(f"Missing targets.csv: {TARGETS_CSV}")
 
@@ -135,8 +142,12 @@ def main():
     rows = []
     for run in run_folders:
         out_dir = os.path.join(ROOT_DIR, run, "outputs")
-        vs_files = sorted(glob.glob(os.path.join(out_dir, "head_fire_spread_rate_*.tif")))
-        flin_files = sorted(glob.glob(os.path.join(out_dir, "head_flin_*.tif")))
+        if mode == 2:
+            vs_files = sorted(glob.glob(os.path.join(out_dir, "head_fire_spread_rate_*.tif")))
+            flin_files = sorted(glob.glob(os.path.join(out_dir, "head_flin_*.tif")))
+        elif mode == 1:
+            vs_files = sorted(glob.glob(os.path.join(out_dir, "vs_*.tif")))
+            flin_files = sorted(glob.glob(os.path.join(out_dir, "flin_*.tif")))
 
         ros_max, ros_file = max_of_geotiffs(vs_files) if vs_files else (None, None)
         fi_max, fi_file = max_of_geotiffs(flin_files) if flin_files else (None, None)

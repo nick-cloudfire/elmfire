@@ -19,13 +19,15 @@ RECURSIVE SUBROUTINE ROTHERMEL_SURFACE_SPREAD_RATE(L,DUMMY_NODE)
 TYPE (DLL), INTENT(INOUT) :: L
 TYPE (NODE), POINTER, INTENT(INOUT) :: DUMMY_NODE
 !Local variables:
-INTEGER :: I, ILH, NUM_NODES
+INTEGER :: I, ILH, NUM_NODES, IX, IY
 REAL :: WS_LIMIT, WSMF_LIMITED, PHIS_MAX, MOMEX2, MOMEX3, MEX_LIVE, M_DEAD, M_LIVE,ETAM_DEAD, ETAM_LIVE, &
-        RHOBEPSQIG_DEAD, RHOBEPSQIG_LIVE, RHOBEPSQIG, IR_DEAD, IR_LIVE, MOMEX, SUM_MPRIMENUMER
+        RHOBEPSQIG_DEAD, RHOBEPSQIG_LIVE, RHOBEPSQIG, IR_DEAD, IR_LIVE, MOMEX, SUM_MPRIMENUMER, CAC, CBD_EFF, CROS, CROSA, R0, &
+        WS10KMPH
 REAL, DIMENSION(1:6) :: M, QIG, FEPSQIG, FMC, FMEX, MPRIMENUMER
 TYPE (FUEL_MODEL_TABLE_TYPE) :: FMT
 TYPE(NODE), POINTER :: C
 REAL, PARAMETER :: BTUPFT2MIN_TO_KWPM2 = 1.055/(60. * 0.3048 * 0.3048)
+REAL, PARAMETER :: MPH_20FT_TO_KMPH_10M = 1.609 / 0.87 
 
 IF (ASSOCIATED (DUMMY_NODE) ) THEN
    NUM_NODES = 1
@@ -36,7 +38,8 @@ ELSE
 ENDIF
 
 DO I = 1, NUM_NODES
-
+   IX = C%IX
+   IY = C%IY
    IF (USE_BLDG_SPREAD_MODEL .AND. C%IFBFM .EQ. 91) THEN
       C => C%NEXT
       CYCLE
@@ -123,6 +126,35 @@ DO I = 1, NUM_NODES
    C%IR           = C%IR * BTUPFT2MIN_TO_KWPM2 ! kW/m2
    C%HPUA_SURFACE = C%IR * FMT%TR * 60. ! kJ/m2
    C%FLIN_DMS_SURFACE = FMT%TR * C%IR * C%VELOCITY_DMS_SURFACE * 0.3048 ! kW/m
+   
+! Crown fire   
+   IF (C%VS0 .GT. 0. .AND. CBD%R4(IX,IY,1) .GT. 1E-3 .AND. CC%R4(IX,IY,1) .GT. 1E-3) THEN   
+      
+      CALL CROWN_CRITICAL_FLIN(C)
+
+      CROS = 0.
+      CBD_EFF  = MAX(CBD%R4(IX,IY,1) + PERTURB_CBD, 0.01)
+      WS10KMPH = C%WS20_NOW * MPH_20FT_TO_KMPH_10M
+      CROSA    = CROWN_FIRE_ADJ * 11.02 * WS10KMPH**0.9 * CBD_EFF**0.19 * EXP(-0.17*100.0*C%M1) / 0.3048 ! ft / min
+      CROSA    = MIN(CROSA,CROWN_FIRE_SPREAD_RATE_LIMIT) ! ft/min
+      R0       = (3.0 / CBD_EFF) / 0.3048 !ft/min
+      CAC      = CROSA / R0
+      IF (CAC .GT. 1) THEN !Active crown fire
+         IF (CC%R4(IX,IY,1) .GE. CRITICAL_CANOPY_COVER) THEN 
+            C%CROWN_FIRE = 2
+            CROS = CROSA
+            C%PHIW_CROWN = MIN(MAX(CROS / MAX(C%VS0, 0.001) - 1.0, 0.0), 200.0)
+         ELSE
+            C%CROWN_FIRE = 1
+         ENDIF
+      ELSE ! Passive crown fire
+         C%CROWN_FIRE = 1
+         IF (CC%R4(IX,IY,1) .GE. CRITICAL_CANOPY_COVER) THEN
+            CROS = CROSA * EXP(-CAC)
+            C%PHIW_CROWN = MIN(MAX(CROS / MAX(C%VS0,0.001) - 1.0, 0.0), 200.0)
+         ENDIF
+      ENDIF
+   endif
 
    C => C%NEXT
 ENDDO
@@ -139,10 +171,10 @@ TYPE (DLL), INTENT(INOUT) :: L
 TYPE (NODE), POINTER, INTENT(INOUT) :: DUMMY_NODE
 REAL, intent(in) :: BUI_c
 
-INTEGER :: NUM_NODES, aspect, I
+INTEGER :: NUM_NODES, aspect, I, IX, IY
 TYPE(NODE), POINTER :: C
 REAL :: M, FF, SF, RSF, ISF_c, WSE, WSE1, WSE2, WSX, WSY, &
-         FW, RSI_c, BE, ROS, FFMC, CF, slope, RSF_1, RSF_2
+         FW, RSI_c, BE, ROS, FFMC, CF, slope, RSF_1, RSF_2, ISI_s, windy
 
 IF (ASSOCIATED (DUMMY_NODE) ) THEN
    NUM_NODES = 1
@@ -153,7 +185,8 @@ ELSE
 ENDIF
 
 DO I = 1, NUM_NODES
-
+   IX = C%IX
+   IY = C%IY
    IF (USE_BLDG_SPREAD_MODEL .AND. C%IFBFM .EQ. 101) THEN
       C => C%NEXT
       CYCLE
@@ -177,7 +210,7 @@ DO I = 1, NUM_NODES
    C%PDF = C%PC
    M  = C%M1*100
    slope = tan(SLP%R4(C%IX,C%IY,1)*PIO180) * 100.0 !percent
-   aspect = mod(ASP%R4(C%IX,C%IY,1) + 180.0,360.0)
+   aspect = mod(ASP%R4(C%IX,C%IY,1),360.0)
 
    ! ---------------- INITIAL SPREAD INDEX ----------------
 
@@ -227,20 +260,21 @@ DO I = 1, NUM_NODES
    else
       WSE = WSE2 
    endif
-   WSX = C%WS20_NOW*1.61*1.15*sin(C%WD20_NOW * PIO180) + WSE*sin(aspect * PIO180)
-   WSY = C%WS20_NOW*1.61*1.15*cos(C%WD20_NOW * PIO180) + WSE*cos(aspect * PIO180)
+   WSX = C%WS20_NOW*1.61*1.15*sin(C%WD20_NOW * PIO180+ PI) + WSE*sin(aspect * PIO180 + PI)
+   WSY = C%WS20_NOW*1.61*1.15*cos(C%WD20_NOW * PIO180+ PI) + WSE*cos(aspect * PIO180 + PI)
+   !WSY = WSY * (-1.0) !So it is positive upwards.
+   !WSX = WSX * (-1.0) !So it is positive rightwards. 
    C%WSV = sqrt(WSX**2+WSY**2)
-   C%RAZ = acos(WSY/C%WSV)
+   C%RAZ = acos(WSY/C%WSV)/PIO180
    if (WSX .lt. 0) C%RAZ = 360 - C%RAZ
 
-   if (C%WS20_NOW*1.61*1.15 .le. 40) then
+   if (C%WSV .le. 40) then
       FW = exp(0.05039*C%WSV)
    else
       FW = 12*(1-exp(-0.0818*(C%WSV-28)))
    endif
 
    C%ISI = 0.208 * FF * FW
-
    ! ----------------- RATE OF SPREAD -------------------
    RSI_c = RSI(C%IFBFM, C%ISI, CF)
 
@@ -259,14 +293,40 @@ DO I = 1, NUM_NODES
    C%VS0 = RSI(C%IFBFM, 0.208*FF, CF) * BE ! RSZ m/min, no wind, no slope
    C%IR = 0! kW/m2, CANADIAN FBP HAS NO PROVISION FOR RESIDENCE TIME OR HEAT PER UNIT AREA.
 
-   C%PHIS_SURFACE = (RSF* BE/C%VS0) - 1
-   C%PHIW_SURFACE = (ROS-RSF* BE)/C%VS0
+   ! ----------------- SLOPE AND WIND MAGNITUDES  -------------------
+  ! recalculate slope only ROS, in direction of max spread
+
+   !these dont actually work right now, so the part where this is used is handled downstream.
+
+   windy = C%WS20_NOW*1.61*1.15 !* COS( ((C%WD20_NOW) - C%RAZ) * PIO180 )
+   if (windy .le. 40) then
+      FW = exp(0.05039*windy)
+   else
+      FW = 12*(1-exp(-0.0818*(windy-28)))
+   endif
+   ISI_s = 0.208 * FF * FW
+   !ROS = RSI(C%IFBFM, ISI_s, CF)*BE
+
+   WSE = WSE !* COS( ((ASPECT + 180.0) - C%RAZ) * PIO180 )
+   if (WSE .le. 40) then
+      FW = exp(0.05039*WSE)
+   else
+      FW = 12*(1-exp(-0.0818*(WSE-28)))
+   endif
+   ISI_s = 0.208 * FF * FW
+   RSF = RSI(C%IFBFM, ISI_s, CF)*BE
+   
+   ! print *, RSF, ROS, C%WSV, WSE, C%WS20_NOW*1.61*1.15
+   C%PHIS_SURFACE = SF/BE - 1
+   C%PHIW_SURFACE = ROS/C%VS0 - 1 - C%PHIS_SURFACE
 
    C%VS0 = C%VS0 * 3.28 ! ft/min
-
    C%HPUA_SURFACE = 0. ! kJ/m2, CANADIAN FBP HAS NO PROVISION FOR RESIDENCE TIME OR HEAT PER UNIT AREA.
    
    ! print *, "ISI:", C%ISI, "SFC:", C%SFC, "RSS:", ROS
+
+   C%FLIN_CANOPY = 0 ! CFFDRS does not really differentiate between surface and canopy FLIN, and requires final ROS for the calculation anyway.
+   C%PHIW_CROWN = 0 ! not included in cffdrs calculations
 
    C => C%NEXT
 
@@ -276,14 +336,15 @@ ENDDO
 end subroutine CFFDRS_SPREAD_RATE
 ! *****************************************************************************
 
+! *****************************************************************************
 subroutine UPDATE_LOCAL_SPREAD_PROPERTIES(L,DUMMY_NODE)
-
+! *****************************************************************************
 TYPE (DLL), INTENT(INOUT) :: L
 TYPE (NODE), POINTER, INTENT(INOUT) :: DUMMY_NODE
 
 TYPE(NODE), POINTER :: C
-INTEGER :: I, IX, IY, NUM_NODES
-
+INTEGER :: I, NUM_NODES, IX, IY, RSO
+REAL :: FME, RSC
 
 IF (ASSOCIATED (DUMMY_NODE) ) THEN
    NUM_NODES = 1
@@ -294,88 +355,19 @@ ELSE
 ENDIF
 
 DO I = 1, NUM_NODES
-   IX=C%IX
-   IY=C%IY
-   C%FLIN_SURFACE = 300 * (C%SFC + C%CFC) * C%VELOCITY / 3.24
-
-   if (C%FLIN_SURFACE .lt. C%CRITICAL_FLIN) then 
-      C%CROWN_FIRE = 0
-      C%FLIN_CANOPY = 0
-   else
-      if (trim(SURFACE_SPREAD_MODEL) .eq. "ROTHERMEL") C%FLIN_CANOPY = C%HPUA_CANOPY * C%VELOCITY * 5.08E-3
-   endif
-
-   C%FLAME_LENGTH = (0.0775 / 0.3048) * (C%FLIN_SURFACE + C%FLIN_CANOPY) ** 0.46
-   C%HRRPUA = (C%FLIN_SURFACE + C%FLIN_CANOPY) / ASP%CELLSIZE
-
-enddo
-
-end subroutine UPDATE_LOCAL_SPREAD_PROPERTIES
-
-! *****************************************************************************
-RECURSIVE SUBROUTINE CROWN_SPREAD_RATE(L,DUMMY_NODE)
-! *****************************************************************************
-
-TYPE (DLL), INTENT(INOUT) :: L
-TYPE (NODE), POINTER, INTENT(INOUT) :: DUMMY_NODE
-
-INTEGER :: I, IX, IY, NUM_NODES
-REAL :: WS10KMPH, CROSA, R0, CAC, FMCTERM, CBD_EFF, CBH_EFF, CROS, RSO, FME, RSC
-TYPE(NODE), POINTER :: C
-REAL, PARAMETER :: MPH_20FT_TO_KMPH_10M = 1.609 / 0.87 ! 1.609 km/h per mi/h; divide by 0.87 to go from 20 ft to 10 m
-!LOGICAL, PARAMETER :: USE_FLIN_DMS_SURFACE = .TRUE.  ! Ignores directional fireline intensity for crown fire activation.
-
-IF (ASSOCIATED (DUMMY_NODE) ) THEN
-   NUM_NODES = 1
-   C => DUMMY_NODE
-ELSE
-   NUM_NODES = L%NUM_NODES
-   C => L%HEAD
-ENDIF
-DO I = 1, NUM_NODES
-   IX=C%IX
-   IY=C%IY
-   
-   IF (C%VS0 .GT. 0. .AND. CBD%R4(IX,IY,1) .GT. 1E-3 .AND. CC%R4(IX,IY,1) .GT. 1E-3) THEN 
-      CROS = 0.
-      IF (C%CRITICAL_FLIN .GT. 1E9) THEN
-         C%HPUA_CANOPY = CBD%R4(IX,IY,1) * MAX(CH%R4(IX,IY,1) - CBH%R4(IX,IY,1),0.) * 12000. !kJ/m2
-         IF (CBH%R4(IX,IY,1) .GE. 0.) THEN
-            FMCTERM = 460. + 26. * C%FMC
-            CBH_EFF = MAX(CBH%R4(IX,IY,1) + PERTURB_CBH, 0.1)
-            C%CRITICAL_FLIN = (0.01 * CBH_EFF * FMCTERM) ** 1.5
-         ELSE
-            C%CRITICAL_FLIN = 9E9
-         ENDIF
-      ENDIF
-
-      CBD_EFF  = MAX(CBD%R4(IX,IY,1) + PERTURB_CBD, 0.01)
-      WS10KMPH = C%WS20_NOW * MPH_20FT_TO_KMPH_10M
-      CROSA    = CROWN_FIRE_ADJ * 11.02 * WS10KMPH**0.9 * CBD_EFF**0.19 * EXP(-0.17*100.0*C%M1) / 0.3048 ! ft / min
-      CROSA    = MIN(CROSA,CROWN_FIRE_SPREAD_RATE_LIMIT) ! ft/min
-      R0       = (3.0 / CBD_EFF) / 0.3048 !ft/min
-      CAC      = CROSA / R0
-
-      IF (CAC .GT. 1) THEN !Active crown fire
-         IF (CC%R4(IX,IY,1) .GE. CRITICAL_CANOPY_COVER) THEN 
-            C%CROWN_FIRE = 2
-            CROS = CROSA
-            C%PHIW_CROWN = MIN(MAX(CROS / MAX(C%VS0, 0.001) - 1.0, 0.0), 200.0)
-         ELSE
-            C%CROWN_FIRE = 1
-         ENDIF
-      ELSE ! Passive crown fire
-         C%CROWN_FIRE = 1
-         IF (CC%R4(IX,IY,1) .GE. CRITICAL_CANOPY_COVER) THEN
-            CROS = CROSA * EXP(-CAC)
-            C%PHIW_CROWN = MIN(MAX(CROS / MAX(C%VS0,0.001) - 1.0, 0.0), 200.0)
-         ENDIF
-      ENDIF
-
-      if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS") then
-         C%PHIW_CROWN = 0 ! not included in cffdrs calculations
+   IX = C%IX
+   IY = C%IY
+   if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS") then
+      IF (C%VS0 .GT. 0. .AND. CBD%R4(IX,IY,1) .GT. 1E-3 .AND. CC%R4(IX,IY,1) .GT. 1E-3) THEN   
+         
+         CALL CROWN_CRITICAL_FLIN(C)
          RSO = C%CRITICAL_FLIN /(300*C%SFC)
          C%CFB = MAX(0.0,1-exp(-0.23*(C%VELOCITY/3.28-RSO)))
+         
+         if (C%CFB .lt. 0.1) C%CROWN_FIRE = 0
+         if (C%CFB .lt. 0.9 .and. C%CFB .gt. 0.1) C%CROWN_FIRE = 1
+         if (C%CFB .gt. 0.9) C%CROWN_FIRE = 2
+
          C%CFC=0
          IF ((C%IFBFM .ge. 40 .and. C%IFBFM .le. 60) .or. (C%IFBFM .ge. 400 .and. C%IFBFM .le. 699)) then ! M1, M2
             C%CFC = FUEL_MODEL_TABLE_FBP(C%IFBFM)%CFL*C%CFB * C%PC
@@ -384,25 +376,58 @@ DO I = 1, NUM_NODES
          ELSE
             C%CFC = FUEL_MODEL_TABLE_FBP(C%IFBFM)%CFL*C%CFB
          ENDIF
-         C%FLIN_CANOPY = 0 ! CFFDRS does not really differentiate between surface and canopy FLIN, and requires final ROS for the calculation anyway.
-
-         if (C%IFBFM .eq. 6 .and. C%CFB .gt. 0) then ! C-6 special condition 
-            FME = 1000*((1.5-0.00275*C%FMC)**4.0)/(460+(25.9*C%FMC))
-            RSC = 60*(1-exp(-0.0497*C%ISI))*FME/0.778
-            C%VELOCITY = C%VELOCITY + C%CFB*(RSC - C%VELOCITY/3.28) * 3.28 !ft/min
-            ! print *, "FMC:", C%FMC, "FME:", FME, "RSC", RSC, "CFB:", C%CFB, "RSS:", C%VELOCITY_DMS_SURFACE/3.28
-         endif
       endif
-   ENDIF ! CBD .GT. 1E-3 .AND. CC .GT. 1E-3
+      if (C%IFBFM .eq. 6 .and. C%CFB .gt. 0) then ! C-6 special condition 
+         FME = 1000*((1.5-0.00275*C%FMC)**4.0)/(460+(25.9*C%FMC))
+         RSC = 60*(1-exp(-0.0497*C%ISI))*FME/0.778
+         C%VELOCITY = C%VELOCITY + C%CFB*(RSC - C%VELOCITY/3.28) * 3.28 !ft/min
+      endif
+      print *, C%SFC, C%CFC, C%CFB, C%VELOCITY / 3.28
+   endif
+   
+   if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS") C%FLIN_SURFACE = 300 * (C%SFC + C%CFC) * C%VELOCITY / 3.28
+   
+   
+   if (C%FLIN_SURFACE .lt. C%CRITICAL_FLIN) then 
+      C%CROWN_FIRE = 0
+      C%FLIN_CANOPY = 0
+   else
+      if (trim(SURFACE_SPREAD_MODEL) .eq. "ROTHERMEL") C%FLIN_CANOPY = C%HPUA_CANOPY * C%VELOCITY * 5.08E-3
+   endif
+   print *, C%FLIN_SURFACE, C%FLIN_CANOPY
 
+   C%FLAME_LENGTH = (0.0775 / 0.3048) * (C%FLIN_SURFACE + C%FLIN_CANOPY) ** 0.46
+   C%HRRPUA = (C%FLIN_SURFACE + C%FLIN_CANOPY) / ASP%CELLSIZE
 
+   
 
    C => C%NEXT
-ENDDO ! I = 1, L%NUM_NODES
+enddo
+! *****************************************************************************
+end subroutine UPDATE_LOCAL_SPREAD_PROPERTIES
+! *****************************************************************************
 
-! *****************************************************************************
-END SUBROUTINE CROWN_SPREAD_RATE
-! *****************************************************************************
+subroutine CROWN_CRITICAL_FLIN(C)
+
+TYPE (NODE), POINTER, INTENT(INOUT) :: C
+REAL :: FMCTERM, CBH_EFF
+INTEGER :: IX, IY
+
+IX = C%IX
+IY = C%IY
+
+IF (C%CRITICAL_FLIN .GT. 1E9) THEN
+   C%HPUA_CANOPY = CBD%R4(IX,IY,1) * MAX(CH%R4(IX,IY,1) - CBH%R4(IX,IY,1),0.) * 12000. !kJ/m2
+   IF (CBH%R4(IX,IY,1) .GE. 0.) THEN
+      FMCTERM = 460. + 26. * C%FMC
+      CBH_EFF = MAX(CBH%R4(IX,IY,1) + PERTURB_CBH, 0.1)
+      C%CRITICAL_FLIN = (0.01 * CBH_EFF * FMCTERM) ** 1.5
+   ELSE
+      C%CRITICAL_FLIN = 9E9
+   ENDIF
+ENDIF
+
+end subroutine CROWN_CRITICAL_FLIN
 
 #ifdef _WUI
 ! *****************************************************************************
