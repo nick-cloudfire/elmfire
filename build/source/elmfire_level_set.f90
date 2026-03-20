@@ -80,7 +80,10 @@ TSTOP = WS%NBANDS * DT_METEOROLOGY - 1 ! placeholder value, fixes issue where mp
 local_flag = 0
 
 Print *, "STARTING LEVEL SET PROPAGATION CASE: ", ICASE, " | WEATHER BAND START: ", IWX_BAND
-if (IS_VIRTUAL_RUN) print *, "[", ICASE, "]: VIRTUAL RUN CASE"
+if (IS_VIRTUAL_RUN) then
+   print *, "[", ICASE, "]: VIRTUAL RUN CASE"
+   local_flag = 1
+endif
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 CALL UPDATE_WEATHER_SLICE(BAND_L, BAND_H)
 IF (MULTIPLE_HOSTS) CALL BCAST_WEATHER()
@@ -444,14 +447,14 @@ DO WHILE (T .le. WS%NBANDS * DT_METEOROLOGY)
          ! Adjust spread rate for passive and active crown fire (Cruz):
          ! Note that this adjusts spread rate in not only burned cells but nearby cells
          ! that are "about to burn"
-         IF (CROWN_FIRE_MODEL .GT. 0) CALL CROWN_SPREAD_RATE(LIST_TAGGED, C)
+         
          DO ISTEP=1,2
             ! Calcaulate components of normal vector
             CALL CALC_NORMAL_VECTORS (ISTEP, HALFRCELLSIZE)
 
             ! Calculate x and y components of velocity from elliptical spread dimensions
             CALL UX_AND_UY_ELLIPTICAL(LIST_BURNED, LIST_BURNED, 1.0, ISTEP, T, DYNAMIC_ARRAY)
-
+            
             call UPDATE_LOCAL_SPREAD_PROPERTIES(LIST_BURNED, C)
          ENDDO
          
@@ -510,7 +513,7 @@ DO WHILE (T .le. WS%NBANDS * DT_METEOROLOGY)
       START_CALCS = .TRUE.
       INITIATED = .TRUE.
    ENDIF
-   if (ICASE .eq. 5) print *, T, START_CALCS
+   
    IF (START_CALCS) THEN
       CALL SYSTEM_CLOCK(IT1)
 
@@ -717,15 +720,11 @@ DO WHILE (T .le. WS%NBANDS * DT_METEOROLOGY)
             CALL CFFDRS_SPREAD_RATE(LIST_TAGGED, DUMMY_NODE, daily_bui(DAY_OF_SIM))
          ENDIF
       ENDIF
-         CALL ACCUMULATE_CPU_USAGE(39, IT1, IT2)
+      CALL ACCUMULATE_CPU_USAGE(39, IT1, IT2)
 
    ! Adjust spread rate for passive and active crown fire (Cruz):
    ! Note that this adjusts spread rate in not only burned cells but nearby cells
    ! that are "about to burn"
-      IF (CROWN_FIRE_MODEL .GT. 0 .AND. JUST_INTERPOLATED) then 
-         CALL CROWN_SPREAD_RATE(LIST_TAGGED,DUMMY_NODE)
-      endif
-         CALL ACCUMULATE_CPU_USAGE(40, IT1, IT2)
       
       DO ISTEP = 1, 2
 
@@ -736,10 +735,9 @@ DO WHILE (T .le. WS%NBANDS * DT_METEOROLOGY)
    ! Calculate x and y components of velocity from elliptical spread dimensions
          CALL UX_AND_UY_ELLIPTICAL(LIST_TAGGED, LIST_BURNED, SURFACE_ACCELERATION_FACTOR, ISTEP, T, DYNAMIC_ARRAY)
          CALL ACCUMULATE_CPU_USAGE(42, IT1, IT2)
-
+         
    ! Update local spread properties that depend on canopy / fire velocity
          CALL UPDATE_LOCAL_SPREAD_PROPERTIES(LIST_TAGGED, DUMMY_NODE)
-
    ! Check CFL criterion, adjust timestep, AND apply flux limiter (merged)
          CALL CFL_AND_FLUX_LIMITER(DT, RCELLSIZE, PHIP, ISTEP, ITIMESTEP)
          CALL ACCUMULATE_CPU_USAGE(43, IT1, IT2)
@@ -1103,12 +1101,11 @@ DO WHILE (T .le. WS%NBANDS * DT_METEOROLOGY)
             ENDIF
             
             CALL INTERP_WD_RASTER_SINGLE(C, WD20_LO(:,:), WD20_HI(:,:), F_METEOROLOGY)
-         if (trim(SURFACE_SPREAD_MODEL) .eq. "ROTHERMEL") then
-            CALL ROTHERMEL_SURFACE_SPREAD_RATE(LIST_TAGGED, C)
-         else if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS") then
-            CALL CFFDRS_SPREAD_RATE(LIST_TAGGED, C, daily_bui(DAY_OF_SIM))
-         ENDIF
-            IF (CROWN_FIRE_MODEL .GT. 0) CALL CROWN_SPREAD_RATE(LIST_TAGGED,C)
+            if (trim(SURFACE_SPREAD_MODEL) .eq. "ROTHERMEL") then
+               CALL ROTHERMEL_SURFACE_SPREAD_RATE(LIST_TAGGED, C)
+            else if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS") then
+               CALL CFFDRS_SPREAD_RATE(LIST_TAGGED, C, daily_bui(DAY_OF_SIM))
+            ENDIF
 #ifdef _SUPPRESSION
             IF (ENABLE_EXTENDED_ATTACK .AND. USE_SDI) C%SDI = SDI_FACTOR * SDI%R4(C%IX,C%IY,1)
 #endif
@@ -1363,6 +1360,7 @@ DO WHILE (T .le. WS%NBANDS * DT_METEOROLOGY)
    ENDIF
    T = T + DT
    IF ((T .ge. TSTOP) .and. START_CALCS) THEN ! END SIM
+      print *, ""
       print *, "[",ICASE,"] LEVEL SET CASE ENDED"
       CALL SYSTEM_CLOCK(IT1)
 
@@ -1633,8 +1631,8 @@ DO WHILE (T .le. WS%NBANDS * DT_METEOROLOGY)
       CALL ACCUMULATE_CPU_USAGE(61, IT1, IT2)
       START_CALCS = .FALSE.
       local_flag = 1
-      call MPI_Allreduce(local_flag, global_flag, 1, MPI_INTEGER, MPI_MIN, MPI_COMM_WORLD, ierr)
-   ENDIF
+      ENDIF
+   call MPI_Allreduce(local_flag, global_flag, 1, MPI_INTEGER, MPI_MIN, MPI_COMM_WORLD, ierr)
    IF (global_flag .gt. 0) T = (WS%NBANDS+1)*DT_METEOROLOGY
 ENDDO
 
@@ -1900,6 +1898,7 @@ IF (ISTEP .EQ. 1) THEN
                C%NORMVECTORY_DMS = RPHIMAG * PHIY
             ENDIF
             C%VELOCITY_DMS = C%VS0 * (ACCELERATION_FACTOR + PHIMAG)
+            if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS") C%VELOCITY_DMS = C%VELOCITY_DMS_SURFACE
 
 ! Calculate length over width:
             if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS") then
@@ -1967,7 +1966,7 @@ IF (ISTEP .EQ. 1) THEN
 
             ILH = MAX(MIN(NINT(100.*C%MLH),120),30)
             if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS") then
-               C%FLIN_SURFACE = C%FLIN_DMS_SURFACE * C%VELOCITY / C%VELOCITY_DMS_SURFACE
+               C%FLIN_SURFACE = C%FLIN_DMS_SURFACE ! * C%VELOCITY / C%VELOCITY_DMS_SURFACE
             else if (trim(SURFACE_SPREAD_MODEL) .eq. "ROTHERMEL") then
                C%FLIN_SURFACE = FUEL_MODEL_TABLE_2D(C%IFBFM,ILH)%TR * C%IR * C%VELOCITY * 0.3048 ! kW/m
             endif
@@ -1990,6 +1989,7 @@ IF (ISTEP .EQ. 1) THEN
          ENDDO
 
       ENDIF
+      ! print *, C%VELOCITY * 0.3048, C%VELOCITY_DMS * 0.3048, C%VELOCITY_DMS_SURFACE * 0.3048, C%VS0 * 0.3048, C%PHIS_SURFACE, C%PHIW_SURFACE, PHIMAG
       C => C%NEXT
 
    ENDDO
@@ -2033,7 +2033,7 @@ ELSE !ISTEP .EQ. 2
 
          ILH = MAX(MIN(NINT(100.*C%MLH),120),30)
          if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS") then
-            C%FLIN_SURFACE = C%FLIN_DMS_SURFACE * C%VELOCITY / C%VELOCITY_DMS_SURFACE
+            C%FLIN_SURFACE = C%FLIN_DMS_SURFACE !* C%VELOCITY / C%VELOCITY_DMS_SURFACE
          else if (trim(SURFACE_SPREAD_MODEL) .eq. "ROTHERMEL") then
             C%FLIN_SURFACE = FUEL_MODEL_TABLE_2D(C%IFBFM,ILH)%TR * C%IR * C%VELOCITY * 0.3048 ! kW/m
          endif

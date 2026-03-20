@@ -224,8 +224,8 @@ FUNCTION CHECK_RASTER_DIMS(R1, R2, testname)
    CHECK_RASTER_DIMS = .TRUE.
 
    ! Check raster size
-   if (R1%NROWS .ne. R2%NROWS .or. R1%NCOLS .ne. R2%NROWS) then
-      WRITE(*,*) "[ERROR] ", TRIM(testname), " raster dimensions mismatch. Please ensure the rasters have the same NROWS and NCOLS."
+   if (R1%NROWS .ne. R2%NROWS .or. R1%NCOLS .ne. R2%NCOLS) then
+      WRITE(*,'(A,A,A,I0,A,I0,A,I0,A,I0,A)') "[ERROR] ", TRIM(testname), " raster dimensions mismatch. Please ensure the rasters have the same NROWS (",R1%NROWS, " vs ",R2%NROWS,") and NCOLS (",R1%NCOLS, " vs ",R2%NCOLS,")."
       CHECK_RASTER_DIMS = .FALSE.
    endif
 

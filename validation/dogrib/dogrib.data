@@ -16,12 +16,12 @@ WS_AT_10M 					   = .TRUE.
 M1_FILENAME                    = 'm1'
 M10_FILENAME                   = 'm10'
 M100_FILENAME                  = 'm100'
-LH_MOISTURE_CONTENT 		   = 30
+LH_MOISTURE_CONTENT 		   = 30.0
 FOLIAR_MOISTURE_CONTENT 	   = 93.3
-USE_CFFDRS 					   = .TRUE.
+SURFACE_SPREAD_MODEL		   = 'CFFDRS'
 DAILY_WEATHER_FILENAME 		   = 'daily_weather.txt'
-START_DMC 					   = 100
-START_DC 				       = 40
+START_DMC 					   = 100.0
+START_DC 				       = 40.0
 /
 
 &OUTPUTS

@@ -1563,7 +1563,6 @@ INTEGER*2, intent(in) :: FUEL
 REAL RSI_100, PDF
 
 PDF = mod(FUEL,100)/100.0
-
 IF (FUEL .eq. 40 .or. FUEL .eq. 60 .or. (FUEL .ge. 400 .and. FUEL .le. 499) .or. (FUEL .ge. 600 .and. FUEL .le. 699)) then ! M1
    rsi_val = PDF * RSI(2_2, ISI, CF) + (1-PDF)*RSI(11_2, ISI, CF)
 ELSE IF (FUEL .eq. 50 .or. (FUEL .ge. 500 .and. FUEL .le. 599)) then ! M2
