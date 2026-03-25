@@ -1,0 +1,62 @@
+&INPUTS
+FUELS_AND_TOPOGRAPHY_DIRECTORY = './inputs'
+ASP_FILENAME                   = 'asp'
+CBD_FILENAME                   = 'cbd'
+CBH_FILENAME                   = 'cbh'
+CC_FILENAME                    = 'cc'
+CH_FILENAME                    = 'ch'
+DEM_FILENAME                   = 'dem'
+FBFM_FILENAME                  = 'fbfm40'
+SLP_FILENAME                   = 'slp'
+ADJ_FILENAME                   = 'adj'
+PHI_FILENAME                   = 'phi'
+DT_METEOROLOGY                 = 3600.0
+WEATHER_DIRECTORY              = './inputs'
+WS_FILENAME                    = 'ws'
+WD_FILENAME                    = 'wd'
+M1_FILENAME                    = 'm1'
+M10_FILENAME                   = 'm10'
+M100_FILENAME                  = 'm100'
+LH_MOISTURE_CONTENT            = 60.0
+LW_MOISTURE_CONTENT            = 90.0
+/
+
+&OUTPUTS
+OUTPUTS_DIRECTORY    = './outputs'
+DTDUMP               = 7200.0
+DUMP_TIME_OF_ARRIVAL = .TRUE.
+CONVERT_TO_GEOTIFF   = .TRUE.
+/
+
+&COMPUTATIONAL_DOMAIN
+A_SRS                          = 'EPSG: 32611'
+COMPUTATIONAL_DOMAIN_CELLSIZE  = 30.00
+COMPUTATIONAL_DOMAIN_XLLCORNER = 366015.00
+COMPUTATIONAL_DOMAIN_YLLCORNER = 4016355.00
+/
+
+&TIME_CONTROL
+SIMULATION_DT    = 300.0
+TARGET_CFL       = 0.4
+SIMULATION_TSTOP = 2679540.0
+LATITUDE                       = 36.419559
+LONGITUDE                      = -118.448511
+CURRENT_YEAR                   = 2020
+HOUR_OF_YEAR                   = 5924
+/
+
+&SIMULATOR
+NUM_IGNITIONS = 1
+X_IGN(1)      = 370140.00
+Y_IGN(1)      = 4031460.00
+T_IGN(1)      = 0.00
+DEBUG_LEVEL   = 20
+WX_BANDS_KEPT_IN_MEM = 10
+UNTAG_TYPE_2 = .TRUE.
+UNTAG_TYPE_3 = .TRUE.
+/
+
+&MISCELLANEOUS
+PATH_TO_GDAL                   = '/home/nick/miniconda3/envs/elmfire/bin/'
+SCRATCH                        = './scratch'
+/

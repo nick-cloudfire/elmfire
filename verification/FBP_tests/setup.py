@@ -32,8 +32,8 @@ DAILY_WEATHER = os.path.join(ROOT_DIR, "daily_weather.txt")
 N_ITERS = 20  # number of iteration folders to create (01..N_ITERS)
 
 # Raster specs
-NROWS, NCOLS = 10, 10
-CELLSIZE = 10.0
+NROWS, NCOLS = 100, 100
+CELLSIZE = 1.0
 NODATA = -9999
 
 A_SRS = "+proj=utm +zone=35 +datum=WGS84 +units=m +no_defs"

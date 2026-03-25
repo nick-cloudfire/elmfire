@@ -1,0 +1,71 @@
+&INPUTS
+FUELS_AND_TOPOGRAPHY_DIRECTORY = './inputs'
+ASP_FILENAME                   = 'asp'
+CBD_FILENAME                   = 'cbd'
+CBH_FILENAME                   = 'cbh'
+CC_FILENAME                    = 'cc'
+CH_FILENAME                    = 'ch'
+DEM_FILENAME                   = 'dem'
+FBFM_FILENAME                  = 'fbfm13'
+SLP_FILENAME                   = 'slp'
+ADJ_FILENAME                   = 'adj'
+PHI_FILENAME                   = 'phi'
+DT_METEOROLOGY                 = 3600.0
+WEATHER_DIRECTORY              = './inputs'
+WS_FILENAME                    = 'ws'
+WD_FILENAME                    = 'wd'
+M1_FILENAME                    = 'm1'
+M10_FILENAME                   = 'm10'
+M100_FILENAME                  = 'm100'
+USE_CONSTANT_LH                = .TRUE.
+LH_MOISTURE_CONTENT            = 60
+USE_CONSTANT_LW                = .TRUE.
+LW_MOISTURE_CONTENT            = 90
+IGNITION_MASK_FILENAME		   = 'adj'
+/
+
+&OUTPUTS
+OUTPUTS_DIRECTORY    = './outputs'
+DTDUMP = 6000.0
+CALCULATE_TIMES_BURNED = .FALSE.
+DUMP_SURFACE_FIRE_AREA = .TRUE.
+CALCULATE_FLAME_LENGTH_STATS = .TRUE.
+CONVERT_TO_GEOTIFF   = .TRUE.
+/
+
+&TIME_CONTROL
+SIMULATION_DT    = 5.0
+TARGET_CFL       = 0.3
+SIMULATION_TSTOP = 60000.0
+/
+
+&MONTE_CARLO
+NUM_METEOROLOGY_TIMES 		= 72
+RANDOM_IGNITIONS 			= .TRUE.
+USE_IGNITION_MASK 			= .TRUE.
+EDGEBUFFER                  = 5.
+NUM_ENSEMBLE_MEMBERS 		= 500
+!PERCENT_OF_PIXELS_TO_IGNITE = 10
+NUM_RASTERS_TO_PERTURB      = 2			
+RASTER_TO_PERTURB(1)       = 'WS'
+SPATIAL_PERTURBATION(1)    = 'GLOBAL'
+TEMPORAL_PERTURBATION(1)   = 'STATIC'
+PDF_TYPE(1)                = 'UNIFORM'
+PDF_LOWER_LIMIT(1)         = -5.0
+PDF_UPPER_LIMIT(1)         = 5.0
+RASTER_TO_PERTURB(2)       = 'WD'
+SPATIAL_PERTURBATION(2)    = 'GLOBAL'
+TEMPORAL_PERTURBATION(2)   = 'STATIC'
+PDF_TYPE(2)                = 'UNIFORM'
+PDF_LOWER_LIMIT(2)         = 10.0
+PDF_UPPER_LIMIT(2)         = 20.0
+/
+
+&SIMULATOR
+MULTIPLE_HOSTS             = .FALSE.
+/
+
+&MISCELLANEOUS
+PATH_TO_GDAL                   = '/usr/bin'
+SCRATCH                        = './scratch'
+/
