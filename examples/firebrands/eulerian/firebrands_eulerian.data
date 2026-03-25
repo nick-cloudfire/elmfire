@@ -1,0 +1,90 @@
+&INPUTS
+FUELS_AND_TOPOGRAPHY_DIRECTORY = './inputs'
+ASP_FILENAME                   = 'asp'
+CBD_FILENAME                   = 'cbd'
+CBH_FILENAME                   = 'cbh'
+CC_FILENAME                    = 'cc'
+CH_FILENAME                    = 'ch'
+DEM_FILENAME                   = 'dem'
+FBFM_FILENAME                  = 'fbfm13'
+SLP_FILENAME                   = 'slp'
+ADJ_FILENAME                   = 'adj'
+PHI_FILENAME                   = 'phi'
+DT_METEOROLOGY                 = 3600.0
+WEATHER_DIRECTORY              = './inputs'
+WS_FILENAME                    = 'ws'
+WD_FILENAME                    = 'wd'
+M1_FILENAME                    = 'm1'
+M10_FILENAME                   = 'm10'
+M100_FILENAME                  = 'm100'
+USE_CONSTANT_LH                = .FALSE.
+MLH_FILENAME                   = 'lh'
+USE_CONSTANT_LW                = .FALSE.
+MLW_FILENAME                   = 'lw'
+WS_AT_10M		               = .TRUE.
+ONLY_READ_NEEDED_WX_BANDS      = .TRUE.
+/
+
+&OUTPUTS
+OUTPUTS_DIRECTORY    			= './outputs'
+DUMP_HOURLY_RASTERS				= .FALSE.
+CONVERT_TO_GEOTIFF   			= .TRUE.
+DUMP_CROWN_FIRE 				= .TRUE.
+ACCUMULATE_EMBER_FLUX           = .FALSE.
+DUMP_SPOTTING_OUTPUTS			= .TRUE.
+DUMP_TIME_OF_ARRIVAL			= .TRUE.	
+DUMP_EMBER_FLUX = .TRUE.
+DUMP_SPREAD_RATE = .TRUE.
+DUMP_FLIN = .TRUE.
+/
+
+&SPOTTING
+ENABLE_SPOTTING 					 = .TRUE.
+USE_SUPERSEDED_SPOTTING 			 = .FALSE.
+CROWN_FIRE_SPOTTING_PERCENT 		 = 10
+ENABLE_SURFACE_FIRE_SPOTTING         = .FALSE.
+USE_UMD_SPOTTING_MODEL				 = .TRUE.
+USE_PHYSICAL_EMBER_NUMBER			 = .TRUE.
+TAU_EMBERGEN                         = 6
+SPOTTING_DISTRIBUTION_TYPE           = 'LOGNORMAL'
+USE_EULERIAN_SPOTTING				 = .TRUE.
+USE_EMBER_IGNITION_MODEL			 = .TRUE.
+USE_SIMPLE_IGNITION_MODEL 			 = .FALSE.
+BUILD_EMBER_FLUX_TABLE     			 = .TRUE.
+PIGN                                 = 100.0
+DT_DUMP_EMBER_FLUX                   = 288
+/
+
+
+&COMPUTATIONAL_DOMAIN
+A_SRS = '+proj=utm +zone=35 +datum=WGS84 +units=m +no_defs'
+COMPUTATIONAL_DOMAIN_CELLSIZE = 30.000000000000000
+COMPUTATIONAL_DOMAIN_XLLCORNER = 0.0000000
+COMPUTATIONAL_DOMAIN_YLLCORNER = 0.0000000
+/
+
+&TIME_CONTROL
+SIMULATION_DT    = 1.0
+TARGET_CFL       = 0.2
+SIMULATION_TSTOP = 60000.0
+/
+
+&MONTE_CARLO
+!NUM_METEOROLOGY_TIMES = 72
+METEOROLOGY_BAND_START = 1
+METEOROLOGY_BAND_STOP = 12
+/
+
+&SIMULATOR
+NUM_IGNITIONS = 1
+X_IGN(1) = 1890
+Y_IGN(1) = 3300
+T_IGN(1)      = 0.0
+MODE = 1
+DEBUG_LEVEL = 100
+/
+
+&MISCELLANEOUS
+PATH_TO_GDAL                   = '/usr/bin'
+SCRATCH                        = './scratch'
+/

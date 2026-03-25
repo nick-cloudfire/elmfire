@@ -1933,47 +1933,7 @@ IF (ISTEP .EQ. 1) THEN
             ENDIF
 #endif      
 
-! We can get sin(theta - dms) and cos(theta - dms) directly:
-            COSANG   = C%NORMVECTORY*C%NORMVECTORY_DMS + C%NORMVECTORX*C%NORMVECTORX_DMS
-            A        = MAX(0.5 * (C%VELOCITY_DMS + C%VBACK), 1E-10)
-            AACOSANG = A*A*COSANG
-
-            SINANG   = C%NORMVECTORX*C%NORMVECTORY_DMS - C%NORMVECTORY*C%NORMVECTORX_DMS
-            B        = 0.5 * MAX( (C%VELOCITY_DMS + C%VBACK) / C%LOW, 1E-10)
-            BBSINANG = B*B*SINANG
-
-            DENOM    = MAX(SQRT(AACOSANG*COSANG + BBSINANG*SINANG),1E-10)
-            RDENOM   = 1. / DENOM
-
-            DYDT     = (RDENOM * AACOSANG ) + 0.5 * (C%VELOCITY_DMS - C%VBACK)
-            DXDT     = RDENOM * BBSINANG 
-
-! Rotate based on direction of maximum spread:
-            DXDT_ROTATED = DYDT*C%NORMVECTORX_DMS + DXDT*C%NORMVECTORY_DMS !ft/min, parallel to slope
-            C%UX = DXDT_ROTATED * C%UXOUSX * FTPMIN_TO_MPS !m/s, projected
-
-            DYDT_ROTATED = DYDT*C%NORMVECTORY_DMS - DXDT*C%NORMVECTORX_DMS !ft/min, parallel to slope
-            C%UY = DYDT_ROTATED * C%UYOUSY * FTPMIN_TO_MPS !m/s, projected
-            C%VELOCITY = SQRT(DXDT_ROTATED*DXDT_ROTATED + DYDT_ROTATED*DYDT_ROTATED) ! ft/min, parallel to slope
-                        
-            if (ABS(C%UX) + ABS(C%UY) .gt. 1.0e-20) then
-               C%SPREAD_DIRECTION = ATAN2(C%UX, C%UY) * 180.0 / ACOS(-1.0)
-               if (C%SPREAD_DIRECTION .lt. 0.0) C%SPREAD_DIRECTION = C%SPREAD_DIRECTION + 360.0
-            else
-               C%SPREAD_DIRECTION = 0.0
-            end if
-            !print *, "CELL ", C%IX, ",", C%IY, "ROS: ", C%VELOCITY, ", ISI: ", C%ISI, ", FBFM: ", C%IFBFM, ", ROSMAX: ", C%VELOCITY_DMS_SURFACE 
-
-            ILH = MAX(MIN(NINT(100.*C%MLH),120),30)
-            if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS") then
-               C%FLIN_SURFACE = C%FLIN_DMS_SURFACE ! * C%VELOCITY / C%VELOCITY_DMS_SURFACE
-            else if (trim(SURFACE_SPREAD_MODEL) .eq. "ROTHERMEL") then
-               C%FLIN_SURFACE = FUEL_MODEL_TABLE_2D(C%IFBFM,ILH)%TR * C%IR * C%VELOCITY * 0.3048 ! kW/m
-            endif
-            IF (NO_SURFACE_FIRE) THEN
-               C%UX = 1E-5
-               C%UY = 1E-5
-            ENDIF
+            CALL COMPUTE_SPREAD_VELOCITIES(C, ILH)
 
             CROWN_FIRE_AT_END = .FALSE.
             IF (CROWN_FIRE_MODEL .GT. 0 .AND. C%FLIN_SURFACE .GE. C%CRITICAL_FLIN) then
@@ -2000,49 +1960,9 @@ ELSE !ISTEP .EQ. 2
       IF (.NOT. C%BURNED) THEN ! This condition is not functioning. C%BURNED are only assigned to LIST_BURNED but not to LIST_TAGGED
          CONTINUE
 
-! We can get sin(theta - dms) and cos(theta - dms) directly:
-         COSANG   = C%NORMVECTORY*C%NORMVECTORY_DMS + C%NORMVECTORX*C%NORMVECTORX_DMS
-         A        = MAX(0.5 * (C%VELOCITY_DMS + C%VBACK), 1E-10)
-         AACOSANG = A*A*COSANG
+         CALL COMPUTE_SPREAD_VELOCITIES(C, ILH)
 
-         SINANG   = C%NORMVECTORX*C%NORMVECTORY_DMS - C%NORMVECTORY*C%NORMVECTORX_DMS
-         B        = 0.5 * MAX( (C%VELOCITY_DMS + C%VBACK) / C%LOW, 1E-10)
-         BBSINANG = B*B*SINANG
-
-         DENOM    = MAX(SQRT(AACOSANG*COSANG + BBSINANG*SINANG),1E-10)
-         RDENOM   = 1. / DENOM
-
-         DYDT     = (RDENOM * AACOSANG ) + 0.5 * (C%VELOCITY_DMS - C%VBACK)
-         DXDT     = RDENOM * BBSINANG 
-
-! Rotate based on direction of maximum spread:
-         DXDT_ROTATED = DYDT*C%NORMVECTORX_DMS + DXDT*C%NORMVECTORY_DMS !ft/min, parallel to slope
-         C%UX = DXDT_ROTATED * C%UXOUSX * FTPMIN_TO_MPS !m/s, projected
-
-         DYDT_ROTATED = DYDT*C%NORMVECTORY_DMS - DXDT*C%NORMVECTORX_DMS !ft/min, parallel to slope
-         C%UY = DYDT_ROTATED * C%UYOUSY * FTPMIN_TO_MPS !m/s, projected
-
-         C%VELOCITY = SQRT(DXDT_ROTATED*DXDT_ROTATED + DYDT_ROTATED*DYDT_ROTATED) ! ft/min, parallel to slope
-         if (ABS(C%UX) + ABS(C%UY) .gt. 1.0e-20) then
-               C%SPREAD_DIRECTION = ATAN2(C%UX, C%UY) * 180.0 / ACOS(-1.0)
-               
-               if (C%SPREAD_DIRECTION .lt. 0.0) C%SPREAD_DIRECTION = C%SPREAD_DIRECTION + 360.0
-         else
-            C%SPREAD_DIRECTION = 0.0
-         end if
-
-         ILH = MAX(MIN(NINT(100.*C%MLH),120),30)
-         if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS") then
-            C%FLIN_SURFACE = C%FLIN_DMS_SURFACE !* C%VELOCITY / C%VELOCITY_DMS_SURFACE
-         else if (trim(SURFACE_SPREAD_MODEL) .eq. "ROTHERMEL") then
-            C%FLIN_SURFACE = FUEL_MODEL_TABLE_2D(C%IFBFM,ILH)%TR * C%IR * C%VELOCITY * 0.3048 ! kW/m
-         endif
-         IF (NO_SURFACE_FIRE) THEN
-               C%UX = 1E-5
-               C%UY = 1E-5
-         ENDIF
-
-         IF (CROWN_FIRE_MODEL .GT. 0 .AND. C%FLIN_SURFACE .GE. C%CRITICAL_FLIN) then 
+         IF (trim(SURFACE_SPREAD_MODEL) .eq. "ROTHERMEL" .and. CROWN_FIRE_MODEL .GT. 0 .AND. C%FLIN_SURFACE .GE. C%CRITICAL_FLIN) then 
             C%FLIN_CANOPY = C%HPUA_CANOPY * C%VELOCITY * 5.08E-3
          else
             C%CROWN_FIRE = 0
@@ -2083,6 +2003,62 @@ ELSE !ISTEP .EQ. 2
    ENDDO
 
 ENDIF !ISTEP .EQ. 1
+
+CONTAINS
+
+! *****************************************************************************
+SUBROUTINE COMPUTE_SPREAD_VELOCITIES(NODE_C, ILH_OUT)
+! Computes UX, UY, VELOCITY, SPREAD_DIRECTION, and FLIN_SURFACE for a node
+! from its pre-computed ellipse parameters (VELOCITY_DMS, VBACK, LOW) and
+! normal vector components.
+! *****************************************************************************
+TYPE(NODE), POINTER :: NODE_C
+INTEGER, INTENT(OUT) :: ILH_OUT
+REAL :: COSANG, SINANG, A, B, AACOSANG, BBSINANG, DENOM, RDENOM, DYDT, DXDT, DXDT_ROTATED, DYDT_ROTATED
+
+! We can get sin(theta - dms) and cos(theta - dms) directly:
+COSANG   = NODE_C%NORMVECTORY*NODE_C%NORMVECTORY_DMS + NODE_C%NORMVECTORX*NODE_C%NORMVECTORX_DMS
+A        = MAX(0.5 * (NODE_C%VELOCITY_DMS + NODE_C%VBACK), 1E-10)
+AACOSANG = A*A*COSANG
+
+SINANG   = NODE_C%NORMVECTORX*NODE_C%NORMVECTORY_DMS - NODE_C%NORMVECTORY*NODE_C%NORMVECTORX_DMS
+B        = 0.5 * MAX( (NODE_C%VELOCITY_DMS + NODE_C%VBACK) / NODE_C%LOW, 1E-10)
+BBSINANG = B*B*SINANG
+
+DENOM    = MAX(SQRT(AACOSANG*COSANG + BBSINANG*SINANG),1E-10)
+RDENOM   = 1. / DENOM
+
+DYDT     = (RDENOM * AACOSANG ) + 0.5 * (NODE_C%VELOCITY_DMS - NODE_C%VBACK)
+DXDT     = RDENOM * BBSINANG
+
+! Rotate based on direction of maximum spread:
+DXDT_ROTATED    = DYDT*NODE_C%NORMVECTORX_DMS + DXDT*NODE_C%NORMVECTORY_DMS ! ft/min, parallel to slope
+NODE_C%UX       = DXDT_ROTATED * NODE_C%UXOUSX * FTPMIN_TO_MPS               ! m/s, projected
+
+DYDT_ROTATED    = DYDT*NODE_C%NORMVECTORY_DMS - DXDT*NODE_C%NORMVECTORX_DMS ! ft/min, parallel to slope
+NODE_C%UY       = DYDT_ROTATED * NODE_C%UYOUSY * FTPMIN_TO_MPS               ! m/s, projected
+NODE_C%VELOCITY = SQRT(DXDT_ROTATED*DXDT_ROTATED + DYDT_ROTATED*DYDT_ROTATED) ! ft/min, parallel to slope
+
+IF (ABS(NODE_C%UX) + ABS(NODE_C%UY) .GT. 1.0e-20) THEN
+   NODE_C%SPREAD_DIRECTION = ATAN2(NODE_C%UX, NODE_C%UY) * 180.0 / ACOS(-1.0)
+   IF (NODE_C%SPREAD_DIRECTION .LT. 0.0) NODE_C%SPREAD_DIRECTION = NODE_C%SPREAD_DIRECTION + 360.0
+ELSE
+   NODE_C%SPREAD_DIRECTION = 0.0
+END IF
+
+ILH_OUT = MAX(MIN(NINT(100.*NODE_C%MLH),120),30)
+IF (TRIM(SURFACE_SPREAD_MODEL) .EQ. "CFFDRS") THEN
+   NODE_C%FLIN_SURFACE = NODE_C%FLIN_DMS_SURFACE
+ELSE IF (TRIM(SURFACE_SPREAD_MODEL) .EQ. "ROTHERMEL") THEN
+   NODE_C%FLIN_SURFACE = FUEL_MODEL_TABLE_2D(NODE_C%IFBFM,ILH_OUT)%TR * NODE_C%IR * NODE_C%VELOCITY * 0.3048 ! kW/m
+END IF
+
+IF (NO_SURFACE_FIRE) THEN
+   NODE_C%UX = 1E-5
+   NODE_C%UY = 1E-5
+END IF
+
+END SUBROUTINE COMPUTE_SPREAD_VELOCITIES
 
 ! *****************************************************************************
 END SUBROUTINE UX_AND_UY_ELLIPTICAL

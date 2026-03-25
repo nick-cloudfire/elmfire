@@ -377,12 +377,12 @@ DO I = 1, NUM_NODES
             C%CFC = FUEL_MODEL_TABLE_FBP(C%IFBFM)%CFL*C%CFB
          ENDIF
       endif
-      if (C%IFBFM .eq. 6 .and. C%CFB .gt. 0) then ! C-6 special condition 
+      if (C%IFBFM .eq. 6 .and. C%CROWN_FIRE .gt. 0) then ! C-6 special condition 
          FME = 1000*((1.5-0.00275*C%FMC)**4.0)/(460+(25.9*C%FMC))
          RSC = 60*(1-exp(-0.0497*C%ISI))*FME/0.778
          C%VELOCITY = C%VELOCITY + C%CFB*(RSC - C%VELOCITY/3.28) * 3.28 !ft/min
       endif
-      print *, C%SFC, C%CFC, C%CFB, C%VELOCITY / 3.28
+      !print *, C%SFC, C%CFC, C%CFB, C%VELOCITY / 3.28
    endif
    
    if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS") C%FLIN_SURFACE = 300 * (C%SFC + C%CFC) * C%VELOCITY / 3.28
@@ -394,12 +394,10 @@ DO I = 1, NUM_NODES
    else
       if (trim(SURFACE_SPREAD_MODEL) .eq. "ROTHERMEL") C%FLIN_CANOPY = C%HPUA_CANOPY * C%VELOCITY * 5.08E-3
    endif
-   print *, C%FLIN_SURFACE, C%FLIN_CANOPY
+   !print *, C%FLIN_SURFACE, C%FLIN_CANOPY
 
    C%FLAME_LENGTH = (0.0775 / 0.3048) * (C%FLIN_SURFACE + C%FLIN_CANOPY) ** 0.46
    C%HRRPUA = (C%FLIN_SURFACE + C%FLIN_CANOPY) / ASP%CELLSIZE
-
-   
 
    C => C%NEXT
 enddo
