@@ -64,25 +64,25 @@ CHARACTER(16) :: TIMESTAMP
 CHARACTER(400) :: FN
 
 ! parameters for checking if all simulations are finished
-integer :: local_flag , global_flag
+integer :: rank_finished , global_flag
 
 TYPE(NODE), POINTER :: C => NULL(), DUMMY_NODE => NULL()
 
 TYPE (FUEL_MODEL_TABLE_TYPE) :: FMT
 
-BAND_L = IWX_BAND
-BAND_H = min(WS%NBANDS, WX_BANDS_KEPT_IN_MEM + IWX_BAND - 1)
+BAND_L = MIN_IWX_BAND
+BAND_H = min(WS%NBANDS, WX_BANDS_KEPT_IN_MEM + MIN_IWX_BAND - 1)
 T=(MIN_IWX_BAND-1)*DT_METEOROLOGY
 INITIATED = .FALSE.
 START_CALCS = .FALSE.
 DT = 30 ! placeholder value, fixes issue where mpi procs > num_cases
 TSTOP = WS%NBANDS * DT_METEOROLOGY - 1 ! placeholder value, fixes issue where mpi procs > num_cases
-local_flag = 0
+rank_finished = 0
 
 Print *, "STARTING LEVEL SET PROPAGATION CASE: ", ICASE, " | WEATHER BAND START: ", IWX_BAND
 if (IS_VIRTUAL_RUN) then
    print *, "[", ICASE, "]: VIRTUAL RUN CASE"
-   local_flag = 1
+   rank_finished = 1
 endif
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 CALL UPDATE_WEATHER_SLICE(BAND_L, BAND_H)
@@ -92,12 +92,14 @@ CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 DO WHILE (T .le. WS%NBANDS * DT_METEOROLOGY)
    DAY_OF_SIM = ceiling(((12 + mod(HOUR_OF_YEAR, 24) + IWX_BAND + floor(T/3600) - 1)/24.0))
    IF (T > BAND_H * DT_METEOROLOGY) THEN ! LOAD NEXT WEATHER SLICE
+      print *, "[",ICASE,"] AWAITING NEW WEATHER"
       CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
       BAND_L = BAND_H 
       BAND_H = min(WS%NBANDS, BAND_H - 1 + WX_BANDS_KEPT_IN_MEM)
       CALL UPDATE_WEATHER_SLICE(BAND_L, BAND_H)
       IF (MULTIPLE_HOSTS) CALL BCAST_WEATHER()
-      CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+      call MPI_Allreduce(rank_finished, global_flag, 1, MPI_INTEGER, MPI_MIN, MPI_COMM_WORLD, ierr)
+      IF (global_flag .gt. 0) T = (WS%NBANDS+1)*DT_METEOROLOGY
    ENDIF
    IF (T .ge. SIMULATION_TSTART + (IWX_BAND - 1) * DT_METEOROLOGY .and. .not. INITIATED .and. .not. IS_VIRTUAL_RUN) THEN ! START SIM
       ! ***************************************************************************************
@@ -264,7 +266,9 @@ DO WHILE (T .le. WS%NBANDS * DT_METEOROLOGY)
             STATS_SIMULATION_TSTOP_HOURS     (ICASE) = -9999.
             STATS_PM2P5_RELEASE              (ICASE) = 0.
             STATS_HRR_PEAK                   (ICASE) = 0.
-            T = TSTOP + 1
+            print *, "[", ICASE, "]: IGNITION CELL IS NONBURNABLE, STOPPING"
+            rank_finished = 1
+            DT = DT_METEOROLOGY
          ENDIF
 
       ENDIF
@@ -514,7 +518,7 @@ DO WHILE (T .le. WS%NBANDS * DT_METEOROLOGY)
       INITIATED = .TRUE.
    ENDIF
    
-   IF (START_CALCS) THEN
+   IF (START_CALCS .and. rank_finished .ne. 1) THEN
       CALL SYSTEM_CLOCK(IT1)
 
       if (DEBUG_LEVEL .GT. 0 .and. NPROC .eq. 1) THEN
@@ -1137,7 +1141,8 @@ DO WHILE (T .le. WS%NBANDS * DT_METEOROLOGY)
          CALL RANDOM_NUMBER(R0)
          IF (R0 .LE. POC) THEN !Fire is contained
             print *, "[", ICASE, "]"," INITIAL ATTACK CONTAINMENT SUCCESSFUL"
-            T = TSTOP + 1.
+            rank_finished = 1
+            DT = DT_METEOROLOGY
             STATS_FINAL_CONTAINMENT_FRAC(ICASE) = 1.0
             STATS_SIMULATION_TSTOP_HOURS(ICASE) = INITIAL_ATTACK_TIME / 3600.0
          ENDIF
@@ -1158,7 +1163,8 @@ DO WHILE (T .le. WS%NBANDS * DT_METEOROLOGY)
          SIMULATION_TSTOP_HOURS = T / 3600.
          STATS_SIMULATION_TSTOP_HOURS(ICASE) = SIMULATION_TSTOP_HOURS
          STATS_FINAL_CONTAINMENT_FRAC(ICASE) = 1.0
-         T = TSTOP + 1.
+         rank_finished = 1
+         DT = DT_METEOROLOGY
          IDUMPCOUNT = NDUMPS + 1
       ENDIF
 
@@ -1166,10 +1172,11 @@ DO WHILE (T .le. WS%NBANDS * DT_METEOROLOGY)
          print *, "[", ICASE, "]"," STOPPING: SIMULATED ACRES MORE THAN STOP CONDITION"
          SIMULATION_TSTOP_HOURS = T / 3600.
          STATS_SIMULATION_TSTOP_HOURS(ICASE) = SIMULATION_TSTOP_HOURS
-         T = TSTOP + 1.
+         rank_finished = 1
+         DT = DT_METEOROLOGY
          IDUMPCOUNT = NDUMPS + 1
       ENDIF
-      
+
       IF (NUM_TIME_AT_BURNED_ACRES .GT. 0) THEN
          FN = TRIM(OUTPUTS_DIRECTORY) // 'burned-acres-timings_' // FOUR_IRANK_WORLD // '.csv'
          INQUIRE(UNIT=LUBAT+IRANK_WORLD,OPENED=LOPEN)
@@ -1348,7 +1355,8 @@ DO WHILE (T .le. WS%NBANDS * DT_METEOROLOGY)
          print *, "[",ICASE,"] STOPPED: ELAPSED TIME",ELAPSED_TIME," GREATER THAN MAX_RUNTIME", MAX_RUNTIME
          SIMULATION_TSTOP_HOURS = T / 3600.
          STATS_SIMULATION_TSTOP_HOURS(ICASE) = SIMULATION_TSTOP_HOURS
-         T = TSTOP + 1.
+         rank_finished = 1
+         DT = DT_METEOROLOGY
          IDUMPCOUNT = NDUMPS + 1
       ENDIF
 
@@ -1360,7 +1368,6 @@ DO WHILE (T .le. WS%NBANDS * DT_METEOROLOGY)
    ENDIF
    T = T + DT
    IF ((T .ge. TSTOP) .and. START_CALCS) THEN ! END SIM
-      print *, ""
       print *, "[",ICASE,"] LEVEL SET CASE ENDED"
       CALL SYSTEM_CLOCK(IT1)
 
@@ -1630,10 +1637,9 @@ DO WHILE (T .le. WS%NBANDS * DT_METEOROLOGY)
 
       CALL ACCUMULATE_CPU_USAGE(61, IT1, IT2)
       START_CALCS = .FALSE.
-      local_flag = 1
+      rank_finished = 1
+      DT = DT_METEOROLOGY
       ENDIF
-   call MPI_Allreduce(local_flag, global_flag, 1, MPI_INTEGER, MPI_MIN, MPI_COMM_WORLD, ierr)
-   IF (global_flag .gt. 0) T = (WS%NBANDS+1)*DT_METEOROLOGY
 ENDDO
 
 ! *****************************************************************************

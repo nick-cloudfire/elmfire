@@ -18,6 +18,7 @@ BuildLog.*
 control_files
 DEPRECATED
 forecasts/runs
+examples/
 fuel
 inputs
 input_decks
