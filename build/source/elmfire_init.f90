@@ -201,7 +201,7 @@ endif
 
 do I = 0, size(X_IGN)-1
    if (X_IGN(I) .gt. 0) then
-      if (X_IGN(I) .lt. ASP%XLLCORNER .or. Y_IGN(I) .lt. ASP%YLLCORNER .or. X_IGN(I) .gt. ASP%XLLCORNER + ASP%NROWS * ASP%CELLSIZE .or. Y_IGN(I) .gt. ASP%YLLCORNER + ASP%NCOLS * ASP%CELLSIZE) then
+      if (X_IGN(I) .lt. ASP%XLLCORNER .or. Y_IGN(I) .lt. ASP%YLLCORNER .or. X_IGN(I) .gt. ASP%XLLCORNER + ASP%NCOLS * ASP%CELLSIZE .or. Y_IGN(I) .lt. ASP%YLLCORNER - ASP%NROWS * ASP%CELLSIZE) then ! note that y increases upwards in the northern hemisphere, might need to change this later. 
          WRITE(*,*) "[ERROR] Ignition point ", I, " is outside the bounds of the raster."
          GOOD_INPUTS = .FALSE.
       endif
