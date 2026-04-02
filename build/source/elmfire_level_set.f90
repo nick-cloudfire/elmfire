@@ -523,7 +523,7 @@ DO WHILE (T .le. WS%NBANDS * DT_METEOROLOGY)
 
       if (DEBUG_LEVEL .GT. 0 .and. NPROC .eq. 1) THEN
          write(*,'(A)', advance='no') char(13)   ! carriage return
-         write(*,'(A,I0,A,F0.1,A,F0.1,A,I7,A,I0,A,I0,A,F0.1,A,F0.1)', advance='no') '[',ICASE,'] Current Timestep: ', T - (IWX_BAND - 1)*DT_METEOROLOGY, ' of ', SIMULATION_TSTOP, ', tracked nodes: ', LIST_TAGGED%NUM_NODES, ". Weather bands ", BAND_L, " to ", BAND_H, " | Actual timings: ", T, " of ", TSTOP
+         write(*,'(A,I0,A,F0.1,A,F0.1,A,I7,A,I0,A,I0,A,F0.1,A,F0.1)', advance='no') '[',ICASE,'] Current Timestep: ', T - (IWX_BAND - 1)*DT_METEOROLOGY, ' of ', SIMULATION_TSTOP, ', tracked nodes: ', LIST_TAGGED%NUM_NODES, ". Weather bands ", BAND_L, " to ", BAND_H!, " | Actual timings: ", T, " of ", TSTOP
          call flush(6)
       END IF
       ITIMESTEP = ITIMESTEP + 1
@@ -779,15 +779,6 @@ DO WHILE (T .le. WS%NBANDS * DT_METEOROLOGY)
             SURFACE_FIRE   (IX,IY) = 1
             TIME_OF_ARRIVAL(IX,IY) = T
             
-#ifdef _WUI
-            ! For model type 3: mark urban cells as ignited when they burn
-            IF (USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .EQ. 3) THEN
-               IF (C%IFBFM .EQ. 91 .AND. .NOT. C%BLDG_IGNITED) THEN
-                  C%BLDG_IGNITED = .TRUE.
-                  C%T_BLDG_IGNITION = T
-               ENDIF
-            ENDIF
-#endif
             IF (C%CROWN_FIRE .LT. 0) C%CROWN_FIRE = 0
             
    ! Note that per Thomas (1963) and Rothermel (1991), crown fire flame length is Lf=0.2*I^2/3
@@ -831,10 +822,6 @@ DO WHILE (T .le. WS%NBANDS * DT_METEOROLOGY)
 #ifdef _WUI
             IF (USE_BLDG_SPREAD_MODEL) THEN
                LIST_BURNED%TAIL%IBLDGFM = C%IBLDGFM
-               ! For model type 3, accumulate heat to adjacent urban cells
-               IF (BLDG_SPREAD_MODEL_TYPE .EQ. 3) THEN
-                  CALL BLDG_ACCUMULATE_HEAT_FROM_NEIGHBORS(LIST_BURNED%TAIL, LIST_TAGGED, SIMULATION_DT)
-               ENDIF
             ENDIF
 #endif
 
@@ -905,8 +892,7 @@ DO WHILE (T .le. WS%NBANDS * DT_METEOROLOGY)
                                     SOURCE_FUEL_IGN_MULT (FBFM%I2(C%IX,C%IY,1)) )
                   ELSE
                      CALL SPOTTING ( IX,IY,C%WS20_NOW,C%FLIN_SURFACE + C%FLIN_CANOPY, N_SPOT_FIRES,IX_SPOT_FIRE,IY_SPOT_FIRE,&
-                                    ICASE, DT, T, 0., SOURCE_FUEL_IGN_MULT (FBFM%I2(C%IX,C%IY,1)), &
-                                    BLDG_FOOTPRINT_FRAC%R4(C%IX,C%IY,1), C%FMC, C%IFBFM, WN_FUEL) ! FLIN should be surface plus canopy right?
+                                    ICASE, DT, T, 0., SOURCE_FUEL_IGN_MULT (FBFM%I2(C%IX,C%IY,1)), C%IFBFM) ! FLIN should be surface plus canopy right?
                   ENDIF
                ENDIF
             ENDIF ! ENABLE_SPOTTING
@@ -969,8 +955,7 @@ DO WHILE (T .le. WS%NBANDS * DT_METEOROLOGY)
                                     SOURCE_FUEL_IGN_MULT (FBFM%I2(C%IX,C%IY,1)) )
                   ELSE
                      CALL SPOTTING ( C%IX,C%IY,C%WS20_NOW,C%FLIN_SURFACE + C%FLIN_CANOPY,N_SPOT_FIRES,IX_SPOT_FIRE,IY_SPOT_FIRE,&
-                                    ICASE,DT,T, C%TAU_EMBERGEN,SOURCE_FUEL_IGN_MULT (FBFM%I2(C%IX,C%IY,1)),&
-                                    BLDG_FOOTPRINT_FRAC%R4(C%IX,C%IY,1), C%FMC, C%IFBFM, WN_FUEL) ! Parameters added to calculate number of physical embers
+                                    ICASE,DT,T, C%TAU_EMBERGEN,SOURCE_FUEL_IGN_MULT (FBFM%I2(C%IX,C%IY,1)), C%IFBFM) ! Parameters added to calculate number of physical embers
                   ENDIF
                ENDIF
             ENDIF
@@ -1833,9 +1818,8 @@ TYPE(NODE), POINTER :: C, LB_P
 
 REAL, ALLOCATABLE, INTENT(INOUT), DIMENSION(:,:) :: DYNAMIC_ARRAY  ! Dynamic array to store IX and IY - DWI_SU
 
-REAL :: PHIMAG, PHIWX, PHIWY, PHIX, PHIY, WSMFEFF, A, B, COSANG, SINANG, BOH, DXDT, DYDT, DENOM, &
-        DXDT_ROTATED, DYDT_ROTATED, AACOSANG, BBSINANG, APHIS, APHIW, SINASPMPI, COSASPMPI, &
-        RPHIMAG, RDENOM, SQRT_LOW2_M1!, STRUCTURE_AREA
+REAL :: PHIMAG, PHIWX, PHIWY, PHIX, PHIY, WSMFEFF, BOH, APHIS, APHIW, SINASPMPI, COSASPMPI, &
+        RPHIMAG, SQRT_LOW2_M1
 INTEGER :: IASP, I, ILH, NITER
 REAL, PARAMETER :: KWPM2_TO_BTUPFT2MIN = 60. * 0.3048 * 0.3048 / 1.055, FTPMIN_TO_MPS = 0.3048 / 60.
 LOGICAL :: DONE, CROWN_FIRE_AT_START, CROWN_FIRE_AT_END
@@ -1930,12 +1914,7 @@ IF (ISTEP .EQ. 1) THEN
 #ifdef _WUI
             IF (USE_BLDG_SPREAD_MODEL .AND. C%IFBFM .EQ. 91) THEN
                IF (BLDG_SPREAD_MODEL_TYPE .EQ. 1) CALL HAMADA(C) ! GET C%VELOCITY_DMS, C%VBACK & C%LOW
-               IF (BLDG_SPREAD_MODEL_TYPE .EQ. 2) CALL UMD_UCB_BLDG_SPREAD(C, LB, T_ELMFIRE, DYNAMIC_ARRAY) ! GET C%VELOCITY_DMS, C%VBACK & C%LOW
-               IF (BLDG_SPREAD_MODEL_TYPE .EQ. 3) THEN
-                  ! Check ignition for unburned cells, then compute spread
-                  IF (.NOT. C%BLDG_IGNITED) CALL BLDG_CHECK_IGNITION(C, T_ELMFIRE)
-                  CALL BLDG_SPREAD_MODEL_3(C, T_ELMFIRE) ! GET C%VELOCITY_DMS, C%VBACK & C%LOW
-               ENDIF
+               IF (BLDG_SPREAD_MODEL_TYPE .EQ. 2) CALL UMD_UCB_BLDG_SPREAD(C, LB, DYNAMIC_ARRAY) ! GET C%VELOCITY_DMS, C%VBACK & C%LOW
             ENDIF
 #endif      
 
