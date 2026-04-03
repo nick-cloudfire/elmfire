@@ -108,7 +108,9 @@ FUNCTION CHECK_FILEPATH_IS_SET(filename, testname)
    endif
 end function CHECK_FILEPATH_IS_SET
 
+! *****************************************************************************
 end subroutine CHECK_INPUT_FILEPATHS_SET
+! *****************************************************************************
 
 ! *****************************************************************************
 SUBROUTINE CHECK_INPUTS(GOOD_INPUTS)
@@ -213,6 +215,47 @@ do I = 0, size(X_IGN)-1
       endif
    endif      
 enddo
+
+IF (USE_BLDG_SPREAD_MODEL) THEN
+   IF (.NOT. USE_CONSTANT_BLDG_SPREAD_MODEL_PARAMS) THEN
+         IF (TRIM(BLDG_AREA_FILENAME) .EQ. '' ) THEN
+            WRITE(*,*) 'Specify BLDG_AREA_FILENAME or set USE_CONSTANT_BLDG_SPREAD_MODEL_PARAMS = .TRUE.'
+            GOOD_INPUTS = .FALSE.
+         ENDIF
+
+         IF (TRIM(BLDG_SEPARATION_DIST_FILENAME) .EQ. '' ) THEN
+            WRITE(*,*) 'Specify BLDG_SEPARATION_DIST_FILENAME or set USE_CONSTANT_BLDG_SPREAD_MODEL_PARAMS = .TRUE.'
+            GOOD_INPUTS = .FALSE.
+         ENDIF
+
+         IF (TRIM(BLDG_NONBURNABLE_FRAC_FILENAME) .EQ. '' ) THEN
+            WRITE(*,*) 'Specify BLDG_NONBURNABLE_FRAC_FILENAME or set USE_CONSTANT_BLDG_SPREAD_MODEL_PARAMS = .TRUE.'
+            GOOD_INPUTS = .FALSE.
+         ENDIF
+
+         IF (TRIM(BLDG_FOOTPRINT_FRAC_FILENAME) .EQ. '' ) THEN
+            WRITE(*,*) 'Specify BLDG_FOOTPRINT_FRAC_FILENAME or set USE_CONSTANT_BLDG_SPREAD_MODEL_PARAMS = .TRUE.'
+            GOOD_INPUTS = .FALSE.
+         ENDIF
+
+         IF (TRIM(BLDG_FUEL_MODEL_FILENAME) .EQ. '' ) THEN
+            WRITE(*,*) 'Specify BLDG_FUEL_MODEL_FILENAME or set USE_CONSTANT_BLDG_SPREAD_MODEL_PARAMS = .TRUE.'
+            GOOD_INPUTS = .FALSE.
+         ENDIF
+   ENDIF
+
+ELSE
+
+   IF (ENABLE_SPOTTING .AND. (.NOT. USE_SUPERSEDED_SPOTTING) ) THEN
+      IF (.NOT. USE_CONSTANT_BLDG_SPREAD_MODEL_PARAMS) THEN
+         IF (TRIM(BLDG_FOOTPRINT_FRAC_FILENAME) .EQ. '' ) THEN
+            WRITE(*,*) 'Specify BLDG_FOOTPRINT_FRAC_FILENAME or set USE_CONSTANT_BLDG_SPREAD_MODEL_PARAMS = .TRUE.'
+            GOOD_INPUTS = .FALSE.
+         ENDIF
+      ENDIF
+   ENDIF
+
+ENDIF
 
 CONTAINS 
 
