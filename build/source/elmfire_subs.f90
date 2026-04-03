@@ -1060,6 +1060,12 @@ INTEGER :: N  ! Store the new count DWI_SU
 ! If the list is empty
 IF (DL2%NUM_NODES == 0) THEN
    CALL INIT(DL2, IX, IY, T)
+
+! Debug array allocation
+   IF (ALLOCATED(DL2%NODE_POINTERS)) THEN
+      DEALLOCATE(DL2%NODE_POINTERS)
+   END IF  
+   
    ALLOCATE(DL2%NODE_POINTERS(1))      ! DWI_SU
    DL2%NODE_POINTERS(1)%PTR => DL2%HEAD   ! DWI_SU
    RETURN
