@@ -14,6 +14,8 @@ Please create issues with your errors, requests or observations so they can be w
 - Reworked the BSQ metadata parser to find its target values more flexibly and not rely on fixed character ranges (caused issues depending on how the input tifs were converted to BSQ)
 - Fixed a bug where the final ROS value in the Fire Potential mode (MODE = 2) was incorrectly calculated.
 - Fixed a bug where user-specified firebrand inputs were overwritten in the code back to default.
+- Fixed a bug for flame ellipse in building fire spread where nonuniform building input rasters is introduced and there are NODATA_VALUE in building size and structure separation distance rasters to have default values.
+- Fixed a bug when structure separation distance inout raster has too high value (> 50m) to have default maximum value (50m) since the coarser input resolution is 30m so far.
 
 ### Removed
 
@@ -31,6 +33,7 @@ Please create issues with your errors, requests or observations so they can be w
 - CFFDRS implementation: The Rothermel model is the standard fire rate of spread estimation model. To expand the potential use of ELMFIRE into Canada, the CFFDRS model (FBP) has been added, to calculate the head ROS values of the FBP fuels, along with the Build-up effect and the CFFDRS crown involvement algorithm. To run ELMFIRE with the CFFDRS model, set SURFACE_SPREAD_MODEL = "CFFDRS", START_DC = (starting Drought Code value), START_DMC = (starting Duff Moisture Code value), all in the &INPUTS namelist. To test the CFFDRS implementation, a set of 20 verification cases have been included, taken from the 2009 FBP model updates, along with automated scripts to run the cases and compare their outputs with the correct solutions. The Dogrib fire has also been included under Validation to compare the ELMFIRE implementation of the Dogrib fire to the Prometheus/WISE validation case (the standard CFFDRS fire spread model).
 - Output options: Some options have been added to the &OUTPUTS namelist. DUMP_CRITICAL_FLIN outputs the critical fireline intensity for canopy fire ignition. DUMP_EMITIMES creates the emitimes.txt file required for a HYSPLIT smoke simulation. DUMP_SPREAD_DIRECTION outputs the direction of primary fire spread in degrees. SPREAD_RATE_IN_M converts the ROS output values from feet per minute to meters per minute.
 - Input file checking: some input checks have been implemented at the start of a simulation. The simulation will now be stopped if not enough files are specified, if required input parameters are not set, if the input raster files have mismatching size / extent / band count / non-meter CRS, and others.
+- Ellipse adjustment parameter: A new tunable parameter, HRR_ELLIPSE_ADJ, has been added to the &SIMULATOR namespace to scale the effective semi-major and semi-minor axes of the fire ellipse used in building fire spread calculations. This parameter multiplies the actual ellipse dimensions to account for non-uniform heat distribution within the ellipse. The default value is 0.5, but it can be calibrated for improved accuracy.
 
 ### Changed
 
