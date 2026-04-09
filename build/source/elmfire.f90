@@ -543,6 +543,7 @@ IF (MODE .NE. 1) THEN
          C => LIST_FIRE_POTENTIAL%HEAD
          DO I = 1, LIST_FIRE_POTENTIAL%NUM_NODES
             C%VELOCITY =  C%VELOCITY_DMS_SURFACE
+            C%FLIN_SURFACE = C%FLIN_DMS_SURFACE
             C => C%NEXT
          enddo
 
