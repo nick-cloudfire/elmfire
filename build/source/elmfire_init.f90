@@ -157,7 +157,7 @@ if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS") then
 endif 
 
 ! Not enough weather bands
-if (WS%NBANDS * DT_METEOROLOGY .lt. SIMULATION_TSTOP) then
+if (WS%NBANDS * DT_METEOROLOGY .lt. SIMULATION_TSTOP .and. WS%NBANDS .gt. 1) then
    WRITE(*,*) "[ERROR] Not enough weather bands for given SIMULATION TSTOP"
    GOOD_INPUTS = .FALSE.
 endif 

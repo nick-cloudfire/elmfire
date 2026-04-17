@@ -30,7 +30,7 @@ INTEGER :: I, ILOC, J, IX, IY, ITIMESTEP, IX_IGN, IY_IGN, ISTEP, K, LU, IT1, IT2
            COUNT_START, COUNT_END, IDUMPCOUNT, ICOUNT, IXSTART, IYSTART, IXSTOP, IYSTOP, IX2, IY2, &
            ITLO_METEOROLOGY, ITHI_METEOROLOGY, BINARY_OUTPUTS_SIZE, IT_EA, IXCEN, IYCEN, IOS, IPYROME, &
            N_TO_TAG, N_SPOT_FIRES, IT2_LSP, ICOL, IROW, YEAR, MONTH, DAY_OF_MONTH, HOUR, &
-           BAND_L, BAND_H, IERR=0, DAY_OF_SIM
+           BAND_L, BAND_H, IERR=0, DAY_OF_SIM, totalDuration
 INTEGER, SAVE :: NX, NY, NDUMPS
 INTEGER, POINTER, SAVE, DIMENSION(:) :: IX_TO_TAG, IY_TO_TAG, IX_SPOT_FIRE, IY_SPOT_FIRE
 
@@ -75,8 +75,10 @@ BAND_H = min(WS%NBANDS, WX_BANDS_KEPT_IN_MEM + MIN_IWX_BAND - 1)
 T=(MIN_IWX_BAND-1)*DT_METEOROLOGY
 INITIATED = .FALSE.
 START_CALCS = .FALSE.
-DT = 30 ! placeholder value, fixes issue where mpi procs > num_cases
-TSTOP = WS%NBANDS * DT_METEOROLOGY - 1 ! placeholder value, fixes issue where mpi procs > num_cases
+if (IS_VIRTUAL_RUN) then
+   DT = 30 ! placeholder value, fixes issue where mpi procs > num_cases
+   TSTOP = WS%NBANDS * DT_METEOROLOGY - 1 ! placeholder value, fixes issue where mpi procs > num_cases
+endif
 rank_finished = 0
 
 Print *, "STARTING LEVEL SET PROPAGATION CASE: ", ICASE, " | WEATHER BAND START: ", IWX_BAND
@@ -91,9 +93,17 @@ IF (MULTIPLE_HOSTS) CALL BCAST_WEATHER()
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
 !MAIN DO LOOP, CONCURRENT FOR ALL THREADS
-DO WHILE (T .le. WS%NBANDS * DT_METEOROLOGY)
+
+if (WS%NBANDS .eq. 1) then
+   totalDuration = SIMULATION_TSTOP
+else
+   totalDuration = WS%NBANDS * DT_METEOROLOGY
+endif
+print *, totalDuration, SIMULATION_TSTOP, WS%NBANDS
+
+DO WHILE (T .le. totalDuration)
    DAY_OF_SIM = ceiling(((12 + mod(HOUR_OF_YEAR, 24) + IWX_BAND + floor(T/3600) - 1)/24.0))
-   IF (T > BAND_H * DT_METEOROLOGY) THEN ! LOAD NEXT WEATHER SLICE
+   IF (T > BAND_H * DT_METEOROLOGY .and. WS%NBANDS .gt. 1) THEN ! LOAD NEXT WEATHER SLICE (unless weather is constant)
       print *, "[",ICASE,"] AWAITING NEW WEATHER"
       CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
       BAND_L = BAND_H 
@@ -1499,7 +1509,7 @@ DO WHILE (T .le. WS%NBANDS * DT_METEOROLOGY)
 
       ENDIF
 
-CALL ACCUMULATE_CPU_USAGE(58, IT1, IT2)
+      CALL ACCUMULATE_CPU_USAGE(58, IT1, IT2)
 
       DO I = 1, NUM_EVERTAGGED
          IX = EVERTAGGED_IX(I)
@@ -1511,7 +1521,7 @@ CALL ACCUMULATE_CPU_USAGE(58, IT1, IT2)
          IF (RANDOM_IGNITIONS) PHIP (IX,IY) = 1
       ENDDO
 
-CALL ACCUMULATE_CPU_USAGE(59, IT1, IT2)
+      CALL ACCUMULATE_CPU_USAGE(59, IT1, IT2)
 
       ! Close smoke file
 #ifdef _SMOKE
@@ -1571,7 +1581,7 @@ CALL ACCUMULATE_CPU_USAGE(59, IT1, IT2)
       START_CALCS = .FALSE.
       rank_finished = 1
       DT = DT_METEOROLOGY
-      ENDIF
+   ENDIF
 ENDDO
 
 ! *****************************************************************************

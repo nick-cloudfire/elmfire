@@ -9,7 +9,7 @@ $ELMFIRE_BASE_DIR/cloudfire/fuel_wx_ign.py \
 
 WX_INPUTS_FILE=wx.csv
 
-ELMFIRE_VER=${ELMFIRE_VER:-2025.1002}
+ELMFIRE_VER=${ELMFIRE_VER:-2026.0319.memopt}
 
 . ../functions/functions.sh
 
@@ -52,12 +52,6 @@ for QUANTITY in $COLS; do
    wait
    gdal_merge.py -separate -n -9999 -init -9999 -a_nodata -9999 -co "COMPRESS=DEFLATE" -co "ZLEVEL=9" -o $INPUTS/$QUANTITY.tif $FNLIST
 done
-
-# Set inputs in elmfire.data
-replace_line COMPUTATIONAL_DOMAIN_XLLCORNER $XMIN no
-replace_line COMPUTATIONAL_DOMAIN_YLLCORNER $YMIN no
-replace_line COMPUTATIONAL_DOMAIN_CELLSIZE $CELLSIZE no
-replace_line A_SRS "$A_SRS" yes
 
 # Execute ELMFIRE
 elmfire_$ELMFIRE_VER ./inputs/elmfire.data
