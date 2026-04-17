@@ -49,11 +49,3 @@ validation/02-multi-fire/2*
 ask_rag.py
 index_repo.py
 rag_db
-examples/smoke/smoke/WARNING
-examples/smoke/smoke/CONTROL
-examples/smoke/smoke/EMITIMES.txt
-examples/smoke/smoke/MESSAGE
-examples/smoke/smoke/smoke.bin
-examples/smoke/smoke/smoke.nc
-examples/smoke/smoke/smoke.nc.aux.xml
-examples/smoke/smoke/VMSDIST
