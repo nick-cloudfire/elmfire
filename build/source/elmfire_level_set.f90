@@ -182,6 +182,34 @@ DO WHILE (T .le. totalDuration)
          ALLOCATE(EVERTAGGED_IX   (1:NX*NY))
          ALLOCATE(EVERTAGGED_IY   (1:NX*NY))
 
+#ifdef _WUI
+         ! Precompute NEAR_URBAN mask (dilate FBFM==91 cells by 60 m) so
+         ! BLDG_SET_WILDLAND_HRR can skip cells that can't reach any structure.
+         ALLOCATE(NEAR_URBAN(1:NX,1:NY)); NEAR_URBAN(:,:) = .FALSE.
+         ALLOCATE(BLDG_EMBER_IGNITED_MAP(1:NX,1:NY)); BLDG_EMBER_IGNITED_MAP(:,:) = .FALSE.
+         IF (USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .EQ. 3) THEN
+            BLOCK
+               INTEGER :: IX_U, IY_U, DX, DY, HAZ
+               REAL, PARAMETER :: NEAR_URBAN_RADIUS_M = 60.0
+               HAZ = CEILING(NEAR_URBAN_RADIUS_M / ANALYSIS_CELLSIZE)
+               DO IY_U = 1, NY
+               DO IX_U = 1, NX
+                  IF (FBFM%I2(IX_U,IY_U,1) .EQ. 91) THEN
+                     ! Dilate: mark every cell within HAZ of this urban cell.
+                     DO DY = -HAZ, HAZ
+                     DO DX = -HAZ, HAZ
+                        IF (IX_U+DX .LT. 1 .OR. IX_U+DX .GT. NX) CYCLE
+                        IF (IY_U+DY .LT. 1 .OR. IY_U+DY .GT. NY) CYCLE
+                        NEAR_URBAN(IX_U+DX, IY_U+DY) = .TRUE.
+                     ENDDO
+                     ENDDO
+                  ENDIF
+               ENDDO
+               ENDDO
+            END BLOCK
+         ENDIF
+#endif
+
          IF (USE_UMD_SPOTTING_MODEL) THEN
             ALLOCATE(EMBER_TIGN      (1:NX,1:NY)); EMBER_TIGN(:,:) = -1.
             !ALLOCATE(T_LOCAL_IGNITION(1:NX,1:NY)); T_LOCAL_IGNITION(:,:) = -1
@@ -785,9 +813,20 @@ DO WHILE (T .le. totalDuration)
             ENDIF
 #endif
             C%BURNED               = .TRUE.
+#ifdef _WUI
+            ! Model-3 urban: preserve FTP/ember ignition time if already set.
+            IF (USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .EQ. 3 .AND. &
+                C%IFBFM .EQ. 91 .AND. TIME_OF_ARRIVAL(IX,IY) .GT. 0.) THEN
+               C%TIME_OF_ARRIVAL = TIME_OF_ARRIVAL(IX,IY)
+            ELSE
+               C%TIME_OF_ARRIVAL      = T
+               TIME_OF_ARRIVAL(IX,IY) = T
+            ENDIF
+#else
             C%TIME_OF_ARRIVAL      = T
-            SURFACE_FIRE   (IX,IY) = 1
             TIME_OF_ARRIVAL(IX,IY) = T
+#endif
+            SURFACE_FIRE   (IX,IY) = 1
             
             IF (C%CROWN_FIRE .LT. 0) C%CROWN_FIRE = 0
             
@@ -831,7 +870,21 @@ DO WHILE (T .le. totalDuration)
             LIST_BURNED%TAIL%LOCAL_EMBERGEN_DURATION= C%LOCAL_EMBERGEN_DURATION
 
 #ifdef _WUI
-            IF (USE_BLDG_SPREAD_MODEL) LIST_BURNED%TAIL%IBLDGFM = C%IBLDGFM
+         IF (USE_BLDG_SPREAD_MODEL) THEN
+            LIST_BURNED%TAIL%IBLDGFM          = C%IBLDGFM
+            ! Propagate model-3 ignition state (wildland cells: both zero).
+            LIST_BURNED%TAIL%BLDG_IGNITED     = C%BLDG_IGNITED
+            LIST_BURNED%TAIL%T_BLDG_IGNITION  = C%T_BLDG_IGNITION
+            ! Prime HRR_TRANSIENT so the freshly-burned cell is a valid
+            ! heat source on the next BLDG_ACCUMULATE pass.
+            IF (BLDG_SPREAD_MODEL_TYPE .EQ. 3) THEN
+               IF (LIST_BURNED%TAIL%IFBFM .EQ. 91) THEN
+                  CALL BLDG_SET_URBAN_HRR(LIST_BURNED%TAIL, T)
+               ELSE
+                  CALL BLDG_SET_WILDLAND_HRR(LIST_BURNED%TAIL, T)
+               ENDIF
+            ENDIF
+         ENDIF
 #endif
 
 !#ifdef _UMDSPOTTING
@@ -879,7 +932,7 @@ DO WHILE (T .le. totalDuration)
                IF(C%IFBFM .EQ. 91) THEN
 #ifdef _WUI
                ! Refresh transient HRRPUA for Hamada model, to be used in eulerian firebrand model
-                  IF(USE_BLDG_SPREAD_MODEL) CALL HRR_TRANSIENT(C, T)
+                  IF(USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .EQ. 1) CALL HRR_TRANSIENT(C, T)
 #endif               
                   FLIN = C%HRR_TRANSIENT*ANALYSIS_CELLSIZE+1E-5
                ELSE
@@ -1792,6 +1845,29 @@ IF (USE_BLDG_SPREAD_MODEL .AND. (BLDG_SPREAD_MODEL_TYPE .EQ. 2)) THEN
       LB_P%FLIN_SURFACE = LB_P%HRR_TRANSIENT*ANALYSIS_CELLSIZE ! kW/m
       LB_P => LB_P%NEXT
    ENDDO
+ELSEIF (USE_BLDG_SPREAD_MODEL .AND. (BLDG_SPREAD_MODEL_TYPE .EQ. 3)) THEN
+   ! Refresh HRR_TRANSIENT on every burned source each RK stage (idempotent).
+   LB_P => LB%HEAD
+   DO I = 1, LB%NUM_NODES
+      IF (LB_P%IFBFM .EQ. 91) THEN
+         CALL BLDG_SET_URBAN_HRR(LB_P, T_ELMFIRE)
+      ELSE
+         CALL BLDG_SET_WILDLAND_HRR(LB_P, T_ELMFIRE)
+      ENDIF
+      LB_P => LB_P%NEXT
+   ENDDO
+
+   ! Deposit heat once per physical timestep (RK2 calls this routine twice).
+   ! Runs before the ISTEP==1 BLDG_CHECK_IGNITION pass below.
+   IF (ISTEP .EQ. 1) THEN
+      LB_P => LB%HEAD
+      DO I = 1, LB%NUM_NODES
+         IF (LB_P%HRR_TRANSIENT .GT. 0.) THEN
+            CALL BLDG_ACCUMULATE_HEAT_FROM_NEIGHBORS(LB_P, L, SIMULATION_DT)
+         ENDIF
+         LB_P => LB_P%NEXT
+      ENDDO
+   ENDIF
 ENDIF
 #endif
 
@@ -1812,6 +1888,7 @@ IF (ISTEP .EQ. 1) THEN
             C%UYOUSY = 1. - ABSCOSASP(IASP) * OMCOSSLPRAD%R4(C%IX,C%IY,1)
             C%NEED_SLOPE_CALC = .FALSE.
          ENDIF
+
          DONE = .FALSE.
          NITER = 0
          DO WHILE (.NOT. DONE)
@@ -1870,12 +1947,15 @@ IF (ISTEP .EQ. 1) THEN
             C%VBACK = BOH * C%VELOCITY_DMS
 #ifdef _WUI
             IF (USE_BLDG_SPREAD_MODEL .AND. C%IFBFM .EQ. 91) THEN
-               CONTINUE
                IF (BLDG_SPREAD_MODEL_TYPE .EQ. 1) CALL HAMADA(C) ! GET C%VELOCITY_DMS, C%VBACK & C%LOW
                IF (BLDG_SPREAD_MODEL_TYPE .EQ. 2) CALL UMD_UCB_BLDG_SPREAD(C, LB, DYNAMIC_ARRAY) ! GET C%VELOCITY_DMS, C%VBACK & C%LOW
-               CONTINUE
+               IF (BLDG_SPREAD_MODEL_TYPE .EQ. 3) THEN
+                  ! Check ignition for unburned cells, then compute spread
+                  IF (.NOT. C%BLDG_IGNITED) CALL BLDG_CHECK_IGNITION(C, T_ELMFIRE)
+                  CALL BLDG_SPREAD_MODEL_3(C, T_ELMFIRE) ! GET C%VELOCITY_DMS, C%VBACK & C%LOW
+               ENDIF
             ENDIF
-#endif      
+#endif
 
             CALL COMPUTE_SPREAD_VELOCITIES(C, ILH)
 
@@ -2246,6 +2326,13 @@ DO
          PHIP           (IX,IY) = -1.0
          ! Record firebrand ignited cells
          IF (DUMP_EMBER_IGNITION) EMBER_IGNITION_MAP%I2(IX,IY,1) = 1
+         ! Model-3 ember-ignited urban cell: hand off piloted ignition time
+         ! to BLDG_CHECK_IGNITION via the raster + one-shot flag.
+         IF (USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .EQ. 3 .AND. &
+             FBFM%I2(IX,IY,1) .EQ. 91) THEN
+            BLDG_EMBER_IGNITED_MAP(IX,IY) = .TRUE.
+            TIME_OF_ARRIVAL(IX,IY)        = C%T_LOCAL_IGNITION
+         ENDIF
          CALL DELETE_NODE(LIST_EMBER_DEPOSITED, C) ! Remove ignited cells
       ENDIF
    ENDIF

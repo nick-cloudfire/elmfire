@@ -209,9 +209,9 @@ do I = 0, size(X_IGN)-1
       endif
       ix_ign = ICOL_FROM_X(X_IGN(I), ASP%XLLCORNER, ASP%CELLSIZE)
       iy_ign = IROW_FROM_Y(Y_IGN(I), ASP%YLLCORNER, ASP%CELLSIZE)
-      if (ISNONBURNABLE(ix_ign, iy_ign)) then
-         WRITE(*,*) "[ERROR] Ignition point ", I, " is on a non-burnable cell."
-         GOOD_INPUTS = .FALSE.
+      if (ISNONBURNABLE(ix_ign, iy_ign)) then                                   ! note there is a setting for allow_nonbunable_pixel_ignition. check if this contradicts?
+         WRITE(*,*) "[WARNING] Ignition point ", I, " is on a non-burnable cell."
+!         GOOD_INPUTS = .FALSE.
       endif
    endif      
 enddo
