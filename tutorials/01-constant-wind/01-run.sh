@@ -31,7 +31,7 @@ A_SRS="EPSG: 32610" # Spatial reference system - UTM Zone 10
 
 # End inputs specification
 
-ELMFIRE_VER=${ELMFIRE_VER:-2025.1002}
+ELMFIRE_VER=${ELMFIRE_VER:-2026.0319.memopt}
 
 . ../functions/functions.sh
 
@@ -69,13 +69,9 @@ for i in $(eval echo "{1..$NUM_INT_RASTERS}"); do
 done
 
 # Set inputs in elmfire.data
-replace_line COMPUTATIONAL_DOMAIN_XLLCORNER $XMIN no
-replace_line COMPUTATIONAL_DOMAIN_YLLCORNER $YMIN no
-replace_line COMPUTATIONAL_DOMAIN_CELLSIZE $CELLSIZE no
 replace_line SIMULATION_TSTOP $SIMULATION_TSTOP no
 replace_line LH_MOISTURE_CONTENT $LH_MOISTURE_CONTENT no
 replace_line LW_MOISTURE_CONTENT $LW_MOISTURE_CONTENT no
-replace_line A_SRS "$A_SRS" yes
 
 # Execute ELMFIRE
 elmfire_$ELMFIRE_VER ./inputs/elmfire.data
