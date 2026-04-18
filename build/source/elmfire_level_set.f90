@@ -183,19 +183,22 @@ DO WHILE (T .le. totalDuration)
          ALLOCATE(EVERTAGGED_IY   (1:NX*NY))
 
 #ifdef _WUI
-         ! Precompute NEAR_URBAN mask (dilate FBFM==91 cells by 60 m) so
-         ! BLDG_SET_WILDLAND_HRR can skip cells that can't reach any structure.
-         ALLOCATE(NEAR_URBAN(1:NX,1:NY)); NEAR_URBAN(:,:) = .FALSE.
-         ALLOCATE(BLDG_EMBER_IGNITED_MAP(1:NX,1:NY)); BLDG_EMBER_IGNITED_MAP(:,:) = .FALSE.
+         ! BLDG_SPREAD_MODEL_TYPE = 3 only. All consumers of NEAR_URBAN and
+         ! BLDG_EMBER_IGNITED_MAP are gated by the same condition at their
+         ! call sites, so allocation is skipped when the model is off.
          IF (USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .EQ. 3) THEN
+            ALLOCATE(NEAR_URBAN(1:NX,1:NY)); NEAR_URBAN(:,:) = .FALSE.
+            ALLOCATE(BLDG_EMBER_IGNITED_MAP(1:NX,1:NY)); BLDG_EMBER_IGNITED_MAP(:,:) = .FALSE.
             BLOCK
+               ! Dilate FBFM==91 cells by the 60 m influence radius so
+               ! BLDG_SET_WILDLAND_HRR can skip wildland cells that can't
+               ! reach any structure.
                INTEGER :: IX_U, IY_U, DX, DY, HAZ
                REAL, PARAMETER :: NEAR_URBAN_RADIUS_M = 60.0
                HAZ = CEILING(NEAR_URBAN_RADIUS_M / ANALYSIS_CELLSIZE)
                DO IY_U = 1, NY
                DO IX_U = 1, NX
                   IF (FBFM%I2(IX_U,IY_U,1) .EQ. 91) THEN
-                     ! Dilate: mark every cell within HAZ of this urban cell.
                      DO DY = -HAZ, HAZ
                      DO DX = -HAZ, HAZ
                         IF (IX_U+DX .LT. 1 .OR. IX_U+DX .GT. NX) CYCLE
