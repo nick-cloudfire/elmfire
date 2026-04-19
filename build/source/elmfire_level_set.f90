@@ -75,10 +75,8 @@ BAND_H = min(WS%NBANDS, WX_BANDS_KEPT_IN_MEM + MIN_IWX_BAND - 1)
 T=(MIN_IWX_BAND-1)*DT_METEOROLOGY
 INITIATED = .FALSE.
 START_CALCS = .FALSE.
-if (IS_VIRTUAL_RUN) then
-   DT = 30 ! placeholder value, fixes issue where mpi procs > num_cases
-   TSTOP = WS%NBANDS * DT_METEOROLOGY - 1 ! placeholder value, fixes issue where mpi procs > num_cases
-endif
+DT = 1
+TSTOP = WS%NBANDS * DT_METEOROLOGY - 1 ! placeholder value, fixes issue where mpi procs > num_cases
 rank_finished = 0
 
 Print *, "STARTING LEVEL SET PROPAGATION CASE: ", ICASE, " | WEATHER BAND START: ", IWX_BAND
@@ -99,7 +97,6 @@ if (WS%NBANDS .eq. 1) then
 else
    totalDuration = WS%NBANDS * DT_METEOROLOGY
 endif
-print *, totalDuration, SIMULATION_TSTOP, WS%NBANDS
 
 DO WHILE (T .le. totalDuration)
    DAY_OF_SIM = ceiling(((12 + mod(HOUR_OF_YEAR, 24) + IWX_BAND + floor(T/3600) - 1)/24.0))
