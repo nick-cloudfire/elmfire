@@ -40,6 +40,19 @@ gnu_debug_linux : obj = elmfire_post_debug
 gnu_debug_linux : setup $(obj_mpi)
 	$(FCOMPL) $(ELMFIRE_PRECOMPILER_FLAGS) $(FFLAGS) -o $(obj) $(obj_mpi)
 
+#Gnu compiler (macOS / Darwin):
+gnu_macos : FFLAGS = -O3 -unroll -frecord-marker=4 -ffree-line-length-none -cpp -march=native -fopenmp -ffpe-summary=none
+gnu_macos : FCOMPL = $(ELMFIRE_FCOMPL_MPI_GNU)
+gnu_macos : obj = elmfire_post
+gnu_macos : setup $(obj_mpi)
+	$(FCOMPL) $(ELMFIRE_PRECOMPILER_FLAGS) $(FFLAGS) -o $(obj) $(obj_mpi)
+
+gnu_debug_macos : FFLAGS = -O0 -g -Wall -fcheck=all -fbacktrace -fdump-core -ffpe-trap=zero,overflow -frecord-marker=4 -ffree-line-length-none -cpp -Wno-character-truncation -Wno-conversion -fopenmp
+gnu_debug_macos : FCOMPL = $(ELMFIRE_FCOMPL_MPI_GNU)
+gnu_debug_macos : obj = elmfire_post_debug
+gnu_debug_macos : setup $(obj_mpi)
+	$(FCOMPL) $(ELMFIRE_PRECOMPILER_FLAGS) $(FFLAGS) -o $(obj) $(obj_mpi)
+
 # Intel compiler:
 intel_linux : FFLAGS = -O2 -ipo -no-prec-div -axCORE-AVX2 -fpp -assume byterecl -qopenmp
 intel_linux : FCOMPL = $(ELMFIRE_FCOMPL_MPI_INTEL)

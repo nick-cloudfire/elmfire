@@ -1,0 +1,210 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Version tag (e.g. v2026.0519)'
+        required: true
+
+jobs:
+
+  build-linux:
+    name: Build Linux (x86_64)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y gfortran libopenmpi-dev openmpi-bin gdal-bin
+
+      - name: Build
+        working-directory: build/linux
+        run: |
+          mkdir -p bin
+          export ELMFIRE_INSTALL_DIR=$(pwd)/bin
+          bash make_gnu.sh
+
+      - name: Package binaries
+        working-directory: build/linux
+        run: |
+          tar -czf elmfire-linux-x86_64.tar.gz -C bin .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: elmfire-linux-x86_64
+          path: build/linux/elmfire-linux-x86_64.tar.gz
+
+  build-macos:
+    name: Build macOS (arm64)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: brew install gcc open-mpi gdal
+
+      - name: Build
+        working-directory: build/macos
+        run: |
+          mkdir -p bin
+          export ELMFIRE_INSTALL_DIR=$(pwd)/bin
+          bash make_gnu.sh
+
+      - name: Package binaries
+        working-directory: build/macos
+        run: |
+          tar -czf elmfire-macos-arm64.tar.gz -C bin .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: elmfire-macos-arm64
+          path: build/macos/elmfire-macos-arm64.tar.gz
+
+  build-macos-x86:
+    name: Build macOS (x86_64 / Intel)
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: brew install gcc open-mpi gdal
+
+      - name: Build
+        working-directory: build/macos
+        run: |
+          mkdir -p bin
+          export ELMFIRE_INSTALL_DIR=$(pwd)/bin
+          bash make_gnu.sh
+
+      - name: Package binaries
+        working-directory: build/macos
+        run: |
+          tar -czf elmfire-macos-x86_64.tar.gz -C bin .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: elmfire-macos-x86_64
+          path: build/macos/elmfire-macos-x86_64.tar.gz
+
+  build-windows:
+    name: Build Windows (x64)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Intel oneAPI HPC Toolkit
+        run: |
+          winget install --id Intel.oneAPI.HPC.Toolkit --silent --accept-package-agreements --accept-source-agreements
+        shell: pwsh
+        continue-on-error: true
+
+      - name: Install Intel oneAPI HPC Toolkit (fallback via PowerShell)
+        shell: pwsh
+        run: |
+          if (!(Test-Path "C:\Program Files (x86)\Intel\oneAPI")) {
+            $url = "https://registrationcenter-download.intel.com/akdlm/IRC_NAS/Intel_HPC_Toolkit_2025.1_offline.exe"
+            Invoke-WebRequest -Uri $url -OutFile oneapi_hpc.exe
+            Start-Process -Wait -FilePath oneapi_hpc.exe -ArgumentList "--silent --eula accept --action install --components intel.oneapi.win.ifort-compiler:intel.oneapi.win.mpi.devel"
+            Remove-Item oneapi_hpc.exe
+          }
+
+      - name: Set up MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build with MSBuild
+        shell: pwsh
+        run: |
+          $setvars = "C:\Program Files (x86)\Intel\oneAPI\setvars.bat"
+          if (Test-Path $setvars) {
+            cmd /c "`"$setvars`" && msbuild build\visual_studio\elmfire.sln /p:Configuration=Release /p:Platform=x64 /t:elmfire /m"
+          } else {
+            Write-Error "Intel oneAPI not found at expected path"
+            exit 1
+          }
+
+      - name: Collect binaries
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist
+          Copy-Item build\visual_studio\elmfire\x64\Release\elmfire.exe dist\ -ErrorAction SilentlyContinue
+          Copy-Item build\visual_studio\elmfire_post\x64\Release\elmfire_post.exe dist\ -ErrorAction SilentlyContinue
+
+      - name: Package binaries
+        shell: pwsh
+        run: Compress-Archive -Path dist\* -DestinationPath elmfire-windows-x64.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: elmfire-windows-x64
+          path: elmfire-windows-x64.zip
+
+  release:
+    name: Create GitHub Release
+    needs: [build-linux, build-macos, build-macos-x86, build-windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Determine version
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ELMFIRE ${{ steps.version.outputs.tag }}
+          draft: false
+          prerelease: false
+          body: |
+            ## ELMFIRE ${{ steps.version.outputs.tag }}
+
+            Pre-built binaries for Linux, macOS, and Windows.
+
+            ### Quick install
+
+            **macOS / Linux:**
+            ```bash
+            curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/install/install.sh | bash
+            ```
+
+            **Windows (PowerShell):**
+            ```powershell
+            irm https://raw.githubusercontent.com/${{ github.repository }}/main/install/install.ps1 | iex
+            ```
+
+            ### Manual install
+            Download the archive for your platform, extract, and add the `bin/` directory to your PATH.
+
+            | Platform | Archive |
+            |----------|---------|
+            | Linux x86_64 | `elmfire-linux-x86_64.tar.gz` |
+            | macOS arm64 (Apple Silicon) | `elmfire-macos-arm64.tar.gz` |
+            | macOS x86_64 (Intel) | `elmfire-macos-x86_64.tar.gz` |
+            | Windows x64 | `elmfire-windows-x64.zip` |
+
+            ### Runtime requirements
+            - **Linux/macOS:** GDAL CLI tools (`gdal-bin` / `brew install gdal`) and an MPI runtime (`openmpi`).
+            - **Windows:** Intel MPI runtime (included with Intel oneAPI HPC Toolkit) and GDAL for Windows (OSGeo4W).
+          files: |
+            artifacts/elmfire-linux-x86_64/elmfire-linux-x86_64.tar.gz
+            artifacts/elmfire-macos-arm64/elmfire-macos-arm64.tar.gz
+            artifacts/elmfire-macos-x86_64/elmfire-macos-x86_64.tar.gz
+            artifacts/elmfire-windows-x64/elmfire-windows-x64.zip
