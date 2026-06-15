@@ -1875,7 +1875,7 @@ IF (IOS .NE. 0) THEN
 END IF
 
 ! 4. (Optional) clean up temp files
-CALL EXECUTE_COMMAND_LINE('rm -f ' // TRIM(TMPIN)  // ' ' // TRIM(TMPOUT))
+CALL EXECUTE_COMMAND_LINE(TRIM(DELETECOMMAND) // TRIM(TMPIN) // ' ' // TRIM(TMPOUT))
 ! *****************************************************************************
 END SUBROUTINE XY_TO_LATLON
 ! *****************************************************************************
@@ -1946,7 +1946,7 @@ contains
    subroutine read_basic_raster_meta()
    ! Runs gdalinfo on the target raster, writes output to a temp file, and parses
    ! it line by line to extract size, origin, pixel size, and metre-units flag.
-      write(cmd,'(a)') 'gdalinfo "' // trim(FUELS_AND_TOPOGRAPHY_DIRECTORY) // '/' // &
+      write(cmd,'(a)') trim(PATH_TO_GDAL) // 'gdalinfo "' // trim(FUELS_AND_TOPOGRAPHY_DIRECTORY) // &
                        trim(tempFilename) // '" > "' // trim(tmpfile) // '"'
       call execute_command_line(trim(cmd))
 
@@ -1972,7 +1972,7 @@ contains
       integer :: p
       character(len=1024) :: text
 
-      write(cmd,'(a)') 'gdalsrsinfo -o epsg "' // trim(FUELS_AND_TOPOGRAPHY_DIRECTORY) // '/' // &
+      write(cmd,'(a)') trim(PATH_TO_GDAL) // 'gdalsrsinfo -o epsg "' // trim(FUELS_AND_TOPOGRAPHY_DIRECTORY) // &
                      trim(tempFilename) // '" > "' // trim(tmpfile_epsg) // '"'
       call execute_command_line(trim(cmd))
 
