@@ -9,8 +9,14 @@ CONTAINS
 ! *****************************************************************************
 SUBROUTINE READ_MISC
 ! *****************************************************************************
+! Reads the &MISCELLANEOUS namelist group, setting defaults for fuel model and
+! GDAL paths and scratch/input directories, and appends path separators to the
+! directory paths.
 
-INTEGER :: IOS
+INTEGER :: IOS, LUGDAL, ISLASH
+CHARACTER(400) :: GDALEXE, GDALTMP
+CHARACTER(32)  :: RANKSTR
+CHARACTER(256) :: IOSMSG
 
 NAMELIST /MISCELLANEOUS/ BUILDING_FUEL_MODEL_FILE, FUEL_MODEL_FILE, MISCELLANEOUS_INPUTS_DIRECTORY, PATH_TO_GDAL, SCRATCH
 
@@ -20,13 +26,40 @@ IF (IRANK_WORLD .EQ. 0) WRITE(*,*) 'Reading &MISCELLANEOUS namelist group'
 BUILDING_FUEL_MODEL_FILE       = 'building_fuel_models.csv'
 FUEL_MODEL_FILE                = 'null'
 MISCELLANEOUS_INPUTS_DIRECTORY = 'null'
-PATH_TO_GDAL                   = '/usr/bin'
+PATH_TO_GDAL                   = 'auto'
 SCRATCH                        = 'null'
 
-READ(LUINPUT,NML=MISCELLANEOUS,IOSTAT=IOS)
+READ(LUINPUT,NML=MISCELLANEOUS,IOSTAT=IOS,IOMSG=IOSMSG)
 IF (IOS > 0) THEN
-   WRITE(*,*) 'Error: Problem with namelist group &MISCELLANEOUS.'
+   WRITE(*,*) 'Error reading &MISCELLANEOUS namelist group: ', TRIM(IOSMSG)
    STOP
+ENDIF
+
+! If PATH_TO_GDAL is left at the default 'auto', discover the directory that
+! contains gdal_translate from the PATH (via 'command -v') so users don't have
+! to hard-code it. Falls back to '/usr/bin' if GDAL can't be located. An
+! explicit PATH_TO_GDAL in the namelist always takes precedence.
+IF (TRIM(PATH_TO_GDAL) .EQ. 'auto') THEN
+   WRITE(RANKSTR,'(I0)') IRANK_WORLD
+   GDALTMP = '.elmfire_gdal_path_' // TRIM(RANKSTR) // '.txt'
+   CALL EXECUTE_COMMAND_LINE('command -v gdal_translate > ' // TRIM(GDALTMP) // ' 2>/dev/null', EXITSTAT=IOS)
+
+   GDALEXE = ''
+   OPEN(NEWUNIT=LUGDAL, FILE=TRIM(GDALTMP), STATUS='OLD', ACTION='READ', IOSTAT=IOS)
+   IF (IOS .EQ. 0) THEN
+      READ(LUGDAL,'(A)',IOSTAT=IOS) GDALEXE
+      CLOSE(LUGDAL)
+   ENDIF
+   CALL EXECUTE_COMMAND_LINE(TRIM(DELETECOMMAND) // ' ' // TRIM(GDALTMP))
+
+   ISLASH = INDEX(TRIM(GDALEXE), PATH_SEPARATOR, BACK=.TRUE.)
+   IF (ISLASH .GT. 1) THEN
+      PATH_TO_GDAL = GDALEXE(1:ISLASH-1)
+      IF (IRANK_WORLD .EQ. 0) WRITE(*,*) 'Auto-detected PATH_TO_GDAL: ', TRIM(PATH_TO_GDAL)
+   ELSE
+      PATH_TO_GDAL = '/usr/bin'
+      IF (IRANK_WORLD .EQ. 0) WRITE(*,*) 'Could not auto-detect GDAL on PATH; falling back to PATH_TO_GDAL = ', TRIM(PATH_TO_GDAL)
+   ENDIF
 ENDIF
 
 PATH_TO_GDAL = TRIM(PATH_TO_GDAL) // PATH_SEPARATOR
@@ -46,8 +79,12 @@ END SUBROUTINE READ_MISC
 ! *****************************************************************************
 SUBROUTINE READ_SMOKE
 ! *****************************************************************************
+! Reads the &SMOKE namelist group and sets defaults for smoke/PM emission
+! outputs (emission factors, calorific value, flaming/smoldering times,
+! output interval and enable flag).
 
 INTEGER :: IOS
+CHARACTER(256) :: IOSMSG
 
 NAMELIST /SMOKE/ DT_SMOKE_OUTPUTS, ENABLE_SMOKE_OUTPUTS, PM_EMISSION_FACTOR_FLAMING, &
                  PM_EMISSION_FACTOR_SMOLDERING, DRY_WOOD_CALORIFIC_VALUE, FLAMING_TIME, &
@@ -64,9 +101,9 @@ DRY_WOOD_CALORIFIC_VALUE       = 19
 FLAMING_TIME                   = 180
 SMOLDERING_TIME                = 3600
 
-READ(LUINPUT,NML=SMOKE,IOSTAT=IOS)
+READ(LUINPUT,NML=SMOKE,IOSTAT=IOS,IOMSG=IOSMSG)
 IF (IOS > 0) THEN
-   WRITE(*,*) 'Error: Problem with namelist group &SMOKE.'
+   WRITE(*,*) 'Error reading &SMOKE namelist group: ', TRIM(IOSMSG)
    STOP
 ENDIF
 
@@ -77,11 +114,15 @@ END SUBROUTINE READ_SMOKE
 ! *****************************************************************************
 SUBROUTINE READ_INPUTS
 ! *****************************************************************************
+! Reads the &INPUTS namelist group and sets defaults for all raster filenames,
+! input/weather directories and units/option flags; also opens and counts the
+! optional TIMED_LOCATIONS_CSV, populating TIMED_LOCATIONS_TRACKER.
 
 INTEGER :: I, IOS
 INTEGER(8) :: I8DUMMY
 REAL :: RDUMMY
 CHARACTER(400) :: FN
+CHARACTER(256) :: IOSMSG
 
 NAMELIST /INPUTS/ &
 ADJ_FILENAME, ASP_FILENAME, BARRIER_FILENAME, BLDG_AREA_FILENAME, BLDG_FOOTPRINT_FRAC_FILENAME, BLDG_FUEL_MODEL_FILENAME, &
@@ -94,8 +135,8 @@ DEAD_MC_IN_PERCENT, LIVE_MC_IN_PERCENT, PHI_FILENAME, POPULATION_DENSITY_FILENAM
 SLP_FILENAME, ERC_FILENAME, M100_FILENAME, M10_FILENAME, M1_FILENAME, MLH_FILENAME, MLW_FILENAME, &
 PYROMES_FILENAME, USE_BSQ_XML_HEADER, ROTATE_ASP, ROTATE_WD, WD_FILENAME, WS_FILENAME, USE_CONSTANT_FMC, &
 USE_CONSTANT_LH, USE_CONSTANT_LW, USE_EXISTING_BSQS, USE_LAND_VALUE, USE_POPULATION_DENSITY, USE_REAL_ESTATE_VALUE, &
-USE_TILED_IO, USE_BARRIERS, WEATHER_DIRECTORY, WS_AT_10M, VRT_INSTEAD_OF_TIF, SDI_FILENAME, TIMED_LOCATIONS_CSV, & 
-ONLY_READ_NEEDED_WX_BANDS, START_DC, START_DMC, DAILY_WEATHER_FILENAME, SURFACE_SPREAD_MODEL
+USE_TILED_IO, USE_BARRIERS, WEATHER_DIRECTORY, WS_AT_10M, WS_IN_KPH, VRT_INSTEAD_OF_TIF, SDI_FILENAME, TIMED_LOCATIONS_CSV, & 
+ONLY_READ_NEEDED_WX_BANDS, START_DC, START_DMC, DAILY_WEATHER_FILENAME, SURFACE_SPREAD_MODEL, LANDSCAPE_FILENAME
 
 IF (IRANK_WORLD .EQ. 0) WRITE(*,*) 'Reading &INPUTS namelist group'
 
@@ -124,6 +165,7 @@ FOLIAR_MOISTURE_CONTENT        = 90.0
 FUELS_AND_TOPOGRAPHY_DIRECTORY = ' '
 GRID_DECLINATION               = 0.0
 IGNITION_MASK_FILENAME         = ' '
+LANDSCAPE_FILENAME             = ' '
 LAND_VALUE_FILENAME            = ' '
 LH_MOISTURE_CONTENT            = 60.0
 LW_MOISTURE_CONTENT            = 60.0 
@@ -160,20 +202,26 @@ USE_BARRIERS                   = .FALSE.
 VRT_INSTEAD_OF_TIF             = .FALSE.
 WEATHER_DIRECTORY              = ' '
 WS_AT_10M                      = .FALSE.
+WS_IN_KPH                      = .FALSE. 
 ONLY_READ_NEEDED_WX_BANDS      = .FALSE.
 SURFACE_SPREAD_MODEL           = 'ROTHERMEL'    ! set 'CFFDRS' for Canadian model
 START_DC                       = 400.0
 START_DMC                      = 80.0
 DAILY_WEATHER_FILENAME         = ' '
 
-READ(LUINPUT,NML=INPUTS,IOSTAT=IOS)
+READ(LUINPUT,NML=INPUTS,IOSTAT=IOS,IOMSG=IOSMSG)
 IF (IOS > 0) THEN
-    WRITE(*,*) 'Error: Problem with namelist group &INPUTS.'
-    STOP
+   WRITE(*,*) 'Error reading &INPUTS namelist group: ', TRIM(IOSMSG)
+   STOP
 ENDIF
 
 FUELS_AND_TOPOGRAPHY_DIRECTORY = TRIM(FUELS_AND_TOPOGRAPHY_DIRECTORY) // PATH_SEPARATOR
 WEATHER_DIRECTORY              = TRIM(WEATHER_DIRECTORY             ) // PATH_SEPARATOR
+
+! A landscape file is a single multiband GeoTIFF holding (in band order) elevation,
+! slope, aspect, fuel model, canopy cover, canopy height, canopy base height, and
+! canopy bulk density. When specified, it is read instead of the individual rasters.
+USE_LANDSCAPE_FILE = (LEN_TRIM(LANDSCAPE_FILENAME) .GT. 0)
 
 PROCESS_TIMED_LOCATIONS = .FALSE.
 IF (TRIM(TIMED_LOCATIONS_CSV) .EQ. 'null' ) RETURN
@@ -220,8 +268,12 @@ END SUBROUTINE READ_INPUTS
 ! *****************************************************************************
 SUBROUTINE READ_OUTPUTS
 ! *****************************************************************************
+! Reads the &OUTPUTS namelist group and sets defaults for all DUMP_*/output
+! options; compacts the TIME_AT_BURNED_ACRES list to its used entries and
+! appends a path separator to OUTPUTS_DIRECTORY.
 
 INTEGER :: I, IOS
+CHARACTER(256) :: IOSMSG
 REAL, ALLOCATABLE, DIMENSION (:) :: TABA ! Time at burned acres
 
 NAMELIST /OUTPUTS/ &
@@ -236,8 +288,8 @@ DUMP_TRANSIENT_ACREAGE, DUMP_VELOCITY, DUMP_WD20, DUMP_CFFDRS_DEBUG, DUMP_WS20, 
 FULL_BINARY_OUTPUTS, NUM_EMBER_COUNT_BINS, NUM_VIRTUAL_STATIONS, &
 FLAME_LENGTH_BIN_LO, FLAME_LENGTH_BIN_HI, MINIMUM_AREA_FOR_BINARY_OUTPUTS, &
 NUM_FLAME_LENGTH_BINS, OUTPUTS_DIRECTORY, USE_EMBER_COUNT_BINS, USE_FLAME_LENGTH_BINS, &
-DUMP_SPOTTING_OUTPUTS, RUN_ID, DUMP_TOTAL_DFC_RECEIVED, DUMP_TOTAL_RAD_RECEIVED, &
-DUMP_HRR_TRANSIENT, TIME_AT_BURNED_ACRES, USE_FOUR_DIGITS_IN_IWX_BAND, VIRTUAL_STATION_X, VIRTUAL_STATION_Y
+DUMP_SPOTTING_OUTPUTS, DUMP_EMBER_FLUX_TRANSIENT, DUMP_EMBER_IGNITION, RUN_ID, DUMP_TOTAL_DFC_RECEIVED, DUMP_TOTAL_RAD_RECEIVED, DUMP_TRANSIENT_DFC, DUMP_TRANSIENT_RAD, DUMP_FUEL_CONSUMPTION, &
+DUMP_HRR_TRANSIENT, TIME_AT_BURNED_ACRES, USE_FOUR_DIGITS_IN_IWX_BAND, VIRTUAL_STATION_X, VIRTUAL_STATION_Y, DUMP_EVERY_STEP
 
 IF (IRANK_WORLD .EQ. 0) WRITE(*,*) 'Reading &OUTPUTS namelist group'
 
@@ -249,6 +301,7 @@ CALCULATE_FLAME_LENGTH_STATS      = .FALSE.
 CALCULATE_TIMES_BURNED            = .FALSE.
 CONVERT_TO_GEOTIFF                = .TRUE. 
 DTDUMP                            = 3600.0
+DUMP_EVERY_STEP                   = .FALSE.
 DUMP_AFFECTED_LAND_VALUE          = .FALSE.
 DUMP_AFFECTED_POPULATION          = .FALSE.
 DUMP_AFFECTED_REAL_ESTATE_VALUE   = .FALSE.
@@ -265,7 +318,6 @@ DUMP_FLAME_LENGTH                 = .FALSE.
 DUMP_FLIN                         = .FALSE.
 DUMP_HOURLY_RASTERS               = .FALSE.
 DUMP_HPUA                         = .FALSE.
-DUMP_HRR_TRANSIENT                = .FALSE.  
 DUMP_PHI                          = .FALSE. 
 DUMP_REACTION_INTENSITY           = .FALSE. 
 DUMP_SPREAD_RATE                  = .FALSE. 
@@ -275,8 +327,6 @@ DUMP_SURFACE_FIRE_AREA            = .FALSE.
 DUMP_TAGGED                       = .FALSE. 
 DUMP_TIME_OF_ARRIVAL              = .FALSE. 
 DUMP_TIMINGS                      = .FALSE.
-DUMP_TOTAL_DFC_RECEIVED           = .FALSE.
-DUMP_TOTAL_RAD_RECEIVED           = .FALSE. 
 DUMP_TRANSIENT_ACREAGE            = .FALSE. 
 DUMP_VELOCITY                     = .FALSE. 
 DUMP_WD20                         = .FALSE. 
@@ -300,14 +350,21 @@ USE_FLAME_LENGTH_BINS             = .FALSE.
 USE_FOUR_DIGITS_IN_IWX_BAND       = .FALSE.
 VIRTUAL_STATION_X(:)              = 0.0
 VIRTUAL_STATION_Y(:)              = 0.0
+! WU-E Related Outputs
+DUMP_HRR_TRANSIENT                = .FALSE. 
+DUMP_TOTAL_DFC_RECEIVED           = .FALSE.
+DUMP_TOTAL_RAD_RECEIVED           = .FALSE. 
+DUMP_TRANSIENT_DFC                = .FALSE.
+DUMP_TRANSIENT_RAD                = .FALSE.
+DUMP_FUEL_CONSUMPTION             = .FALSE.
 ! Eulerian firebrnand model outputs
 DUMP_EMBER_FLUX_TRANSIENT         = .FALSE.
 DUMP_EMBER_IGNITION               = .FALSE. 
 
-READ(LUINPUT,NML=OUTPUTS,IOSTAT=IOS)
+READ(LUINPUT,NML=OUTPUTS,IOSTAT=IOS,IOMSG=IOSMSG)
 IF (IOS > 0) THEN
-    WRITE(*,*) 'Error: Problem with namelist group &OUTPUTS, IOSTAT = ', IOS
-    STOP
+   WRITE(*,*) 'Error reading &OUTPUTS namelist group: ', TRIM(IOSMSG)
+   STOP
 ENDIF
 
 OUTPUTS_DIRECTORY = TRIM(OUTPUTS_DIRECTORY) // PATH_SEPARATOR
@@ -331,8 +388,12 @@ END SUBROUTINE READ_OUTPUTS
 ! *****************************************************************************
 SUBROUTINE READ_TIME_CONTROL
 ! *****************************************************************************
+! Reads the &TIME_CONTROL namelist group and sets defaults for simulation
+! timing, time-step/CFL controls, meteorology interpolation intervals and
+! diurnal/burn-period parameters.
 
 INTEGER :: IOS
+CHARACTER(256) :: IOSMSG
 
 NAMELIST /TIME_CONTROL/ &
 BAND_ONE_HOUR_OF_YEAR, BURN_PERIOD_CENTER_FRAC, BURN_PERIOD_LENGTH, CURRENT_YEAR, DT_INTERPOLATE_M1, &
@@ -368,10 +429,10 @@ SUNSET_HOUR                   = -1.0 ! UTC, over-ridden by call to SUNRISE_SUNSE
 TARGET_CFL                    = 0.4
 USE_DIURNAL_ADJUSTMENT_FACTOR = .FALSE.
 
-READ(LUINPUT,NML=TIME_CONTROL,IOSTAT=IOS)
+READ(LUINPUT,NML=TIME_CONTROL,IOSTAT=IOS,IOMSG=IOSMSG)
 IF (IOS > 0) THEN
-    WRITE(*,*) 'Error: Problem with namelist group &TIME_CONTROL.'
-    STOP
+   WRITE(*,*) 'Error reading &TIME_CONTROL namelist group: ', TRIM(IOSMSG)
+   STOP
 ENDIF
 
 ! *****************************************************************************
@@ -381,8 +442,13 @@ END SUBROUTINE READ_TIME_CONTROL
 ! *****************************************************************************
 SUBROUTINE READ_MONTE_CARLO
 ! *****************************************************************************
+! Reads the &MONTE_CARLO namelist group and sets defaults for ensemble,
+! ignition, ERC and raster-perturbation settings; validates perturbation
+! options, counts Monte Carlo variables/parameters, allocates COEFFS arrays and
+! sets the weather band start/stop/skip range.
 
 INTEGER :: IOS, IVARN
+CHARACTER(256) :: IOSMSG
 
 NAMELIST /MONTE_CARLO/ ADD_TO_IGNITION_MASK, ALLOW_MULTIPLE_IGNITIONS_AT_A_PIXEL, CSV_FIXED_IGNITION_LOCATIONS, &
 EDGEBUFFER, ERC_IS_PLIGNRATE, &
@@ -390,7 +456,8 @@ IGNITION_MASK_SCALE_FACTOR, METEOROLOGY_BAND_START, METEOROLOGY_BAND_STOP, METEO
 NUM_ENSEMBLE_MEMBERS, NUM_METEOROLOGY_TIMES, NUM_RASTERS_TO_PERTURB, PDF_LOWER_LIMIT, PDF_TYPE, PDF_UPPER_LIMIT, &
 PERCENT_OF_PIXELS_TO_IGNITE, RANDOM_IGNITIONS, RANDOM_IGNITIONS_TYPE, RASTER_TO_PERTURB, SEED, SPATIAL_PERTURBATION, &
 TEMPORAL_PERTURBATION, USE_ERC, USE_IGNITION_MASK, WIND_DIRECTION_FLUCTUATION_INTENSITY_MAX, &
-WIND_DIRECTION_FLUCTUATION_INTENSITY_MIN, WIND_SPEED_FLUCTUATION_INTENSITY_MAX, WIND_SPEED_FLUCTUATION_INTENSITY_MIN
+WIND_DIRECTION_FLUCTUATION_INTENSITY_MIN, WIND_SPEED_FLUCTUATION_INTENSITY_MAX, WIND_SPEED_FLUCTUATION_INTENSITY_MIN, &
+PDF_MEAN, PDF_SIGMA, POINT_WIND_TO_CENTER
 
 IF (IRANK_WORLD .EQ. 0) WRITE(*,*) 'Reading &MONTE_CARLO namelist group'
 
@@ -406,10 +473,12 @@ METEOROLOGY_BAND_STOP                    = -1
 METEOROLOGY_BAND_SKIP_INTERVAL           = -1
 NUM_ENSEMBLE_MEMBERS                     = 1
 NUM_RASTERS_TO_PERTURB                   = 0
-NUM_METEOROLOGY_TIMES                    = 1
+NUM_METEOROLOGY_TIMES                    = -1
 PDF_LOWER_LIMIT(:)                       = 0.
 PDF_TYPE(:)                              = 'null'
 PDF_UPPER_LIMIT(:)                       = 0.
+PDF_MEAN(:)                              = 0.
+PDF_SIGMA(:)                             = 0.
 PERCENT_OF_PIXELS_TO_IGNITE              = 5.0
 RANDOM_IGNITIONS                         = .FALSE.
 RANDOM_IGNITIONS_TYPE                    = 1
@@ -423,15 +492,16 @@ WIND_DIRECTION_FLUCTUATION_INTENSITY_MAX = -1.0
 WIND_DIRECTION_FLUCTUATION_INTENSITY_MIN = -1.0
 WIND_SPEED_FLUCTUATION_INTENSITY_MAX     = -1.0
 WIND_SPEED_FLUCTUATION_INTENSITY_MIN     = -1.0 
+POINT_WIND_TO_CENTER                     = .FALSE.
 
 ! Not part of namelist group but set here:
 PERTURB_WIND_DIRECTION_FLUCTUATION_INTENSITY = .FALSE.
 PERTURB_WIND_SPEED_FLUCTUATION_INTENSITY     = .FALSE. 
 
-READ(LUINPUT,NML=MONTE_CARLO,IOSTAT=IOS)
+READ(LUINPUT,NML=MONTE_CARLO,IOSTAT=IOS,IOMSG=IOSMSG)
 IF (IOS > 0) THEN
-    WRITE(*,*) 'Error: Problem with namelist group &MONTE_CARLO.'
-    STOP
+   WRITE(*,*) 'Error reading &MONTE_CARLO namelist group: ', TRIM(IOSMSG)
+   STOP
 ENDIF
 
 NUM_PARAMETERS_RASTERS    = 0
@@ -471,44 +541,19 @@ DO IVARN = 1, NUM_RASTERS_TO_PERTURB
       WRITE(*,200) 'Error, TEMPORAL_PERTURBATION must be STATIC or DYNAMIC. Variation: ', IVARN
       STOP
    ENDIF
-   IF (PDF_TYPE(IVARN) .NE. 'UNIFORM' ) THEN
-      WRITE(*,200) 'Error, PDF_TYPE must be UNIFORM. Variation: ', IVARN
+   IF (PDF_TYPE(IVARN) .NE. 'UNIFORM' .and. PDF_TYPE(IVARN) .NE. 'GAUSSIAN' .and. PDF_TYPE(IVARN) .NE. 'LOGNORMAL') THEN
+      WRITE(*,200) 'Error, PDF_TYPE must be UNIFORM, GAUSSIAN or LOGNORMAL. Variation: ', IVARN
       STOP
    ENDIF
       
-   IF (RASTER_TO_PERTURB(IVARN) .NE. 'ADJ'  ) THEN
-   IF (RASTER_TO_PERTURB(IVARN) .NE. 'CBD'  ) THEN
-   IF (RASTER_TO_PERTURB(IVARN) .NE. 'CBH'  ) THEN
-   IF (RASTER_TO_PERTURB(IVARN) .NE. 'CC'   ) THEN
-   IF (RASTER_TO_PERTURB(IVARN) .NE. 'CH'   ) THEN
-   IF (RASTER_TO_PERTURB(IVARN) .NE. 'FBFM' ) THEN
-   IF (RASTER_TO_PERTURB(IVARN) .NE. 'FMC'  ) THEN
-   IF (RASTER_TO_PERTURB(IVARN) .NE. 'M1'   ) THEN
-   IF (RASTER_TO_PERTURB(IVARN) .NE. 'M10'  ) THEN
-   IF (RASTER_TO_PERTURB(IVARN) .NE. 'M100' ) THEN
-   IF (RASTER_TO_PERTURB(IVARN) .NE. 'MLH'  ) THEN
-   IF (RASTER_TO_PERTURB(IVARN) .NE. 'MLW'  ) THEN
-   IF (RASTER_TO_PERTURB(IVARN) .NE. 'WAF'  ) THEN
-   IF (RASTER_TO_PERTURB(IVARN) .NE. 'WD'   ) THEN
-   IF (RASTER_TO_PERTURB(IVARN) .NE. 'WS'   ) THEN
-      WRITE(*,200) 'Error on variation ', IVARN, ' RASTER_TO_PERTURB must be one of: ' 
+   SELECT CASE (TRIM(RASTER_TO_PERTURB(IVARN)))
+   CASE ('ADJ','CBD','CBH','CC','CH','FBFM','FMC','M1','M10','M100','MLH','MLW','WAF','WD','WS')
+      ! valid - no action
+   CASE DEFAULT
+      WRITE(*,200) 'Error on variation ', IVARN, ' RASTER_TO_PERTURB must be one of: '
       WRITE(*,200) 'ADJ, CBD, CBH, CC, CH, FBFM, FMC, M1, M10, M100, MLH, MLW, WAF, WD, WS'
       STOP
-   ENDIF
-   ENDIF
-   ENDIF
-   ENDIF
-   ENDIF
-   ENDIF
-   ENDIF
-   ENDIF
-   ENDIF
-   ENDIF
-   ENDIF
-   ENDIF
-   ENDIF
-   ENDIF
-   ENDIF
+   END SELECT
       
    IF (TRIM(SPATIAL_PERTURBATION(IVARN)) .NE. 'PIXEL') THEN
       IF (TRIM(TEMPORAL_PERTURBATION(IVARN)) .EQ. 'STATIC') THEN
@@ -554,17 +599,21 @@ END SUBROUTINE READ_MONTE_CARLO
 ! *****************************************************************************
 SUBROUTINE READ_SIMULATOR
 ! *****************************************************************************
+! Reads the &SIMULATOR namelist group and sets defaults for run mode, crown
+! fire, ignition points/lines, wind fluctuations and runtime/feedback options
 
 INTEGER :: IOS
+CHARACTER(256) :: IOSMSG
 
 NAMELIST /SIMULATOR/ &
 ALLOW_NONBURNABLE_PIXEL_IGNITION, BANDTHICKNESS, CRITICAL_CANOPY_COVER, &
-CROWN_FIRE_ADJ, CROWN_FIRE_MODEL, CROWN_FIRE_SPREAD_RATE_LIMIT, CROWN_RATIO, DEBUG_LEVEL, DT_WIND_FLUCTUATIONS, &
-ESTIMATE_URBAN_LOSSES, MAX_LOW, MAX_RUNTIME, MODE, MULTIPLE_HOSTS, NUM_IGNITIONS, NUM_NODES_OMP_THRESHOLD, &
+CROWN_FIRE_ADJ, CROWN_FIRE_MODEL, CROWN_FIRE_SPREAD_RATE_LIMIT, CROWN_RATIO, FEEDBACK_LEVEL, DT_WIND_FLUCTUATIONS, &
+ESTIMATE_URBAN_LOSSES, MAX_LOW, MAX_RUNTIME, MODE, MULTIPLE_HOSTS, NUM_IGNITIONS, &
 PHIS_ADJ, PHIW_ADJ, PLIGNRATE_MIN, RANDOMIZE_RANDOM_SEED,SURFACE_ACCELERATION_TIME_CONSTANT, T_IGN, &
 UNTAG_CELLS_TIMESTEP_INTERVAL, UNTAG_TYPE_2, UNTAG_TYPE_3, USE_PYROMES, &
 WIND_DIRECTION_FLUCTUATION_INTENSITY, WIND_FLUCTUATIONS, WIND_SPEED_FLUCTUATION_INTENSITY, X_IGN, Y_IGN, &
-WSMFEFF_LOW_MULT, WX_BILINEAR_INTERPOLATION, WX_BANDS_KEPT_IN_MEM, CLEAN_SCRATCH, HRR_ELLIPSE_ADJ
+WSMFEFF_LOW_MULT, WX_BILINEAR_INTERPOLATION, WX_BANDS_KEPT_IN_MEM, CLEAN_SCRATCH, T_LINE_IGN, X_LINE_IGN_START, &
+X_LINE_IGN_END, Y_LINE_IGN_START, Y_LINE_IGN_END
 
 IF (IRANK_WORLD .EQ. 0) WRITE(*,*) 'Reading &SIMULATOR namelist group'
 
@@ -575,7 +624,7 @@ CROWN_FIRE_ADJ                       = 1.0
 CROWN_FIRE_MODEL                     = 1
 CROWN_FIRE_SPREAD_RATE_LIMIT         = 250.0
 CROWN_RATIO                          = 1.0
-DEBUG_LEVEL                          = 0
+FEEDBACK_LEVEL                       = 0 ! options: 0, 1, 2, 3
 DT_WIND_FLUCTUATIONS                 = 15.0
 ESTIMATE_URBAN_LOSSES                = .FALSE.
 MAX_LOW                              = 8.0
@@ -583,13 +632,12 @@ MAX_RUNTIME                          = 999999.
 MODE                                 = 1 !1 = level set propagation; 2 = fire potential; 3 = both
 MULTIPLE_HOSTS                       = .FALSE.
 NUM_IGNITIONS                        = 0
-NUM_NODES_OMP_THRESHOLD              = 999999999
 PHIS_ADJ                             = 1E0
 PHIW_ADJ                             = 1E0
 PLIGNRATE_MIN                        = 0E0
 RANDOMIZE_RANDOM_SEED                = .FALSE. 
 SURFACE_ACCELERATION_TIME_CONSTANT   = 1.0
-T_IGN(:)                             = 0.0
+T_IGN(:)                             = -1.0
 UNTAG_CELLS_TIMESTEP_INTERVAL        = 10
 UNTAG_TYPE_2                         = .FALSE.
 UNTAG_TYPE_3                         = .FALSE.
@@ -599,16 +647,21 @@ WIND_SPEED_FLUCTUATION_INTENSITY     = 0.0
 X_IGN(:)                             = 0.0
 Y_IGN(:)                             = 0.0
 USE_PYROMES                          = .FALSE.
-WSMFEFF_LOW_MULT                     = 5.07955E-3
+!WSMFEFF_LOW_MULT                     = 5.07955E-3
+WSMFEFF_LOW_MULT                     = 60.0/5280.0
 WX_BILINEAR_INTERPOLATION            = .FALSE.
 WX_BANDS_KEPT_IN_MEM                 = 30
 CLEAN_SCRATCH                        = .FALSE.
-HRR_ELLIPSE_ADJ                      = 0.5
+T_LINE_IGN(:) = -1
+X_LINE_IGN_START(:) = -1
+Y_LINE_IGN_START(:) = -1
+X_LINE_IGN_END(:) = -1
+Y_LINE_IGN_END(:) = -1
 
-READ(LUINPUT,NML=SIMULATOR,IOSTAT=IOS)
+READ(LUINPUT,NML=SIMULATOR,IOSTAT=IOS,IOMSG=IOSMSG)
 IF (IOS > 0) THEN
-    WRITE(*,*) 'Error: Problem with namelist group &SIMULATOR.'
-    STOP
+   WRITE(*,*) 'Error reading &SIMULATOR namelist group: ', TRIM(IOSMSG)
+   STOP
 ENDIF
 
 ! *****************************************************************************
@@ -618,13 +671,18 @@ END SUBROUTINE READ_SIMULATOR
 ! *****************************************************************************
 SUBROUTINE READ_WUI
 ! *****************************************************************************
+! Reads the &WUI namelist group and sets defaults for the building (WUI) spread
+! model: building area/separation/fuel parameters, spread and interface model
+! types, hardening factor and band thickness.
 
 INTEGER :: IOS
+CHARACTER(256) :: IOSMSG
 
 NAMELIST /WUI/ BLDG_AREA_CONSTANT, BLDG_NONBURNABLE_FRAC_CONSTANT, BLDG_SEPARATION_DIST_CONSTANT, &
                BLDG_SPREAD_MODEL_TYPE, BLDG_FOOTPRINT_FRAC_CONSTANT, BLDG_FUEL_MODEL_CONSTANT, &
                USE_BLDG_SPREAD_MODEL, USE_CONSTANT_BLDG_SPREAD_MODEL_PARAMS, GLOBAL_HARDENING_FACTOR, INTERFACE_MODEL_TYPE, &
-               USE_UNIGNITED_URBAN_VELOCITY_HACK
+               USE_UNIGNITED_URBAN_VELOCITY_HACK, &
+               BANDTHICKNESS_WUI, CRITICL_HF_WUI, HRR_ELLIPSE_ADJ
 
 IF (IRANK_WORLD .EQ. 0) WRITE(*,*) 'Reading &WUI namelist group'
 
@@ -641,11 +699,14 @@ INTERFACE_MODEL_TYPE                  = 1 ! 1 = Ellipse, 2 = Threshold
 ! Legacy-compat: restore the pre-2026.0319 phantom base velocity on unignited
 ! urban cells (BLDG_SPREAD_MODEL_TYPE == 3 only). See CHANGELOG for rationale.
 USE_UNIGNITED_URBAN_VELOCITY_HACK     = .FALSE.
+BANDTHICKNESS_WUI                     = 5
+CRITICL_HF_WUI                        = 0.0
+HRR_ELLIPSE_ADJ                       = 0.5
 
-READ(LUINPUT,NML=WUI,IOSTAT=IOS)
+READ(LUINPUT,NML=WUI,IOSTAT=IOS,IOMSG=IOSMSG)
 IF (IOS > 0) THEN
-    WRITE(*,*) 'Error: Problem with namelist group &WUI.'
-    STOP
+   WRITE(*,*) 'Error reading &WUI namelist group: ', TRIM(IOSMSG)
+   STOP
 ENDIF
 
 ! *****************************************************************************
@@ -655,8 +716,13 @@ END SUBROUTINE READ_WUI
 ! *****************************************************************************
 SUBROUTINE READ_SPOTTING
 ! *****************************************************************************
+! Reads the &SPOTTING namelist group and sets defaults for ember spotting
+! (generation/distance/accumulation/ignition models, spotting percentages,
+! ember counts and distances); sets NUM_PARAMETERS_SPOTTING and allocates
+! SPOTTING_STATS.
 
 INTEGER :: IOS
+CHARACTER(256) :: IOSMSG
 
 NAMELIST /SPOTTING/ CRITICAL_SPOTTING_FIRELINE_INTENSITY, CROWN_FIRE_SPOTTING_PERCENT, CROWN_FIRE_SPOTTING_PERCENT_MAX, &
 CROWN_FIRE_SPOTTING_PERCENT_MIN, ENABLE_SPOTTING, ENABLE_SURFACE_FIRE_SPOTTING, &
@@ -666,14 +732,19 @@ NEMBERS_MAX, NEMBERS_MAX_HI, NEMBERS_MAX_LO, NEMBERS_MIN, NEMBERS_MIN_HI, NEMBER
 NORMALIZED_SPOTTING_DIST_VARIANCE, NORMALIZED_SPOTTING_DIST_VARIANCE_MAX, NORMALIZED_SPOTTING_DIST_VARIANCE_MIN, &
 PIGN, PIGN_MAX, PIGN_MIN, SPOTTING_DISTRIBUTION_TYPE, SPOT_FLIN_EXP, SPOT_FLIN_EXP_HI, SPOT_FLIN_EXP_LO, &
 SPOT_WS_EXP, SPOT_WS_EXP_HI, SPOT_WS_EXP_LO, STOCHASTIC_SPOTTING, SURFACE_FIRE_SPOTTING_PERCENT, &
-SURFACE_FIRE_SPOTTING_PERCENT_MULT, TAU_EMBERGEN, USE_UMD_SPOTTING_MODEL, EMBER_GR, SOURCE_FUEL_IGN_MULT, &
-P_EPS, USE_PHYSICAL_SPOTTING_DURATION, USE_PHYSICAL_EMBER_NUMBER, EMBER_SAMPLING_FACTOR, USE_EULERIAN_SPOTTING, &
-USE_SUPERSEDED_SPOTTING, NO_SURFACE_FIRE, USE_EMBER_IGNITION_MODEL, USE_SIMPLE_IGNITION_MODEL, &
+SURFACE_FIRE_SPOTTING_PERCENT_MULT, TAU_EMBERGEN, EMBER_GR, SOURCE_FUEL_IGN_MULT, &
+P_EPS, USE_PHYSICAL_SPOTTING_DURATION, EMBER_SAMPLING_FACTOR, &
+USE_SUPERSEDED_SPOTTING, NO_SURFACE_FIRE, &
 LOCAL_IGNITION_TIME, CELL_IGNITION_DELAY, USE_CUSTOMIZED_PDF, MU_CROSSWIND, SIGMA_CROSSWIND, MU_DOWNWIND, &
 SIGMA_DOWNWIND, EMBER_GR_PER_MW_BLDG, EMBER_GR_PER_MW_VEGE, DIFF_WILDLAND_IGNITION, USE_EMBER_CONSUMPTION, &
-USE_CROSSWIND_DISTRIBUTION
+USE_CROSSWIND_DISTRIBUTION, GENERATION_MODEL, SPOTTING_DISTANCE_MODEL, ACCUMULATION_MODEL, IGNITION_MODEL
 
 IF (IRANK_WORLD .EQ. 0) WRITE(*,*) 'Reading &SPOTTING namelist group'
+
+GENERATION_MODEL     = 'RANDOM' ! 'RANDOM' or 'PER-AREA' or 'PER-MW'  
+SPOTTING_DISTANCE_MODEL = 'UNIFORM' ! 'UNIFORM' or 'LOGNORMAL' or 'EMPIRICAL'
+ACCUMULATION_MODEL   = 'LAGRANGIAN' ! 'LAGRANGIAN' or 'EULERIAN'
+IGNITION_MODEL       = 'DIRECT' ! 'DIRECT' or 'SIMPLE' or 'PHYSICAL'
 
 CRITICAL_SPOTTING_FIRELINE_INTENSITY(:)   = 0.
 CROWN_FIRE_SPOTTING_PERCENT               = 100.
@@ -686,7 +757,7 @@ ENABLE_SURFACE_FIRE_SPOTTING              = .FALSE.
 GLOBAL_SURFACE_FIRE_SPOTTING_PERCENT      = 0.0
 GLOBAL_SURFACE_FIRE_SPOTTING_PERCENT_MAX  = 0.0
 GLOBAL_SURFACE_FIRE_SPOTTING_PERCENT_MIN  = 0.0
-MAX_SPOTTING_DISTANCE                     = 0. ! Set value for UMD model to construct lookup table
+MAX_SPOTTING_DISTANCE                     = 0.
 MEAN_SPOTTING_DIST                        = 0. 
 MEAN_SPOTTING_DIST_MAX                    = 0.
 MEAN_SPOTTING_DIST_MIN                    = 0.
@@ -718,16 +789,11 @@ STOCHASTIC_SPOTTING                       = .FALSE. !This is now being used.
 SURFACE_FIRE_SPOTTING_PERCENT(:)          = 100.
 SURFACE_FIRE_SPOTTING_PERCENT_MULT(:)     = 1.0
 TAU_EMBERGEN                              = 6.0
-USE_UMD_SPOTTING_MODEL                    = .FALSE.
 P_EPS                                     = 0.01 
-USE_EULERIAN_SPOTTING                     = .FALSE. 
 USE_PHYSICAL_SPOTTING_DURATION            = .FALSE.
-USE_PHYSICAL_EMBER_NUMBER                 = .FALSE.
 USE_CUSTOMIZED_PDF                        = .FALSE.
 USE_SUPERSEDED_SPOTTING                   = .TRUE.
 NO_SURFACE_FIRE                           = .FALSE.
-USE_EMBER_IGNITION_MODEL                  = .FALSE.
-USE_SIMPLE_IGNITION_MODEL                 = .TRUE.
 MU_CROSSWIND                              = 0.0
 SIGMA_CROSSWIND                           = 0.0
 MU_DOWNWIND                               = 0.0
@@ -738,9 +804,9 @@ DIFF_WILDLAND_IGNITION                    = .FALSE.
 USE_EMBER_CONSUMPTION                     = .FALSE.
 USE_CROSSWIND_DISTRIBUTION                = .FALSE.
 
-READ(LUINPUT,NML=SPOTTING,IOSTAT=IOS)
+READ(LUINPUT,NML=SPOTTING,IOSTAT=IOS,IOMSG=IOSMSG)
 IF (IOS > 0) THEN
-   WRITE(*,*) 'Error: Problem with namelist group &SPOTTING.'
+   WRITE(*,*) 'Error reading &SPOTTING namelist group: ', TRIM(IOSMSG)
    STOP
 ENDIF
 
@@ -750,7 +816,6 @@ ELSE
    NUM_PARAMETERS_SPOTTING = 0
 ENDIF
 
-!IF (USE_UMD_SPOTTING_MODEL) ALLOCATE (SPOTTING_STATS(1:EMBER_TRACKER_SIZE))
 ALLOCATE (SPOTTING_STATS(1:EMBER_TRACKER_SIZE))
 
 ! *****************************************************************************
@@ -760,8 +825,12 @@ END SUBROUTINE READ_SPOTTING
 ! *****************************************************************************
 SUBROUTINE READ_SUPPRESSION
 ! *****************************************************************************
+! Reads the &SUPPRESSION namelist group and sets defaults for initial/extended
+! attack suppression and SDI (suppression difficulty index) containment
+! parameters.
 
 INTEGER :: IOS
+CHARACTER(256) :: IOSMSG
 
 NAMELIST /SUPPRESSION/ AREA_NO_CONTAINMENT_CHANGE, B_SDI, DT_EXTENDED_ATTACK, &
                        ENABLE_EXTENDED_ATTACK, ENABLE_INITIAL_ATTACK, &
@@ -781,9 +850,9 @@ SDI_FACTOR                  = 1.0
 USE_SDI                     = .FALSE.
 USE_SDI_LOG_FUNCTION        = .FALSE.
 
-READ(LUINPUT,NML=SUPPRESSION,IOSTAT=IOS)
+READ(LUINPUT,NML=SUPPRESSION,IOSTAT=IOS,IOMSG=IOSMSG)
 IF (IOS > 0) THEN
-   WRITE(*,*) 'Error: Problem with namelist group &SUPPRESSION.'
+   WRITE(*,*) 'Error reading &SUPPRESSION namelist group: ', TRIM(IOSMSG)
    STOP
 ENDIF
 
@@ -794,8 +863,12 @@ END SUBROUTINE READ_SUPPRESSION
 ! *****************************************************************************
 SUBROUTINE READ_CALIBRATION
 ! *****************************************************************************
+! Opens the namelist input file and reads the &CALIBRATION namelist group,
+! setting defaults for per-pyrome adjustment factors, calibration constants and
+! duration PDF filenames/flags and the maximum fire duration.
 
 INTEGER :: IOS
+CHARACTER(256) :: IOSMSG
 
 NAMELIST /CALIBRATION/ ADJUSTMENT_FACTORS_BY_PYROME, ADJUSTMENT_FACTORS_FILENAME, &
 CALIBRATION_CONSTANTS_BY_PYROME, CALIBRATION_CONSTANTS_FILENAME, DURATION_MAX_DAYS, &
@@ -818,9 +891,9 @@ IF (IOS .GT. 0) THEN
    STOP
 ENDIF
 
-READ(LUINPUT,NML=CALIBRATION,IOSTAT=IOS)
-IF (IOS > 0) THEN 
-   WRITE(*,*) 'Error: Problem with namelist group &CALIBRATION.'
+READ(LUINPUT,NML=CALIBRATION,IOSTAT=IOS,IOMSG=IOSMSG)
+IF (IOS > 0) THEN
+   WRITE(*,*) 'Error reading &CALIBRATION namelist group: ', TRIM(IOSMSG)
    STOP
 ENDIF
 

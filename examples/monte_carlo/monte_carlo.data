@@ -1,13 +1,6 @@
 &INPUTS
 FUELS_AND_TOPOGRAPHY_DIRECTORY = './inputs'
-ASP_FILENAME                   = 'asp'
-CBD_FILENAME                   = 'cbd'
-CBH_FILENAME                   = 'cbh'
-CC_FILENAME                    = 'cc'
-CH_FILENAME                    = 'ch'
-DEM_FILENAME                   = 'dem'
-FBFM_FILENAME                  = 'fbfm13'
-SLP_FILENAME                   = 'slp'
+LANDSCAPE_FILENAME             = 'landscape'
 ADJ_FILENAME                   = 'adj'
 PHI_FILENAME                   = 'phi'
 DT_METEOROLOGY                 = 3600.0
@@ -28,7 +21,7 @@ IGNITION_MASK_FILENAME		   = 'adj'
 OUTPUTS_DIRECTORY    = './outputs'
 DTDUMP = 6000.0
 CALCULATE_TIMES_BURNED = .FALSE.
-DUMP_SURFACE_FIRE_AREA = .TRUE.
+DUMP_SURFACE_FIRE_AREA = .FALSE.
 CALCULATE_FLAME_LENGTH_STATS = .TRUE.
 CONVERT_TO_GEOTIFF   = .TRUE.
 /
@@ -36,7 +29,7 @@ CONVERT_TO_GEOTIFF   = .TRUE.
 &TIME_CONTROL
 SIMULATION_DT    = 5.0
 TARGET_CFL       = 0.3
-SIMULATION_TSTOP = 60000.0
+SIMULATION_TSTOP = 3600.0
 /
 
 &MONTE_CARLO
@@ -44,9 +37,9 @@ NUM_METEOROLOGY_TIMES 		= 72
 RANDOM_IGNITIONS 			= .TRUE.
 USE_IGNITION_MASK 			= .TRUE.
 EDGEBUFFER                  = 5.
-NUM_ENSEMBLE_MEMBERS 		= 500
+NUM_ENSEMBLE_MEMBERS 		= 5000
 !PERCENT_OF_PIXELS_TO_IGNITE = 10
-NUM_RASTERS_TO_PERTURB      = 2			
+NUM_RASTERS_TO_PERTURB      = 3			
 RASTER_TO_PERTURB(1)       = 'WS'
 SPATIAL_PERTURBATION(1)    = 'GLOBAL'
 TEMPORAL_PERTURBATION(1)   = 'STATIC'
@@ -56,16 +49,23 @@ PDF_UPPER_LIMIT(1)         = 5.0
 RASTER_TO_PERTURB(2)       = 'WD'
 SPATIAL_PERTURBATION(2)    = 'GLOBAL'
 TEMPORAL_PERTURBATION(2)   = 'STATIC'
-PDF_TYPE(2)                = 'UNIFORM'
-PDF_LOWER_LIMIT(2)         = 10.0
-PDF_UPPER_LIMIT(2)         = 20.0
+PDF_TYPE(2)                = 'GAUSSIAN'
+PDF_MEAN(2)         = 0.0
+PDF_SIGMA(2)         = 20.0
+RASTER_TO_PERTURB(3)       = 'M1'
+SPATIAL_PERTURBATION(3)    = 'GLOBAL'
+TEMPORAL_PERTURBATION(3)   = 'STATIC'
+PDF_TYPE(3)                = 'LOGNORMAL'
+PDF_MEAN(3)         = 1.0
+PDF_SIGMA(3)         = 0.3
 /
 
 &SIMULATOR
 MULTIPLE_HOSTS             = .FALSE.
+FEEDBACK_LEVEL = 'Limited'
 /
 
 &MISCELLANEOUS
-PATH_TO_GDAL                   = '/usr/bin'
+PATH_TO_GDAL                   = 'auto'
 SCRATCH                        = './scratch'
 /

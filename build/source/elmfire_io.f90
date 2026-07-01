@@ -9,6 +9,24 @@ IMPLICIT NONE
 CONTAINS
 
 ! *****************************************************************************
+SUBROUTINE CAST_RASTER_TO_FLOAT(R)
+! *****************************************************************************
+! If raster R was read as SIGNEDINT, convert its integer band-1 data to REAL,
+! release the integer buffer, and mark the raster FLOAT. No-op if already FLOAT.
+
+TYPE(RASTER_TYPE), INTENT(INOUT) :: R
+
+IF (TRIM(R%PIXELTYPE) .EQ. 'SIGNEDINT') THEN
+   R%R4(:,:,1) = REAL(R%I2(:,:,1))
+   DEALLOCATE(R%I2)
+   R%PIXELTYPE='FLOAT     '
+ENDIF
+
+! *****************************************************************************
+END SUBROUTINE CAST_RASTER_TO_FLOAT
+! *****************************************************************************
+
+! *****************************************************************************
 !> Distribute IO jobs equally among available cores (via round robin)
 SUBROUTINE SETUP_PARALLEL_IO
 ! *****************************************************************************
@@ -175,6 +193,8 @@ END SUBROUTINE SETUP_PARALLEL_IO
 ! *****************************************************************************
 SUBROUTINE UPDATE_WEATHER_SLICE(BANDSTART, BANDEND)
 ! *****************************************************************************
+! Loads weather bands BANDSTART..BANDEND (tiled or single-file path) and, when
+! the grid is rotated, applies declination correction to aspect and wind direction.
 
 INTEGER, intent(in):: BANDSTART, BANDEND
 
@@ -195,6 +215,9 @@ END SUBROUTINE UPDATE_WEATHER_SLICE
 ! *****************************************************************************
 SUBROUTINE READ_WEATHER_SLICE_TILED(BANDSTART, BANDEND)
 ! *****************************************************************************
+! Reads bands BANDSTART..BANDEND of each weather raster (WS,WD,M1,M10,M100,ERC,
+! MLH,MLW,MFOL) from split/tiled .bsq files into RASTER%R4 on their assigned IO
+! ranks, applies unit conversions/constant overrides, then broadcasts headers.
 INTEGER, intent(in) :: BANDSTART, BANDEND
 REAL :: CONSTANT_LH, CONSTANT_LW, CONSTANT_FMC
 INTEGER :: IERR
@@ -204,6 +227,7 @@ IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(3)) THEN
    FN = TRIM(WEATHER_DIRECTORY) // TRIM(WS_FILENAME)
    CALL READ_BSQ_RASTER_SLICE_EXISTING_TILED (WS,FN,BANDSTART, BANDEND)
    IF (WS_AT_10M) WHERE(WS%R4(:,:,:) .NE. WS%NODATA_VALUE) WS%R4(:,:,:) = 0.87 * WS%R4(:,:,:) 
+   IF (WS_IN_KPH) WHERE(WS%R4(:,:,:) .NE. WS%NODATA_VALUE) WS%R4(:,:,:) = 0.621 * WS%R4(:,:,:)
 ENDIF
 
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(4)) THEN
@@ -296,6 +320,9 @@ END SUBROUTINE READ_WEATHER_SLICE_TILED
 ! *****************************************************************************
 SUBROUTINE READ_WEATHER_SLICE(BANDSTART, BANDEND)
 ! *****************************************************************************
+! Reads bands BANDSTART..BANDEND of each weather raster (WS,WD,M1,M10,M100,ERC,
+! MLH,MLW,MFOL) from single .bsq files into RASTER%R4 on their assigned IO ranks,
+! applies unit conversions/constant overrides, then broadcasts headers.
 
 INTEGER, intent(in):: BANDSTART, BANDEND
 REAL :: CONSTANT_LH, CONSTANT_LW, CONSTANT_FMC
@@ -304,6 +331,7 @@ INTEGER :: IERR
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(3)) THEN
    CALL READ_BSQ_RASTER_SLICE (WS,   WEATHER_DIRECTORY, WS_FILENAME, BANDSTART, BANDEND)
    IF (WS_AT_10M) WHERE(WS%R4(:,:,:) .NE. WS%NODATA_VALUE) WS%R4(:,:,:) = 0.87 * WS%R4(:,:,:)
+   IF (WS_IN_KPH) WHERE(WS%R4(:,:,:) .NE. WS%NODATA_VALUE) WS%R4(:,:,:) = 0.621 * WS%R4(:,:,:)
 ENDIF
 
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(4)) CALL READ_BSQ_RASTER_SLICE (WD,   WEATHER_DIRECTORY, WD_FILENAME, BANDSTART, BANDEND)
@@ -395,84 +423,122 @@ INTEGER :: ICOL, IROW, i, j
 REAL :: RX
 INTEGER :: IERR
 LOGICAL, PARAMETER :: NOISE=.TRUE.
+CHARACTER(400) :: FNTIF, FNBSQ, FNHDR, SHELLSTR
+LOGICAL :: HDR_EXISTS, BSQ_EXISTS
 
 IF (IRANK_WORLD .EQ. 0) WRITE(*,*) 'Reading fuel and topography rasters'
+
+! When a single multiband landscape GeoTIFF is supplied, convert it to ENVI BSQ
+! exactly once (on rank 0) before the individual layers are read. The per-layer
+! reads below run on different ranks but all point at this same file, so doing the
+! GDAL conversion up front (followed by a barrier) prevents several ranks from
+! racing to create the same .bsq/.hdr.
+IF (USE_LANDSCAPE_FILE) THEN
+   IF (IRANK_WORLD .EQ. 0) THEN
+      IF (VRT_INSTEAD_OF_TIF) THEN
+         FNTIF = TRIM(FUELS_AND_TOPOGRAPHY_DIRECTORY) // TRIM(LANDSCAPE_FILENAME) // '.vrt'
+      ELSE
+         FNTIF = TRIM(FUELS_AND_TOPOGRAPHY_DIRECTORY) // TRIM(LANDSCAPE_FILENAME) // '.tif'
+      ENDIF
+      IF (TRIM(SCRATCH) .EQ. 'null') THEN
+         FNHDR = TRIM(FUELS_AND_TOPOGRAPHY_DIRECTORY) // TRIM(LANDSCAPE_FILENAME) // '.hdr'
+         FNBSQ = TRIM(FUELS_AND_TOPOGRAPHY_DIRECTORY) // TRIM(LANDSCAPE_FILENAME) // '.bsq'
+      ELSE
+         FNHDR = TRIM(SCRATCH) // TRIM(LANDSCAPE_FILENAME) // '.hdr'
+         FNBSQ = TRIM(SCRATCH) // TRIM(LANDSCAPE_FILENAME) // '.bsq'
+      ENDIF
+      INQUIRE(FILE=TRIM(FNHDR),EXIST=HDR_EXISTS)
+      INQUIRE(FILE=TRIM(FNBSQ),EXIST=BSQ_EXISTS)
+      IF (.NOT. HDR_EXISTS .OR. .NOT. BSQ_EXISTS) THEN
+         SHELLSTR = TRIM(PATH_TO_GDAL) // 'gdal_translate -q -of ENVI -co "INTERLEAVE=BSQ" ' // TRIM(FNTIF) // " " // TRIM(FNBSQ)
+         IF (FEEDBACK_LEVEL .GE. 3) WRITE(*,'(A)') TRIM(SHELLSTR)
+         CALL EXECUTE_COMMAND_LINE(TRIM(SHELLSTR))
+      ENDIF
+   ENDIF
+   CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+ENDIF
 
 IF (USE_IGNITION_MASK .AND. IRANK_WORLD .EQ. PARALLEL_IO_RANK(12)) THEN
    CALL READ_BSQ_RASTER_SLICE (IGN_MASK, FUELS_AND_TOPOGRAPHY_DIRECTORY, IGNITION_MASK_FILENAME, 1, 1)
 ENDIF
 
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(13)) THEN
-   CALL READ_BSQ_RASTER_SLICE (ASP , FUELS_AND_TOPOGRAPHY_DIRECTORY, ASP_FILENAME, 1, 1)
-   IF (TRIM(ASP%PIXELTYPE) .EQ. 'SIGNEDINT') THEN
-      ASP%R4(:,:,1) = REAL(ASP%I2(:,:,1))
-      DEALLOCATE(ASP%I2)
-      ASP%PIXELTYPE='FLOAT     '
+   IF (USE_LANDSCAPE_FILE) THEN
+      CALL READ_LANDSCAPE_BAND (ASP, FUELS_AND_TOPOGRAPHY_DIRECTORY, LANDSCAPE_FILENAME, 3)
+   ELSE
+      CALL READ_BSQ_RASTER_SLICE (ASP , FUELS_AND_TOPOGRAPHY_DIRECTORY, ASP_FILENAME, 1, 1)
    ENDIF
+   CALL CAST_RASTER_TO_FLOAT(ASP)
 ENDIF
 
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(14)) THEN
-   if (trim(SURFACE_SPREAD_MODEL) .eq. "ROTHERMEL" .or. CBH_FILENAME .ne. ' ') THEN
+   IF (USE_LANDSCAPE_FILE) THEN
+      CALL READ_LANDSCAPE_BAND (CBH, FUELS_AND_TOPOGRAPHY_DIRECTORY, LANDSCAPE_FILENAME, 7)
+   ELSE IF (trim(SURFACE_SPREAD_MODEL) .eq. "ROTHERMEL" .or. CBH_FILENAME .ne. ' ') THEN
       CALL READ_BSQ_RASTER_SLICE (CBH , FUELS_AND_TOPOGRAPHY_DIRECTORY, CBH_FILENAME, 1, 1)
-      IF (TRIM(CBH%PIXELTYPE) .EQ. 'SIGNEDINT') THEN
-         CBH%R4(:,:,1) = REAL(CBH%I2(:,:,1))
-         DEALLOCATE(CBH%I2)
-         CBH%PIXELTYPE='FLOAT     '
-      ENDIF
+   ENDIF
+   IF (ASSOCIATED(CBH%R4) .OR. ASSOCIATED(CBH%I2)) THEN
+      CALL CAST_RASTER_TO_FLOAT(CBH)
       IF (CBH_TIMES_10 ) WHERE(CBH%R4(:,:,1) .NE. CBH%NODATA_VALUE) CBH%R4(:,:,1) = 0.10*CBH%R4(:,:,1) ! m
-   endif
+   ENDIF
 ENDIF
 
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(15)) THEN
-   if (trim(SURFACE_SPREAD_MODEL) .eq. "ROTHERMEL" .or. CBD_FILENAME .ne. ' ') THEN
+   IF (USE_LANDSCAPE_FILE) THEN
+      CALL READ_LANDSCAPE_BAND (CBD, FUELS_AND_TOPOGRAPHY_DIRECTORY, LANDSCAPE_FILENAME, 8)
+   ELSE IF (trim(SURFACE_SPREAD_MODEL) .eq. "ROTHERMEL" .or. CBD_FILENAME .ne. ' ') THEN
       CALL READ_BSQ_RASTER_SLICE (CBD , FUELS_AND_TOPOGRAPHY_DIRECTORY, CBD_FILENAME, 1, 1)
-      IF (TRIM(CBD%PIXELTYPE) .EQ. 'SIGNEDINT') THEN
-         CBD%R4(:,:,1) = REAL(CBD%I2(:,:,1))
-         DEALLOCATE(CBD%I2)
-         CBD%PIXELTYPE='FLOAT     '
-      ENDIF
+   ENDIF
+   IF (ASSOCIATED(CBD%R4) .OR. ASSOCIATED(CBD%I2)) THEN
+      CALL CAST_RASTER_TO_FLOAT(CBD)
       IF (CBD_TIMES_100) WHERE(CBD%R4(:,:,1) .NE. CBD%NODATA_VALUE) CBD%R4(:,:,1) = 0.01*CBD%R4(:,:,1) ! kg/m3
-   endif
+   ENDIF
 ENDIF
 
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(16)) THEN
-   CALL READ_BSQ_RASTER_SLICE (CC  , FUELS_AND_TOPOGRAPHY_DIRECTORY, CC_FILENAME, 1, 1)
-   IF (TRIM(CC%PIXELTYPE) .EQ. 'SIGNEDINT') THEN
-      CC%R4(:,:,1) = REAL(CC%I2(:,:,1))
-      DEALLOCATE(CC%I2)
-      CC%PIXELTYPE='FLOAT     '
+   IF (USE_LANDSCAPE_FILE) THEN
+      CALL READ_LANDSCAPE_BAND (CC, FUELS_AND_TOPOGRAPHY_DIRECTORY, LANDSCAPE_FILENAME, 5)
+   ELSE
+      CALL READ_BSQ_RASTER_SLICE (CC  , FUELS_AND_TOPOGRAPHY_DIRECTORY, CC_FILENAME, 1, 1)
    ENDIF
+   CALL CAST_RASTER_TO_FLOAT(CC)
    IF (CC_IN_PERCENT) WHERE(CC%R4 (:,:,1) .NE. CC%NODATA_VALUE ) CC%R4 (:,:,1) = 0.01*CC%R4 (:,:,1) ! -
 ENDIF
 
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(17)) THEN
-   CALL READ_BSQ_RASTER_SLICE (CH  , FUELS_AND_TOPOGRAPHY_DIRECTORY, CH_FILENAME, 1, 1 )
-   IF (TRIM(CH%PIXELTYPE) .EQ. 'SIGNEDINT') THEN
-      CH%R4(:,:,1) = REAL(CH%I2(:,:,1))
-      DEALLOCATE(CH%I2)
-      CH%PIXELTYPE='FLOAT     '
+   IF (USE_LANDSCAPE_FILE) THEN
+      CALL READ_LANDSCAPE_BAND (CH, FUELS_AND_TOPOGRAPHY_DIRECTORY, LANDSCAPE_FILENAME, 6)
+   ELSE
+      CALL READ_BSQ_RASTER_SLICE (CH  , FUELS_AND_TOPOGRAPHY_DIRECTORY, CH_FILENAME, 1, 1 )
    ENDIF
+   CALL CAST_RASTER_TO_FLOAT(CH)
    IF (CH_TIMES_10  ) WHERE(CH%R4 (:,:,1) .NE. CH%NODATA_VALUE ) CH%R4 (:,:,1) = 0.10*CH%R4 (:,:,1) ! m
 ENDIF
 
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(18)) THEN
-   CALL READ_BSQ_RASTER_SLICE (DEM , FUELS_AND_TOPOGRAPHY_DIRECTORY, DEM_FILENAME, 1, 1)
-   IF (TRIM(DEM%PIXELTYPE) .EQ. 'SIGNEDINT') THEN
-      DEM%R4(:,:,1)= REAL(DEM%I2(:,:,1))
-      DEALLOCATE(DEM%I2)
-      DEM%PIXELTYPE='FLOAT     '
+   IF (USE_LANDSCAPE_FILE) THEN
+      CALL READ_LANDSCAPE_BAND (DEM, FUELS_AND_TOPOGRAPHY_DIRECTORY, LANDSCAPE_FILENAME, 1)
+   ELSE
+      CALL READ_BSQ_RASTER_SLICE (DEM , FUELS_AND_TOPOGRAPHY_DIRECTORY, DEM_FILENAME, 1, 1)
+   ENDIF
+   CALL CAST_RASTER_TO_FLOAT(DEM)
+ENDIF
+
+IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(19)) THEN
+   IF (USE_LANDSCAPE_FILE) THEN
+      CALL READ_LANDSCAPE_BAND (FBFM, FUELS_AND_TOPOGRAPHY_DIRECTORY, LANDSCAPE_FILENAME, 4)
+   ELSE
+      CALL READ_BSQ_RASTER_SLICE (FBFM, FUELS_AND_TOPOGRAPHY_DIRECTORY, FBFM_FILENAME, 1, 1)
    ENDIF
 ENDIF
 
-IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(19)) CALL READ_BSQ_RASTER_SLICE (FBFM, FUELS_AND_TOPOGRAPHY_DIRECTORY, FBFM_FILENAME, 1, 1)
-
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(20)) THEN
-   CALL READ_BSQ_RASTER_SLICE (SLP , FUELS_AND_TOPOGRAPHY_DIRECTORY, SLP_FILENAME, 1, 1)
-   IF (TRIM(SLP%PIXELTYPE) .EQ. 'SIGNEDINT') THEN
-      SLP%R4(:,:,1) = REAL(SLP%I2(:,:,1))
-      DEALLOCATE(SLP%I2)
-      SLP%PIXELTYPE='FLOAT     '
+   IF (USE_LANDSCAPE_FILE) THEN
+      CALL READ_LANDSCAPE_BAND (SLP, FUELS_AND_TOPOGRAPHY_DIRECTORY, LANDSCAPE_FILENAME, 2)
+   ELSE
+      CALL READ_BSQ_RASTER_SLICE (SLP , FUELS_AND_TOPOGRAPHY_DIRECTORY, SLP_FILENAME, 1, 1)
    ENDIF
+   CALL CAST_RASTER_TO_FLOAT(SLP)
 ENDIF
 
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(21) ) THEN
@@ -528,7 +594,7 @@ IF (USE_BARRIERS .AND. IRANK_WORLD .EQ. PARALLEL_IO_RANK(41)) CALL READ_BSQ_RAST
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(14)) THEN
-   if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS" .and. CBH_FILENAME .eq. ' ') THEN
+   if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS" .and. CBH_FILENAME .eq. ' ' .and. .not. USE_LANDSCAPE_FILE) THEN
       do j = 1, size(FBFM%I2,2)
       do i = 1, size(FBFM%I2,1)
          if (FBFM%I2(i,j,1) .eq. FBFM%NODATA_VALUE) then
@@ -542,7 +608,7 @@ IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(14)) THEN
 ENDIF
 
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(15)) THEN
-   if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS" .and. CBD_FILENAME .eq. ' ') THEN
+   if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS" .and. CBD_FILENAME .eq. ' ' .and. .not. USE_LANDSCAPE_FILE) THEN
       do j = 1, size(FBFM%I2,2)
       do i = 1, size(FBFM%I2,1)
          if (FBFM%I2(i,j,1) .eq. FBFM%NODATA_VALUE) then
@@ -609,65 +675,41 @@ ENDIF
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(13)) THEN
    FN = TRIM(FUELS_AND_TOPOGRAPHY_DIRECTORY) // TRIM(ASP_FILENAME)
    CALL READ_BSQ_RASTER_SLICE_EXISTING_TILED (ASP, FN, 1, 1)
-   IF (TRIM(ASP%PIXELTYPE) .EQ. 'SIGNEDINT') THEN
-      ASP%R4(:,:,1) = REAL(ASP%I2(:,:,1))
-      DEALLOCATE(ASP%I2)
-      ASP%PIXELTYPE='FLOAT     '
-   ENDIF
+   CALL CAST_RASTER_TO_FLOAT(ASP)
 ENDIF
 
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(14)) THEN
    FN = TRIM(FUELS_AND_TOPOGRAPHY_DIRECTORY) // TRIM(CBH_FILENAME)
    CALL READ_BSQ_RASTER_SLICE_EXISTING_TILED (CBH, FN, 1, 1)
-   IF (TRIM(CBH%PIXELTYPE) .EQ. 'SIGNEDINT') THEN
-      CBH%R4(:,:,1) = REAL(CBH%I2(:,:,1))
-      DEALLOCATE(CBH%I2)
-      CBH%PIXELTYPE='FLOAT     '
-   ENDIF
+   CALL CAST_RASTER_TO_FLOAT(CBH)
    IF (CBH_TIMES_10 ) WHERE(CBH%R4(:,:,1) .NE. CBH%NODATA_VALUE) CBH%R4(:,:,1) = 0.10*CBH%R4(:,:,1) ! m
 ENDIF
 
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(15)) THEN
    FN = TRIM(FUELS_AND_TOPOGRAPHY_DIRECTORY) // TRIM(CBD_FILENAME)
    CALL READ_BSQ_RASTER_SLICE_EXISTING_TILED (CBD, FN, 1, 1)
-   IF (TRIM(CBD%PIXELTYPE) .EQ. 'SIGNEDINT') THEN
-      CBD%R4(:,:,1) = REAL(CBD%I2(:,:,1))
-      DEALLOCATE(CBD%I2)
-      CBD%PIXELTYPE='FLOAT     '
-   ENDIF
+   CALL CAST_RASTER_TO_FLOAT(CBD)
    IF (CBD_TIMES_100) WHERE(CBD%R4(:,:,1) .NE. CBD%NODATA_VALUE) CBD%R4(:,:,1) = 0.01*CBD%R4(:,:,1) ! kg/m3
 ENDIF
 
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(16)) THEN
    FN = TRIM(FUELS_AND_TOPOGRAPHY_DIRECTORY) // TRIM(CC_FILENAME)
    CALL READ_BSQ_RASTER_SLICE_EXISTING_TILED (CC, FN, 1, 1)
-   IF (TRIM(CC%PIXELTYPE) .EQ. 'SIGNEDINT') THEN
-      CC%R4(:,:,1) = REAL(CC%I2(:,:,1))
-      DEALLOCATE(CC%I2)
-      CC%PIXELTYPE='FLOAT     '
-   ENDIF
+   CALL CAST_RASTER_TO_FLOAT(CC)
    IF (CC_IN_PERCENT) WHERE(CC%R4 (:,:,1) .NE. CC%NODATA_VALUE ) CC%R4 (:,:,1) = 0.01*CC%R4 (:,:,1) ! -
 ENDIF
 
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(17)) THEN
    FN = TRIM(FUELS_AND_TOPOGRAPHY_DIRECTORY) // TRIM(CH_FILENAME)
    CALL READ_BSQ_RASTER_SLICE_EXISTING_TILED (CH, FN, 1, 1)
-   IF (TRIM(CH%PIXELTYPE) .EQ. 'SIGNEDINT') THEN
-      CH%R4(:,:,1) = REAL(CH%I2(:,:,1))
-      DEALLOCATE(CH%I2)
-      CH%PIXELTYPE='FLOAT     '
-   ENDIF
+   CALL CAST_RASTER_TO_FLOAT(CH)
    IF (CH_TIMES_10  ) WHERE(CH%R4 (:,:,1) .NE. CH%NODATA_VALUE ) CH%R4 (:,:,1) = 0.10*CH%R4 (:,:,1) ! m
 ENDIF
 
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(18)) THEN
    FN = TRIM(FUELS_AND_TOPOGRAPHY_DIRECTORY) // TRIM(DEM_FILENAME)
    CALL READ_BSQ_RASTER_SLICE_EXISTING_TILED (DEM, FN, 1, 1)
-   IF (TRIM(DEM%PIXELTYPE) .EQ. 'SIGNEDINT') THEN
-      DEM%R4(:,:,1)= REAL(DEM%I2(:,:,1))
-      DEALLOCATE(DEM%I2)
-      DEM%PIXELTYPE='FLOAT     '
-   ENDIF
+   CALL CAST_RASTER_TO_FLOAT(DEM)
 ENDIF
 
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(19)) THEN
@@ -678,11 +720,7 @@ ENDIF
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(20)) THEN
    FN = TRIM(FUELS_AND_TOPOGRAPHY_DIRECTORY) // TRIM(SLP_FILENAME)
    CALL READ_BSQ_RASTER_SLICE_EXISTING_TILED (SLP, FN, 1, 1)
-   IF (TRIM(SLP%PIXELTYPE) .EQ. 'SIGNEDINT') THEN
-      SLP%R4(:,:,1) = REAL(SLP%I2(:,:,1))
-      DEALLOCATE(SLP%I2)
-      SLP%PIXELTYPE='FLOAT     '
-   ENDIF
+   CALL CAST_RASTER_TO_FLOAT(SLP)
 ENDIF
 
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(21) ) THEN
@@ -768,7 +806,7 @@ ENDIF
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(14)) THEN
-   if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS" .and. CBH_FILENAME .eq. ' ') THEN
+   if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS" .and. CBH_FILENAME .eq. ' ' .and. .not. USE_LANDSCAPE_FILE) THEN
       do j = 1, size(FBFM%I2,2)
       do i = 1, size(FBFM%I2,1)
          if (FBFM%I2(i,j,1) .eq. FBFM%NODATA_VALUE) then
@@ -782,7 +820,7 @@ IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(14)) THEN
 ENDIF
 
 IF (IRANK_WORLD .EQ. PARALLEL_IO_RANK(15)) THEN
-   if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS" .and. CBD_FILENAME .eq. ' ') THEN
+   if (trim(SURFACE_SPREAD_MODEL) .eq. "CFFDRS" .and. CBD_FILENAME .eq. ' ' .and. .not. USE_LANDSCAPE_FILE) THEN
       do j = 1, size(FBFM%I2,2)
       do i = 1, size(FBFM%I2,1)
          if (FBFM%I2(i,j,1) .eq. FBFM%NODATA_VALUE) then
@@ -899,7 +937,7 @@ SELECT CASE (TRIM(RASTER%PIXELTYPE))
 
       INQUIRE (IOLENGTH=LRECL) RVALUES(:)
       OPEN(LUOUT,FILE=TRIM(FNBIL),ACCESS='DIRECT',STATUS='REPLACE',RECL=LRECL,IOSTAT=IOS) 
-      IF (IOS .GT. 0) THEN
+      IF (IOS .NE. 0) THEN
          WRITE(*,*) 'Problem opening output bil file ', TRIM(FNBIL)
          STOP
       ENDIF
@@ -928,21 +966,21 @@ SELECT CASE (TRIM(RASTER%PIXELTYPE))
 
       IF (CONVERT_TO_GEOTIFF_LOCAL) THEN
          IF (COMPRESS) THEN
-            SHELLSTR = TRIM(PATH_TO_GDAL) // 'gdal_translate -ot Float32 -co "COMPRESS=DEFLATE" -co "ZLEVEL=9" -a_srs "' // &
+            SHELLSTR = TRIM(PATH_TO_GDAL) // 'gdal_translate -q -ot Float32 -co "COMPRESS=DEFLATE" -co "ZLEVEL=9" -a_srs "' // &
                        TRIM(A_SRS) // '" ' // TRIM(FNBIL) // ' ' // TRIM(FNTIF)
-            WRITE(*,100) TRIM(SHELLSTR)
+            IF (FEEDBACK_LEVEL .GE. 3) WRITE(*,100) TRIM(SHELLSTR)
             ISTAT = SYSTEM(TRIM(SHELLSTR))
          ELSE
-            SHELLSTR = TRIM(PATH_TO_GDAL) // 'gdal_translate -ot Float32 -a_srs "' // &
+            SHELLSTR = TRIM(PATH_TO_GDAL) // 'gdal_translate -q -ot Float32 -a_srs "' // &
                        TRIM(A_SRS) // '" ' // TRIM(FNBIL) // ' '// TRIM(FNTIF)
-            WRITE(*,100) TRIM(SHELLSTR)
+            IF (FEEDBACK_LEVEL .GE. 3) WRITE(*,100) TRIM(SHELLSTR)
             ISTAT = SYSTEM(TRIM(SHELLSTR))
          ENDIF
 
-         SHELLSTR = TRIM(DELETECOMMAND) // " " // TRIM(FNBIL); WRITE(*,100) TRIM(SHELLSTR)
+         SHELLSTR = TRIM(DELETECOMMAND) // " " // TRIM(FNBIL); IF (FEEDBACK_LEVEL .GE. 3) WRITE(*,100) TRIM(SHELLSTR)
          ISTAT = SYSTEM(TRIM(SHELLSTR))
 
-         SHELLSTR = TRIM(DELETECOMMAND) // " " // TRIM(FNHDR); WRITE(*,100) TRIM(SHELLSTR)
+         SHELLSTR = TRIM(DELETECOMMAND) // " " // TRIM(FNHDR); IF (FEEDBACK_LEVEL .GE. 3) WRITE(*,100) TRIM(SHELLSTR)
          ISTAT = SYSTEM(TRIM(SHELLSTR))
 
       ENDIF
@@ -953,7 +991,7 @@ SELECT CASE (TRIM(RASTER%PIXELTYPE))
 
       INQUIRE (IOLENGTH = LRECL) I2VALUES(:)
       OPEN(LUOUT,FILE=TRIM(FNBIL),ACCESS='DIRECT',STATUS='REPLACE',RECL=LRECL,IOSTAT=IOS) 
-      IF (IOS .GT. 0) THEN
+      IF (IOS .NE. 0) THEN
          WRITE(*,*) 'Problem opening output bil file ', TRIM(FNBIL)
          STOP
       ENDIF
@@ -981,17 +1019,21 @@ SELECT CASE (TRIM(RASTER%PIXELTYPE))
 
       IF (CONVERT_TO_GEOTIFF_LOCAL) THEN
          IF (COMPRESS) THEN
-            SHELLSTR = TRIM(PATH_TO_GDAL) // 'gdal_translate -ot Int16 -co "COMPRESS=DEFLATE" -co "ZLEVEL=9" -a_srs "' // &
+            SHELLSTR = TRIM(PATH_TO_GDAL) // 'gdal_translate -q -ot Int16 -co "COMPRESS=DEFLATE" -co "ZLEVEL=9" -a_srs "' // &
                        TRIM(A_SRS) // '" ' // TRIM(FNBIL) // ' ' // TRIM(FNTIF)
-            WRITE(*,100) TRIM(SHELLSTR); ISTAT = SYSTEM(TRIM(SHELLSTR))
+            IF (FEEDBACK_LEVEL .GE. 3) WRITE(*,100) TRIM(SHELLSTR)
+            ISTAT = SYSTEM(TRIM(SHELLSTR))
          ELSE
-            SHELLSTR = TRIM(PATH_TO_GDAL) // 'gdal_translate -ot Int16 -a_srs "' // &
+            SHELLSTR = TRIM(PATH_TO_GDAL) // 'gdal_translate -q -ot Int16 -a_srs "' // &
                        TRIM(A_SRS) // '" ' // TRIM(FNBIL) // ' ' // TRIM(FNTIF)
-            WRITE(*,100) TRIM(SHELLSTR); ISTAT = SYSTEM(TRIM(SHELLSTR))   
+            IF (FEEDBACK_LEVEL .GE. 3) WRITE(*,100) TRIM(SHELLSTR)
+            ISTAT = SYSTEM(TRIM(SHELLSTR))
          ENDIF
 
-         SHELLSTR = TRIM(DELETECOMMAND) // " " // TRIM(FNBIL); WRITE(*,100) TRIM(SHELLSTR); ISTAT = SYSTEM(TRIM(SHELLSTR))
-         SHELLSTR = TRIM(DELETECOMMAND) // " " // TRIM(FNHDR); WRITE(*,100) TRIM(SHELLSTR); ISTAT = SYSTEM(TRIM(SHELLSTR))
+         SHELLSTR = TRIM(DELETECOMMAND) // " " // TRIM(FNBIL); IF (FEEDBACK_LEVEL .GE. 3) WRITE(*,100) TRIM(SHELLSTR)
+         ISTAT = SYSTEM(TRIM(SHELLSTR))
+         SHELLSTR = TRIM(DELETECOMMAND) // " " // TRIM(FNHDR); IF (FEEDBACK_LEVEL .GE. 3) WRITE(*,100) TRIM(SHELLSTR)
+         ISTAT = SYSTEM(TRIM(SHELLSTR))
       ENDIF
 
    CASE DEFAULT
@@ -1028,7 +1070,7 @@ CHARACTER(7) :: ISSAMPLES
 CHARACTER(9) :: ISDATATYPE
 CHARACTER(24) :: ISNODATA
 CHARACTER(400), ALLOCATABLE, DIMENSION(:) :: LINES
-INTEGER :: I, IOS, ISTAT, ITYPE, NLINES
+INTEGER :: I, IOS, IPOS, ISTAT, ITYPE, NLINES
 LOGICAL :: XML_EXISTS
 
 IF (VRT_INSTEAD_OF_TIF) THEN
@@ -1051,14 +1093,15 @@ ENDIF
 
 ! Convert to ENVI header BSQ format
 INQUIRE(FILE=FNXML,EXIST=XML_EXISTS)
-IF (.NOT. USE_EXISTING_BSQS .or. .not. XML_EXISTS) THEN
-   SHELLSTR = TRIM(PATH_TO_GDAL) // 'gdal_translate -of ENVI -co "INTERLEAVE=BSQ" ' // TRIM(FNTIF) // " " // TRIM(FNBSQ)
-   WRITE(*,100) TRIM(SHELLSTR); CALL EXECUTE_COMMAND_LINE(TRIM(SHELLSTR))
+IF (.NOT. USE_EXISTING_BSQS .and. .not. XML_EXISTS) THEN
+   SHELLSTR = TRIM(PATH_TO_GDAL) // 'gdal_translate -q -of ENVI -co "INTERLEAVE=BSQ" ' // TRIM(FNTIF) // " " // TRIM(FNBSQ)
+   IF (FEEDBACK_LEVEL .GE. 3) WRITE(*,100) TRIM(SHELLSTR)
+   CALL EXECUTE_COMMAND_LINE(TRIM(SHELLSTR))
 ENDIF
 
 ! Open and parse BSQ XML:
 OPEN(LUINPUT,FILE=TRIM(FNXML),FORM='FORMATTED',STATUS='OLD',IOSTAT=IOS) 
-IF (IOS .GT. 0) THEN
+IF (IOS .NE. 0) THEN
    WRITE(*,*) 'Problem opening bsq xml header ', TRIM(FNXML)
    WRITE(*,*) 'IOS: ', IOS
    STOP
@@ -1102,14 +1145,7 @@ DO I = 1, NLINES
    IF (ISDATATYPE == 'data_type') THEN
       READ(LINENOW(26:26),*) TEMPSTR
       READ(TEMPSTR,*) ITYPE
-      IF (ITYPE .EQ. 2) THEN
-         RASTER%PIXELTYPE='SIGNEDINT'
-         RASTER%NBITS=16
-      ENDIF
-      IF (ITYPE .EQ. 4) THEN
-         RASTER%PIXELTYPE='FLOAT'
-         RASTER%NBITS=32
-      ENDIF
+      CALL CLASSIFY_ENVI_DATA_TYPE(ITYPE, RASTER%PIXELTYPE, RASTER%NBITS, FN)
    ENDIF
 
    IF (ISLINES == 'lines') THEN ! rows
@@ -1127,11 +1163,14 @@ DO I = 1, NLINES
    ENDIF
 
    IF (ISNODATA == 'NoDataValue') THEN
-      READ(LINENOW(18:38),*) TEMPSTR
-!      TEMPSTR = STRIP_NON_NUMBERS(TEMPSTR)
-      if (tempstr(1:1) /= '-') then !fix issue with positive NODATA values
-         tempstr = tempstr(1:20) ! alternative: shorten through assignment
-      endif
+      IPOS = INDEX(LINENOW, '>')
+      IF (IPOS > 0) THEN
+         READ(LINENOW(IPOS+1:IPOS+25),*) TEMPSTR
+      ELSE
+         READ(LINENOW(18:38),*) TEMPSTR
+      ENDIF
+      IPOS = INDEX(TEMPSTR, '<')
+      IF (IPOS > 1) TEMPSTR = TEMPSTR(1:IPOS-1)
       READ(TEMPSTR,*) RASTER%NODATA_VALUE
       CONTINUE
    ENDIF
@@ -1143,7 +1182,8 @@ RASTER%TOTALROWBYTES = RASTER%BANDROWBYTES * RASTER%NBANDS
 
 IF (DELETE_INTERMEDIATE_FILES) THEN
    SHELLSTR = TRIM(DELETECOMMAND) // " " // TRIM(FNBSQ) // " " // TRIM(FNHDR) // " " // TRIM(FNPRJ) // " " // TRIM(FNXML)
-   WRITE(*,100) TRIM(SHELLSTR); ISTAT = SYSTEM(TRIM(SHELLSTR))
+   IF (FEEDBACK_LEVEL .GE. 3) WRITE(*,100) TRIM(SHELLSTR)
+   ISTAT = SYSTEM(TRIM(SHELLSTR))
 ENDIF
 
 DEALLOCATE(LINES)
@@ -1153,6 +1193,8 @@ DEALLOCATE(LINES)
 CONTAINS
 
 CHARACTER(400) FUNCTION STRIP_NON_NUMBERS(STR)
+! Returns STR with every non-digit character replaced by a blank, leaving only
+! the numeric characters (used to extract numbers from XML metadata text).
 
    INTEGER :: I,J
    CHARACTER(400), INTENT(INOUT) :: STR
@@ -1238,14 +1280,7 @@ SELECT CASE(TRIM(INTERLEAVE))
 END SELECT
 
 
-SELECT CASE(DATA_TYPE)
-   CASE(2)
-      RASTER%PIXELTYPE='SIGNEDINT'
-      RASTER%NBITS=16
-   CASE(4)
-      RASTER%PIXELTYPE='FLOAT'
-      RASTER%NBITS=32
-END SELECT
+CALL CLASSIFY_ENVI_DATA_TYPE(DATA_TYPE, RASTER%PIXELTYPE, RASTER%NBITS, FNHDR)
 
 ! Check to make sure x and y cell sizes are the same:
 IF (RASTER%XDIM .NE. RASTER%YDIM) THEN
@@ -1272,7 +1307,8 @@ RASTER%ULYMAP = RASTER%YLLCORNER + RASTER%NROWS * RASTER%CELLSIZE - 0.5 * RASTER
 
 IF (DELETE_INTERMEDIATE_FILES) THEN
    SHELLSTR = TRIM(DELETECOMMAND) // " " // TRIM(FNBSQ) // " " // TRIM(FNHDR)
-   WRITE(*,100) TRIM(SHELLSTR); ISTAT = SYSTEM(TRIM(SHELLSTR))
+   IF (FEEDBACK_LEVEL .GE. 3) WRITE(*,100) TRIM(SHELLSTR)
+   ISTAT = SYSTEM(TRIM(SHELLSTR))
 ENDIF
 
 100 FORMAT(A)
@@ -1320,7 +1356,7 @@ GOT_DATATYPE = .FALSE.
 GOT_NODATA   = .FALSE.
 
 OPEN(LUINPUT,FILE=TRIM(FNXML),FORM='FORMATTED',STATUS='OLD',IOSTAT=IOS)
-IF (IOS .GT. 0) THEN
+IF (IOS .NE. 0) THEN
    WRITE(*,*) 'Problem opening bsq xml header ', TRIM(FNXML)
    WRITE(*,*) 'IOS: ', IOS
    STOP
@@ -1356,25 +1392,7 @@ DO
       READ(VALUESTR,*,IOSTAT=IOS) ITYPE
       IF (IOS .EQ. 0) THEN
          GOT_DATATYPE = .TRUE.
-         SELECT CASE (ITYPE)
-         CASE (1)
-            RASTER%PIXELTYPE='UNSIGNEDINT'
-            RASTER%NBITS=8
-         CASE (2)
-            RASTER%PIXELTYPE='SIGNEDINT'
-            RASTER%NBITS=16
-         CASE (3)
-            RASTER%PIXELTYPE='SIGNEDINT'
-            RASTER%NBITS=32
-         CASE (4)
-            RASTER%PIXELTYPE='FLOAT'
-            RASTER%NBITS=32
-         CASE (5)
-            RASTER%PIXELTYPE='FLOAT'
-            RASTER%NBITS=64
-         CASE DEFAULT
-            WRITE(*,*) 'Warning: unhandled ENVI data_type=', ITYPE, ' in ', TRIM(FNXML)
-         END SELECT
+         CALL CLASSIFY_ENVI_DATA_TYPE(ITYPE, RASTER%PIXELTYPE, RASTER%NBITS, FNXML)
       ENDIF
       CYCLE
    ENDIF
@@ -1418,12 +1436,12 @@ RASTER%NROWS = RASTER%NROWS * 3
 
 ! Open and parse BSQ header:
 OPEN(LUINPUT,FILE=TRIM(FNHDR),FORM='FORMATTED',STATUS='OLD',IOSTAT=IOS)
-IF (IOS .GT. 0) THEN
+IF (IOS .NE. 0) THEN
    WRITE(*,*) 'Problem opening bsq header ', TRIM(FNHDR)
    STOP
 ENDIF
 
-IF (DEBUG_LEVEL .GT. 100) WRITE(*,*) 'Reading bsq header'
+IF (FEEDBACK_LEVEL .GE. 3) WRITE(*,*) 'Reading bsq header from ', trim(FNIN)
 
 ! Read until we find the map info line instead of assuming line 12
 FOUND = .FALSE.
@@ -1491,6 +1509,8 @@ RASTER%ULYMAP = RASTER%YLLCORNER + RASTER%NROWS * RASTER%CELLSIZE - 0.5 * RASTER
 CONTAINS
 
    SUBROUTINE GET_MDI_VALUE(LINE, KEY, VALUE, FOUND)
+      ! Extracts the text inside a <MDI key="KEY">...</MDI> element on LINE,
+      ! returning it in VALUE and setting FOUND .TRUE. if the key is present.
       CHARACTER(*), INTENT(IN)  :: LINE, KEY
       CHARACTER(*), INTENT(OUT) :: VALUE
       LOGICAL,      INTENT(OUT) :: FOUND
@@ -1515,6 +1535,8 @@ CONTAINS
    END SUBROUTINE GET_MDI_VALUE
 
    SUBROUTINE GET_XML_TAG_VALUE(LINE, TAG, VALUE, FOUND)
+      ! Extracts the text between <TAG> and </TAG> on LINE, returning it in
+      ! VALUE and setting FOUND .TRUE. if the tag is present.
       CHARACTER(*), INTENT(IN)  :: LINE, TAG
       CHARACTER(*), INTENT(OUT) :: VALUE
       LOGICAL,      INTENT(OUT) :: FOUND
@@ -1544,25 +1566,24 @@ END SUBROUTINE READ_BSQ_HEADER_EXISTING_TILED
 ! *****************************************************************************
 
 ! *****************************************************************************
-!> Read slice of raster contained in .bsq file FN in directory INDIR and save it to RASTER. 
-SUBROUTINE READ_BSQ_RASTER_SLICE(RASTER,INDIR,FN,BANDSTART,BANDEND)
+SUBROUTINE PREPARE_RASTER_HEADER(RASTER,INDIR,FN)
 ! *****************************************************************************
+! Ensures RASTER's header is populated: converts the source GeoTIFF (FN.tif/.vrt
+! in INDIR) to ENVI BSQ format via GDAL if the .bsq/.hdr don't already exist, then
+! parses the header (XML or ENVI .hdr depending on USE_BSQ_XML_HEADER). Shared by
+! READ_BSQ_RASTER_SLICE and READ_LANDSCAPE_BAND. No-op if HEADERISSET already.
 
 #ifdef __INTEL_COMPILER
 USE IFPORT
 #endif
 
 TYPE (RASTER_TYPE) :: RASTER
-CHARACTER(400), INTENT (IN) :: INDIR,FN
-INTEGER, intent (IN) :: BANDSTART, BANDEND
+CHARACTER(400), INTENT (IN) :: INDIR, FN
 CHARACTER(400) :: FNHDR, FNBSQ, FNTIF, TEMPSTR, SHELLSTR
-INTEGER :: I, IOS, IBAND, IROW1, IROW2, IDUMMY, J, IBANDCOUNT, NBANDS
-INTEGER*8 :: LRECL
+INTEGER :: I, J, IOS, IDUMMY
 LOGICAL :: FOUND, HDR_EXISTS, BSQ_EXISTS
-REAL, ALLOCATABLE, DIMENSION(:) :: RVALUES
-REAL, ALLOCATABLE, DIMENSION(:,:) :: RTEMP
-INTEGER*2, ALLOCATABLE, DIMENSION(:) :: I2VALUES
-INTEGER*2, ALLOCATABLE, DIMENSION(:,:) :: I2TEMP
+
+IF (RASTER%HEADERISSET) RETURN
 
 IF (VRT_INSTEAD_OF_TIF) THEN
    FNTIF = TRIM(INDIR) // TRIM(FN) // '.vrt'
@@ -1578,74 +1599,258 @@ ELSE
    FNBSQ = TRIM(SCRATCH) // TRIM(FN) // '.bsq'
 ENDIF
 
-if (.not. RASTER%HEADERISSET) then
-
-   ! Convert to ENVI header BSQ format if files don't already exist
-   INQUIRE(FILE=TRIM(FNHDR),EXIST=HDR_EXISTS)
-   INQUIRE(FILE=TRIM(FNBSQ),EXIST=BSQ_EXISTS)
-   IF (.NOT. HDR_EXISTS .OR. .NOT. BSQ_EXISTS) THEN
-      SHELLSTR = TRIM(PATH_TO_GDAL) // 'gdal_translate -of ENVI -co "INTERLEAVE=BSQ" ' // TRIM(FNTIF) // " " // TRIM(FNBSQ)
-      WRITE(*,100) TRIM(SHELLSTR); CALL EXECUTE_COMMAND_LINE(TRIM(SHELLSTR))
-   ENDIF
-
-   IF (USE_BSQ_XML_HEADER) THEN
-      CALL READ_BSQ_XML_HEADER (RASTER , INDIR, FN, .FALSE.)
-
-   ! Now open and parse BSQ .hdr file:
-      OPEN(LUINPUT,FILE=TRIM(FNHDR),FORM='FORMATTED',STATUS='OLD',IOSTAT=IOS) 
-      IF (IOS .GT. 0) THEN
-         WRITE(*,*) 'Problem opening bsq header ', TRIM(FNHDR)
-      ENDIF
-
-      IF (DEBUG_LEVEL .GT. 100) WRITE(*,*) 'Reading bsq header'
-
-   ! Skip 11 lines
-      DO I = 1, 11
-         READ(LUINPUT,100,IOSTAT=IOS)
-      ENDDO
-
-   ! Read easting, northing, and cell size info:
-      READ(LUINPUT,100,IOSTAT=IOS) TEMPSTR
-      FOUND=.FALSE.; I=1
-      DO WHILE (.NOT. FOUND)
-         IF(TEMPSTR(I:I) .EQ. ',') THEN
-            FOUND=.TRUE.
-         ELSE
-            I=I+1
-         ENDIF
-      ENDDO
-      J=I+1
-      DO I=1,130
-         IF (TEMPSTR(I:I) .EQ. '}') TEMPSTR(I:I)=' '
-      ENDDO
-      READ(TEMPSTR(J:),*) IDUMMY, IDUMMY, RASTER%XLLCORNER, RASTER%YLLCORNER, RASTER%XDIM, RASTER%YDIM
-      RASTER%YLLCORNER = RASTER%YLLCORNER - RASTER%YDIM * RASTER%NROWS
-      CLOSE(LUINPUT)
-
-   ! Check to make sure x and y cell sizes are the same:
-      IF (RASTER%XDIM .NE. RASTER%YDIM) THEN
-         WRITE(*,*) 'Error opening ', TRIM(FNHDR), ' because XDIM is not equal to YDIM.'
-         STOP
-      ELSE
-         RASTER%CELLSIZE=RASTER%XDIM
-      ENDIF
-
-   ! Set ULXMAP and ULYMAP
-      RASTER%ULXMAP = RASTER%XLLCORNER + 0.5 * RASTER%CELLSIZE
-      RASTER%ULYMAP = RASTER%YLLCORNER + RASTER%NROWS * RASTER%CELLSIZE - 0.5 * RASTER%CELLSIZE
-
-   ! Set BYTEORDER and LAYOUT
-      RASTER%BYTEORDER = '0'
-      RASTER%LAYOUT    = 'BSQ'
-
-   ! This is for bil:
-      RASTER%BYTEORDER = 'I'
-      RASTER%LAYOUT    = 'BIL'
-   ELSE
-      CALL READ_BSQ_HDR_HEADER(RASTER, INDIR, FN, .FALSE.)
-   ENDIF
-   RASTER%HEADERISSET = .TRUE.
+! Convert to ENVI header BSQ format if files don't already exist
+INQUIRE(FILE=TRIM(FNHDR),EXIST=HDR_EXISTS)
+INQUIRE(FILE=TRIM(FNBSQ),EXIST=BSQ_EXISTS)
+IF (.NOT. HDR_EXISTS .OR. .NOT. BSQ_EXISTS) THEN
+   SHELLSTR = TRIM(PATH_TO_GDAL) // 'gdal_translate -q -of ENVI -co "INTERLEAVE=BSQ" ' // TRIM(FNTIF) // " " // TRIM(FNBSQ)
+   IF (FEEDBACK_LEVEL .GE. 3) WRITE(*,100) TRIM(SHELLSTR)
+   CALL EXECUTE_COMMAND_LINE(TRIM(SHELLSTR))
 ENDIF
+
+IF (USE_BSQ_XML_HEADER) THEN
+   CALL READ_BSQ_XML_HEADER (RASTER , INDIR, FN, .FALSE.)
+
+! Now open and parse BSQ .hdr file:
+   OPEN(LUINPUT,FILE=TRIM(FNHDR),FORM='FORMATTED',STATUS='OLD',IOSTAT=IOS)
+   IF (IOS .NE. 0) THEN
+      WRITE(*,*) 'Problem opening bsq header ', TRIM(FNHDR)
+   ENDIF
+
+   IF (FEEDBACK_LEVEL .GE. 3) WRITE(*,*) 'Reading bsq header from ', trim(FN)
+
+! Skip 11 lines
+   DO I = 1, 11
+      READ(LUINPUT,100,IOSTAT=IOS)
+   ENDDO
+
+! Read easting, northing, and cell size info:
+   READ(LUINPUT,100,IOSTAT=IOS) TEMPSTR
+   FOUND=.FALSE.; I=1
+   DO WHILE (.NOT. FOUND)
+      IF(TEMPSTR(I:I) .EQ. ',') THEN
+         FOUND=.TRUE.
+      ELSE
+         I=I+1
+      ENDIF
+   ENDDO
+   J=I+1
+   DO I=1,130
+      IF (TEMPSTR(I:I) .EQ. '}') TEMPSTR(I:I)=' '
+   ENDDO
+   READ(TEMPSTR(J:),*) IDUMMY, IDUMMY, RASTER%XLLCORNER, RASTER%YLLCORNER, RASTER%XDIM, RASTER%YDIM
+   RASTER%YLLCORNER = RASTER%YLLCORNER - RASTER%YDIM * RASTER%NROWS
+   CLOSE(LUINPUT)
+
+! Check to make sure x and y cell sizes are the same:
+   IF (RASTER%XDIM .NE. RASTER%YDIM) THEN
+      WRITE(*,*) 'Error opening ', TRIM(FNHDR), ' because XDIM is not equal to YDIM.'
+      STOP
+   ELSE
+      RASTER%CELLSIZE=RASTER%XDIM
+   ENDIF
+
+! Set ULXMAP and ULYMAP
+   RASTER%ULXMAP = RASTER%XLLCORNER + 0.5 * RASTER%CELLSIZE
+   RASTER%ULYMAP = RASTER%YLLCORNER + RASTER%NROWS * RASTER%CELLSIZE - 0.5 * RASTER%CELLSIZE
+
+! Set BYTEORDER and LAYOUT
+   RASTER%BYTEORDER = '0'
+   RASTER%LAYOUT    = 'BSQ'
+
+! This is for bil:
+   RASTER%BYTEORDER = 'I'
+   RASTER%LAYOUT    = 'BIL'
+ELSE
+   CALL READ_BSQ_HDR_HEADER(RASTER, INDIR, FN, .FALSE.)
+ENDIF
+RASTER%HEADERISSET = .TRUE.
+
+100 FORMAT(A)
+
+! *****************************************************************************
+END SUBROUTINE PREPARE_RASTER_HEADER
+! *****************************************************************************
+
+! *****************************************************************************
+SUBROUTINE CLASSIFY_ENVI_DATA_TYPE(ITYPE, PIXELTYPE, NBITS, SRC)
+! *****************************************************************************
+! Maps an ENVI 'data type' code to ELMFIRE's internal PIXELTYPE label and bit
+! width. 16-bit signed integers are kept as integers (read into %I2, used by
+! integer-coded layers such as FBFM and PYROMES); every other supported numeric
+! type is decoded into 32-bit REAL (%R4) at read time by READ_BSQ_BAND_R4.
+! Complex (6, 9) and 64-bit integer (14, 15) types have no REAL/INTEGER*2
+! representation here and are rejected loudly rather than read as garbage.
+
+INTEGER,      INTENT(IN)  :: ITYPE
+CHARACTER(*), INTENT(OUT) :: PIXELTYPE
+INTEGER,      INTENT(OUT) :: NBITS
+CHARACTER(*), INTENT(IN)  :: SRC
+
+SELECT CASE (ITYPE)
+   CASE (1)            ! 8-bit unsigned integer
+      PIXELTYPE = 'BYTE'     ; NBITS = 8
+   CASE (2)            ! 16-bit signed integer (kept as INTEGER*2)
+      PIXELTYPE = 'SIGNEDINT'; NBITS = 16
+   CASE (3)            ! 32-bit signed integer
+      PIXELTYPE = 'INT32'    ; NBITS = 32
+   CASE (4)            ! 32-bit float
+      PIXELTYPE = 'FLOAT'    ; NBITS = 32
+   CASE (5)            ! 64-bit float (double)
+      PIXELTYPE = 'DOUBLE'   ; NBITS = 64
+   CASE (12)           ! 16-bit unsigned integer
+      PIXELTYPE = 'UINT16'   ; NBITS = 16
+   CASE (13)           ! 32-bit unsigned integer
+      PIXELTYPE = 'UINT32'   ; NBITS = 32
+   CASE DEFAULT
+      WRITE(*,*) '[ERROR] Unsupported ENVI data type (', ITYPE, ') for ', TRIM(SRC)
+      WRITE(*,*) '        Supported: 1=byte, 2=int16, 3=int32, 4=float32, 5=float64,'
+      WRITE(*,*) '        12=uint16, 13=uint32. Re-export the raster as Float32 or Int16.'
+      STOP
+END SELECT
+
+! *****************************************************************************
+END SUBROUTINE CLASSIFY_ENVI_DATA_TYPE
+! *****************************************************************************
+
+! *****************************************************************************
+SUBROUTINE READ_BSQ_BAND_R4(FNBSQ, IREC, NPIX, PIXELTYPE, RVALUES)
+! *****************************************************************************
+! Reads band record IREC (NPIX pixels, BSQ layout) from FNBSQ and returns the
+! values as 32-bit REAL in RVALUES, decoding whatever on-disk numeric type
+! PIXELTYPE names. Unsigned integer types are sign-corrected (Fortran has no
+! unsigned kinds, so the raw bits read back negative for the upper half of the
+! range). Handles every supported pixel type except 16-bit signed integer,
+! which the callers read straight into %I2. RECL is obtained via INQUIRE so the
+! record length stays correct regardless of the compiler's RECL unit.
+!
+! Note: 32-bit integers and 64-bit floats whose magnitude exceeds ~2^24 lose
+! precision once stored as REAL(4). That is immaterial for the fuel,
+! topography, weather and mask rasters ELMFIRE consumes.
+
+CHARACTER(*), INTENT(IN)  :: FNBSQ, PIXELTYPE
+INTEGER,      INTENT(IN)  :: IREC, NPIX
+REAL,         INTENT(OUT) :: RVALUES(1:NPIX)
+
+INTEGER :: LUN, IOS
+INTEGER*8 :: LRECL
+INTEGER(1), ALLOCATABLE :: B1(:)
+INTEGER(2), ALLOCATABLE :: U2(:)
+INTEGER(4), ALLOCATABLE :: I4(:)
+REAL(4),    ALLOCATABLE :: R4T(:)
+REAL(8),    ALLOCATABLE :: R8T(:)
+
+SELECT CASE (TRIM(PIXELTYPE))
+
+   CASE ('BYTE')                                  ! 8-bit unsigned
+      ALLOCATE(B1(1:NPIX)); INQUIRE(IOLENGTH=LRECL) B1(:)
+      CALL OPEN_BSQ_DIRECT(FNBSQ, LRECL, LUN)
+      READ(LUN, REC=IREC, IOSTAT=IOS) B1(:)
+      RVALUES(:) = REAL(IAND(INT(B1, 4), 255))
+      DEALLOCATE(B1)
+
+   CASE ('UINT16')                                ! 16-bit unsigned
+      ALLOCATE(U2(1:NPIX)); INQUIRE(IOLENGTH=LRECL) U2(:)
+      CALL OPEN_BSQ_DIRECT(FNBSQ, LRECL, LUN)
+      READ(LUN, REC=IREC, IOSTAT=IOS) U2(:)
+      RVALUES(:) = REAL(IAND(INT(U2, 4), 65535))
+      DEALLOCATE(U2)
+
+   CASE ('INT32')                                 ! 32-bit signed
+      ALLOCATE(I4(1:NPIX)); INQUIRE(IOLENGTH=LRECL) I4(:)
+      CALL OPEN_BSQ_DIRECT(FNBSQ, LRECL, LUN)
+      READ(LUN, REC=IREC, IOSTAT=IOS) I4(:)
+      RVALUES(:) = REAL(I4)
+      DEALLOCATE(I4)
+
+   CASE ('UINT32')                                ! 32-bit unsigned
+      ALLOCATE(I4(1:NPIX)); INQUIRE(IOLENGTH=LRECL) I4(:)
+      CALL OPEN_BSQ_DIRECT(FNBSQ, LRECL, LUN)
+      READ(LUN, REC=IREC, IOSTAT=IOS) I4(:)
+      RVALUES(:) = REAL(IAND(INT(I4, 8), 4294967295_8))
+      DEALLOCATE(I4)
+
+   CASE ('FLOAT')                                 ! 32-bit float
+      ALLOCATE(R4T(1:NPIX)); INQUIRE(IOLENGTH=LRECL) R4T(:)
+      CALL OPEN_BSQ_DIRECT(FNBSQ, LRECL, LUN)
+      READ(LUN, REC=IREC, IOSTAT=IOS) R4T(:)
+      RVALUES(:) = R4T(:)
+      DEALLOCATE(R4T)
+
+   CASE ('DOUBLE')                                ! 64-bit float
+      ALLOCATE(R8T(1:NPIX)); INQUIRE(IOLENGTH=LRECL) R8T(:)
+      CALL OPEN_BSQ_DIRECT(FNBSQ, LRECL, LUN)
+      READ(LUN, REC=IREC, IOSTAT=IOS) R8T(:)
+      RVALUES(:) = REAL(R8T, 4)
+      DEALLOCATE(R8T)
+
+   CASE DEFAULT
+      WRITE(*,*) '[ERROR] READ_BSQ_BAND_R4: cannot decode PIXELTYPE ', TRIM(PIXELTYPE)
+      STOP
+
+END SELECT
+
+IF (IOS .NE. 0) THEN
+   WRITE(*,*) '[ERROR] Problem reading band ', IREC, ' from ', TRIM(FNBSQ), ' (IOS=', IOS, ')'
+   STOP
+ENDIF
+CLOSE(LUN, IOSTAT=IOS)
+
+! *****************************************************************************
+END SUBROUTINE READ_BSQ_BAND_R4
+! *****************************************************************************
+
+! *****************************************************************************
+SUBROUTINE OPEN_BSQ_DIRECT(FNBSQ, LRECL, LUN)
+! *****************************************************************************
+! Opens FNBSQ for direct-access unformatted reads with record length LRECL and
+! returns a fresh unit in LUN. Aborts on failure.
+
+CHARACTER(*), INTENT(IN)  :: FNBSQ
+INTEGER*8,    INTENT(IN)  :: LRECL
+INTEGER,      INTENT(OUT) :: LUN
+INTEGER :: IOS
+
+OPEN(NEWUNIT=LUN, FILE=TRIM(FNBSQ), ACCESS='DIRECT', FORM='UNFORMATTED', &
+     STATUS='OLD', RECL=LRECL, IOSTAT=IOS)
+IF (IOS .NE. 0) THEN
+   WRITE(*,*) 'Problem opening raster file ', TRIM(FNBSQ)
+   STOP
+ENDIF
+
+! *****************************************************************************
+END SUBROUTINE OPEN_BSQ_DIRECT
+! *****************************************************************************
+
+! *****************************************************************************
+!> Read slice of raster contained in .bsq file FN in directory INDIR and save it to RASTER.
+SUBROUTINE READ_BSQ_RASTER_SLICE(RASTER,INDIR,FN,BANDSTART,BANDEND)
+! *****************************************************************************
+
+#ifdef __INTEL_COMPILER
+USE IFPORT
+#endif
+
+TYPE (RASTER_TYPE) :: RASTER
+CHARACTER(400), INTENT (IN) :: INDIR,FN
+INTEGER, intent (IN) :: BANDSTART, BANDEND
+CHARACTER(400) :: FNHDR, FNBSQ
+INTEGER :: IOS, IBAND, IROW1, IROW2, IBANDCOUNT, NBANDS
+INTEGER*8 :: LRECL
+REAL, ALLOCATABLE, DIMENSION(:) :: RVALUES
+REAL, ALLOCATABLE, DIMENSION(:,:) :: RTEMP
+INTEGER*2, ALLOCATABLE, DIMENSION(:) :: I2VALUES
+INTEGER*2, ALLOCATABLE, DIMENSION(:,:) :: I2TEMP
+
+IF (TRIM(SCRATCH) .EQ. 'null') THEN
+   FNHDR = TRIM(INDIR) // TRIM(FN) // '.hdr'
+   FNBSQ = TRIM(INDIR) // TRIM(FN) // '.bsq'
+ELSE
+   FNHDR = TRIM(SCRATCH) // TRIM(FN) // '.hdr'
+   FNBSQ = TRIM(SCRATCH) // TRIM(FN) // '.bsq'
+ENDIF
+
+CALL PREPARE_RASTER_HEADER(RASTER, INDIR, FN)
 
 IF (CSV_FIXED_IGNITION_LOCATIONS .AND. ONLY_READ_NEEDED_WX_BANDS .AND. RASTER%NBANDS .GT. 1) THEN
    NBANDS = 1 + IGN_IWX_BAND_HI - IGN_IWX_BAND_LO
@@ -1687,7 +1892,7 @@ SELECT CASE(TRIM(RASTER%PIXELTYPE))
       INQUIRE (IOLENGTH=LRECL) RVALUES(:) 
 
       OPEN(LUINPUT, FILE=TRIM(FNBSQ), ACCESS='DIRECT', STATUS='OLD', RECL=LRECL, IOSTAT=IOS) 
-      IF (IOS .GT. 0) THEN
+      IF (IOS .NE. 0) THEN
          WRITE(*,*) 'Problem opening raster file ', TRIM(FNBSQ)
          STOP
       ENDIF
@@ -1732,7 +1937,7 @@ SELECT CASE(TRIM(RASTER%PIXELTYPE))
       INQUIRE (IOLENGTH=LRECL) I2VALUES(:) 
 
       OPEN(LUINPUT, FILE=TRIM(FNBSQ), ACCESS='DIRECT', STATUS='OLD', RECL=LRECL, IOSTAT=IOS) 
-      IF (IOS .GT. 0) THEN
+      IF (IOS .NE. 0) THEN
          WRITE(*,*) 'Problem opening raster file ', TRIM(FNBSQ)
          STOP
       ENDIF
@@ -1750,17 +1955,164 @@ SELECT CASE(TRIM(RASTER%PIXELTYPE))
 
       DEALLOCATE(I2VALUES, I2TEMP)
 
+   CASE('BYTE','UINT16','INT32','UINT32','DOUBLE')
+!     Decoded into 32-bit REAL by READ_BSQ_BAND_R4, then presented as FLOAT to
+!     all downstream consumers.
+      IF (.NOT. ASSOCIATED(RASTER%R4)) ALLOCATE(RASTER%R4(1:RASTER%NCOLS,1:RASTER%NROWS,1:NBANDS))
+      ALLOCATE(RVALUES(1:RASTER%NROWS*RASTER%NCOLS))
+      ALLOCATE(RTEMP(1:RASTER%NCOLS,1:RASTER%NROWS))
+
+      RASTER%R4(:,:,:) = RASTER%NODATA_VALUE
+
+      DO IBAND = BANDSTART, BANDEND
+         CALL READ_BSQ_BAND_R4(FNBSQ, IBAND, RASTER%NROWS*RASTER%NCOLS, RASTER%PIXELTYPE, RVALUES)
+         RTEMP(:,:) = RESHAPE(RVALUES, (/RASTER%NCOLS,RASTER%NROWS/))
+         DO IROW1 = 1, RASTER%NROWS
+            IROW2 = RASTER%NROWS + 1 - IROW1
+            RASTER%R4(:,IROW1,IBAND - BANDSTART + 1) = RTEMP(:,IROW2)
+         ENDDO
+      ENDDO
+
+      DEALLOCATE(RVALUES, RTEMP)
+      RASTER%PIXELTYPE = 'FLOAT'
+      RASTER%NBITS = 32
+
    CASE DEFAULT
-      CONTINUE
+      WRITE(*,*) '[ERROR] READ_BSQ_RASTER_SLICE: unhandled PIXELTYPE ', TRIM(RASTER%PIXELTYPE), ' for ', TRIM(FNBSQ)
+      STOP
 
 END SELECT
 
 CLOSE(LUINPUT,IOSTAT=IOS)
 
-100 FORMAT(A)
-
 ! *****************************************************************************
 END SUBROUTINE READ_BSQ_RASTER_SLICE
+! *****************************************************************************
+
+! *****************************************************************************
+SUBROUTINE READ_LANDSCAPE_BAND(RASTER,INDIR,FN,IBAND)
+! *****************************************************************************
+! Reads a single band (IBAND) out of a multiband "landscape" GeoTIFF and stores
+! it as band 1 of RASTER. A landscape file is one multiband GeoTIFF holding (in
+! band order) elevation, slope, aspect, fuel model, canopy cover, canopy height,
+! canopy base height, and canopy bulk density. Header handling and the GDAL
+! GeoTIFF -> ENVI BSQ conversion are shared with READ_BSQ_RASTER_SLICE (via
+! PREPARE_RASTER_HEADER); unlike that routine this one allocates only a single
+! band, so each topography/fuel layer keeps the same in-memory layout as when read
+! from an individual raster. READ_FUEL_TOPOGRAPHY performs the BSQ conversion once
+! up front so the per-band reads here don't race to convert the same file.
+
+#ifdef __INTEL_COMPILER
+USE IFPORT
+#endif
+
+TYPE (RASTER_TYPE) :: RASTER
+CHARACTER(400), INTENT (IN) :: INDIR,FN
+INTEGER, INTENT (IN) :: IBAND
+CHARACTER(400) :: FNHDR, FNBSQ
+INTEGER :: IOS, IROW1, IROW2
+INTEGER*8 :: LRECL
+REAL, ALLOCATABLE, DIMENSION(:) :: RVALUES
+REAL, ALLOCATABLE, DIMENSION(:,:) :: RTEMP
+INTEGER*2, ALLOCATABLE, DIMENSION(:) :: I2VALUES
+INTEGER*2, ALLOCATABLE, DIMENSION(:,:) :: I2TEMP
+
+IF (TRIM(SCRATCH) .EQ. 'null') THEN
+   FNHDR = TRIM(INDIR) // TRIM(FN) // '.hdr'
+   FNBSQ = TRIM(INDIR) // TRIM(FN) // '.bsq'
+ELSE
+   FNHDR = TRIM(SCRATCH) // TRIM(FN) // '.hdr'
+   FNBSQ = TRIM(SCRATCH) // TRIM(FN) // '.bsq'
+ENDIF
+
+CALL PREPARE_RASTER_HEADER(RASTER, INDIR, FN)
+
+IF (IBAND .GT. RASTER%NBANDS .OR. IBAND .LT. 1) THEN
+   WRITE(*,*) '[ERROR] Error processing landscape file ', TRIM(FNHDR), ' band (', IBAND, ') is outside the bounds of (', 1, ',',RASTER%NBANDS,')'
+   STOP
+ENDIF
+
+SELECT CASE(TRIM(RASTER%PIXELTYPE))
+
+   CASE('FLOAT')
+      IF (.NOT. ASSOCIATED(RASTER%R4)) ALLOCATE(RASTER%R4(1:RASTER%NCOLS,1:RASTER%NROWS,1:1))
+      ALLOCATE(RVALUES(1:RASTER%NROWS*RASTER%NCOLS))
+      ALLOCATE(RTEMP(1:RASTER%NCOLS,1:RASTER%NROWS))
+
+      RASTER%R4(:,:,:) = RASTER%NODATA_VALUE
+
+      INQUIRE (IOLENGTH=LRECL) RVALUES(:)
+      OPEN(LUINPUT, FILE=TRIM(FNBSQ), ACCESS='DIRECT', STATUS='OLD', RECL=LRECL, IOSTAT=IOS)
+      IF (IOS .NE. 0) THEN
+         WRITE(*,*) 'Problem opening raster file ', TRIM(FNBSQ)
+         STOP
+      ENDIF
+
+      READ(LUINPUT,REC=IBAND,IOSTAT=IOS) RVALUES(:)
+      RTEMP(:,:) = RESHAPE(RVALUES, (/RASTER%NCOLS,RASTER%NROWS/))
+      DO IROW1 = 1, RASTER%NROWS
+         IROW2 = RASTER%NROWS + 1 - IROW1
+         RASTER%R4(:,IROW1,1) = RTEMP(:,IROW2)
+      ENDDO
+
+      DEALLOCATE(RVALUES, RTEMP)
+
+   CASE('SIGNEDINT')
+      IF (.NOT. ASSOCIATED(RASTER%I2)) ALLOCATE(RASTER%I2(1:RASTER%NCOLS,1:RASTER%NROWS,1:1))
+      ALLOCATE(I2VALUES(1:RASTER%NROWS*RASTER%NCOLS))
+      ALLOCATE(I2TEMP(1:RASTER%NCOLS,1:RASTER%NROWS))
+
+      RASTER%I2(:,:,:) = RASTER%NODATA_VALUE
+
+      INQUIRE (IOLENGTH=LRECL) I2VALUES(:)
+      OPEN(LUINPUT, FILE=TRIM(FNBSQ), ACCESS='DIRECT', STATUS='OLD', RECL=LRECL, IOSTAT=IOS)
+      IF (IOS .NE. 0) THEN
+         WRITE(*,*) 'Problem opening raster file ', TRIM(FNBSQ)
+         STOP
+      ENDIF
+
+      READ(LUINPUT,REC=IBAND,IOSTAT=IOS) I2VALUES(:)
+      I2TEMP(:,:) = RESHAPE(I2VALUES, (/RASTER%NCOLS,RASTER%NROWS/))
+      DO IROW1 = 1, RASTER%NROWS
+         IROW2 = RASTER%NROWS + 1 - IROW1
+         RASTER%I2(:,IROW1,1) = I2TEMP(:,IROW2)
+      ENDDO
+
+      DEALLOCATE(I2VALUES, I2TEMP)
+
+   CASE('BYTE','UINT16','INT32','UINT32','DOUBLE')
+!     Decoded into 32-bit REAL by READ_BSQ_BAND_R4, then presented as FLOAT.
+      IF (.NOT. ASSOCIATED(RASTER%R4)) ALLOCATE(RASTER%R4(1:RASTER%NCOLS,1:RASTER%NROWS,1:1))
+      ALLOCATE(RVALUES(1:RASTER%NROWS*RASTER%NCOLS))
+      ALLOCATE(RTEMP(1:RASTER%NCOLS,1:RASTER%NROWS))
+
+      RASTER%R4(:,:,:) = RASTER%NODATA_VALUE
+
+      CALL READ_BSQ_BAND_R4(FNBSQ, IBAND, RASTER%NROWS*RASTER%NCOLS, RASTER%PIXELTYPE, RVALUES)
+      RTEMP(:,:) = RESHAPE(RVALUES, (/RASTER%NCOLS,RASTER%NROWS/))
+      DO IROW1 = 1, RASTER%NROWS
+         IROW2 = RASTER%NROWS + 1 - IROW1
+         RASTER%R4(:,IROW1,1) = RTEMP(:,IROW2)
+      ENDDO
+
+      DEALLOCATE(RVALUES, RTEMP)
+      RASTER%PIXELTYPE = 'FLOAT'
+      RASTER%NBITS = 32
+
+   CASE DEFAULT
+      WRITE(*,*) '[ERROR] READ_LANDSCAPE_BAND: unhandled PIXELTYPE ', TRIM(RASTER%PIXELTYPE), ' for ', TRIM(FNBSQ)
+      STOP
+
+END SELECT
+
+! A single band has been extracted into band 1, so present this raster as
+! single-band to all downstream consumers.
+RASTER%NBANDS = 1
+
+CLOSE(LUINPUT,IOSTAT=IOS)
+
+! *****************************************************************************
+END SUBROUTINE READ_LANDSCAPE_BAND
 ! *****************************************************************************
 
 ! *****************************************************************************
@@ -1806,6 +2158,7 @@ IF (BANDEND-BANDSTART .gt. WX_BANDS_KEPT_IN_MEM) then
    STOP
 endif
 
+NBANDS = 0   ! real value is computed in the header-set block before any allocation below
 DO ITILE = 1, 3
 DO JTILE = 1, 3
 
@@ -1866,7 +2219,7 @@ DO JTILE = 1, 3
 
          OPEN(LUINPUT, FILE=TRIM(FNBSQ), ACCESS='DIRECT', FORM='UNFORMATTED', &
               STATUS='OLD', RECL=LRECL, IOSTAT=IOS)
-         IF (IOS .GT. 0) THEN
+         IF (IOS .NE. 0) THEN
             WRITE(*,*) 'Problem opening raster file ', TRIM(FNBSQ)
             STOP
          ENDIF
@@ -1905,7 +2258,7 @@ DO JTILE = 1, 3
 
          OPEN(LUINPUT, FILE=TRIM(FNBSQ), ACCESS='DIRECT', FORM='UNFORMATTED', &
               STATUS='OLD', RECL=LRECL, IOSTAT=IOS)
-         IF (IOS .GT. 0) THEN
+         IF (IOS .NE. 0) THEN
             WRITE(*,*) 'Problem opening raster file ', TRIM(FNBSQ)
             STOP
          ENDIF
@@ -1931,12 +2284,49 @@ DO JTILE = 1, 3
          IF (ALLOCATED(I2VALUES)) DEALLOCATE(I2VALUES)
          IF (ALLOCATED(I2TEMP))   DEALLOCATE(I2TEMP)
 
+      CASE('BYTE','UINT16','INT32','UINT32','DOUBLE')
+!        Decoded into 32-bit REAL by READ_BSQ_BAND_R4. PIXELTYPE is relabelled
+!        FLOAT only after the tile loop, so every tile decodes with the true type.
+         IF (.NOT. ASSOCIATED(RASTER%R4)) THEN
+            ALLOCATE(RASTER%R4(1:NCOLS_FULL,1:NROWS_FULL,1:NBANDS))
+            RASTER%R4(:,:,:) = RASTER%NODATA_VALUE
+         ENDIF
+
+         ALLOCATE(RVALUES(1:NCOLS_TILE*NROWS_TILE))
+         ALLOCATE(RTEMP  (1:NCOLS_TILE,1:NROWS_TILE))
+
+         DO IBAND = BANDSTART, BANDEND
+            IBAND_OUT = IBAND - BANDSTART + 1
+            CALL READ_BSQ_BAND_R4(FNBSQ, IBAND, NCOLS_TILE*NROWS_TILE, RASTER%PIXELTYPE, RVALUES)
+            RTEMP(:,:) = RESHAPE(RVALUES, (/NCOLS_TILE, NROWS_TILE/))
+
+            IROW_SMALL = NROWS_TILE
+            DO IROW_BIG = IROW_BIG_LO, IROW_BIG_HI
+               RASTER%R4(ICOL_BIG_LO:ICOL_BIG_HI, IROW_BIG, IBAND_OUT) = RTEMP(:,IROW_SMALL)
+               IROW_SMALL = IROW_SMALL - 1
+            ENDDO
+         ENDDO
+         IF (ALLOCATED(RVALUES)) DEALLOCATE(RVALUES)
+         IF (ALLOCATED(RTEMP))   DEALLOCATE(RTEMP)
+
+      CASE DEFAULT
+         WRITE(*,*) '[ERROR] READ_BSQ_RASTER_SLICE_EXISTING_TILED: unhandled PIXELTYPE ', &
+                    TRIM(RASTER%PIXELTYPE), ' for ', TRIM(FNBSQ)
+         STOP
+
    END SELECT
 
    CLOSE(LUINPUT, IOSTAT=IOS)
 
 ENDDO
 ENDDO
+
+! Numeric types decoded into R4 above are presented as FLOAT to downstream code.
+SELECT CASE (TRIM(RASTER%PIXELTYPE))
+   CASE ('BYTE','UINT16','INT32','UINT32','DOUBLE')
+      RASTER%PIXELTYPE = 'FLOAT'
+      RASTER%NBITS = 32
+END SELECT
 
 ! *****************************************************************************
 END SUBROUTINE READ_BSQ_RASTER_SLICE_EXISTING_TILED
@@ -2016,21 +2406,22 @@ END SUBROUTINE LL_DUMP_ROUTINE
 ! *****************************************************************************
 
 ! *****************************************************************************
-!> Write all specified raster files to .bil files at time T for ICASE case. Also includes transient ACRES output. Output final rasters only for some values (when IDUMPCOUNT == NDUMPS)
-SUBROUTINE MAIN_DUMP_ROUTINE(IDUMPCOUNT, NDUMPS, ICASE, T, ACRES)
+!> Write all specified raster files to .bil files at time T for ICASE case. Also includes transient ACRES output. Output final rasters only for some values 
+SUBROUTINE MAIN_DUMP_ROUTINE(IS_FINAL_DUMP, IDUMP_OUTPUT, ICASE, T, ACRES)
 ! *****************************************************************************
 
 #ifdef __INTEL_COMPILER
 USE IFPORT
 #endif
 
-INTEGER, INTENT(INOUT) :: IDUMPCOUNT
-INTEGER, INTENT(IN) :: NDUMPS, ICASE
-REAL, INTENT(IN) :: T, ACRES
+INTEGER, INTENT(IN) :: ICASE, IDUMP_OUTPUT
+REAL, INTENT(IN) :: ACRES
+REAL(8), intent(in) :: T
+LOGICAL, INTENT(IN) :: IS_FINAL_DUMP
 INTEGER :: I, IT, IOS
 LOGICAL :: LOPEN
 
-CHARACTER(7) :: SEVEN, CTSEC
+CHARACTER(7) :: SEVEN, CTSEC, CDUMP
 CHARACTER(400) :: FN
 
 REAL :: ULXMAP,ULYMAP
@@ -2045,9 +2436,8 @@ IF (.NOT. ASSOCIATED(I2DUMPME%I2)) THEN
    CALL ALLOCATE_EMPTY_RASTER(RDUMPME,  R%NCOLS, R%NROWS, 1, R%XLLCORNER, R%YLLCORNER, R%CELLSIZE, R%NODATA_VALUE, 'FLOAT     ')
 ENDIF
 
-IF (IDUMPCOUNT .GT. NDUMPS) RETURN
-   
 WRITE(SEVEN, '(I7.7)') STATS_ICASE(ICASE)
+WRITE(CDUMP, '(I7.7)') IDUMP_OUTPUT
 
 IT=NINT(T)
 WRITE(CTSEC,'(I7)') IT
@@ -2057,6 +2447,24 @@ IF (IT .GE.     100 .AND. IT .LT.     1000) CTSEC = '0000'   // ADJUSTL(CTSEC)
 IF (IT .GE.    1000 .AND. IT .LT.    10000) CTSEC = '000'    // ADJUSTL(CTSEC) 
 IF (IT .GE.   10000 .AND. IT .LT.   100000) CTSEC = '00'     // ADJUSTL(CTSEC) 
 IF (IT .GE.  100000 .AND. IT .LT.  1000000) CTSEC = '0'      // ADJUSTL(CTSEC) 
+
+! Write dump times to csv
+IOS = 0
+FN = TRIM(OUTPUTS_DIRECTORY) // 'dump_times_' // SEVEN // '.csv'
+INQUIRE(UNIT=LUOUTPUT-4, OPENED=LOPEN)
+
+IF (.NOT. LOPEN) THEN
+   OPEN(LUOUTPUT-4, FILE=TRIM(FN), FORM='FORMATTED', STATUS='REPLACE', IOSTAT=IOS)
+   IF (IOS .EQ. 0) THEN
+      WRITE(LUOUTPUT-4,'(A)') 'dump_index,time_seconds,is_final_dump'
+   ELSE
+      WRITE(*,*) 'ERROR opening dump timestamp file: ', TRIM(FN), ' IOSTAT=', IOS
+   ENDIF
+ENDIF
+
+IF (IOS .EQ. 0) WRITE(LUOUTPUT-4,'(I7,A,F20.10,A,L1)') IDUMP_OUTPUT, ',', T, ',', IS_FINAL_DUMP
+
+IF (IS_FINAL_DUMP .AND. IOS .EQ. 0) CLOSE(LUOUTPUT-4)
 
 ! Write acres
 IF (DUMP_TRANSIENT_ACREAGE) THEN
@@ -2077,11 +2485,11 @@ RDUMPME%ULXMAP=ULXMAP; RDUMPME%ULYMAP=ULYMAP
 
 IF (DUMP_SURFACE_FIRE) THEN
    I2DUMPME%I2(:,:,1) = SURFACE_FIRE(:,:)
-   FN = 'surface_fire_' // SEVEN // '_' // CTSEC
+   FN = 'surface_fire_' // SEVEN // '_d' // CDUMP
    CALL WRITE_BIL_RASTER(I2DUMPME,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IRANK_WORLD)
 ENDIF
       
-IF (DUMP_CROWN_FIRE .AND. IDUMPCOUNT .EQ. NDUMPS) THEN
+IF (DUMP_CROWN_FIRE .AND. IS_FINAL_DUMP) THEN
    I2DUMPME%I2(:,:,1) = NINT(I2DUMPME%NODATA_VALUE,2)
    C => LIST_BURNED%HEAD
    DO I = 1, LIST_BURNED%NUM_NODES
@@ -2092,7 +2500,7 @@ IF (DUMP_CROWN_FIRE .AND. IDUMPCOUNT .EQ. NDUMPS) THEN
    CALL WRITE_BIL_RASTER(I2DUMPME,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IRANK_WORLD)
 ENDIF
 
-IF (DUMP_SPREAD_RATE .AND. IDUMPCOUNT .EQ. NDUMPS) THEN
+IF (DUMP_SPREAD_RATE .AND. IS_FINAL_DUMP) THEN
    RDUMPME%R4(:,:,1) = RDUMPME%NODATA_VALUE
    C => LIST_BURNED%HEAD
    if (SPREAD_RATE_IN_M) then
@@ -2110,7 +2518,7 @@ IF (DUMP_SPREAD_RATE .AND. IDUMPCOUNT .EQ. NDUMPS) THEN
    CALL WRITE_BIL_RASTER(RDUMPME,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IRANK_WORLD)
 ENDIF
 
-IF (DUMP_SPREAD_DIRECTION .AND. IDUMPCOUNT .EQ. NDUMPS) THEN
+IF (DUMP_SPREAD_DIRECTION .AND. IS_FINAL_DUMP) THEN
    RDUMPME%R4(:,:,1) = RDUMPME%NODATA_VALUE
    C => LIST_BURNED%HEAD
    DO I = 1, LIST_BURNED%NUM_NODES
@@ -2121,7 +2529,7 @@ IF (DUMP_SPREAD_DIRECTION .AND. IDUMPCOUNT .EQ. NDUMPS) THEN
    CALL WRITE_BIL_RASTER(RDUMPME,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IRANK_WORLD)
 ENDIF
 
-IF (DUMP_CRITICAL_FLIN .AND. IDUMPCOUNT .EQ. NDUMPS) THEN
+IF (DUMP_CRITICAL_FLIN .AND. IS_FINAL_DUMP) THEN
    RDUMPME%R4(:,:,1) = RDUMPME%NODATA_VALUE
    C => LIST_BURNED%HEAD
    DO I = 1, LIST_BURNED%NUM_NODES
@@ -2133,7 +2541,7 @@ IF (DUMP_CRITICAL_FLIN .AND. IDUMPCOUNT .EQ. NDUMPS) THEN
 ENDIF
 
 
-IF (DUMP_HPUA  .AND. IDUMPCOUNT .EQ. NDUMPS) THEN
+IF (DUMP_HPUA  .AND. IS_FINAL_DUMP) THEN
    RDUMPME%R4(:,:,1) = RDUMPME%NODATA_VALUE
    C => LIST_BURNED%HEAD
    DO I = 1, LIST_BURNED%NUM_NODES
@@ -2144,7 +2552,7 @@ IF (DUMP_HPUA  .AND. IDUMPCOUNT .EQ. NDUMPS) THEN
    CALL WRITE_BIL_RASTER(RDUMPME,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IRANK_WORLD)
 ENDIF
 
-IF (DUMP_FLIN  .AND. IDUMPCOUNT .EQ. NDUMPS) THEN
+IF (DUMP_FLIN  .AND. IS_FINAL_DUMP) THEN
    RDUMPME%R4(:,:,1) = RDUMPME%NODATA_VALUE
    C => LIST_BURNED%HEAD
    DO I = 1, LIST_BURNED%NUM_NODES
@@ -2155,7 +2563,7 @@ IF (DUMP_FLIN  .AND. IDUMPCOUNT .EQ. NDUMPS) THEN
    CALL WRITE_BIL_RASTER(RDUMPME,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IRANK_WORLD)
 ENDIF
 
-IF (DUMP_FLAME_LENGTH  .AND. IDUMPCOUNT .EQ. NDUMPS) THEN
+IF (DUMP_FLAME_LENGTH  .AND. IS_FINAL_DUMP) THEN
    RDUMPME%R4(:,:,1) = RDUMPME%NODATA_VALUE
    C => LIST_BURNED%HEAD
    DO I = 1, LIST_BURNED%NUM_NODES
@@ -2166,7 +2574,7 @@ IF (DUMP_FLAME_LENGTH  .AND. IDUMPCOUNT .EQ. NDUMPS) THEN
    CALL WRITE_BIL_RASTER(RDUMPME,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IRANK_WORLD)
 ENDIF
 
-IF (DUMP_REACTION_INTENSITY  .AND. IDUMPCOUNT .EQ. NDUMPS) THEN
+IF (DUMP_REACTION_INTENSITY  .AND. IS_FINAL_DUMP) THEN
    RDUMPME%R4(:,:,:) = RDUMPME%NODATA_VALUE
    C => LIST_BURNED%HEAD
    DO I = 1, LIST_BURNED%NUM_NODES
@@ -2184,7 +2592,7 @@ IF (DUMP_WS20) THEN
       RDUMPME%R4(C%IX,C%IY,1) = C%WS20_NOW
       C => C%NEXT
    ENDDO
-   FN = 'ws20_' // SEVEN // '_' // CTSEC
+   FN = 'ws20_' // SEVEN // '_d' // CDUMP
    CALL WRITE_BIL_RASTER(RDUMPME,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IRANK_WORLD)
 ENDIF
 
@@ -2195,11 +2603,11 @@ IF (DUMP_WD20) THEN
       RDUMPME%R4(C%IX,C%IY,1) = C%WD20_NOW
       C => C%NEXT
    ENDDO
-   FN = 'wd20_' // SEVEN // '_' // CTSEC
+   FN = 'wd20_' // SEVEN // '_d' // CDUMP
    CALL WRITE_BIL_RASTER(RDUMPME,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IRANK_WORLD)
 ENDIF
 
-IF (DUMP_VELOCITY .AND. IDUMPCOUNT .EQ. NDUMPS) THEN
+IF (DUMP_VELOCITY .AND. IS_FINAL_DUMP) THEN
    RDUMPME%R4(:,:,:) = RDUMPME%NODATA_VALUE
    C => LIST_BURNED%HEAD
    if (SPREAD_RATE_IN_M) then
@@ -2217,7 +2625,7 @@ IF (DUMP_VELOCITY .AND. IDUMPCOUNT .EQ. NDUMPS) THEN
    CALL WRITE_BIL_RASTER(RDUMPME,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IRANK_WORLD)
 ENDIF
 
-IF (DUMP_TIME_OF_ARRIVAL .AND. IDUMPCOUNT .EQ. NDUMPS) THEN
+IF (DUMP_TIME_OF_ARRIVAL .AND. IS_FINAL_DUMP) THEN
    RDUMPME%R4(:,:,:) = RDUMPME%NODATA_VALUE
    C => LIST_BURNED%HEAD
    DO I = 1, LIST_BURNED%NUM_NODES
@@ -2229,76 +2637,84 @@ IF (DUMP_TIME_OF_ARRIVAL .AND. IDUMPCOUNT .EQ. NDUMPS) THEN
 ENDIF
 
 #ifdef _WUI
-IF (USE_BLDG_SPREAD_MODEL .AND. DUMP_TOTAL_DFC_RECEIVED) THEN
-   RDUMPME%R4(:,:,:) = RDUMPME%NODATA_VALUE
-   C => LIST_TAGGED%HEAD
-   DO I = 1, LIST_TAGGED%NUM_NODES
-      RDUMPME%R4(C%IX,C%IY,1) = C%TOTAL_DFC_RECEIVED
-      C => C%NEXT
-   ENDDO
-   FN = 'total_dfc_received_' // SEVEN // '_' // CTSEC
-   CALL WRITE_BIL_RASTER(RDUMPME,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IRANK_WORLD)
+IF (USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .EQ. 2) THEN
+   ! These fields generated at the end of simulation
+   IF (DUMP_TOTAL_DFC_RECEIVED .AND. IS_FINAL_DUMP) THEN
+      RDUMPME%R4(:,:,1) = TOTAL_DFC_WUI(:,:)
+      FN = 'total_dfc_received_' // SEVEN // '_' // CTSEC
+      CALL WRITE_BIL_RASTER(RDUMPME,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IRANK_WORLD)
+   ENDIF
+
+   IF (DUMP_TOTAL_RAD_RECEIVED .AND. IS_FINAL_DUMP) THEN
+      RDUMPME%R4(:,:,1) = TOTAL_RADIATION_WUI(:,:)
+      FN = 'total_rad_received_' // SEVEN // '_' // CTSEC
+      CALL WRITE_BIL_RASTER(RDUMPME,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IRANK_WORLD)
+   ENDIF
+
+   ! These fields generated at given time interval
+   IF (DUMP_FUEL_CONSUMPTION) THEN 
+      RDUMPME%R4(:,:,1) = FUEL_LOAD_REMAIN(:,:)
+      FN = 'fuelload_transient_' // SEVEN // '_d' // CDUMP
+      CALL WRITE_BIL_RASTER(RDUMPME,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IRANK_WORLD)
+   ENDIF
+
+   IF (DUMP_TRANSIENT_DFC) THEN
+      RDUMPME%R4(:,:,1) = TRANSIENT_DFC_WUI(:,:)
+      FN = 'hf_dfc_transient_' // SEVEN // '_d' // CDUMP
+      CALL WRITE_BIL_RASTER(RDUMPME,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IRANK_WORLD)
+   ENDIF
+
+   IF (DUMP_TRANSIENT_RAD) THEN
+      RDUMPME%R4(:,:,1) = TRANSIENT_RADIATION_WUI(:,:)
+      FN = 'hf_rad_transient_' // SEVEN // '_d' // CDUMP
+      CALL WRITE_BIL_RASTER(RDUMPME,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IRANK_WORLD)
+   ENDIF
+
 ENDIF
 
-IF (USE_BLDG_SPREAD_MODEL .AND. DUMP_TOTAL_RAD_RECEIVED) THEN
-   RDUMPME%R4(:,:,:) = RDUMPME%NODATA_VALUE
-   C => LIST_TAGGED%HEAD
-   DO I = 1, LIST_TAGGED%NUM_NODES
-      RDUMPME%R4(C%IX,C%IY,1) = C%TOTAL_RAD_RECEIVED
-      C => C%NEXT
-   ENDDO
-   FN = 'total_rad_received_' // SEVEN // '_' // CTSEC
-   CALL WRITE_BIL_RASTER(RDUMPME,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IRANK_WORLD)
-ENDIF
-
-IF (USE_BLDG_SPREAD_MODEL .AND. DUMP_HRR_TRANSIENT) THEN
-   RDUMPME%R4(:,:,:) = RDUMPME%NODATA_VALUE
-   C => LIST_BURNED%HEAD
-   DO I = 1, LIST_BURNED%NUM_NODES
-      RDUMPME%R4(C%IX,C%IY,1) = C%HRR_TRANSIENT
-      C => C%NEXT
-   ENDDO
-   FN = 'hrr_transient_' // SEVEN // '_' // CTSEC
-   CALL WRITE_BIL_RASTER(RDUMPME,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IRANK_WORLD)
-ENDIF
 #endif
 
-IF (DUMP_TAGGED) THEN
+IF (DUMP_HRR_TRANSIENT) THEN
+   RDUMPME%R4(:,:,1) = HRR_TRANSIENT_MAP(:,:)
+   FN = 'hrr_transient_' // SEVEN // '_d' // CDUMP
+   CALL WRITE_BIL_RASTER(RDUMPME,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IRANK_WORLD)
+ENDIF
+
+IF (DUMP_TAGGED) THEN 
    I2DUMPME%I2(:,:,:) = NINT(I2DUMPME%NODATA_VALUE,2)
    C => LIST_TAGGED%HEAD
    DO I = 1, LIST_TAGGED%NUM_NODES
       I2DUMPME%I2(C%IX,C%IY,1) = 1_2
       C => C%NEXT
    ENDDO
-   FN = 'tagged_' // SEVEN // '_' // CTSEC
+   FN = 'tagged_' // SEVEN // '_d' // CDUMP
    CALL WRITE_BIL_RASTER(I2DUMPME,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IRANK_WORLD)
 ENDIF
 
-IF (DUMP_PHI) THEN
+IF (DUMP_PHI) THEN 
    RDUMPME%R4(:,:,1) = PHIP(:,:)
-   FN = 'phi_' // SEVEN // '_' // CTSEC
+   FN = 'phi_' // SEVEN // '_d' // CDUMP
    CALL WRITE_BIL_RASTER(RDUMPME,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IRANK_WORLD)
 ENDIF
 
-IF (DUMP_EMBER_FLUX_TRANSIENT) THEN
-   FN = 'ember_flux_transient_' // SEVEN // '_' // CTSEC
+IF (DUMP_EMBER_FLUX_TRANSIENT) THEN 
+   FN = 'ember_flux_transient_' // SEVEN // '_d' // CDUMP
    CALL WRITE_BIL_RASTER(EMBER_FLUX_TRANSIENT,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IRANK_WORLD)
    EMBER_FLUX_TRANSIENT%R4(:,:,1)=0.
 ENDIF
 
-IF (DUMP_EMBER_FLUX .AND. IDUMPCOUNT .EQ. NDUMPS .AND. (.NOT. ACCUMULATE_EMBER_FLUX) ) THEN
+IF (DUMP_EMBER_FLUX .AND. IS_FINAL_DUMP .AND. (.NOT. ACCUMULATE_EMBER_FLUX) ) THEN
    FN = 'ember_flux_' // SEVEN // '_' // CTSEC
    CALL WRITE_BIL_RASTER(EMBER_FLUX,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IRANK_WORLD)
 ENDIF
 
-IF (DUMP_EMBER_IGNITION .AND. IDUMPCOUNT .EQ. NDUMPS) THEN
+IF (DUMP_EMBER_IGNITION .AND. IS_FINAL_DUMP) THEN
    FN = 'ember_ignition_' // SEVEN // '_' // CTSEC
    CALL WRITE_BIL_RASTER(EMBER_IGNITION_MAP,OUTPUTS_DIRECTORY,FN,CONVERT_TO_GEOTIFF,.TRUE.,IRANK_WORLD)
 ENDIF
   
-IF (IDUMPCOUNT .EQ. NDUMPS .AND. DUMP_TRANSIENT_ACREAGE) CLOSE(LUOUTPUT-3) !Close acreage file
+IF (IS_FINAL_DUMP .AND. DUMP_TRANSIENT_ACREAGE) CLOSE(LUOUTPUT-3) !Close acreage file
 
-IDUMPCOUNT = IDUMPCOUNT + 1
 
 ! *****************************************************************************
 END SUBROUTINE MAIN_DUMP_ROUTINE
@@ -2587,17 +3003,23 @@ ENDIF
 
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
-IF (DUMP_EMBER_FLUX .AND. ACCUMULATE_EMBER_FLUX) THEN 
-   R=>TIMES_BURNED
-   CALL ALLOCATE_EMPTY_RASTER(INTERMEDIATE_I2, R%NCOLS, R%NROWS, 1, R%XLLCORNER, R%YLLCORNER, R%CELLSIZE, 0., 'SIGNEDINT ')
+! EMBER_FLUX is a R4 (FLOAT) raster everywhere else, so reduce and write it as such.
+IF (DUMP_EMBER_FLUX .AND. ACCUMULATE_EMBER_FLUX) THEN
+   R=>EMBER_FLUX
+   CALL ALLOCATE_EMPTY_RASTER(INTERMEDIATE_R4, R%NCOLS, R%NROWS, 1, R%XLLCORNER, R%YLLCORNER, R%CELLSIZE, 0., 'FLOAT     ')
 
-   CALL MPI_REDUCE(EMBER_FLUX%I2(:,:,1), INTERMEDIATE_I2%I2(:,:,1), ANALYSIS_NCOLS*ANALYSIS_NROWS, &
-                   MPI_SHORT, MPI_SUM, 0, MPI_COMM_WORLD, IERR)
+   CALL MPI_REDUCE(EMBER_FLUX%R4(:,:,1), INTERMEDIATE_R4%R4(:,:,1), ANALYSIS_NCOLS*ANALYSIS_NROWS, &
+                   MPI_REAL, MPI_SUM, 0, MPI_COMM_WORLD, IERR)
    IF (IRANK_WORLD .EQ. 0) THEN
       FN='ember_flux'
-      CALL WRITE_BIL_RASTER(INTERMEDIATE_I2, OUTPUTS_DIRECTORY, FN, CONVERT_TO_GEOTIFF, .TRUE., IRANK_WORLD)
+      CALL WRITE_BIL_RASTER(INTERMEDIATE_R4, OUTPUTS_DIRECTORY, FN, CONVERT_TO_GEOTIFF, .TRUE., IRANK_WORLD)
    ENDIF
 ENDIF
+
+! Free the scratch raster buffers used above. RASTER_TYPE pointer components (%R4/%I2) are not
+! auto-deallocated when these local variables go out of scope, so release them explicitly.
+IF (ASSOCIATED(INTERMEDIATE_R4%R4)) DEALLOCATE(INTERMEDIATE_R4%R4)
+IF (ASSOCIATED(INTERMEDIATE_I2%I2)) DEALLOCATE(INTERMEDIATE_I2%I2)
 
 ! *****************************************************************************
 END SUBROUTINE POSTPROCESS
@@ -2609,7 +3031,7 @@ SUBROUTINE WRITE_STATION(C,IRANK,ICASE,T)
 ! *****************************************************************************
 
 INTEGER, INTENT(IN) :: IRANK, ICASE
-REAL, INTENT(IN) :: T
+REAL(8), INTENT(IN) :: T
 TYPE(NODE), INTENT(IN) :: C
 LOGICAL :: LOPEN
 INTEGER :: IOS
@@ -2636,6 +3058,9 @@ END SUBROUTINE WRITE_STATION
 ! *****************************************************************************
 SUBROUTINE PARSE_ENVI_HEADER(HDR_FILE_NAME, DESCRIPTION, SAMPLES, LINES, BANDS, HEADER_OFFSET, FILE_TYPE, DATA_TYPE, INTERLEAVE, BYTE_ORDER, BAND_NAMES, COORDINATE_SYSTEM, DATA_IGNORE_VALUE, DEFAULT_BANDS, PROJECTION_NAME, X_PIXEL_REFERENCE, Y_PIXEL_REFERENCE, EASTING, NORTHING, X_PIXEL_SIZE, Y_PIXEL_SIZE)
 ! *****************************************************************************
+! Opens and parses an ENVI .hdr text file (handling multi-line {...} values),
+! returning all header fields as output arguments and delegating the "map info"
+! line to PARSE_MAP_INFO for projection/pixel-size/origin values.
 IMPLICIT NONE
 CHARACTER(LEN=*), INTENT(IN) :: HDR_FILE_NAME 
 INTEGER, INTENT(OUT) :: SAMPLES, LINES, BANDS, HEADER_OFFSET, DATA_TYPE, BYTE_ORDER 
@@ -2767,6 +3192,9 @@ END SUBROUTINE PARSE_ENVI_HEADER
 ! *****************************************************************************
 SUBROUTINE PARSE_MAP_INFO(MAP_INFO, PROJECTION_NAME, X_PIXEL_REFERENCE, Y_PIXEL_REFERENCE, EASTING, NORTHING, X_PIXEL_SIZE, Y_PIXEL_SIZE, UTM_PROJECTION_ZONE, UTM_NORTH_SOUTH, DATUM, UNITS)
 ! *****************************************************************************
+! Splits the comma-separated ENVI "map info" string into its fields, returning
+! projection name, tie-point pixel reference, origin easting/northing, pixel
+! sizes, and (for UTM) zone/hemisphere plus datum and units.
 
 IMPLICIT NONE
 CHARACTER(LEN=*), INTENT(IN) :: MAP_INFO 
@@ -2775,15 +3203,13 @@ REAL, INTENT(OUT) :: EASTING, NORTHING, X_PIXEL_SIZE, Y_PIXEL_SIZE, X_PIXEL_REFE
 CHARACTER(5), INTENT(OUT) :: UTM_NORTH_SOUTH
 CHARACTER(64), INTENT(OUT) :: PROJECTION_NAME, DATUM, UNITS
 
-INTEGER :: COMMA_POS, NUM_VALUES, POS_START, POS_END, I, IOS
+INTEGER :: NUM_VALUES, POS_START, POS_END, I, IOS
 
 ! SET SOME DEFAULTS
 UTM_NORTH_SOUTH = "EMPTY"
 
-! PARSE OUT THE PROJECTION NAME FIRST
-COMMA_POS = INDEX(MAP_INFO, ',')
-
 ! DETERMINE THE NUM OF VALUES THAT ARE PRESENT
+NUM_VALUES = 0
 POS_START = 1
 DO
    POS_END = INDEX(MAP_INFO(POS_START:), ',')

@@ -1,13 +1,6 @@
 &INPUTS
 FUELS_AND_TOPOGRAPHY_DIRECTORY = './inputs'
-ASP_FILENAME                   = 'asp'
-CBD_FILENAME                   = 'cbd'
-CBH_FILENAME                   = 'cbh'
-CC_FILENAME                    = 'cc'
-CH_FILENAME                    = 'ch'
-DEM_FILENAME                   = 'dem'
-FBFM_FILENAME                  = 'fbfm13'
-SLP_FILENAME                   = 'slp'
+LANDSCAPE_FILENAME             = 'landscape'
 ADJ_FILENAME                   = 'adj'
 PHI_FILENAME                   = 'phi'
 DT_METEOROLOGY                 = 3600.0
@@ -34,13 +27,6 @@ DUMP_TIME_OF_ARRIVAL 		= .TRUE.
 DUMP_SPREAD_RATE 			= .TRUE.
 /
 
-&COMPUTATIONAL_DOMAIN
-A_SRS = '+proj=utm +zone=35 +datum=WGS84 +units=m +no_defs'
-COMPUTATIONAL_DOMAIN_CELLSIZE = 30.000000000000000
-COMPUTATIONAL_DOMAIN_XLLCORNER = 0.0000000
-COMPUTATIONAL_DOMAIN_YLLCORNER = 0.0000000
-/
-
 &TIME_CONTROL
 SIMULATION_DT    = 1.0
 TARGET_CFL       = 0.2
@@ -62,11 +48,11 @@ Y_IGN(1) = 3300
 T_IGN(1)      = 0.0
 MODE = 1
 BANDTHICKNESS = 1
-DEBUG_LEVEL = 100
+FEEDBACK_LEVEL = 1
 WX_BANDS_KEPT_IN_MEM = 40
 /
 
 &MISCELLANEOUS
-PATH_TO_GDAL                   = '/home/nick/miniconda3/envs/elmfire/bin/'
+PATH_TO_GDAL                   = 'auto'
 SCRATCH                        = './scratch'
 /

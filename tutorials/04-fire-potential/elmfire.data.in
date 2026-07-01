@@ -1,13 +1,6 @@
 &INPUTS
 FUELS_AND_TOPOGRAPHY_DIRECTORY = './inputs'
-ASP_FILENAME                   = 'asp'
-CBD_FILENAME                   = 'cbd'
-CBH_FILENAME                   = 'cbh'
-CC_FILENAME                    = 'cc'
-CH_FILENAME                    = 'ch'
-DEM_FILENAME                   = 'dem'
-FBFM_FILENAME                  = 'fbfm40'
-SLP_FILENAME                   = 'slp'
+LANDSCAPE_FILENAME             = 'landscape'
 ADJ_FILENAME                   = 'adj'
 PHI_FILENAME                   = 'phi'
 DT_METEOROLOGY                 = 3600.0
@@ -41,6 +34,6 @@ MODE = 2
 /
 
 &MISCELLANEOUS
-PATH_TO_GDAL                   = '/usr/bin'
+PATH_TO_GDAL                   = 'auto'
 SCRATCH                        = './scratch'
 /

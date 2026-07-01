@@ -12,6 +12,8 @@ CONTAINS
 ! *****************************************************************************
 SUBROUTINE WRITE_TIMINGS_TO_DISK
 ! *****************************************************************************
+! Writes the per-rank TIMINGS array (62 timing blocks x all host ranks) to a
+! formatted CSV file 'timings_<PROCNAME>.csv' in OUTPUTS_DIRECTORY.
 
 INTEGER :: I,IOS,IR,LU
 CHARACTER(400) :: FN
@@ -36,6 +38,8 @@ END SUBROUTINE WRITE_TIMINGS_TO_DISK
 ! *****************************************************************************
 SUBROUTINE ACCUMULATE_CPU_USAGE(IBLOCK,IT1,IT2)
 ! *****************************************************************************
+! Adds the elapsed wall-clock time (since IT1) into timing block IBLOCK of the
+! TIMINGS array for this rank, then resets IT1 to the current clock count.
 
 INTEGER, INTENT(IN) :: IBLOCK
 INTEGER, INTENT(INOUT) :: IT1
@@ -52,6 +56,9 @@ END SUBROUTINE ACCUMULATE_CPU_USAGE
 ! *****************************************************************************
 SUBROUTINE MPI_BCAST_RASTER_HEADER(R, IROOT, JUST_SEND_SIZE)
 ! *****************************************************************************
+! MPI: broadcasts a raster's header metadata from rank IROOT to all ranks in
+! MPI_COMM_WORLD. If JUST_SEND_SIZE, only the dimensions (NROWS/NCOLS/NBANDS)
+! are sent; otherwise the full geotransform/pixel-type header is broadcast.
 
 TYPE (RASTER_TYPE) :: R
 INTEGER, INTENT(IN) :: IROOT
@@ -86,7 +93,12 @@ ENDIF
 END SUBROUTINE MPI_BCAST_RASTER_HEADER
 ! *****************************************************************************
 
+! *****************************************************************************
 SUBROUTINE BCAST_WEATHER 
+! *****************************************************************************
+! MPI: broadcasts all weather raster arrays (WS, WD, fuel moistures, and, if
+! USE_ERC, ERC and IGNFAC) from rank 0 to the per-host rank-0 communicator
+! MPI_COMM_HOST_IRANK0, so each node's leader receives a shared copy.
 
 INTEGER :: IERR, FUEL_TOPO_COUNT, WEATHER_COUNT
 
@@ -112,6 +124,9 @@ END SUBROUTINE BCAST_WEATHER
 ! *****************************************************************************
 SUBROUTINE BCAST_FUEL_TOPOGRAPHY
 ! *****************************************************************************
+! MPI: broadcasts all fuel and topography raster arrays (aspect, canopy, DEM,
+! fuel model, slope, adjustments, optional WUI/population/value/pyrome layers)
+! from rank 0 to the per-host leader communicator MPI_COMM_HOST_IRANK0.
 
 INTEGER :: IERR, FUEL_TOPO_COUNT
 
@@ -154,13 +169,36 @@ END SUBROUTINE BCAST_FUEL_TOPOGRAPHY
 ! *****************************************************************************
 SUBROUTINE PERTURB_RASTERS(R1)
 ! *****************************************************************************
+! Draws perturbation offsets for each raster flagged for perturbation, using
+! the configured PDF (uniform/Gaussian/lognormal) seeded by R1, and stores the
+! results in the global PERTURB_* module variables used to adjust inputs.
 
 REAL, INTENT(IN), DIMENSION(:) :: R1
+REAL :: U1, U2, NORMAL_MEAN, NORMAL_SIGMA, NORMAL_SIGMA2
 
 INTEGER :: I
 
+!Format is X_actual = X_input + COEFFS_UNSCALED(I)
+
 DO I = 1, NUM_RASTERS_TO_PERTURB
-   COEFFS_UNSCALED(I) = PDF_LOWER_LIMIT(I) + R1(I) * (PDF_UPPER_LIMIT(I) - PDF_LOWER_LIMIT(I))
+   if (PDF_TYPE(I) .eq. 'UNIFORM') then
+      COEFFS_UNSCALED(I) = PDF_LOWER_LIMIT(I) + R1(I) * (PDF_UPPER_LIMIT(I) - PDF_LOWER_LIMIT(I))
+   else if (PDF_TYPE(I) .eq. 'GAUSSIAN') then
+      call random_number(U1)
+      call random_number(U2)
+      U1 = max(U1, tiny(U1))
+      COEFFS_UNSCALED(I) = PDF_MEAN(I) + PDF_SIGMA(I) * (sqrt(-2.0 * log(U1))*cos(2*PI*U2)) ! Box-Muller transform
+   else if (PDF_TYPE(I) .eq. 'LOGNORMAL') then
+      call random_number(U1)
+      call random_number(U2)
+      U1 = max(U1, tiny(U1))
+
+      NORMAL_SIGMA2 = log(1.0 + (PDF_SIGMA(I) / PDF_MEAN(I))**2)
+      NORMAL_SIGMA  = sqrt(NORMAL_SIGMA2)
+      NORMAL_MEAN   = log(PDF_MEAN(I)) - 0.5 * NORMAL_SIGMA2
+
+      COEFFS_UNSCALED(I) = exp(NORMAL_MEAN + NORMAL_SIGMA * (sqrt(-2.0 * log(U1))*cos(2*PI*U2))) - PDF_MEAN(I)
+   endif
    SELECT CASE (TRIM(RASTER_TO_PERTURB(I)))
       CASE('ADJ')
          PERTURB_ADJ  = COEFFS_UNSCALED(I)
@@ -172,14 +210,19 @@ DO I = 1, NUM_RASTERS_TO_PERTURB
          PERTURB_FMC  = COEFFS_UNSCALED(I)
       CASE('M1')
          PERTURB_M1   = COEFFS_UNSCALED(I)
+         if (DEAD_MC_IN_PERCENT) PERTURB_M1 = PERTURB_M1 * 0.01
       CASE('M10')
          PERTURB_M10  = COEFFS_UNSCALED(I)
+         if (DEAD_MC_IN_PERCENT) PERTURB_M10 = PERTURB_M10 * 0.01
       CASE('M100')
          PERTURB_M100 = COEFFS_UNSCALED(I)
+         if (DEAD_MC_IN_PERCENT) PERTURB_M100 = PERTURB_M100 * 0.01
       CASE('MLH')
          PERTURB_MLH  = COEFFS_UNSCALED(I)
+         if (LIVE_MC_IN_PERCENT) PERTURB_MLH = PERTURB_MLH * 0.01
       CASE('MLW')
          PERTURB_MLW  = COEFFS_UNSCALED(I)
+         if (LIVE_MC_IN_PERCENT) PERTURB_MLW = PERTURB_MLW * 0.01
       CASE('WAF')
          PERTURB_WAF  = COEFFS_UNSCALED(I)
       CASE('WD')
@@ -197,6 +240,8 @@ END SUBROUTINE PERTURB_RASTERS
 ! *****************************************************************************
 SUBROUTINE GET_OPERATING_SYSTEM
 ! *****************************************************************************
+! Detects the host OS by inspecting the PATH environment variable and sets the
+! global OPERATING_SYSTEM, PATH_SEPARATOR, and DELETECOMMAND module variables.
 
 CHARACTER(2000) :: PATH
 
@@ -219,6 +264,9 @@ END SUBROUTINE GET_OPERATING_SYSTEM
 ! *****************************************************************************
 SUBROUTINE ALLOCATE_EMPTY_RASTER(RASTER,NCOLS,NROWS,NBANDS,XLLCORNER,YLLCORNER,CELLSIZE,NODATA_VALUE,PIXELTYPE)
 ! *****************************************************************************
+! Populates a RASTER_TYPE's BIL header from the given geometry and allocates
+! its data array (R4 for FLOAT, I2 for SIGNEDINT), initializing it to the
+! NODATA_VALUE. Stops with an error for unsupported PIXELTYPE values.
 
 TYPE(RASTER_TYPE), INTENT(INOUT) :: RASTER
 INTEGER, INTENT(IN) :: NCOLS, NROWS, NBANDS
@@ -231,6 +279,7 @@ IF (TRIM(PIXELTYPE) .NE. 'FLOAT' .AND. TRIM(PIXELTYPE) .NE. 'SIGNEDINT' ) THEN
    STOP
 ENDIF
 
+NBITS = 0   ! unreachable default; PIXELTYPE is validated above
 SELECT CASE(TRIM(PIXELTYPE))
    CASE('FLOAT')
       NBITS=32
@@ -277,6 +326,9 @@ END SUBROUTINE ALLOCATE_EMPTY_RASTER
 ! *****************************************************************************
 SUBROUTINE MAP_FINE_TO_COARSE(COARSE,FINE,ICOL_COARSE,IROW_COARSE)
 ! *****************************************************************************
+! Builds lookup tables mapping each fine-grid column/row to the coarse-grid
+! column/row that contains it, returned (clamped to coarse extent) in the
+! ICOL_COARSE and IROW_COARSE arrays.
 
 TYPE(RASTER_TYPE), INTENT(IN) :: COARSE, FINE
 INTEGER, DIMENSION(:), INTENT(OUT) :: ICOL_COARSE, IROW_COARSE !fine to coarse
@@ -308,6 +360,8 @@ END SUBROUTINE MAP_FINE_TO_COARSE
 ! *****************************************************************************
 INTEGER FUNCTION ICOL_FROM_X(X,XLL,CELLSIZE)
 ! *****************************************************************************
+! Returns the raster column index containing the x-coordinate X, given the
+! lower-left x (XLL) and CELLSIZE.
 
 REAL, INTENT(IN) :: X,XLL,CELLSIZE
 REAL :: DIST
@@ -323,6 +377,8 @@ END FUNCTION ICOL_FROM_X
 ! *****************************************************************************
 INTEGER FUNCTION IROW_FROM_Y(Y,YLL,CELLSIZE)
 ! *****************************************************************************
+! Returns the raster row index containing the y-coordinate Y, given the
+! lower-left y (YLL) and CELLSIZE.
 
 REAL, INTENT(IN) :: Y,YLL,CELLSIZE
 REAL :: DIST
@@ -338,6 +394,8 @@ END FUNCTION IROW_FROM_Y
 ! *****************************************************************************
 REAL FUNCTION X_FROM_ICOL(ICOL,XLL,CELLSIZE)
 ! *****************************************************************************
+! Returns the x-coordinate of the center of raster column ICOL, given the
+! lower-left x (XLL) and CELLSIZE.
 
 INTEGER, INTENT(IN) :: ICOL
 REAL, INTENT(IN) :: XLL, CELLSIZE
@@ -351,6 +409,8 @@ END FUNCTION X_FROM_ICOL
 ! *****************************************************************************
 REAL FUNCTION Y_FROM_IROW(IROW,YLL,CELLSIZE)
 ! *****************************************************************************
+! Returns the y-coordinate of the center of raster row IROW, given the
+! lower-left y (YLL) and CELLSIZE.
 
 INTEGER, INTENT(IN) :: IROW
 REAL, INTENT(IN) :: YLL, CELLSIZE
@@ -362,39 +422,37 @@ END FUNCTION Y_FROM_IROW
 ! *****************************************************************************
 
 ! *****************************************************************************
-SUBROUTINE INTERP_WD_RASTER(L,WD_LO,WD_HI,F)
+SUBROUTINE UPDATE_WD_RASTER(L,WD_LO,WD_HI,F)
 ! *****************************************************************************
+! Temporally interpolates wind direction (fraction F between the WD_LO and
+! WD_HI rasters) for every node in linked list L, updating each node's
+! WD20_INTERP and WD20_NOW; interpolation is done through the 180-deg opposite
+! to avoid wrap-around discontinuities, and PERTURB_WD is applied.
 
 TYPE (DLL), INTENT(INOUT) :: L
 REAL, DIMENSION(:,:), INTENT(IN) :: WD_LO, WD_HI
 REAL, INTENT(IN) :: F
-INTEGER :: I, ICOL, IROW
-REAL :: WD1TO, WD2TO, WDTO
+INTEGER :: I
 TYPE(NODE), POINTER :: C
 
 C => L%HEAD
 DO I = 1, L%NUM_NODES
-   ICOL = ICOL_ANALYSIS_F2C(C%IX)
-   IROW = IROW_ANALYSIS_F2C(C%IY)
-   WD1TO = WD_LO(ICOL,IROW) + 180. ; IF (WD1TO .GT. 360) WD1TO = WD1TO - 360.
-   WD2TO = WD_HI(ICOL,IROW) + 180. ; IF (WD2TO .GT. 360) WD2TO = WD2TO - 360.
-   WDTO = WD1TO + F * (WD2TO - WD1TO)
-   C%WD20_INTERP = WDTO + 180. + PERTURB_WD
-   IF (C%WD20_INTERP .GT. 360.) C%WD20_INTERP = C%WD20_INTERP - 360.
-   IF (C%WD20_INTERP .LT.   0.) C%WD20_INTERP = C%WD20_INTERP + 360.
-   C%WD20_NOW = C%WD20_INTERP
+   CALL UPDATE_WD_RASTER_SINGLE(C, WD_LO, WD_HI, F)
    C => C%NEXT
 ENDDO
-  
+
 ! *****************************************************************************
-END SUBROUTINE INTERP_WD_RASTER
+END SUBROUTINE UPDATE_WD_RASTER
 ! *****************************************************************************
 
 ! *****************************************************************************
-SUBROUTINE INTERP_WD_RASTER_SINGLE(NODEIN,WD_LO,WD_HI,F)
+SUBROUTINE UPDATE_WD_RASTER_SINGLE(NODEIN,WD_LO,WD_HI,F)
 ! *****************************************************************************
+! Same as INTERP_WD_RASTER but for a single node NODEIN: temporally interpolates
+! wind direction between WD_LO and WD_HI (fraction F) and updates the node's
+! WD20_INTERP and WD20_NOW, applying PERTURB_WD.
 
-TYPE(NODE), POINTER, INTENT(OUT) :: NODEIN
+TYPE(NODE), POINTER, INTENT(IN) :: NODEIN
 REAL, DIMENSION(:,:), INTENT(IN) :: WD_LO, WD_HI
 REAL, INTENT(IN) :: F
 INTEGER :: ICOL, IROW
@@ -405,22 +463,32 @@ C => NODEIN
 
 ICOL = ICOL_ANALYSIS_F2C(C%IX)
 IROW = IROW_ANALYSIS_F2C(C%IY)
-WD1TO = WD_LO(ICOL,IROW) + 180. ; IF (WD1TO .GT. 360) WD1TO = WD1TO - 360.
-WD2TO = WD_HI(ICOL,IROW) + 180. ; IF (WD2TO .GT. 360) WD2TO = WD2TO - 360.
-WDTO = WD1TO + F * (WD2TO - WD1TO)
-C%WD20_INTERP = WDTO + 180. + PERTURB_WD
-IF (C%WD20_INTERP .GT. 360.) C%WD20_INTERP = C%WD20_INTERP - 360.
-IF (C%WD20_INTERP .LT.   0.) C%WD20_INTERP = C%WD20_INTERP + 360.
+
+if (POINT_WIND_TO_CENTER) then
+   C%WD20_INTERP = WD_TO_CENTER
+else
+   WD1TO = WD_LO(ICOL,IROW) + 180. ; IF (WD1TO .GT. 360) WD1TO = WD1TO - 360.
+   WD2TO = WD_HI(ICOL,IROW) + 180. ; IF (WD2TO .GT. 360) WD2TO = WD2TO - 360.
+   WDTO = WD1TO + F * (WD2TO - WD1TO)
+   C%WD20_INTERP = WDTO + 180. + PERTURB_WD
+   IF (C%WD20_INTERP .GT. 360.) C%WD20_INTERP = C%WD20_INTERP - 360.
+   IF (C%WD20_INTERP .LT.   0.) C%WD20_INTERP = C%WD20_INTERP + 360.
+endif 
 
 C%WD20_NOW = C%WD20_INTERP
   
 ! *****************************************************************************
-END SUBROUTINE INTERP_WD_RASTER_SINGLE
+END SUBROUTINE UPDATE_WD_RASTER_SINGLE
 ! *****************************************************************************
 
 ! *****************************************************************************
 SUBROUTINE INTERP_RASTER_LINKEDLIST(L,LO,HI,F,IQUANTITY)
 ! *****************************************************************************
+! Temporally interpolates a weather quantity (selected by IQUANTITY: 1-m/10-h/
+! 100-h/live-herb/live-woody moisture, foliar MC, or wind speed) between the LO
+! and HI rasters (fraction F) for every node in list L using nearest-cell
+! lookup, applying the matching PERTURB_* offset and floor; for wind speed it
+! also recomputes WS20_NOW and the midflame wind WSMF.
 
 TYPE (DLL), INTENT(INOUT) :: L
 REAL, DIMENSION(:,:), INTENT(IN ) :: LO,HI
@@ -508,6 +576,9 @@ END SUBROUTINE INTERP_RASTER_LINKEDLIST
 ! *****************************************************************************
 SUBROUTINE INTERP_RASTER_LINKEDLIST_BILINEAR(L,LO,HI,F,IQUANTITY)
 ! *****************************************************************************
+! Like INTERP_RASTER_LINKEDLIST but uses bilinear spatial interpolation of the
+! LO and HI weather rasters at each node before temporally blending by fraction
+! F; updates the node field selected by IQUANTITY (and WSMF for wind speed).
 
 TYPE (DLL), INTENT(INOUT) :: L
 REAL, DIMENSION(:,:), INTENT(IN) :: LO,HI
@@ -565,6 +636,10 @@ END SUBROUTINE INTERP_RASTER_LINKEDLIST_BILINEAR
 ! *****************************************************************************
 SUBROUTINE INTERP_WIND_LINKEDLIST_BILINEAR(L,WSLO,WSHI,WDLO,WDHI,F)
 ! *****************************************************************************
+! Bilinearly + temporally interpolates the wind field for every node in list L:
+! converts the LO/HI speed and direction rasters to U/V components, interpolates
+! those, then recombines into WS20_NOW/WD20_NOW and the midflame wind WSMF,
+! applying PERTURB_WS/WD/WAF. Vector interpolation avoids direction wrap issues.
 
 TYPE (DLL), INTENT(INOUT) :: L
 REAL, DIMENSION(:,:), INTENT(IN) :: WSLO,WSHI,WDLO,WDHI
@@ -627,7 +702,8 @@ DO I = 1, L%NUM_NODES
    UYNOW = UYL + F * (UYH - UYL)
    
 ! Convert to wind speed and direction
-   IF      (UXNOW .EQ. 0. .AND. UYNOW .EQ. 0.) THEN 
+   WDNOW = 0.   ! exhaustive branches below set it; default keeps it defined
+   IF      (UXNOW .EQ. 0. .AND. UYNOW .EQ. 0.) THEN
       WDNOW = 0.
    ELSE IF (UXNOW .GT. 0. .AND. UYNOW .EQ. 0.) THEN
       WDNOW = 0.5*PI
@@ -670,6 +746,9 @@ END SUBROUTINE INTERP_WIND_LINKEDLIST_BILINEAR
 ! *****************************************************************************
 SUBROUTINE INTERP_WIND_SINGLE_BILINEAR(NODEIN,WSLO,WSHI,WDLO,WDHI,F)
 ! *****************************************************************************
+! Single-node version of INTERP_WIND_LINKEDLIST_BILINEAR: bilinearly and
+! temporally interpolates the wind field at NODEIN via U/V components and sets
+! its WS20_NOW, WD20_NOW, and midflame wind WSMF (with PERTURB_WS/WD/WAF).
 
 TYPE(NODE), POINTER, INTENT(OUT) :: NODEIN
 REAL, DIMENSION(:,:), INTENT(IN) :: WSLO,WSHI,WDLO,WDHI
@@ -729,7 +808,8 @@ UXNOW = UXL + F * (UXH - UXL)
 UYNOW = UYL + F * (UYH - UYL)
    
 ! Convert to wind speed and direction
-IF      (UXNOW .EQ. 0. .AND. UYNOW .EQ. 0.) THEN 
+WDNOW = 0.   ! exhaustive branches below set it; default keeps it defined
+IF      (UXNOW .EQ. 0. .AND. UYNOW .EQ. 0.) THEN
    WDNOW = 0.
 ELSE IF (UXNOW .GT. 0. .AND. UYNOW .EQ. 0.) THEN
    WDNOW = 0.5*PI
@@ -768,6 +848,8 @@ END SUBROUTINE INTERP_WIND_SINGLE_BILINEAR
 ! *****************************************************************************
 REAL FUNCTION UX_FROM_WSWD(WS,WD)
 ! *****************************************************************************
+! Returns the x (east-west) component of a wind vector from speed WS and
+! meteorological direction WD (degrees).
    REAL, INTENT(IN) :: WS, WD
    UX_FROM_WSWD = WS * COS( (WD + 90.) * PI / 180.) 
 ! *****************************************************************************
@@ -777,6 +859,8 @@ END FUNCTION UX_FROM_WSWD
 ! *****************************************************************************
 REAL FUNCTION UY_FROM_WSWD(WS,WD)
 ! *****************************************************************************
+! Returns the y (north-south) component of a wind vector from speed WS and
+! meteorological direction WD (degrees).
    REAL, INTENT(IN) :: WS, WD
    UY_FROM_WSWD = WS * SIN( (WD - 90.) * PI / 180.) 
 ! *****************************************************************************
@@ -786,6 +870,9 @@ END FUNCTION UY_FROM_WSWD
 ! *****************************************************************************
 SUBROUTINE GET_BILINEAR_INTERPOLATE_COEFFS(IX, IY, X1, Y1, X2, Y2, I1, J1, I2, J2, CX, CY)
 ! *****************************************************************************
+! For a fuel-grid cell (IX,IY), returns the bounding weather-grid cell indices
+! (I1,J1)-(I2,J2), their corner coordinates (X1,Y1)-(X2,Y2), and the cell center
+! (CX,CY) needed by BILINEAR_INTERPOLATE.
 
 INTEGER, INTENT(IN) :: IX, IY
 REAL, INTENT(OUT) :: X1, Y1, X2, Y2, CX, CY
@@ -813,7 +900,7 @@ I2 = MAX ( MIN(I1 + 1, NCOL_WX), 1 )
 
 J1 = 1 + NINT( (CY - YLL_WX) / CELLSIZE_WX )
 J1 = MAX ( MIN(J1,     NROW_WX), 1 )
-J2 = MAX ( MIN(J2 + 1, NROW_WX), 1 )
+J2 = MAX ( MIN(J1 + 1, NROW_WX), 1 )
 
 X1 = XLL_WX + (REAL(I1) - 0.5) * CELLSIZE_WX
 X2 = XLL_WX + (REAL(I2) - 0.5) * CELLSIZE_WX
@@ -827,6 +914,9 @@ END SUBROUTINE GET_BILINEAR_INTERPOLATE_COEFFS
 ! *****************************************************************************
 REAL FUNCTION BILINEAR_INTERPOLATE(X, Y, X1, Y1, X2, Y2, Q11, Q21, Q12, Q22)
 ! *****************************************************************************
+! Bilinearly interpolates the value at point (X,Y) from the four corner values
+! Q11/Q21/Q12/Q22 at corners (X1,Y1)-(X2,Y2). Degenerates gracefully to 1-D
+! interpolation when the cell has zero width or height.
 
 REAL, INTENT(IN) :: X, Y, X1, Y1, X2, Y2, Q11, Q21, Q12, Q22
 REAL :: X2MX1, Y2MY1, DENOM, X2MX, Y2MY, XMX1, YMY1, NUMER1, NUMER2, NUMER3, &
@@ -862,6 +952,8 @@ END FUNCTION BILINEAR_INTERPOLATE
 ! *****************************************************************************
 INTEGER FUNCTION WX_ICOL_FROM_ANALYSIS_IX(IX_IN)
 ! *****************************************************************************
+! Maps an analysis/fuel-grid column IX_IN to the corresponding weather-grid
+! column, clamped to the valid weather-raster column range.
 
 INTEGER, INTENT(IN) :: IX_IN
 INTEGER :: IX
@@ -876,6 +968,8 @@ END FUNCTION WX_ICOL_FROM_ANALYSIS_IX
 ! *****************************************************************************
 INTEGER FUNCTION WX_IROW_FROM_ANALYSIS_IY(IY_IN)
 ! *****************************************************************************
+! Maps an analysis/fuel-grid row IY_IN to the corresponding weather-grid row,
+! clamped to the valid weather-raster row range.
 
 INTEGER, INTENT(IN) :: IY_IN
 INTEGER :: IY
@@ -890,6 +984,8 @@ END FUNCTION WX_IROW_FROM_ANALYSIS_IY
 ! *****************************************************************************
 INTEGER FUNCTION ICOL_FINE_TO_COARSE(IX_IN)
 ! *****************************************************************************
+! Maps a fine-grid column IX_IN to the corresponding coarse weather-grid column
+! via ICOL_ANALYSIS_F2C, clamped to the weather-raster column range.
 
 INTEGER, INTENT(IN) :: IX_IN
 INTEGER :: IX
@@ -904,6 +1000,9 @@ END FUNCTION ICOL_FINE_TO_COARSE
 ! *****************************************************************************
 SUBROUTINE INTERP_RASTER_LINKEDLIST_SINGLE(NODEIN,LO,HI,F,IQUANTITY)
 ! *****************************************************************************
+! Single-node, nearest-cell version of INTERP_RASTER_LINKEDLIST: temporally
+! interpolates the weather quantity selected by IQUANTITY between LO and HI
+! (fraction F) at NODEIN and applies the matching PERTURB_* offset/floor.
 
 TYPE (NODE), POINTER, INTENT(OUT) :: NODEIN
 REAL, DIMENSION(:,:), INTENT(IN) :: LO,HI
@@ -958,6 +1057,9 @@ END SUBROUTINE INTERP_RASTER_LINKEDLIST_SINGLE
 ! *****************************************************************************
 SUBROUTINE INTERP_RASTER_LINKEDLIST_SINGLE_BILINEAR(NODEIN,LO,HI,F,IQUANTITY)
 ! *****************************************************************************
+! Single-node, bilinear version of INTERP_RASTER_LINKEDLIST_BILINEAR: spatially
+! and temporally interpolates the weather quantity selected by IQUANTITY between
+! LO and HI (fraction F) at NODEIN, applying the matching PERTURB_* offset.
 
 TYPE (NODE), POINTER, INTENT(OUT) :: NODEIN
 REAL, DIMENSION(:,:), INTENT(IN) :: LO,HI
@@ -1009,6 +1111,10 @@ END SUBROUTINE INTERP_RASTER_LINKEDLIST_SINGLE_BILINEAR
 ! *****************************************************************************
 SUBROUTINE APPLY_WIND_FLUCTUATIONS(L)
 ! *****************************************************************************
+! Applies random gust/veer fluctuations to every node in list L: perturbs the
+! interpolated wind speed and direction by random factors scaled by the
+! WIND_SPEED/DIRECTION_FLUCTUATION_INTENSITY parameters, updating WS20_NOW,
+! WD20_NOW, and the midflame wind WSMF.
 
 TYPE (DLL), INTENT(INOUT) :: L
 TYPE(NODE), POINTER :: C
@@ -1040,6 +1146,7 @@ END SUBROUTINE APPLY_WIND_FLUCTUATIONS
 ! *****************************************************************************
 ELEMENTAL TYPE(DLL) FUNCTION NEW_DLL()
 ! *****************************************************************************
+! Returns an empty doubly-linked list (null head/tail pointers, zero nodes).
 
 NEW_DLL = DLL(NULL(),NULL(),0)
 
@@ -1050,6 +1157,9 @@ END FUNCTION NEW_DLL
 ! *****************************************************************************
 LOGICAL FUNCTION CHECK_BARRIER_BREACH(C)
 ! *****************************************************************************
+! Returns .TRUE. if node C's flame length is large enough to breach the local
+! fuel-break barrier (1.5x flame length, converted to meters, exceeds the cell's
+! BARRIER_WIDTH), otherwise .FALSE.
    TYPE(NODE), POINTER :: C
 
    CHECK_BARRIER_BREACH = .TRUE.
@@ -1064,31 +1174,25 @@ END FUNCTION CHECK_BARRIER_BREACH
 ! *****************************************************************************
 SUBROUTINE APPEND_ss(DL2, IX, IY, T)
 ! *****************************************************************************
-   TYPE(DLL), INTENT(INOUT) :: DL2
-   INTEGER,  INTENT(IN)     :: IX, IY
-   REAL,     INTENT(IN)     :: T
+! Appends a new node for cell (IX,IY) added at time T to the tail of list DL2
+! (calling INIT if the list is empty), allocating the node and caching its fuel
+! model, adjustment factor, slope-squared, and (WUI build) building fuel model.
 
-   TYPE(NODE), POINTER :: NP
-   TYPE(NODE_WRAPPER), ALLOCATABLE :: TEMP(:)  ! Temporary array for resizing DWI_SU
-   INTEGER :: N  ! Store the new count DWI_SU
-   
+TYPE(DLL), INTENT(INOUT) :: DL2
+INTEGER, INTENT(IN)      :: IX, IY
+REAL(8), INTENT(IN) :: T
+INTEGER, PARAMETER :: NO_DATA = -9999
+ 
+TYPE(NODE), POINTER :: NP
+
 ! If the list is empty
 IF (DL2%NUM_NODES == 0) THEN
    CALL INIT(DL2, IX, IY, T)
-
-! Debug array allocation
-   IF (ALLOCATED(DL2%NODE_POINTERS)) THEN
-      DEALLOCATE(DL2%NODE_POINTERS)
-   END IF  
-   
-   ALLOCATE(DL2%NODE_POINTERS(1))      ! DWI_SU
-   DL2%NODE_POINTERS(1)%PTR => DL2%HEAD   ! DWI_SU
    RETURN
-END IF
- 
+ENDIF
+
 ! Add new element ot the end
 DL2%NUM_NODES = DL2%NUM_NODES + 1
-N = SIZE(DL2%NODE_POINTERS)+1  ! Store the new count DWI_SU + YIREN DEBUG
 
 NP => DL2%TAIL
 ALLOCATE(DL2%TAIL)
@@ -1099,7 +1203,17 @@ DL2%TAIL%TIME_ADDED =  T
 DL2%TAIL%IFBFM   =  FBFM%I2(IX,IY,1)
 
 #ifdef _WUI
-IF (USE_BLDG_SPREAD_MODEL) DL2%TAIL%IBLDGFM =  BLDG_FUEL_MODEL%I2(IX,IY,1)
+IF (USE_BLDG_SPREAD_MODEL) THEN
+   IF (FBFM%I2(IX,IY,1) .EQ. 91) THEN
+      IF(BLDG_FUEL_MODEL%I2(IX,IY,1) .NE. NO_DATA) THEN
+         DL2%TAIL%IBLDGFM =  BLDG_FUEL_MODEL%I2(IX,IY,1)
+      ELSE
+         DL2%TAIL%IBLDGFM =  1
+      ENDIF
+   ELSE
+      DL2%TAIL%IBLDGFM =  BLDG_FUEL_MODEL_CONSTANT
+   ENDIF
+ENDIF
 #endif
 
 DL2%TAIL%ADJ     =  ADJ%R4(IX,IY,1)
@@ -1108,19 +1222,6 @@ DL2%TAIL%TANSLP2 =  TANSLP2(MAX(MIN(NINT(SLP%R4(IX,IY,1)),90),0))
 DL2%TAIL%PREV       => NP
 DL2%TAIL%PREV%NEXT  => DL2%TAIL
 
-#ifdef _WUI
-! Resize NODE_POINTERS array dynamically DWI_SU
-ALLOCATE(TEMP(N-1))
-TEMP = DL2%NODE_POINTERS
-DEALLOCATE(DL2%NODE_POINTERS)
-ALLOCATE(DL2%NODE_POINTERS(N))
-DL2%NODE_POINTERS(1:N-1) = TEMP
-DEALLOCATE(TEMP) 
-
-! Store the new node in the array DWI_SU
-NULLIFY(DL2%NODE_POINTERS(N)%PTR)
-DL2%NODE_POINTERS(N)%PTR => DL2%TAIL
-#endif
 ! *****************************************************************************   
 END SUBROUTINE APPEND_ss
 ! *****************************************************************************
@@ -1204,48 +1305,17 @@ END SUBROUTINE APPEND
 ! *****************************************************************************
 
 ! *****************************************************************************
-SUBROUTINE APPEND_TO_DYNAMIC_ARRAY(IX, IY, N_ROWS, DYNAMIC_ARRAY)
-! *****************************************************************************
-
-    INTEGER, INTENT(IN) :: IX, IY                         ! NEW_VALUES_TO_APPEND
-    INTEGER, INTENT(INOUT) :: N_ROWS   
-    REAL, ALLOCATABLE, INTENT(INOUT), DIMENSION(:,:) :: DYNAMIC_ARRAY  ! Dynamic 2D array to store IX and IY
-
-
-    ! Local temporary array for resizing
-    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: TEMP_ARRAY
-
-    ! Handle the case where the array is unallocated
-    IF (N_ROWS .LE. 1) THEN
-        ALLOCATE(DYNAMIC_ARRAY(1, 2))           ! Allocate first column
-        DYNAMIC_ARRAY(1, 1) = IX
-        DYNAMIC_ARRAY(1, 2) = IY
-        N_ROWS = 1                              ! Set number of rows to 1
-    ELSE
-        ! Allocate a temporary array with one additional column
-        ALLOCATE(TEMP_ARRAY(N_ROWS, 2))
-        TEMP_ARRAY(1:N_ROWS-1, :) = DYNAMIC_ARRAY  ! Copy existing data
-        TEMP_ARRAY(N_ROWS, 1) = IX           ! Add new IX value
-        TEMP_ARRAY(N_ROWS, 2) = IY           ! Add new IY value
-
-        ! Replace the old array with the resized one
-        DEALLOCATE(DYNAMIC_ARRAY)
-        ALLOCATE(DYNAMIC_ARRAY(N_ROWS, 2))
-        DYNAMIC_ARRAY = TEMP_ARRAY
-    END IF
-
-
-! *****************************************************************************
-END SUBROUTINE APPEND_TO_DYNAMIC_ARRAY
-! *****************************************************************************
-
-! *****************************************************************************
 ELEMENTAL SUBROUTINE INIT(DL2, IX, IY, T)
 ! *****************************************************************************
+! Initializes an empty list DL2 with its first node for cell (IX,IY) added at
+! time T, allocating head/tail and caching the cell's fuel model, adjustment
+! factor, slope-squared, and (WUI build) building fuel model.
 
 TYPE(DLL), INTENT(INOUT) :: DL2
 INTEGER, INTENT(IN)      :: IX, IY
-REAL, INTENT(IN) :: T
+REAL(8), INTENT(IN) :: T
+
+INTEGER, PARAMETER :: NO_DATA = -9999
 
 ALLOCATE(DL2%HEAD)
 DL2%TAIL => DL2%HEAD
@@ -1257,6 +1327,19 @@ DL2%TAIL%TANSLP2    =  TANSLP2(MAX(MIN(NINT(SLP%R4(IX,IY,1)),90),0))
 DL2%TAIL%TIME_ADDED =  T
 DL2%NUM_NODES = 1
 
+#ifdef _WUI
+IF (USE_BLDG_SPREAD_MODEL) THEN
+   IF (FBFM%I2(IX,IY,1) .EQ. 91) THEN
+      IF(BLDG_FUEL_MODEL%I2(IX,IY,1) .NE. NO_DATA) THEN
+         DL2%TAIL%IBLDGFM =  BLDG_FUEL_MODEL%I2(IX,IY,1)
+      ELSE
+         DL2%TAIL%IBLDGFM =  1
+      ENDIF
+   ELSE
+      DL2%TAIL%IBLDGFM =  BLDG_FUEL_MODEL_CONSTANT
+   ENDIF
+ENDIF
+#endif
 ! *****************************************************************************
 END SUBROUTINE INIT
 ! *****************************************************************************
@@ -1264,6 +1347,9 @@ END SUBROUTINE INIT
 ! *****************************************************************************
 SUBROUTINE DELETE_NODE(DL2, CURRENT)
 ! *****************************************************************************
+! Removes node CURRENT from list DL2, relinking neighbors (handling head, tail,
+! intermediate, and single-node cases), deallocating it, decrementing the node
+! count, and resetting CURRENT to the previous (or new head/null) node.
 
 TYPE(DLL), INTENT(INOUT) :: DL2
 TYPE(NODE), POINTER, INTENT(INOUT) :: CURRENT
@@ -1288,13 +1374,17 @@ ELSE IF (ASSOCIATED(CURRENT%PREV) .AND. (.NOT. ASSOCIATED(CURRENT%NEXT))) THEN !
    CURRENT => CURRENT%PREV
    DL2%TAIL => CURRENT
 CONTINUE
+
 ELSE IF (.NOT. ASSOCIATED(CURRENT%PREV) .AND. ASSOCIATED(CURRENT%NEXT)) THEN ! Deleting head node
    DL2%HEAD => CURRENT%NEXT
    CURRENT => DL2%HEAD
    CURRENT%PREV => NULL()
 CONTINUE
-!ELSE
-!   CONTINUE
+
+ELSE IF (.NOT. ASSOCIATED(CURRENT%PREV) .AND. (.NOT. ASSOCIATED(CURRENT%NEXT))) THEN
+   DL2%HEAD => NULL()
+   DL2%TAIL => NULL()
+   CURRENT => NULL()
 ENDIF
 
 DEALLOCATE(NP)
@@ -1308,6 +1398,8 @@ END SUBROUTINE DELETE_NODE
 ! *****************************************************************************
 SUBROUTINE TIDY(DL2)
 ! *****************************************************************************
+! Deallocates every node in list DL2, freeing the entire linked list (used to
+! tear down a list at end of use).
 
 TYPE(DLL), INTENT(INOUT) :: DL2
 TYPE(NODE), POINTER :: CURRENT, LAST
@@ -1375,9 +1467,12 @@ END SUBROUTINE LOCATE
 !******************************************************************************
 SUBROUTINE SUNRISE_SUNSET_CALCS
 !******************************************************************************
+! Computes the UTC sunrise and sunset hours for the domain's lower-left lat/lon
+! and current day of year (NOAA solar equations), storing them in the global
+! SUNRISE_HOUR and SUNSET_HOUR module variables.
 LOGICAL :: LEAPYEAR
 INTEGER :: DAY_OF_YEAR, HOUR_OF_DAY
-REAL :: DAYS_PER_YEAR, GAMMA, EQTIME, COSPIMTHETA, DECL, HA, HA_SUNRISE, LAT_RAD, LON_RAD, PHI, THETA, TST, &
+REAL :: DAYS_PER_YEAR, GAMMA, EQTIME, DECL, HA_SUNRISE, LAT_RAD, LON_RAD, &
         SUNRISE_MIN_UTC, SUNRISE_H_UTC, SUNSET_MIN_UTC, HA_SUNSET, SUNSET_H_UTC, LON_DEG, LAT_DEG
 
 CALL XY_TO_LATLON(ASP%XLLCORNER, ASP%YLLCORNER, LAT_DEG, LON_DEG)
@@ -1397,14 +1492,6 @@ GAMMA = 2.0 * (PI/DAYS_PER_YEAR) * (DAY_OF_YEAR - 1)
 EQTIME = 229.18 * ( 0.000075 + 0.001868*COS(GAMMA) - 0.032077*SIN(GAMMA) - 0.014615*COS(2.*GAMMA) - 0.040849*SIN(2.*GAMMA) )
 DECL   = 0.006918 - 0.399912*COS(GAMMA) + 0.070257*SIN(GAMMA) - 0.006758*COS(2.*GAMMA) + 0.000907*SIN(2.*GAMMA) - 0.002697*COS(3.*GAMMA) + 0.00148*SIN(3.*GAMMA)
 
-! Begin part not needed for sunrise / sunset calcs:
-TST = REAL(HOUR_OF_DAY) * 60. + EQTIME + 4. * LON_DEG
-HA = 0.25 * TST - 180.
-PHI = ACOS(SIN(LAT_RAD)*SIN(DECL)+COS(LAT_RAD)*COS(DECL)*COS(HA*PI/180))
-COSPIMTHETA = (SIN(LAT_RAD)*COS(PHI) - SIN(DECL)) / (COS(LAT_RAD)*SIN(PHI))
-THETA = PI - ACOS(COSPIMTHETA)
-! End part not needed for sunrise / sunset calcs
-
 HA_SUNRISE = ACOS( COS(90.833*PI/180) / (COS(LAT_RAD)*COS(DECL)) -TAN(LAT_RAD)*TAN(DECL) )
 SUNRISE_MIN_UTC = 720. - 4.*(LON_DEG + HA_SUNRISE*180./PI) - EQTIME
 SUNRISE_H_UTC = SUNRISE_MIN_UTC / 60.
@@ -1423,6 +1510,9 @@ END SUBROUTINE SUNRISE_SUNSET_CALCS
 ! *****************************************************************************
 SUBROUTINE SHUTDOWN
 ! *****************************************************************************
+! Performs orderly program shutdown: closes per-rank output files, frees all
+! MPI shared-memory windows (raster and stats arrays), records final timings and
+! optionally writes them to disk, cleans scratch files, then calls MPI_FINALIZE.
 
 INTEGER :: I, IERR
 CHARACTER(4) :: FOUR
@@ -1523,6 +1613,9 @@ END SUBROUTINE SHUTDOWN
 ! *****************************************************************************
 SUBROUTINE ERC_IGNITION_FACTOR (ERC, IGNFAC, IB1, IB2)
 ! *****************************************************************************
+! Copies the ERC raster header into IGNFAC and fills its data (bands IB1..IB2)
+! with a per-cell ignition probability factor derived from the energy release
+! component, or, if ERC_IS_PLIGNRATE, with the ERC value floored at PLIGNRATE_MIN.
 
 TYPE (RASTER_TYPE), INTENT(IN) :: ERC
 TYPE (RASTER_TYPE) :: IGNFAC
@@ -1575,6 +1668,8 @@ END SUBROUTINE ERC_IGNITION_FACTOR
 ! *****************************************************************************
 REAL FUNCTION ERFINV(X)
 ! *****************************************************************************
+! Returns an approximation of the inverse error function of X using a truncated
+! polynomial (Maclaurin-type) series.
 
 REAL, INTENT(IN) :: X
 REAL, PARAMETER :: HALFSQRTPI = 0.88622692545
@@ -1605,6 +1700,9 @@ END FUNCTION ERFINV
 ! *****************************************************************************
 REAL FUNCTION ISF(FUEL, RSF, CF)
 ! *****************************************************************************
+! Solves the Canadian FBP rate-of-spread relation inversely to return the
+! initial spread index (ISF) consistent with a surface spread rate RSF for the
+! given FUEL type and slope/curing factor CF.
 
 REAL,INTENT(IN) :: RSF, CF
 INTEGER*2, intent(in) :: FUEL
@@ -1617,6 +1715,9 @@ END FUNCTION ISF
 ! *****************************************************************************
 RECURSIVE REAL FUNCTION RSI(FUEL, ISI, CF) result(rsi_val)
 ! *****************************************************************************
+! Returns the Canadian FBP initial-spread rate (RSI) for the given FUEL type,
+! initial spread index ISI, and curing factor CF. Recurses to blend component
+! fuel types for the mixedwood models (M1-M4).
 
 REAL,INTENT(IN) :: ISI, CF
 INTEGER*2, intent(in) :: FUEL
@@ -1645,6 +1746,9 @@ END FUNCTION RSI
 ! *****************************************************************************
 RECURSIVE REAL FUNCTION SFC(FUEL, FFMC, BUI) result(out)
 ! *****************************************************************************
+! Returns the Canadian FBP surface fuel consumption (kg/m^2) for the given FUEL
+! type from the fine fuel moisture code FFMC and buildup index BUI; recurses to
+! blend component fuels for the mixedwood models.
 INTEGER*2, INTENT(IN) :: FUEL 
 REAL, INTENT(IN) :: FFMC, BUI
 
@@ -1690,6 +1794,10 @@ END FUNCTION SFC
 ! *****************************************************************************
 REAL FUNCTION BUI(day_of_weather, month_of_weather)
 ! *****************************************************************************
+! Returns the Canadian FWI Buildup Index for the given day/month by advancing
+! the Drought Code and Duff Moisture Code from temperature, humidity, and
+! precipitation. Side effect: updates the global DC_prev and DMC_prev carry-over
+! state for the next day's calculation.
 REAL :: V, DC, Q_prev, Q_RT, DC_RT, K, DMC, b, Pe, M_prev, M_RT, DMC_RT
 INTEGER, intent(in) :: day_of_weather, month_of_weather
 ! ------------- DROUGHT CODE -------------------------------
@@ -1737,6 +1845,8 @@ END FUNCTION BUI
 ! *****************************************************************************
 CHARACTER(16) FUNCTION HOUR_OF_YEAR_TO_TIMESTAMP(YEAR, HOUR_OF_YEAR)
 ! *****************************************************************************
+! Converts an hour-of-year count (with the given YEAR, accounting for leap
+! years) into a 'YYYY-MM-DD HH:00' timestamp string.
 
 INTEGER, INTENT(IN) :: YEAR
 INTEGER, INTENT(IN) :: HOUR_OF_YEAR
@@ -1780,6 +1890,9 @@ END FUNCTION HOUR_OF_YEAR_TO_TIMESTAMP
 ! *****************************************************************************
 SUBROUTINE XY_TO_LATLON(X, Y, LAT, LON)
 ! *****************************************************************************
+! Converts projected coordinates (X,Y in meters, source CRS A_SRS) to geographic
+! LAT/LON degrees (EPSG:4326) by shelling out to the GDAL 'gdaltransform' tool
+! via per-rank temporary scratch files, which are written, read back, and removed.
 REAL, INTENT(IN)  :: X, Y              ! projected coordinates (meters)
 REAL, INTENT(OUT) :: LAT, LON          ! output lat, lon in degrees
 
@@ -1805,7 +1918,7 @@ CLOSE(LUIN)
 ! 2. Build gdaltransform command:
 !    gdaltransform -s_srs SRC_SRS -t_srs EPSG:4326 < TMPIN > TMPOUT
 SHELLSTR = TRIM(PATH_TO_GDAL) // 'gdaltransform -s_srs "' // TRIM(A_SRS) // '"' // &
-            ' -t_srs EPSG:4326 < ' // TRIM(TMPIN) // ' > ' // TRIM(TMPOUT)
+            ' -t_srs EPSG:4326 < ' // TRIM(TMPIN) // ' > ' // TRIM(TMPOUT) // ' 2>/dev/null'
 
 ! WRITE(*,*) 'Running: ', TRIM(SHELLSTR)
 CALL EXECUTE_COMMAND_LINE(TRIM(SHELLSTR), EXITSTAT=IOS)
@@ -1839,6 +1952,10 @@ END SUBROUTINE XY_TO_LATLON
 
 ! *****************************************************************************
 subroutine read_geotiff_meta_gdalinfo()
+! Reads spatial metadata for the analysis grid from the aspect raster by running
+! GDAL 'gdalinfo'/'gdalsrsinfo' and parsing their output, then sets the global
+! ANALYSIS_CELLSIZE, ANALYSIS_XLLCORNER, ANALYSIS_YLLCORNER, and A_SRS. Requires
+! the CRS to use metre linear units (error-stops otherwise).
    character(len=1024) :: cmd, line
    character(len=256)  :: tmpfile, tmpfile_epsg, tempFilename, istr
    integer :: iu, ios
@@ -1861,7 +1978,13 @@ subroutine read_geotiff_meta_gdalinfo()
    tmpfile      = trim(SCRATCH) // '/' // '._gdalinfo_tmp_'//trim(istr)//'.txt'
    tmpfile_epsg = trim(SCRATCH) // '/' // '._gdalsrsinfo_tmp_'//trim(istr)//'.txt'
 
-   tempFilename = trim(ASP_FILENAME)
+   ! When a combined landscape file is used the individual layer filenames are
+   ! blank, so derive the analysis grid metadata from the landscape file instead.
+   if (USE_LANDSCAPE_FILE) then
+      tempFilename = trim(LANDSCAPE_FILENAME)
+   else
+      tempFilename = trim(ASP_FILENAME)
+   endif
    if (USE_TILED_IO) then
       tempFilename = trim(tempFilename) // '_1_1.bsq'
    else
@@ -1891,6 +2014,8 @@ subroutine read_geotiff_meta_gdalinfo()
 contains
 
    subroutine read_basic_raster_meta()
+   ! Runs gdalinfo on the target raster, writes output to a temp file, and parses
+   ! it line by line to extract size, origin, pixel size, and metre-units flag.
       write(cmd,'(a)') 'gdalinfo "' // trim(FUELS_AND_TOPOGRAPHY_DIRECTORY) // '/' // &
                        trim(tempFilename) // '" > "' // trim(tmpfile) // '"'
       call execute_command_line(trim(cmd))
@@ -1912,6 +2037,8 @@ contains
    end subroutine read_basic_raster_meta
 
    subroutine read_epsg_with_gdalsrsinfo()
+   ! Runs gdalsrsinfo on the target raster and parses its output for an 'EPSG:'
+   ! token, storing the numeric code in the host routine's epsg variable.
       integer :: p
       character(len=1024) :: text
 
@@ -1941,6 +2068,7 @@ contains
    end subroutine read_epsg_with_gdalsrsinfo
 
    pure logical function contains_ci(s, pat)
+   ! Returns .true. if string s contains pattern pat, compared case-insensitively.
       implicit none
       character(len=*), intent(in) :: s, pat
       character(len=len(s))   :: sl
@@ -1966,6 +2094,8 @@ contains
    end function contains_ci
 
    subroutine parse_is_metre_units
+   ! Sets the host routine's is_metre flag to .true. if the current gdalinfo line
+   ! indicates the CRS linear unit is metre.
       if (contains_ci(line, 'linear units:') .and. contains_ci(line, 'metre')) then
          is_metre = .true.
       else if (contains_ci(line, 'lengthunit["metre"')) then
@@ -1976,6 +2106,8 @@ contains
    end subroutine parse_is_metre_units
 
    subroutine parse_size
+   ! Parses a gdalinfo 'Size is NCOLS, NROWS' line into the host routine's ncols
+   ! and nrows variables.
       integer :: p
       character(len=256) :: rest
 
@@ -1991,6 +2123,8 @@ contains
    end subroutine parse_size
 
    subroutine parse_origin
+   ! Parses a gdalinfo 'Origin = (x0, y0)' line into the host routine's x0 and y0
+   ! variables.
       integer :: p1, p2
       character(len=256) :: inside
 
@@ -2006,6 +2140,8 @@ contains
    end subroutine parse_origin
 
    subroutine parse_pixel_size
+   ! Parses a gdalinfo 'Pixel Size = (dx, dy)' line into the host routine's dx
+   ! and dy variables.
       integer :: p1, p2
       character(len=256) :: inside
 
@@ -2021,6 +2157,7 @@ contains
    end subroutine parse_pixel_size
 
    pure function int_to_str(i) result(s)
+   ! Returns integer i formatted as a trimmed, left-justified character string.
       integer, intent(in) :: i
       character(len=:), allocatable :: s
       character(len=32) :: buf

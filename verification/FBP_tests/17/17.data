@@ -57,11 +57,11 @@ NUM_IGNITIONS = 1
 X_IGN(1) = 50
 Y_IGN(1) = 50
 T_IGN(1)      = 0.0
-DEBUG_LEVEL = 0
+FEEDBACK_LEVEL = 0
 MODE=3
 /
 
 &MISCELLANEOUS
-PATH_TO_GDAL                   = '/home/nick/miniconda3/envs/elmfire/bin/'
+PATH_TO_GDAL                   = 'auto'
 SCRATCH                        = './scratch'
 /

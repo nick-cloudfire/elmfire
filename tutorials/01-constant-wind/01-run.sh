@@ -31,9 +31,10 @@ A_SRS="EPSG: 32610" # Spatial reference system - UTM Zone 10
 
 # End inputs specification
 
-ELMFIRE_VER=${ELMFIRE_VER:-2026.0319.memopt}
-
+# ELMFIRE_VER defaults to the repo-root VERSION file (resolved by
+# set_elmfire_version below); export ELMFIRE_VER to override.
 . ../functions/functions.sh
+set_elmfire_version
 
 XMIN=`echo "0.0 - 0.5 * $DOMAINSIZE" | bc -l`
 XMAX=`echo "0.0 + 0.5 * $DOMAINSIZE" | bc -l`
@@ -67,6 +68,9 @@ done
 for i in $(eval echo "{1..$NUM_INT_RASTERS}"); do
    gdal_calc.py -A $SCRATCH/int.tif --co="COMPRESS=DEFLATE" --co="ZLEVEL=9" --NoDataValue=-9999 --outfile="$INPUTS/${INT_RASTER[i]}.tif" --calc="A + ${INT_VAL[i]}"
 done
+
+# Combine the topography/fuel layers into a single multiband landscape file
+create_landscape $INPUTS fbfm40
 
 # Set inputs in elmfire.data
 replace_line SIMULATION_TSTOP $SIMULATION_TSTOP no

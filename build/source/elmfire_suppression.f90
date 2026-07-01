@@ -12,6 +12,9 @@ CONTAINS
 ! *****************************************************************************
 SUBROUTINE CENTROID(IT)
 ! *****************************************************************************
+! Computes the centroid (IXCEN, IYCEN cell indices) of the active fire perimeter
+! for suppression resource IT by averaging the positions of tagged cells that are
+! not yet burned or suppressed. Result is stored in SUPP(IT).
 
 INTEGER, INTENT(IN) :: IT
 INTEGER :: I, IXCEN, IYCEN, COUNT
@@ -52,13 +55,18 @@ END SUBROUTINE CENTROID
 ! *****************************************************************************
 SUBROUTINE CONTAINMENT(IT,T)
 ! *****************************************************************************
+! Bins tagged/suppressed fireline cells into 360 angular sectors about the centroid
+! and computes current containment from per-bin suppressed and fireline fractions.
+! If below the target containment, selects the lowest-spread-velocity sectors and
+! marks their tagged cells as suppressed at time T (sets TIME_SUPPRESSED).
 
 INTEGER, INTENT(IN) :: IT
-REAL, INTENT(IN) :: T
+REAL(8), INTENT(IN) :: T
 INTEGER :: I, IDEG, J, COUNT, N_NONZERO
 REAL :: DX, DY, CURRENT_CONTAINMENT, VELOCITY_SUM
 REAL, DIMENSION (0:359) :: SUPPRESSED_FRACTION, FIRELINE_FRACTION, DEG, &
                            VELOCITY_SMOOTHED, VELOCITY0_SMOOTHED
+LOGICAL, DIMENSION (0:359) :: SELECTED
 INTEGER, PARAMETER :: DEG_SMOOTH_WIDTH=22
 TYPE (DLL), POINTER :: L
 TYPE(NODE), POINTER :: C
@@ -80,7 +88,7 @@ DO J = 1, 2
       DX = REAL(C%IX - SUPP(IT)%IXCEN) 
       DY = REAL(C%IY - SUPP(IT)%IYCEN)
 !      IDEG = NINT(ATAN2D(DY,DX) - 90.0)
-      IDEG = NINT(ATAN2(DY,DX)*180.0/3.14159 - 90.0)
+      IDEG = NINT(ATAN2(DY,DX)/PIO180 - 90.0)   ! PIO180 = PI/180 (full-precision), was 3.14159
       IF (IDEG .LT.   0) IDEG = IDEG + 360
       IF (IDEG .EQ. 360) IDEG = 0
       C%SUPPRESSION_IDEG = IDEG
@@ -146,30 +154,31 @@ IF (SUPP(IT)%TARGET_CONTAINMENT .GT. CURRENT_CONTAINMENT) THEN
    CALL DSORT(VELOCITY_SMOOTHED(0:), FIRELINE_FRACTION  (0:), 360, 2); VELOCITY_SMOOTHED(:) = VELOCITY0_SMOOTHED(:)
    CALL DSORT(VELOCITY_SMOOTHED(0:), DEG                (0:), 360, 2)
 
+   ! Select degree bins (in increasing-velocity order) until the containment target is met.
+   ! Flag the chosen bins here, then suppress their tagged cells in a single pass afterwards.
+   ! This avoids re-walking the entire tagged list once per selected bin (was O(bins x nodes)).
+   SELECTED(:) = .FALSE.
    I=-1
    DO WHILE (CURRENT_CONTAINMENT .LT. SUPP(IT)%TARGET_CONTAINMENT .AND. I .LT. 359)
       I = I + 1
       IDEG = INT(DEG(I))
       IF (SUPP(IT)%NCELLS(IDEG) .EQ. 0) CYCLE
 
-      C => LIST_TAGGED%HEAD
-      DO J = 1, LIST_TAGGED%NUM_NODES
-
-         IF (C%SUPPRESSION_IDEG .NE. IDEG) THEN
-            C => C%NEXT
-            CYCLE
-         ENDIF
-
-         IF (C%TIME_SUPPRESSED .LT. 0.) THEN
-            C%TIME_SUPPRESSED = T
-            C%SUPPRESSION_ADJUSTMENT_FACTOR = 0.0
-         ENDIF
-         C => C%NEXT
-      ENDDO
+      SELECTED(IDEG) = .TRUE.
 
       CURRENT_CONTAINMENT = CURRENT_CONTAINMENT + (1. - SUPP(IT)%SUPPRESSED_FRACTION(IDEG)) * SUPP(IT)%FIRELINE_FRACTION(IDEG)
       SUPP(IT)%SUPPRESSED_FRACTION(IDEG) = 1.0
 
+   ENDDO
+
+   ! Single pass over the tagged list: suppress every not-yet-suppressed cell whose bin was selected.
+   C => LIST_TAGGED%HEAD
+   DO J = 1, LIST_TAGGED%NUM_NODES
+      IF (SELECTED(C%SUPPRESSION_IDEG) .AND. C%TIME_SUPPRESSED .LT. 0.) THEN
+         C%TIME_SUPPRESSED = T
+         C%SUPPRESSION_ADJUSTMENT_FACTOR = 0.0
+      ENDIF
+      C => C%NEXT
    ENDDO
 ENDIF
 
