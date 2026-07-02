@@ -250,6 +250,8 @@ REAL, ALLOCATABLE, DIMENSION(:,:) :: PHIP
 LOGICAL*1, ALLOCATABLE, DIMENSION(:,:) :: EVERTAGGED
 LOGICAL*1, ALLOCATABLE, DIMENSION(:,:) :: NEAR_URBAN                  ! for bldg spread type 3, cells within influence radius of any FBFM==91 cell
 LOGICAL*1, ALLOCATABLE, DIMENSION(:,:) :: BLDG_EMBER_IGNITED_MAP      ! for bldg spread type 3, ember-ignition flag from EULERIAN_SPOTTING_MAIN
+INTEGER :: BLDG_STENCIL_HAZ = 0                                       ! for bldg spread type 3, influence radius in cells (60 m / cellsize)
+REAL, ALLOCATABLE, DIMENSION(:,:) :: BLDG_STENCIL_G                   ! for bldg spread type 3, precomputed view-factor stencil cell_area/r^2 (0 outside radius / at self)
 REAL(8), ALLOCATABLE, DIMENSION (:,:) :: TIME_OF_ARRIVAL, EMBER_TOA
 
 ! 1D geospatial arrays

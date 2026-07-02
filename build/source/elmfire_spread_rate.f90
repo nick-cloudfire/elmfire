@@ -947,12 +947,90 @@ endif
 END FUNCTION CFFDRS_FW
 ! *****************************************************************************
 ! *****************************************************************************
+SUBROUTINE BLDG_ACCUMULATE_HEAT_STENCIL(LT, DT)
+! *****************************************************************************
+! Target-centered heat deposition for BLDG_SPREAD_MODEL_TYPE = 3. For each
+! unignited urban target in LT, gather source heat from HRR_TRANSIENT_MAP over
+! the precomputed neighborhood stencil BLDG_STENCIL_G (built once at init) and
+! deposit one DT of heat. Updates ACCUMULATED_HEAT [kJ/m^2] for the FTP ignition
+! check and TOTAL_DFC_RECEIVED / TOTAL_RAD_RECEIVED [kJ] for output.
+!
+! Replaces BLDG_ACCUMULATE_HEAT_FROM_NEIGHBORS, which scanned the entire front
+! once per burning source -- O(N_sources x N_front), the dominant runtime cost.
+! This pass is O(N_front x stencil) and does only multiply-adds (no sqrt/divide)
+! since the distance/view-factor geometry is static and folded into the stencil.
+! Result is identical to the former routine up to floating-point summation order.
+!
+! Decomposition per (target, in-range source), with G(dx,dy) = cell_area / r^2:
+!   ACCUMULATED_HEAT   += RAD_FRAC * (HRR * G)                    * DT
+!   TOTAL_DFC_RECEIVED += DFC_COEFF * cell_area * HRR             * DT   (distance-independent)
+!   TOTAL_RAD_RECEIVED += (RAD_FRAC*DFC_COEFF*RAD_COEFF*cell_area/(4 pi)) * (HRR * G) * DT
+! so only two per-target reductions are needed: SUM_FLAT = sum HRR, SUM_G = sum HRR*G.
+
+USE ELMFIRE_VARS
+
+TYPE(DLL), INTENT(INOUT) :: LT
+REAL, INTENT(IN) :: DT
+
+TYPE(NODE), POINTER :: TARG
+INTEGER :: I, DX, DY, JX, JY, NX_MAP, NY_MAP
+REAL :: G, S, SUM_G, SUM_FLAT, DFC_COEFF, RAD_COEFF, CELL_AREA
+REAL, PARAMETER :: RAD_FRAC = 0.3
+
+IF (.NOT. ALLOCATED(BLDG_STENCIL_G)) RETURN
+
+NX_MAP = SIZE(HRR_TRANSIENT_MAP, 1)
+NY_MAP = SIZE(HRR_TRANSIENT_MAP, 2)
+CELL_AREA = ANALYSIS_CELLSIZE * ANALYSIS_CELLSIZE
+
+TARG => LT%HEAD
+DO I = 1, LT%NUM_NODES
+   IF (.NOT. ASSOCIATED(TARG)) EXIT
+
+   ! Urban + unignited only. Accumulators freeze at ignition.
+   IF (TARG%IFBFM .EQ. 91 .AND. .NOT. TARG%BLDG_IGNITED) THEN
+      SUM_G    = 0.
+      SUM_FLAT = 0.
+      DO DY = -BLDG_STENCIL_HAZ, BLDG_STENCIL_HAZ
+         JY = TARG%IY + DY
+         IF (JY .LT. 1 .OR. JY .GT. NY_MAP) CYCLE
+         DO DX = -BLDG_STENCIL_HAZ, BLDG_STENCIL_HAZ
+            G = BLDG_STENCIL_G(DX,DY)
+            IF (G .LE. 0.) CYCLE                 ! out of range or self cell
+            JX = TARG%IX + DX
+            IF (JX .LT. 1 .OR. JX .GT. NX_MAP) CYCLE
+            S = HRR_TRANSIENT_MAP(JX,JY)
+            IF (S .LE. 0.) CYCLE
+            SUM_FLAT = SUM_FLAT + S
+            SUM_G    = SUM_G    + S * G
+         ENDDO
+      ENDDO
+
+      IF (SUM_FLAT .GT. 0.) THEN
+         DFC_COEFF = 1. - BUILDING_FUEL_MODEL_TABLE(TARG%IBLDGFM)%NONBURNABLE_FRAC
+         RAD_COEFF = BUILDING_FUEL_MODEL_TABLE(TARG%IBLDGFM)%ABSORPTIVITY
+
+         TARG%ACCUMULATED_HEAT   = TARG%ACCUMULATED_HEAT   + RAD_FRAC * SUM_G * DT
+         TARG%TOTAL_DFC_RECEIVED = TARG%TOTAL_DFC_RECEIVED + DFC_COEFF * CELL_AREA * SUM_FLAT * DT
+         TARG%TOTAL_RAD_RECEIVED = TARG%TOTAL_RAD_RECEIVED &
+                                 + (RAD_FRAC * DFC_COEFF * RAD_COEFF * CELL_AREA / (4. * PI)) * SUM_G * DT
+      ENDIF
+   ENDIF
+
+   TARG => TARG%NEXT
+ENDDO
+
+! *****************************************************************************
+END SUBROUTINE BLDG_ACCUMULATE_HEAT_STENCIL
+! *****************************************************************************
+
+! *****************************************************************************
 SUBROUTINE BLDG_ACCUMULATE_HEAT_FROM_NEIGHBORS(SOURCE, LT, DT)
 ! *****************************************************************************
-! Deposit one DT of heat from SOURCE onto every unignited urban target within
-! a 60 m radius. Updates ACCUMULATED_HEAT [kJ/m^2] for the FTP ignition check
-! and TOTAL_DFC_RECEIVED / TOTAL_RAD_RECEIVED [kJ] for output. Called once per
-! timestep from the ISTEP==1 block in UX_AND_UY_ELLIPTICAL. See CHANGELOG.
+! SUPERSEDED by BLDG_ACCUMULATE_HEAT_STENCIL (kept for reference / A-B testing;
+! no longer called). Deposit one DT of heat from SOURCE onto every unignited
+! urban target within a 60 m radius. Updates ACCUMULATED_HEAT [kJ/m^2] for the
+! FTP ignition check and TOTAL_DFC_RECEIVED / TOTAL_RAD_RECEIVED [kJ] for output.
 ! Part of BLDG_SPREAD_MODEL_TYPE = 3.
 
 USE ELMFIRE_VARS

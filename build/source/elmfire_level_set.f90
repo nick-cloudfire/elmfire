@@ -235,6 +235,32 @@ DO WHILE (T .le. totalDuration)
                ENDDO
                ENDDO
             END BLOCK
+
+            ! Precompute the neighborhood view-factor stencil G(dx,dy) = cell_area / r^2
+            ! for the 60 m influence radius. Distance/geometry are static, so the
+            ! per-timestep heat deposition (BLDG_ACCUMULATE_HEAT_STENCIL) reduces to
+            ! multiply-adds over this stencil - no sqrt/divide at runtime. Entries are
+            ! zero outside the radius and at the (0,0) self cell, exactly reproducing
+            ! the in-range/non-self gate of the former all-pairs scan.
+            BLOCK
+               INTEGER :: SDX, SDY, SHAZ
+               REAL :: DM, DM2, CA
+               REAL, PARAMETER :: RADIUS_M = 60.0
+               SHAZ = CEILING(RADIUS_M / ANALYSIS_CELLSIZE)
+               BLDG_STENCIL_HAZ = SHAZ
+               ALLOCATE(BLDG_STENCIL_G(-SHAZ:SHAZ, -SHAZ:SHAZ)); BLDG_STENCIL_G(:,:) = 0.
+               CA = ANALYSIS_CELLSIZE * ANALYSIS_CELLSIZE
+               DO SDY = -SHAZ, SHAZ
+               DO SDX = -SHAZ, SHAZ
+                  IF (SDX .EQ. 0 .AND. SDY .EQ. 0) CYCLE
+                  DM = SQRT(REAL(SDX*SDX + SDY*SDY)) * ANALYSIS_CELLSIZE
+                  IF (DM .LE. RADIUS_M) THEN
+                     DM2 = MAX(DM*DM, CA)
+                     BLDG_STENCIL_G(SDX,SDY) = CA / DM2
+                  ENDIF
+               ENDDO
+               ENDDO
+            END BLOCK
          ENDIF
 #endif
 
@@ -2138,39 +2164,44 @@ LOGICAL :: DONE, CROWN_FIRE_AT_START, CROWN_FIRE_AT_END
 
 C => L%HEAD
 #ifdef _WUI
-IF (USE_BLDG_SPREAD_MODEL .AND. (BLDG_SPREAD_MODEL_TYPE .EQ. 2)) THEN
+IF (USE_BLDG_SPREAD_MODEL) THEN
    LB_P => LB%HEAD
-
-   DO I = 1, LB%NUM_NODES
-      CALL ELLIPSE_UCB(LB_P)
-      CALL HRR_TRANSIENT(LB_P, T_ELMFIRE)
-      LB_P%FLIN_SURFACE = LB_P%HRR_TRANSIENT*ANALYSIS_CELLSIZE ! kW/m
-      LB_P => LB_P%NEXT
-   ENDDO
-ELSEIF (USE_BLDG_SPREAD_MODEL .AND. (BLDG_SPREAD_MODEL_TYPE .EQ. 3)) THEN
-   ! Refresh HRR_TRANSIENT on every burned source each RK stage (idempotent).
-   LB_P => LB%HEAD
-   DO I = 1, LB%NUM_NODES
-      IF (LB_P%IFBFM .EQ. 91) THEN
-         CALL BLDG_SET_URBAN_HRR(LB_P, T_ELMFIRE)
-      ELSE
-         CALL BLDG_SET_WILDLAND_HRR(LB_P, T_ELMFIRE)
-      ENDIF
-      LB_P => LB_P%NEXT
-   ENDDO
-
-   ! Deposit heat once per physical timestep (RK2 calls this routine twice).
-   ! Runs before the ISTEP==1 BLDG_CHECK_IGNITION pass below.
-   IF (ISTEP .EQ. 1) THEN
+   IF (BLDG_SPREAD_MODEL_TYPE .EQ. 2) THEN
+      DO I = 1, LB%NUM_NODES
+         CALL ELLIPSE_UCB(LB_P)
+         CALL HRR_TRANSIENT(LB_P, T_ELMFIRE)
+         LB_P%FLIN_SURFACE = LB_P%HRR_TRANSIENT*ANALYSIS_CELLSIZE ! kW/m
+         LB_P => LB_P%NEXT
+      ENDDO
+   ELSEIF (BLDG_SPREAD_MODEL_TYPE .EQ. 3) THEN
+      ! Refresh HRR_TRANSIENT on every burned source each RK stage (idempotent).
       LB_P => LB%HEAD
       DO I = 1, LB%NUM_NODES
-         IF (LB_P%HRR_TRANSIENT .GT. 0.) THEN
-            CALL BLDG_ACCUMULATE_HEAT_FROM_NEIGHBORS(LB_P, L, SIMULATION_DT)
+         IF (LB_P%IFBFM .EQ. 91) THEN
+            CALL BLDG_SET_URBAN_HRR(LB_P, T_ELMFIRE)
+         ELSE
+            CALL BLDG_SET_WILDLAND_HRR(LB_P, T_ELMFIRE)
          ENDIF
          LB_P => LB_P%NEXT
       ENDDO
+
+      ! Deposit heat once per physical timestep (RK2 calls this routine twice).
+      ! Runs before the ISTEP==1 BLDG_CHECK_IGNITION pass below.
+      IF (ISTEP .EQ. 1) THEN
+         ! Publish current source HRR to the per-cell grid, then deposit heat onto
+         ! unignited urban targets via a precomputed neighborhood stencil. This
+         ! replaces the former O(N_sources x N_front) all-pairs scan
+         ! (BLDG_ACCUMULATE_HEAT_FROM_NEIGHBORS) with an O(N_front x stencil) pass.
+         HRR_TRANSIENT_MAP(:,:) = 0.
+         LB_P => LB%HEAD
+         DO I = 1, LB%NUM_NODES
+            IF (LB_P%HRR_TRANSIENT .GT. 0.) HRR_TRANSIENT_MAP(LB_P%IX, LB_P%IY) = LB_P%HRR_TRANSIENT
+            LB_P => LB_P%NEXT
+         ENDDO
+         CALL BLDG_ACCUMULATE_HEAT_STENCIL(L, SIMULATION_DT)
+      ENDIF
    ENDIF
-ENDIF
+endif
 #endif
 
 IF (ISTEP .EQ. 1) THEN
