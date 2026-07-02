@@ -54,6 +54,7 @@ REAL, ALLOCATABLE, SAVE, DIMENSION(:) :: X,Y
 REAL, POINTER, DIMENSION(:,:), SAVE :: M1_LO, M1_HI, M10_LO, M10_HI, M100_LO, M100_HI, WS20_LO, WS20_HI, &
                                        WD20_LO, WD20_HI, MLH_LO, MLH_HI, MLW_LO, MLW_HI, FMC_LO, FMC_HI
 REAL, POINTER, SAVE, DIMENSION(:,:,:) :: A_TIMES_BURNED
+REAL, ALLOCATABLE, DIMENSION(:,:) :: DYNAMIC_ARRAY  ! Dynamic array to store IX and IY DWI_SU
 
 LOGICAL :: IA_HAS_OCCURRED, LOPEN, GO, CALL_SPOTTING, JUST_INTERPOLATED, DUMP_SMOKE_OUTPUTS, RUN, &
             INITIATED, START_CALCS, IS_FINAL_DUMP
@@ -544,8 +545,8 @@ DO WHILE (T .le. totalDuration)
                   ELSE
                      LIST_BURNED%TAIL%IBLDGFM =  NO_DATA
                   ENDIF
-                  ! Tagged WUI cells, for use in the refactored WUI spread model
-                  IF(BLDG_SPREAD_MODEL_TYPE .EQ. 2) CALL TAG_WUI(NX, NY, IX, IY, T)
+                  ! Populate DYNAMIC_ARRAY of burned cells for the UMD-UCB (type 2) model
+                  IF(BLDG_SPREAD_MODEL_TYPE .EQ. 2) CALL APPEND_TO_DYNAMIC_ARRAY(IX, IY, LIST_BURNED%NUM_NODES, DYNAMIC_ARRAY)
                ELSE
                   LIST_BURNED%TAIL%IBLDGFM = NO_DATA
                ENDIF
@@ -573,7 +574,7 @@ DO WHILE (T .le. totalDuration)
             CALL CALC_NORMAL_VECTORS (ISTEP, HALFRCELLSIZE)
 
             ! Calculate x and y components of velocity from elliptical spread dimensions
-            CALL UX_AND_UY_ELLIPTICAL(LIST_BURNED, 1.0, ISTEP, DT)
+            CALL UX_AND_UY_ELLIPTICAL(LIST_BURNED, LIST_BURNED, 1.0, ISTEP, T, DYNAMIC_ARRAY)
             
             !Apply canopy fire and other parts that depend on directional ROS (instead of max head ros)
             call UPDATE_LOCAL_SPREAD_PROPERTIES(LIST_BURNED, C)
@@ -633,8 +634,7 @@ DO WHILE (T .le. totalDuration)
                   L_WUI_P%HRRPUA = L_WUI_P%FLIN_SURFACE / ANALYSIS_CELLSIZE
                ENDIF
                CALL HRR_TRANSIENT(L_WUI_P, T)
-               CALL CALC_WUI_HEATFLUX(L_WUI_P, NX, NY, DT)
-           
+
                HRR_TRANSIENT_MAP(IX,IY) = L_WUI_P%HRR_TRANSIENT
 
                L_WUI_P => L_WUI_P%NEXT
@@ -745,8 +745,8 @@ DO WHILE (T .le. totalDuration)
             CALL APPEND(LIST_BURNED,IX_IGN,IY_IGN,T)
 #ifdef _WUI
             IF (USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .EQ. 2) THEN
-               ! Tag WUI cells
-               CALL TAG_WUI(NX, NY, IX_IGN, IY_IGN, T) 
+               ! Populate DYNAMIC_ARRAY of burned cells for the UMD-UCB (type 2) model
+               CALL APPEND_TO_DYNAMIC_ARRAY(IX_IGN, IY_IGN, LIST_BURNED%NUM_NODES, DYNAMIC_ARRAY)
             ENDIF
 #endif
          ENDIF
@@ -772,8 +772,8 @@ DO WHILE (T .le. totalDuration)
                CALL APPEND(LIST_BURNED,IX_IGN,IY_IGN,T)
 
                IF (USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .EQ. 2) THEN
-                  ! Tag WUI cells
-                  CALL TAG_WUI(NX, NY, IX_IGN, IY_IGN, T) 
+                  ! Populate DYNAMIC_ARRAY of burned cells for the UMD-UCB (type 2) model
+                  CALL APPEND_TO_DYNAMIC_ARRAY(IX_IGN, IY_IGN, LIST_BURNED%NUM_NODES, DYNAMIC_ARRAY)
                ENDIF
             ENDIF
          ENDDO
@@ -1007,7 +1007,6 @@ DO WHILE (T .le. totalDuration)
                L_WUI_P%HRRPUA = L_WUI_P%FLIN_SURFACE / ANALYSIS_CELLSIZE
             ENDIF
             CALL HRR_TRANSIENT(L_WUI_P, T) ! This is to be modified to update HRR_TRANSIENT for all burning cells.
-            CALL CALC_WUI_HEATFLUX(L_WUI_P, NX, NY, DT)
 
             L_WUI_P => L_WUI_P%NEXT
          ENDDO
@@ -1021,7 +1020,7 @@ DO WHILE (T .le. totalDuration)
          CALL ACCUMULATE_CPU_USAGE(41, IT1, IT2)
 
          ! Calculate x and y components of velocity from elliptical spread dimensions
-         CALL UX_AND_UY_ELLIPTICAL(LIST_TAGGED, SURFACE_ACCELERATION_FACTOR, ISTEP, DT)
+         CALL UX_AND_UY_ELLIPTICAL(LIST_TAGGED, LIST_BURNED, SURFACE_ACCELERATION_FACTOR, ISTEP, T, DYNAMIC_ARRAY)
          CALL ACCUMULATE_CPU_USAGE(42, IT1, IT2)
          
          ! Update local spread properties that depend on canopy / fire velocity
@@ -2117,17 +2116,19 @@ END SUBROUTINE CALC_NORMAL_VECTORS
 ! *****************************************************************************
 
 ! *****************************************************************************
-SUBROUTINE UX_AND_UY_ELLIPTICAL(L, ACCELERATION_FACTOR, ISTEP, DT_ELMFIRE)
+SUBROUTINE UX_AND_UY_ELLIPTICAL(L, LB, ACCELERATION_FACTOR, ISTEP, T_ELMFIRE, DYNAMIC_ARRAY)
 ! *****************************************************************************
 ! Computes the x/y front-propagation velocity components (UX,UY), spread
 ! direction, and fireline intensity for each node in L from the elliptical
 ! spread template: combines slope/wind phi factors, length-to-width ratio,
 ! head/back speeds, crown-fire and WUI (Hamada/UCB) submodels.
 ! Parameter T_ELMFIRE added to update fireline intensity of structures over time
-REAL, INTENT(IN) :: ACCELERATION_FACTOR, DT_ELMFIRE
-TYPE(DLL), INTENT(INOUT) :: L
+REAL, INTENT(IN) :: ACCELERATION_FACTOR
+REAL(8), INTENT(IN) :: T_ELMFIRE
+TYPE(DLL), INTENT(INOUT) :: L, LB
 INTEGER, INTENT(IN) :: ISTEP
-TYPE(NODE), POINTER :: C
+TYPE(NODE), POINTER :: C, LB_P
+REAL, ALLOCATABLE, INTENT(INOUT), DIMENSION(:,:) :: DYNAMIC_ARRAY
 
 REAL :: PHIMAG, PHIWX, PHIWY, PHIX, PHIY, WSMFEFF, BOH, APHIS, APHIW, SINASPMPI, COSASPMPI, &
         RPHIMAG, SQRT_LOW2_M1
@@ -2250,11 +2251,6 @@ IF (ISTEP .EQ. 1) THEN
             C%TEST_INTERFACE = .FALSE.
             C%WTU_SPREAD = .FALSE.
 
-            IF (USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .EQ. 2 .AND. CRITICAL_HF_WUI .EQ. 2) THEN
-               C%TEST_INTERFACE = TEST_INTERFACE_WUI(C%IX,C%IY)
-               C%WTU_SPREAD = WTU_SPREAD_WUI(C%IX,C%IY)
-            ENDIF
-
             IF (USE_BLDG_SPREAD_MODEL .AND. C%IFBFM .EQ. 91) THEN
                IF (BLDG_SPREAD_MODEL_TYPE .EQ. 1) CALL HAMADA(C) ! GET C%VELOCITY_DMS, C%VBACK & C%LOW
                IF (BLDG_SPREAD_MODEL_TYPE .EQ. 2) CALL UMD_UCB_BLDG_SPREAD(C, LB, DYNAMIC_ARRAY) ! GET C%VELOCITY_DMS, C%VBACK & C%LOW
@@ -2311,8 +2307,12 @@ ELSE !ISTEP .EQ. 2
 #endif
 
 #ifdef _WUI                  
-         IF (USE_BLDG_SPREAD_MODEL .AND. (C%IFBFM .EQ. 91)) THEN
-            C%FLIN_SURFACE = HRR_TRANSIENT_MAP(C%IX,C%IY)*ANALYSIS_CELLSIZE ! kW/m
+         IF (USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .EQ. 2 .AND. C%IFBFM .EQ. 91) THEN
+            C%FLIN_SURFACE = C%HRR_TRANSIENT*ANALYSIS_CELLSIZE ! kW/m
+         ENDIF
+         IF (USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .EQ. 1 .AND. C%IFBFM .EQ. 91) THEN
+            CALL HRR_TRANSIENT(C, T_ELMFIRE)
+            C%FLIN_SURFACE = C%HRR_TRANSIENT*ANALYSIS_CELLSIZE ! kW/m
          ENDIF
          ! Model type 3: FLIN_SURFACE is already set in BLDG_SPREAD_MODEL_3
 #endif

@@ -1231,7 +1231,7 @@ SUBROUTINE APPEND(DL2, IX, IY, T)
 ! *****************************************************************************
    TYPE(DLL), INTENT(INOUT) :: DL2
    INTEGER,  INTENT(IN)     :: IX, IY
-   REAL,     INTENT(IN)     :: T
+   REAL(8),  INTENT(IN)     :: T
 
    TYPE(NODE), POINTER :: NP, NEW_NODE
 #ifdef _WUI
@@ -1302,6 +1302,42 @@ SUBROUTINE APPEND(DL2, IX, IY, T)
 
 ! *****************************************************************************
 END SUBROUTINE APPEND
+! *****************************************************************************
+
+! *****************************************************************************
+SUBROUTINE APPEND_TO_DYNAMIC_ARRAY(IX, IY, N_ROWS, DYNAMIC_ARRAY)
+! *****************************************************************************
+
+    INTEGER, INTENT(IN) :: IX, IY                         ! NEW_VALUES_TO_APPEND
+    INTEGER, INTENT(INOUT) :: N_ROWS
+    REAL, ALLOCATABLE, INTENT(INOUT), DIMENSION(:,:) :: DYNAMIC_ARRAY  ! Dynamic 2D array to store IX and IY
+
+
+    ! Local temporary array for resizing
+    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: TEMP_ARRAY
+
+    ! Handle the case where the array is unallocated
+    IF (N_ROWS .LE. 1) THEN
+        ALLOCATE(DYNAMIC_ARRAY(1, 2))           ! Allocate first column
+        DYNAMIC_ARRAY(1, 1) = IX
+        DYNAMIC_ARRAY(1, 2) = IY
+        N_ROWS = 1                              ! Set number of rows to 1
+    ELSE
+        ! Allocate a temporary array with one additional column
+        ALLOCATE(TEMP_ARRAY(N_ROWS, 2))
+        TEMP_ARRAY(1:N_ROWS-1, :) = DYNAMIC_ARRAY  ! Copy existing data
+        TEMP_ARRAY(N_ROWS, 1) = IX           ! Add new IX value
+        TEMP_ARRAY(N_ROWS, 2) = IY           ! Add new IY value
+
+        ! Replace the old array with the resized one
+        DEALLOCATE(DYNAMIC_ARRAY)
+        ALLOCATE(DYNAMIC_ARRAY(N_ROWS, 2))
+        DYNAMIC_ARRAY = TEMP_ARRAY
+    END IF
+
+
+! *****************************************************************************
+END SUBROUTINE APPEND_TO_DYNAMIC_ARRAY
 ! *****************************************************************************
 
 ! *****************************************************************************

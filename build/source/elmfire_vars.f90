@@ -624,7 +624,7 @@ TYPE NODE
 ! WUI model parameters
    TYPE(UCB_ELLIPSE) :: ELLIPSE_PARAMETERS
    INTEGER :: BLDG_FUEL_MODEL       = 0
-   INTEGER :: IBLDGFM               = -9999
+   INTEGER :: IBLDGFM               = 1
    INTEGER :: SIGN_X                = 1
    INTEGER :: SIGN_Y                = 1
    REAL    :: BLDG_AREA             = 0. ! Was HAMADA_A
@@ -633,6 +633,7 @@ TYPE NODE
    REAL    :: BLDG_FOOTPRINT_FRAC   = 0.
    REAL    :: RAD_DIST              = 100.
    REAL    :: WIND_PROP             = 1.
+   REAL    :: HEAT_VALUE            = 0.
    REAL    :: HRR_TRANSIENT         = 0.
    REAL    :: ABSOLUTE_U            = 0.
    REAL    :: TOTAL_DFC_RECEIVED    = 0.
@@ -668,11 +669,17 @@ TYPE NODE
 
 END TYPE NODE
 
+! Wrapper of pointers DWI_SU
+TYPE :: NODE_WRAPPER
+    TYPE(NODE), POINTER :: PTR  ! Each wrapper holds a pointer to a NODE
+END TYPE NODE_WRAPPER
+
 TYPE DLL
   TYPE(NODE), POINTER :: HEAD => NULL()
   TYPE(NODE), POINTER :: TAIL => NULL()
   INTEGER :: NUM_NODES = 0
   INTEGER :: NUM_NODES_PREVIOUS = 0
+  TYPE(NODE_WRAPPER), ALLOCATABLE :: NODE_POINTERS(:)   ! Array of pointers DWI_SU
 END TYPE DLL
 
 TYPE(DLL), TARGET :: LIST_TAGGED, LIST_BURNED, LIST_SUPPRESSED, LIST_VIRTUAL_STATIONS, LIST_EMBER_DEPOSITED, LIST_EMBER_TRACKER, LIST_WUI_BURNING
