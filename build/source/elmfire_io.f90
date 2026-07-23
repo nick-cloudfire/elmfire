@@ -3096,6 +3096,13 @@ DO
    READ(10, '(A)', IOSTAT=I) LINE
    IF (I /= 0) EXIT
 
+   ! Skip blank / non "key = value" lines when not inside a multi-line {...}
+   ! value. Without this the loop re-runs the SELECT CASE below on the stale
+   ! KEY/CURRENT_VALUE left over from the previous line (e.g. the trailing blank
+   ! line after 'data ignore value = -9999'), re-parsing a value that may no
+   ! longer be valid and crashing the unguarded numeric READs.
+   IF (.NOT. IN_MULTILINE .AND. INDEX(LINE, '=') == 0) CYCLE
+
    IF (IN_MULTILINE) THEN
       IF (INDEX(LINE, '}') > 0) THEN
          MULTILINE_VALUE = MULTILINE_VALUE // ' ' // TRIM(ADJUSTL(LINE(1:INDEX(LINE, '}')-1)))
