@@ -21,6 +21,10 @@ V ?= 0
 QUIET_0 = @
 QUIET = $(QUIET_$(V))
 
+# See Makefile_elmfire: -march=native by default; overridden to -mcpu=native (or
+# empty) by make_macos.sh for Apple Silicon.
+ELMFIRE_ARCH ?= -march=native
+
 .SUFFIXES: .f90 .for .o .obj
 
 .f90.o:
@@ -33,7 +37,7 @@ QUIET = $(QUIET_$(V))
 	$(QUIET)$(if $(QUIET),echo "  FC      $<";)$(FCOMPL) -c $(ELMFIRE_PRECOMPILER_FLAGS) $(FFLAGS) $<
 
 #Gnu compiler:
-gnu_linux : FFLAGS = -O3 -unroll -frecord-marker=4 -ffree-line-length-none -cpp -march=native -fopenmp -ffpe-summary=none
+gnu_linux : FFLAGS = -O3 -unroll -frecord-marker=4 -ffree-line-length-none -cpp $(ELMFIRE_ARCH) -fopenmp -ffpe-summary=none
 gnu_linux : FCOMPL = $(ELMFIRE_FCOMPL_MPI_GNU)
 gnu_linux : obj = elmfire_post
 gnu_linux : setup $(obj_mpi)

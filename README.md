@@ -66,6 +66,62 @@ cd $ELMFIRE_BASE_DIR/build/linux
 A [Docker image](Dockerfile) is also provided if you prefer a
 self-contained environment (`docker compose up`).
 
+## Quick start (macOS)
+
+ELMFIRE builds natively on macOS (Intel and Apple Silicon) with the GNU
+toolchain from [Homebrew](https://brew.sh). It uses the same source and
+Makefiles as the Linux build via a thin wrapper that sets the macOS-specific
+compiler/architecture options.
+
+```bash
+# 1. Install prerequisites (provides gfortran, mpifort, and the GDAL CLI)
+brew install gcc open-mpi gdal
+
+# 2. Clone the repository
+git clone https://github.com/lautenberger/elmfire.git
+
+# 3. Set environment variables (add these to ~/.zshrc)
+export ELMFIRE_BASE_DIR=/path/to/elmfire
+export ELMFIRE_SCRATCH_BASE=/path/to/scratch
+export ELMFIRE_INSTALL_DIR=$ELMFIRE_BASE_DIR/build/linux/bin
+export PATH=$PATH:$ELMFIRE_INSTALL_DIR:$ELMFIRE_BASE_DIR/cloudfire
+
+# 4. Build the executables
+cd $ELMFIRE_BASE_DIR/build/linux
+./make_macos.sh
+```
+
+Notes:
+* If your Homebrew Fortran compiler is versioned (e.g. `gfortran-14`), export
+  `ELMFIRE_FCOMPL_SERIAL_GNU` / `ELMFIRE_FCOMPL_MPI_GNU` to point at it before
+  building.
+* On Apple Silicon the wrapper automatically substitutes `-mcpu=native` for
+  `-march=native` (which arm64 gfortran rejects).
+* The build scripts and Makefiles live under `build/linux/`; that directory
+  name is historical — the GNU build path it contains is shared by Linux and
+  macOS.
+
+## Quick start (Windows)
+
+A Visual Studio solution is provided under
+[`build/visual_studio/`](build/visual_studio/) for building with the Intel
+Fortran compiler.
+
+1. Install the [Intel oneAPI HPC Toolkit](https://www.intel.com/content/www/us/en/developer/tools/oneapi/hpc-toolkit.html)
+   (Intel Fortran `ifx` + Intel MPI) and its Visual Studio 2022 integration.
+2. Install [GDAL for Windows](https://gdal.org/download.html) (e.g. via the
+   OSGeo4W installer or conda) and make sure the GDAL command-line tools
+   (`gdal_translate`, `gdalinfo`, `gdalsrsinfo`, `gdaltransform`) are on your
+   `PATH`, or set `PATH_TO_GDAL` in your input file. ELMFIRE shells out to
+   these tools for raster conversion.
+3. Open `build/visual_studio/elmfire.sln`, select the **Release / x64**
+   configuration, and build. The x64 configuration targets Intel MPI; the
+   legacy Win32 configuration (MPICH2) is deprecated.
+
+Alternatively, ELMFIRE runs unmodified under the
+[Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/windows/wsl/),
+where the Linux quick start above applies directly.
+
 ### Running your first case
 
 The fastest way to learn ELMFIRE is to run it. Work through the

@@ -247,14 +247,18 @@ CHARACTER(2000) :: PATH
 
 CALL GET_ENVIRONMENT_VARIABLE('PATH',PATH)
 
-IF (PATH(1:1) .EQ. '/') THEN 
-   OPERATING_SYSTEM = 'linux  '
+IF (PATH(1:1) .EQ. '/') THEN
+   OPERATING_SYSTEM = 'linux  '   ! also covers macOS (POSIX userland)
    PATH_SEPARATOR   = '/'
    DELETECOMMAND    = '/bin/rm -f '
+   NULL_REDIRECT    = '2>/dev/null'
+   WHICH_COMMAND    = 'command -v'
 ELSE
    OPERATING_SYSTEM = 'windows'
    PATH_SEPARATOR   = '\'
    DELETECOMMAND    = 'del   '
+   NULL_REDIRECT    = '2>NUL'
+   WHICH_COMMAND    = 'where'
 ENDIF
 
 ! *****************************************************************************
@@ -1524,7 +1528,7 @@ CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
 CALL MPI_FINALIZE(IERR)
 
-if (IRANK_WORLD .eq. 0 .and. CLEAN_SCRATCH) call execute_command_line("rm -f " // trim(SCRATCH) // "/*")
+if (IRANK_WORLD .eq. 0 .and. CLEAN_SCRATCH) call execute_command_line(trim(DELETECOMMAND) // " " // trim(SCRATCH) // "*")
 
 IF (IRANK_WORLD .EQ. 0) WRITE(*,*) 'End of simulation reached successfully. Shutting down.'
 
@@ -1840,7 +1844,7 @@ CLOSE(LUIN)
 ! 2. Build gdaltransform command:
 !    gdaltransform -s_srs SRC_SRS -t_srs EPSG:4326 < TMPIN > TMPOUT
 SHELLSTR = TRIM(PATH_TO_GDAL) // 'gdaltransform -s_srs "' // TRIM(A_SRS) // '"' // &
-            ' -t_srs EPSG:4326 < ' // TRIM(TMPIN) // ' > ' // TRIM(TMPOUT) // ' 2>/dev/null'
+            ' -t_srs EPSG:4326 < ' // TRIM(TMPIN) // ' > ' // TRIM(TMPOUT) // ' ' // TRIM(NULL_REDIRECT)
 
 ! WRITE(*,*) 'Running: ', TRIM(SHELLSTR)
 CALL EXECUTE_COMMAND_LINE(TRIM(SHELLSTR), EXITSTAT=IOS)
@@ -1867,7 +1871,7 @@ IF (IOS .NE. 0) THEN
 END IF
 
 ! 4. (Optional) clean up temp files
-CALL EXECUTE_COMMAND_LINE('rm -f ' // TRIM(TMPIN)  // ' ' // TRIM(TMPOUT))
+CALL EXECUTE_COMMAND_LINE(TRIM(DELETECOMMAND) // ' ' // TRIM(TMPIN)  // ' ' // TRIM(TMPOUT))
 ! *****************************************************************************
 END SUBROUTINE XY_TO_LATLON
 ! *****************************************************************************
@@ -1897,8 +1901,8 @@ subroutine read_geotiff_meta_gdalinfo()
    is_metre = .false.
 
    write(istr,'(I0)') IRANK_WORLD
-   tmpfile      = trim(SCRATCH) // '/' // '._gdalinfo_tmp_'//trim(istr)//'.txt'
-   tmpfile_epsg = trim(SCRATCH) // '/' // '._gdalsrsinfo_tmp_'//trim(istr)//'.txt'
+   tmpfile      = trim(SCRATCH) // '._gdalinfo_tmp_'//trim(istr)//'.txt'
+   tmpfile_epsg = trim(SCRATCH) // '._gdalsrsinfo_tmp_'//trim(istr)//'.txt'
 
    ! When a combined landscape file is used the individual layer filenames are
    ! blank, so derive the analysis grid metadata from the landscape file instead.
@@ -1938,7 +1942,7 @@ contains
    subroutine read_basic_raster_meta()
    ! Runs gdalinfo on the target raster, writes output to a temp file, and parses
    ! it line by line to extract size, origin, pixel size, and metre-units flag.
-      write(cmd,'(a)') 'gdalinfo "' // trim(FUELS_AND_TOPOGRAPHY_DIRECTORY) // '/' // &
+      write(cmd,'(a)') trim(PATH_TO_GDAL) // 'gdalinfo "' // trim(FUELS_AND_TOPOGRAPHY_DIRECTORY) // &
                        trim(tempFilename) // '" > "' // trim(tmpfile) // '"'
       call execute_command_line(trim(cmd))
 
@@ -1964,7 +1968,7 @@ contains
       integer :: p
       character(len=1024) :: text
 
-      write(cmd,'(a)') 'gdalsrsinfo -o epsg "' // trim(FUELS_AND_TOPOGRAPHY_DIRECTORY) // '/' // &
+      write(cmd,'(a)') trim(PATH_TO_GDAL) // 'gdalsrsinfo -o epsg "' // trim(FUELS_AND_TOPOGRAPHY_DIRECTORY) // &
                      trim(tempFilename) // '" > "' // trim(tmpfile_epsg) // '"'
       call execute_command_line(trim(cmd))
 

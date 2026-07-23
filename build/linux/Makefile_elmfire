@@ -25,6 +25,12 @@ V ?= 0
 QUIET_0 = @
 QUIET = $(QUIET_$(V))
 
+# Architecture tuning flag for the GNU builds. Defaults to -march=native, which
+# is correct for Linux and Intel macOS. Apple Silicon gfortran rejects
+# -march=native, so make_macos.sh overrides this with -mcpu=native (or empty)
+# via the environment. Override at build time: `make ELMFIRE_ARCH=-mcpu=native ...`.
+ELMFIRE_ARCH ?= -march=native
+
 .SUFFIXES: .f90 .for .o .obj
 
 .f90.o:
@@ -37,25 +43,25 @@ QUIET = $(QUIET_$(V))
 	$(QUIET)$(if $(QUIET),echo "  FC      $<";)$(FCOMPL) -c $(ELMFIRE_PRECOMPILER_FLAGS) $(FFLAGS) $<
 
 #Gnu compiler:
-gnu_mpi_linux : FFLAGS = -O3 -unroll -frecord-marker=4 -ffree-line-length-none -cpp -march=native -ffpe-summary=none
+gnu_mpi_linux : FFLAGS = -O3 -unroll -frecord-marker=4 -ffree-line-length-none -cpp $(ELMFIRE_ARCH) -ffpe-summary=none
 gnu_mpi_linux : FCOMPL = $(ELMFIRE_FCOMPL_MPI_GNU)
 gnu_mpi_linux : obj = elmfire
 gnu_mpi_linux : setup $(obj_mpi)
 	$(QUIET)$(if $(QUIET),echo "  LD      $(obj)";)$(FCOMPL) $(ELMFIRE_PRECOMPILER_FLAGS) $(FFLAGS) -o $(obj) $(obj_mpi)
 
-gnu_mpi_gprof_linux : FFLAGS = -O2 -pg -g -Wall -Wno-character-truncation -Wno-conversion -frecord-marker=4 -ffree-line-length-none -cpp -march=native -ffpe-summary=none
+gnu_mpi_gprof_linux : FFLAGS = -O2 -pg -g -Wall -Wno-character-truncation -Wno-conversion -frecord-marker=4 -ffree-line-length-none -cpp $(ELMFIRE_ARCH) -ffpe-summary=none
 gnu_mpi_gprof_linux : FCOMPL = $(ELMFIRE_FCOMPL_MPI_GNU)
 gnu_mpi_gprof_linux : obj = elmfire_gprof
 gnu_mpi_gprof_linux : setup $(obj_mpi)
 	$(QUIET)$(if $(QUIET),echo "  LD      $(obj)";)$(FCOMPL) $(ELMFIRE_PRECOMPILER_FLAGS) $(FFLAGS) -o $(obj) $(obj_mpi)
 
-gnu_mpi_block_linux : FFLAGS = -O2 -pg -g -Wall -Wno-character-truncation -Wno-conversion -frecord-marker=4 -ffree-line-length-none -cpp -march=native -ffpe-summary=none
+gnu_mpi_block_linux : FFLAGS = -O2 -pg -g -Wall -Wno-character-truncation -Wno-conversion -frecord-marker=4 -ffree-line-length-none -cpp $(ELMFIRE_ARCH) -ffpe-summary=none
 gnu_mpi_block_linux : FCOMPL = $(ELMFIRE_FCOMPL_MPI_GNU)
 gnu_mpi_block_linux : obj = elmfire_block
 gnu_mpi_block_linux : setup $(obj_mpi)
 	$(QUIET)$(if $(QUIET),echo "  LD      $(obj)";)$(FCOMPL) $(ELMFIRE_PRECOMPILER_FLAGS) $(FFLAGS) -o $(obj) $(obj_mpi)
 
-gnu_mpi_perf_linux : FFLAGS = -O2 -g -Wall -Wno-character-truncation -Wno-conversion -frecord-marker=4 -ffree-line-length-none -cpp -march=native
+gnu_mpi_perf_linux : FFLAGS = -O2 -g -Wall -Wno-character-truncation -Wno-conversion -frecord-marker=4 -ffree-line-length-none -cpp $(ELMFIRE_ARCH)
 gnu_mpi_perf_linux : FCOMPL = $(ELMFIRE_FCOMPL_MPI_GNU)
 gnu_mpi_perf_linux : obj = elmfire_perf
 gnu_mpi_perf_linux : setup $(obj_mpi)

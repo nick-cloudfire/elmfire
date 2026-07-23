@@ -4,7 +4,8 @@
 # Override at build time by exporting ELMFIRE_VER. The compiled-in banner
 # (VERSIONSTRING in ../source/elmfire.f90) is kept in sync below.
 ELMFIRE_VER=${ELMFIRE_VER:-$(tr -d '[:space:]' < ../../VERSION)}
-sed -i "s/VERSIONSTRING='ELMFIRE [^']*'/VERSIONSTRING='ELMFIRE $ELMFIRE_VER'/" ../source/elmfire.f90
+# Portable in-place edit across GNU sed (Linux) and BSD sed (macOS).
+sed -i.bak "s/VERSIONSTRING='ELMFIRE [^']*'/VERSIONSTRING='ELMFIRE $ELMFIRE_VER'/" ../source/elmfire.f90 && rm -f ../source/elmfire.f90.bak
 
 # ELMFIRE uses several environment variables for compilation. If the default
 # values specified on lines 14 - 16 below are not appropriate for your system,

@@ -42,7 +42,7 @@ ENDIF
 IF (TRIM(PATH_TO_GDAL) .EQ. 'auto') THEN
    WRITE(RANKSTR,'(I0)') IRANK_WORLD
    GDALTMP = '.elmfire_gdal_path_' // TRIM(RANKSTR) // '.txt'
-   CALL EXECUTE_COMMAND_LINE('command -v gdal_translate > ' // TRIM(GDALTMP) // ' 2>/dev/null', EXITSTAT=IOS)
+   CALL EXECUTE_COMMAND_LINE(TRIM(WHICH_COMMAND) // ' gdal_translate > ' // TRIM(GDALTMP) // ' ' // TRIM(NULL_REDIRECT), EXITSTAT=IOS)
 
    GDALEXE = ''
    OPEN(NEWUNIT=LUGDAL, FILE=TRIM(GDALTMP), STATUS='OLD', ACTION='READ', IOSTAT=IOS)
@@ -57,12 +57,18 @@ IF (TRIM(PATH_TO_GDAL) .EQ. 'auto') THEN
       PATH_TO_GDAL = GDALEXE(1:ISLASH-1)
       IF (IRANK_WORLD .EQ. 0) WRITE(*,*) 'Auto-detected PATH_TO_GDAL: ', TRIM(PATH_TO_GDAL)
    ELSE
-      PATH_TO_GDAL = '/usr/bin'
+      IF (TRIM(OPERATING_SYSTEM) .EQ. 'windows') THEN
+         PATH_TO_GDAL = ''         ! no sensible default on Windows; rely on system PATH
+      ELSE
+         PATH_TO_GDAL = '/usr/bin'
+      ENDIF
       IF (IRANK_WORLD .EQ. 0) WRITE(*,*) 'Could not auto-detect GDAL on PATH; falling back to PATH_TO_GDAL = ', TRIM(PATH_TO_GDAL)
    ENDIF
 ENDIF
 
-PATH_TO_GDAL = TRIM(PATH_TO_GDAL) // PATH_SEPARATOR
+! Append a separator only when a directory was actually resolved; an empty
+! PATH_TO_GDAL means "invoke the GDAL tools bare and rely on the system PATH".
+IF (LEN_TRIM(PATH_TO_GDAL) .GT. 0) PATH_TO_GDAL = TRIM(PATH_TO_GDAL) // PATH_SEPARATOR
 
 ! if dirs are still null don't add a path separator
 IF (MISCELLANEOUS_INPUTS_DIRECTORY .NE. 'null') THEN

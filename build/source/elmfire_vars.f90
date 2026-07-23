@@ -267,10 +267,13 @@ INTEGER*2, ALLOCATABLE, DIMENSION (:) :: EMBER_OUTPUTS_COUNT
 REAL, ALLOCATABLE, DIMENSION(:) :: COEFFS, COEFFS_UNSCALED
 REAL, ALLOCATABLE, DIMENSION(:,:) :: COEFFS_UNSCALED_BY_CASE
 
-! OS-specific
+! OS-specific. Defaults are the POSIX (linux/macOS) forms; GET_OPERATING_SYSTEM
+! overrides them with cmd.exe equivalents when running on Windows.
 CHARACTER(12) :: DELETECOMMAND = '/bin/rm -f '
 CHARACTER(1) :: PATH_SEPARATOR
 CHARACTER(7) :: OPERATING_SYSTEM
+CHARACTER(11) :: NULL_REDIRECT = '2>/dev/null' ! stderr sink: '2>/dev/null' vs '2>NUL'
+CHARACTER(10) :: WHICH_COMMAND = 'command -v'  ! locate an exe on PATH: 'command -v' vs 'where'
 
 ! Binary outputs
 INTEGER*2, POINTER, DIMENSION (:) :: BINARY_OUTPUTS_IX            => NULL()
