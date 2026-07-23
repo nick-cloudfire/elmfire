@@ -1070,8 +1070,8 @@ CHARACTER(7) :: ISSAMPLES
 CHARACTER(9) :: ISDATATYPE
 CHARACTER(24) :: ISNODATA
 CHARACTER(400), ALLOCATABLE, DIMENSION(:) :: LINES
-INTEGER :: I, IOS, IPOS, ISTAT, ITYPE, NLINES
-LOGICAL :: XML_EXISTS
+INTEGER :: I, J, IDUMMY, IOS, IPOS, ISTAT, ITYPE, NLINES
+LOGICAL :: XML_EXISTS, FOUND
 
 IF (VRT_INSTEAD_OF_TIF) THEN
    FNTIF = TRIM(INDIR) // TRIM(FN) // '.vrt'
@@ -1180,6 +1180,54 @@ ENDDO
 RASTER%BANDROWBYTES  = (RASTER%NBITS/8) * RASTER%NCOLS
 RASTER%TOTALROWBYTES = RASTER%BANDROWBYTES * RASTER%NBANDS
 
+! The .aux.xml carries no georeferencing, so read easting/northing/cell size
+! from the ENVI .hdr map info line to fully populate RASTER:
+OPEN(LUINPUT,FILE=TRIM(FNHDR),FORM='FORMATTED',STATUS='OLD',IOSTAT=IOS)
+IF (IOS .NE. 0) THEN
+   WRITE(*,*) 'Problem opening bsq header ', TRIM(FNHDR)
+ENDIF
+
+IF (FEEDBACK_LEVEL .GE. 3) WRITE(*,*) 'Reading bsq header from ', trim(FN)
+
+! Skip 11 lines
+DO I = 1, 11
+   READ(LUINPUT,100,IOSTAT=IOS)
+ENDDO
+
+! Read easting, northing, and cell size info:
+READ(LUINPUT,100,IOSTAT=IOS) TEMPSTR
+FOUND=.FALSE.; I=1
+DO WHILE (.NOT. FOUND)
+   IF(TEMPSTR(I:I) .EQ. ',') THEN
+      FOUND=.TRUE.
+   ELSE
+      I=I+1
+   ENDIF
+ENDDO
+J=I+1
+DO I=1,130
+   IF (TEMPSTR(I:I) .EQ. '}') TEMPSTR(I:I)=' '
+ENDDO
+READ(TEMPSTR(J:),*) IDUMMY, IDUMMY, RASTER%XLLCORNER, RASTER%YLLCORNER, RASTER%XDIM, RASTER%YDIM
+RASTER%YLLCORNER = RASTER%YLLCORNER - RASTER%YDIM * RASTER%NROWS
+CLOSE(LUINPUT)
+
+! Check to make sure x and y cell sizes are the same:
+IF (RASTER%XDIM .NE. RASTER%YDIM) THEN
+   WRITE(*,*) 'Error opening ', TRIM(FNHDR), ' because XDIM is not equal to YDIM.'
+   STOP
+ELSE
+   RASTER%CELLSIZE=RASTER%XDIM
+ENDIF
+
+! Set ULXMAP and ULYMAP
+RASTER%ULXMAP = RASTER%XLLCORNER + 0.5 * RASTER%CELLSIZE
+RASTER%ULYMAP = RASTER%YLLCORNER + RASTER%NROWS * RASTER%CELLSIZE - 0.5 * RASTER%CELLSIZE
+
+! Layout matches the BIL dump used elsewhere in ELMFIRE:
+RASTER%BYTEORDER = 'I'
+RASTER%LAYOUT    = 'BIL'
+
 IF (DELETE_INTERMEDIATE_FILES) THEN
    SHELLSTR = TRIM(DELETECOMMAND) // " " // TRIM(FNBSQ) // " " // TRIM(FNHDR) // " " // TRIM(FNPRJ) // " " // TRIM(FNXML)
    IF (FEEDBACK_LEVEL .GE. 3) WRITE(*,100) TRIM(SHELLSTR)
@@ -1245,6 +1293,7 @@ CHARACTER(3) :: INTERLEAVE
 CHARACTER(1024) :: COORDINATE_SYSTEM, DESCRIPTION
 CHARACTER(1024) :: DEFAULT_BANDS, BAND_NAMES
 CHARACTER(64) :: FILE_TYPE, PROJECTION_NAME
+LOGICAL :: BSQ_IN_INPUTS, HDR_EXISTS
 
 IF (VRT_INSTEAD_OF_TIF) THEN
    FNTIF = TRIM(INDIR) // TRIM(FN) // '.vrt'
@@ -1252,12 +1301,26 @@ ELSE
    FNTIF = TRIM(INDIR) // TRIM(FN) // '.tif'
 ENDIF
 
-IF (TRIM(SCRATCH) .EQ. 'null') THEN
+inquire(file=TRIM(INDIR) // TRIM(FN) // '.bsq', exist=BSQ_IN_INPUTS)
+
+IF (BSQ_IN_INPUTS) THEN
    FNHDR = TRIM(INDIR) // TRIM(FN) // '.hdr'
    FNBSQ = TRIM(INDIR) // TRIM(FN) // '.bsq'
 ELSE
    FNHDR = TRIM(SCRATCH) // TRIM(FN) // '.hdr'
    FNBSQ = TRIM(SCRATCH) // TRIM(FN) // '.bsq'
+ENDIF
+
+! Convert the source GeoTIFF to ENVI BSQ (which also writes the .hdr parsed
+! below) when that .hdr does not already exist. READ_BSQ_XML_HEADER performs the
+! equivalent conversion for its own path; without doing it here too, a
+! USE_BSQ_XML_HEADER=.FALSE. run would try to read a .hdr that nothing has
+! created yet (e.g. landscape-file mode) and fail with 'ERROR OPENING HDR FILE'.
+INQUIRE(FILE=TRIM(FNHDR), EXIST=HDR_EXISTS)
+IF (.NOT. USE_EXISTING_BSQS .AND. .NOT. HDR_EXISTS) THEN
+   SHELLSTR = TRIM(PATH_TO_GDAL) // 'gdal_translate -q -of ENVI -co "INTERLEAVE=BSQ" ' // TRIM(FNTIF) // " " // TRIM(FNBSQ)
+   IF (FEEDBACK_LEVEL .GE. 3) WRITE(*,100) TRIM(SHELLSTR)
+   CALL EXECUTE_COMMAND_LINE(TRIM(SHELLSTR))
 ENDIF
 
 CALL PARSE_ENVI_HEADER(FNHDR, DESCRIPTION, SAMPLES, LINES, BANDS, HEADER_OFFSET, FILE_TYPE, DATA_TYPE, INTERLEAVE, BYTE_ORDER, BAND_NAMES, COORDINATE_SYSTEM, DATA_IGNORE_VALUE, DEFAULT_BANDS, PROJECTION_NAME, X_PIXEL_REFERENCE, Y_PIXEL_REFERENCE, EASTING, NORTHING, X_PIXEL_SIZE, Y_PIXEL_SIZE)
@@ -1318,248 +1381,44 @@ END SUBROUTINE READ_BSQ_HDR_HEADER
 ! *****************************************************************************
 
 ! *****************************************************************************
-!> Read .xml metadata of existing split FNIN.bsq raster. Save metadata in RASTER.
+!> Read the header of an existing 3x3 split (tiled) raster. Delegates to the
+!> same routines used for non-tiled input to parse the (1,1) tile header
+!> (honoring USE_BSQ_XML_HEADER: ENVI .hdr by default, GDAL .aux.xml only when
+!> the switch is set), then expands the stored dimensions and lower-left corner
+!> from that single tile to the full mosaic.
 SUBROUTINE READ_BSQ_HEADER_EXISTING_TILED(RASTER,FNIN)
 ! *****************************************************************************
 
-#ifdef __INTEL_COMPILER
-USE IFPORT
-#endif
-
 TYPE (RASTER_TYPE) :: RASTER
-CHARACTER(400), INTENT (IN)     :: FNIN
-CHARACTER(400) :: FNHDR, FNBSQ, FNXML, TEMPSTR
-CHARACTER(400) :: VALUESTR
-INTEGER :: I, J, IOS, ITYPE, ITILE, JTILE, IDUMMY
-LOGICAL :: FOUND
-LOGICAL :: GOT_SAMPLES, GOT_LINES, GOT_BANDS, GOT_DATATYPE, GOT_NODATA
-CHARACTER(1), DIMENSION(1:3), PARAMETER :: CINDEX = (/'1', '2', '3'/)
+CHARACTER(400), INTENT (IN) :: FNIN
+CHARACTER(400) :: FNTILE, NULLDIR
+INTEGER :: NCOLS_TILE, NROWS_TILE
 
-ITILE = 1
-JTILE = 1
+! Base name of the (1,1) tile; the normal header readers append .hdr/.bsq/.xml.
+! FNIN already carries the full directory path, so pass an empty INDIR.
+NULLDIR = ''
+FNTILE  = TRIM(FNIN) // '_1_1'
 
-FNHDR = TRIM(FNIN) // '_' // CINDEX(ITILE) // '_' // CINDEX(JTILE) // '.hdr'
-FNBSQ = TRIM(FNIN) // '_' // CINDEX(ITILE) // '_' // CINDEX(JTILE) // '.bsq'
-FNXML = TRIM(FNBSQ) // '.aux.xml'
-
-RASTER%NBANDS       = 1
-RASTER%NROWS        = -1
-RASTER%NCOLS        = -1
-RASTER%NBITS        = -1
-RASTER%NODATA_VALUE = 0.0
-RASTER%PIXELTYPE    = 'UNKNOWN'
-
-GOT_SAMPLES  = .FALSE.
-GOT_LINES    = .FALSE.
-GOT_BANDS    = .FALSE.
-GOT_DATATYPE = .FALSE.
-GOT_NODATA   = .FALSE.
-
-OPEN(LUINPUT,FILE=TRIM(FNXML),FORM='FORMATTED',STATUS='OLD',IOSTAT=IOS)
-IF (IOS .NE. 0) THEN
-   WRITE(*,*) 'Problem opening bsq xml header ', TRIM(FNXML)
-   WRITE(*,*) 'IOS: ', IOS
-   STOP
-ENDIF
-
-DO
-   READ(LUINPUT,100,IOSTAT=IOS) TEMPSTR
-   IF (IOS .NE. 0) EXIT
-
-   CALL GET_MDI_VALUE(TEMPSTR, 'samples', VALUESTR, FOUND)
-   IF (FOUND) THEN
-      READ(VALUESTR,*,IOSTAT=IOS) RASTER%NCOLS
-      IF (IOS .EQ. 0) GOT_SAMPLES = .TRUE.
-      CYCLE
-   ENDIF
-
-   CALL GET_MDI_VALUE(TEMPSTR, 'lines', VALUESTR, FOUND)
-   IF (FOUND) THEN
-      READ(VALUESTR,*,IOSTAT=IOS) RASTER%NROWS
-      IF (IOS .EQ. 0) GOT_LINES = .TRUE.
-      CYCLE
-   ENDIF
-
-   CALL GET_MDI_VALUE(TEMPSTR, 'bands', VALUESTR, FOUND)
-   IF (FOUND) THEN
-      READ(VALUESTR,*,IOSTAT=IOS) RASTER%NBANDS
-      IF (IOS .EQ. 0) GOT_BANDS = .TRUE.
-      CYCLE
-   ENDIF
-
-   CALL GET_MDI_VALUE(TEMPSTR, 'data_type', VALUESTR, FOUND)
-   IF (FOUND) THEN
-      READ(VALUESTR,*,IOSTAT=IOS) ITYPE
-      IF (IOS .EQ. 0) THEN
-         GOT_DATATYPE = .TRUE.
-         CALL CLASSIFY_ENVI_DATA_TYPE(ITYPE, RASTER%PIXELTYPE, RASTER%NBITS, FNXML)
-      ENDIF
-      CYCLE
-   ENDIF
-
-   CALL GET_XML_TAG_VALUE(TEMPSTR, 'NoDataValue', VALUESTR, FOUND)
-   IF (FOUND) THEN
-      READ(VALUESTR,*,IOSTAT=IOS) RASTER%NODATA_VALUE
-      IF (IOS .EQ. 0) GOT_NODATA = .TRUE.
-      CYCLE
-   ENDIF
-ENDDO
-
-CLOSE(LUINPUT,IOSTAT=IOS)
-
-IF (.NOT. GOT_BANDS) THEN
-   RASTER%NBANDS = 1
-ENDIF
-
-IF (.NOT. GOT_SAMPLES) THEN
-   WRITE(*,*) 'Could not parse samples from ', TRIM(FNXML)
-   STOP
-ENDIF
-
-IF (.NOT. GOT_LINES) THEN
-   WRITE(*,*) 'Could not parse lines from ', TRIM(FNXML)
-   STOP
-ENDIF
-
-IF (.NOT. GOT_DATATYPE) THEN
-   WRITE(*,*) 'Could not parse data_type from ', TRIM(FNXML)
-   STOP
-ENDIF
-
-! Set BANDROWBYTES and TOTALROWBYTES using tile dimensions
-RASTER%BANDROWBYTES  = (RASTER%NBITS/8) * RASTER%NCOLS
-RASTER%TOTALROWBYTES = RASTER%BANDROWBYTES * RASTER%NBANDS
-
-! Expand from one tile to full 3x3 mosaic
-RASTER%NCOLS = RASTER%NCOLS * 3
-RASTER%NROWS = RASTER%NROWS * 3
-
-! Open and parse BSQ header:
-OPEN(LUINPUT,FILE=TRIM(FNHDR),FORM='FORMATTED',STATUS='OLD',IOSTAT=IOS)
-IF (IOS .NE. 0) THEN
-   WRITE(*,*) 'Problem opening bsq header ', TRIM(FNHDR)
-   STOP
-ENDIF
-
-IF (FEEDBACK_LEVEL .GE. 3) WRITE(*,*) 'Reading bsq header from ', trim(FNIN)
-
-! Read until we find the map info line instead of assuming line 12
-FOUND = .FALSE.
-DO
-   READ(LUINPUT,100,IOSTAT=IOS) TEMPSTR
-   IF (IOS .NE. 0) EXIT
-   IF (INDEX(TEMPSTR, 'map info') .GT. 0 .OR. INDEX(TEMPSTR, 'MAP_INFO') .GT. 0) THEN
-      FOUND = .TRUE.
-      EXIT
-   ENDIF
-ENDDO
-
-IF (.NOT. FOUND) THEN
-   WRITE(*,*) 'Could not find map info in ', TRIM(FNHDR)
-   STOP
-ENDIF
-
-! Strip trailing brace if present
-DO I = 1, LEN_TRIM(TEMPSTR)
-   IF (TEMPSTR(I:I) .EQ. '}') TEMPSTR(I:I)=' '
-ENDDO
-
-! Find first comma after "map info = {projection_name"
-FOUND = .FALSE.
-I = 1
-DO WHILE (.NOT. FOUND .AND. I <= LEN_TRIM(TEMPSTR))
-   IF (TEMPSTR(I:I) .EQ. ',') THEN
-      FOUND = .TRUE.
-   ELSE
-      I = I + 1
-   ENDIF
-ENDDO
-
-IF (.NOT. FOUND) THEN
-   WRITE(*,*) 'Malformed map info line in ', TRIM(FNHDR)
-   STOP
-ENDIF
-
-J = I + 1
-
-! Expect: ref_pixel_x, ref_pixel_y, x_map, y_map, xdim, ydim, ...
-READ(TEMPSTR(J:),*,IOSTAT=IOS) IDUMMY, IDUMMY, RASTER%XLLCORNER, RASTER%YLLCORNER, &
-                               RASTER%XDIM, RASTER%YDIM
-IF (IOS .NE. 0) THEN
-   WRITE(*,*) 'Could not parse map info values from ', TRIM(FNHDR)
-   STOP
-ENDIF
-
-RASTER%YLLCORNER = RASTER%YLLCORNER - RASTER%YDIM * RASTER%NROWS
-
-CLOSE(LUINPUT)
-
-IF (RASTER%XDIM .NE. RASTER%YDIM) THEN
-   WRITE(*,*) 'Error opening ', TRIM(FNHDR), ' because XDIM is not equal to YDIM.'
-   STOP
+IF (USE_BSQ_XML_HEADER) THEN
+   CALL READ_BSQ_XML_HEADER (RASTER, NULLDIR, FNTILE, .FALSE.)
 ELSE
-   RASTER%CELLSIZE = RASTER%XDIM
+   CALL READ_BSQ_HDR_HEADER (RASTER, NULLDIR, FNTILE, .FALSE.)
 ENDIF
 
+! RASTER now holds tile (1,1)'s metadata. Expand to the full 3x3 mosaic: the
+! tile reader set YLLCORNER to the bottom edge of tile (1,1), and the mosaic
+! extends two additional tile-heights below that.
+NCOLS_TILE = RASTER%NCOLS
+NROWS_TILE = RASTER%NROWS
+RASTER%NCOLS = 3 * NCOLS_TILE
+RASTER%NROWS = 3 * NROWS_TILE
+RASTER%YLLCORNER = RASTER%YLLCORNER - 2.0 * RASTER%YDIM * REAL(NROWS_TILE)
+
+! Recompute the upper-left map coordinates for the full mosaic (XLLCORNER, the
+! left edge, is unchanged; per-tile row byte counts are left as set by the
+! reader, matching the per-tile .bsq records the tiled slice reader consumes).
 RASTER%ULXMAP = RASTER%XLLCORNER + 0.5 * RASTER%CELLSIZE
 RASTER%ULYMAP = RASTER%YLLCORNER + RASTER%NROWS * RASTER%CELLSIZE - 0.5 * RASTER%CELLSIZE
-
-100 FORMAT(A)
-
-CONTAINS
-
-   SUBROUTINE GET_MDI_VALUE(LINE, KEY, VALUE, FOUND)
-      ! Extracts the text inside a <MDI key="KEY">...</MDI> element on LINE,
-      ! returning it in VALUE and setting FOUND .TRUE. if the key is present.
-      CHARACTER(*), INTENT(IN)  :: LINE, KEY
-      CHARACTER(*), INTENT(OUT) :: VALUE
-      LOGICAL,      INTENT(OUT) :: FOUND
-      CHARACTER(512) :: PATTERN
-      INTEGER :: P1, P2, KLEN
-
-      VALUE = ''
-      FOUND = .FALSE.
-
-      PATTERN = '<MDI key="' // TRIM(KEY) // '">'
-      KLEN = LEN_TRIM(PATTERN)
-
-      P1 = INDEX(LINE, TRIM(PATTERN))
-      IF (P1 .LE. 0) RETURN
-
-      P1 = P1 + KLEN
-      P2 = INDEX(LINE(P1:), '</MDI>')
-      IF (P2 .LE. 0) RETURN
-
-      VALUE = ADJUSTL(LINE(P1:P1+P2-2))
-      FOUND = .TRUE.
-   END SUBROUTINE GET_MDI_VALUE
-
-   SUBROUTINE GET_XML_TAG_VALUE(LINE, TAG, VALUE, FOUND)
-      ! Extracts the text between <TAG> and </TAG> on LINE, returning it in
-      ! VALUE and setting FOUND .TRUE. if the tag is present.
-      CHARACTER(*), INTENT(IN)  :: LINE, TAG
-      CHARACTER(*), INTENT(OUT) :: VALUE
-      LOGICAL,      INTENT(OUT) :: FOUND
-      CHARACTER(128) :: OPEN_TAG, CLOSE_TAG
-      INTEGER :: P1, P2, L1
-
-      VALUE = ''
-      FOUND = .FALSE.
-
-      OPEN_TAG  = '<'  // TRIM(TAG) // '>'
-      CLOSE_TAG = '</' // TRIM(TAG) // '>'
-      L1 = LEN_TRIM(OPEN_TAG)
-
-      P1 = INDEX(LINE, TRIM(OPEN_TAG))
-      IF (P1 .LE. 0) RETURN
-
-      P1 = P1 + L1
-      P2 = INDEX(LINE(P1:), TRIM(CLOSE_TAG))
-      IF (P2 .LE. 0) RETURN
-
-      VALUE = ADJUSTL(LINE(P1:P1+P2-2))
-      FOUND = .TRUE.
-   END SUBROUTINE GET_XML_TAG_VALUE
 
 ! *****************************************************************************
 END SUBROUTINE READ_BSQ_HEADER_EXISTING_TILED
@@ -1579,9 +1438,8 @@ USE IFPORT
 
 TYPE (RASTER_TYPE) :: RASTER
 CHARACTER(400), INTENT (IN) :: INDIR, FN
-CHARACTER(400) :: FNHDR, FNBSQ, FNTIF, TEMPSTR, SHELLSTR
-INTEGER :: I, J, IOS, IDUMMY
-LOGICAL :: FOUND, HDR_EXISTS, BSQ_EXISTS
+CHARACTER(400) :: FNHDR, FNBSQ, FNTIF, SHELLSTR
+LOGICAL :: HDR_EXISTS, BSQ_EXISTS
 
 IF (RASTER%HEADERISSET) RETURN
 
@@ -1608,61 +1466,13 @@ IF (.NOT. HDR_EXISTS .OR. .NOT. BSQ_EXISTS) THEN
    CALL EXECUTE_COMMAND_LINE(TRIM(SHELLSTR))
 ENDIF
 
+! Parse the header. Both readers fully populate RASTER (dimensions, data type,
+! nodata and georeferencing); the ENVI .hdr is sufficient by default and the
+! GDAL .aux.xml is consulted only when USE_BSQ_XML_HEADER is set.
 IF (USE_BSQ_XML_HEADER) THEN
-   CALL READ_BSQ_XML_HEADER (RASTER , INDIR, FN, .FALSE.)
-
-! Now open and parse BSQ .hdr file:
-   OPEN(LUINPUT,FILE=TRIM(FNHDR),FORM='FORMATTED',STATUS='OLD',IOSTAT=IOS)
-   IF (IOS .NE. 0) THEN
-      WRITE(*,*) 'Problem opening bsq header ', TRIM(FNHDR)
-   ENDIF
-
-   IF (FEEDBACK_LEVEL .GE. 3) WRITE(*,*) 'Reading bsq header from ', trim(FN)
-
-! Skip 11 lines
-   DO I = 1, 11
-      READ(LUINPUT,100,IOSTAT=IOS)
-   ENDDO
-
-! Read easting, northing, and cell size info:
-   READ(LUINPUT,100,IOSTAT=IOS) TEMPSTR
-   FOUND=.FALSE.; I=1
-   DO WHILE (.NOT. FOUND)
-      IF(TEMPSTR(I:I) .EQ. ',') THEN
-         FOUND=.TRUE.
-      ELSE
-         I=I+1
-      ENDIF
-   ENDDO
-   J=I+1
-   DO I=1,130
-      IF (TEMPSTR(I:I) .EQ. '}') TEMPSTR(I:I)=' '
-   ENDDO
-   READ(TEMPSTR(J:),*) IDUMMY, IDUMMY, RASTER%XLLCORNER, RASTER%YLLCORNER, RASTER%XDIM, RASTER%YDIM
-   RASTER%YLLCORNER = RASTER%YLLCORNER - RASTER%YDIM * RASTER%NROWS
-   CLOSE(LUINPUT)
-
-! Check to make sure x and y cell sizes are the same:
-   IF (RASTER%XDIM .NE. RASTER%YDIM) THEN
-      WRITE(*,*) 'Error opening ', TRIM(FNHDR), ' because XDIM is not equal to YDIM.'
-      STOP
-   ELSE
-      RASTER%CELLSIZE=RASTER%XDIM
-   ENDIF
-
-! Set ULXMAP and ULYMAP
-   RASTER%ULXMAP = RASTER%XLLCORNER + 0.5 * RASTER%CELLSIZE
-   RASTER%ULYMAP = RASTER%YLLCORNER + RASTER%NROWS * RASTER%CELLSIZE - 0.5 * RASTER%CELLSIZE
-
-! Set BYTEORDER and LAYOUT
-   RASTER%BYTEORDER = '0'
-   RASTER%LAYOUT    = 'BSQ'
-
-! This is for bil:
-   RASTER%BYTEORDER = 'I'
-   RASTER%LAYOUT    = 'BIL'
+   CALL READ_BSQ_XML_HEADER (RASTER, INDIR, FN, .FALSE.)
 ELSE
-   CALL READ_BSQ_HDR_HEADER(RASTER, INDIR, FN, .FALSE.)
+   CALL READ_BSQ_HDR_HEADER (RASTER, INDIR, FN, .FALSE.)
 ENDIF
 RASTER%HEADERISSET = .TRUE.
 
