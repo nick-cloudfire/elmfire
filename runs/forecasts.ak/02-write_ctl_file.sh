@@ -1,1 +1,0 @@
-../forecasts/02-write_ctl_file.sh
