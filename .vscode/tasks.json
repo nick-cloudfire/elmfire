@@ -1,0 +1,95 @@
+{
+  // ELMFIRE build tasks.
+  //
+  // The Windows tasks drive build/windows/make_windows.bat (Intel ifx + Intel
+  // MPI) and require a native-Windows VS Code window -- in a Remote-WSL window
+  // the terminal is Linux and can only produce an ELF binary. The Linux/macOS
+  // task delegates to build/linux/make_gnu.sh.
+  //
+  // The inline problemMatcher parses Intel Fortran diagnostics of the form:
+  //   C:\path\elmfire_io.f90(123): error #6404: This name does not have a type
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Windows: build elmfire (Release, fast)",
+      "type": "shell",
+      "command": "${workspaceFolder}\\build\\windows\\make_windows.bat",
+      "args": ["release", "elmfire"],
+      "options": { "cwd": "${workspaceFolder}\\build\\windows" },
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+      "problemMatcher": {
+        "owner": "fortran",
+        "fileLocation": ["autoDetect", "${workspaceFolder}"],
+        "pattern": {
+          "regexp": "^(.*)\\((\\d+)\\):\\s+(error|warning|remark)\\s+#(\\d+):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "severity": 3,
+          "code": 4,
+          "message": 5
+        }
+      }
+    },
+    {
+      "label": "Windows: build all (Release)",
+      "type": "shell",
+      "command": "${workspaceFolder}\\build\\windows\\make_windows.bat",
+      "args": ["release"],
+      "options": { "cwd": "${workspaceFolder}\\build\\windows" },
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+      "problemMatcher": {
+        "owner": "fortran",
+        "fileLocation": ["autoDetect", "${workspaceFolder}"],
+        "pattern": {
+          "regexp": "^(.*)\\((\\d+)\\):\\s+(error|warning|remark)\\s+#(\\d+):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "severity": 3,
+          "code": 4,
+          "message": 5
+        }
+      }
+    },
+    {
+      "label": "Windows: build all (Debug)",
+      "type": "shell",
+      "command": "${workspaceFolder}\\build\\windows\\make_windows.bat",
+      "args": ["debug"],
+      "options": { "cwd": "${workspaceFolder}\\build\\windows" },
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+      "problemMatcher": {
+        "owner": "fortran",
+        "fileLocation": ["autoDetect", "${workspaceFolder}"],
+        "pattern": {
+          "regexp": "^(.*)\\((\\d+)\\):\\s+(error|warning|remark)\\s+#(\\d+):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "severity": 3,
+          "code": 4,
+          "message": 5
+        }
+      }
+    },
+    {
+      "label": "Windows: clean",
+      "type": "shell",
+      "command": "${workspaceFolder}\\build\\windows\\make_windows.bat",
+      "args": ["clean"],
+      "options": { "cwd": "${workspaceFolder}\\build\\windows" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Linux/macOS: build elmfire (fast)",
+      "type": "shell",
+      "command": "./make_gnu.sh",
+      "args": ["elmfire"],
+      "options": { "cwd": "${workspaceFolder}/build/linux" },
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+      "problemMatcher": ["$gcc"]
+    }
+  ]
+}

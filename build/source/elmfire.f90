@@ -116,6 +116,7 @@ IF (IRANK_HOST .EQ. 0) TIMINGS(:,:) = 0.
 
 ! Print version number:
 IF (IRANK_WORLD .EQ. 0) WRITE(*,*) TRIM(VERSIONSTRING)
+print '(A,I3,A)', "Running with ", NPROC, " workers"
 
 !-----------------------------------------------------------------------------------------------------------------
 

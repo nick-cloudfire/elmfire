@@ -118,6 +118,33 @@ Fortran compiler.
    configuration, and build. The x64 configuration targets Intel MPI; the
    legacy Win32 configuration (MPICH2) is deprecated.
 
+### Building without the Visual Studio IDE
+
+[`build/windows/make_windows.bat`](build/windows/make_windows.bat) drives `ifx`
+directly with the same flags as the solution's x64 configurations, so no
+Visual Studio IDE (and no Fortran VS integration) is required — only the oneAPI
+HPC Toolkit. It calls `setvars.bat` automatically if `ifx` is not already on
+`PATH`:
+
+```bat
+cd build\windows
+make_windows.bat                 :: full Release build (elmfire + elmfire_post)
+make_windows.bat elmfire         :: fast Release build (elmfire only)
+make_windows.bat debug           :: full Debug build
+make_windows.bat clean           :: remove obj\ and bin\
+```
+
+Executables land in `build\windows\bin`. Set `I_MPI_ROOT` / `ONEAPI_ROOT` if
+oneAPI is installed somewhere non-default, and `ELMFIRE_LOWMEM` for a LOWMEM
+build (as with `make_gnu.sh`).
+
+VS Code tasks wrapping this script are provided in `.vscode/tasks.json`
+(<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>). These require a native-Windows
+VS Code window — in a Remote-WSL window the integrated terminal is Linux and
+produces a Linux binary, not an `.exe`. Note also that `cmd.exe` cannot use a
+`\\wsl.localhost\...` UNC path as a working directory, so a Windows build needs
+the repository checked out on a Windows drive.
+
 Alternatively, ELMFIRE runs unmodified under the
 [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/windows/wsl/),
 where the Linux quick start above applies directly.
