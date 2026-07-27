@@ -692,5 +692,76 @@ LOGICAL :: ONLY_READ_NEEDED_WX_BANDS = .FALSE.
 REAL :: WD_TO_CENTER
 
 ! *****************************************************************************
+CONTAINS
+
+! *****************************************************************************
+FUNCTION GDAL_COMMAND(TOOL, ARGS) RESULT(CMD)
+! *****************************************************************************
+! Builds the shell command that invokes one of the GDAL command line tools.
+! PATH_TO_GDAL is either empty ("the tools are on PATH, invoke them bare") or a
+! directory with a trailing PATH_SEPARATOR already appended by READ_MISC.
+!
+! On Windows the executable has to be quoted: the usual GDAL installations
+! (QGIS, OSGeo4W) all live under "C:\Program Files\...", and an unquoted path
+! makes cmd.exe split at the space and report that 'C:\Program' is not
+! recognized.
+!
+! Exactly one quote pair, around the executable only. Wrapping the whole
+! command in a second, outer pair -- the usual `cmd /c ""a b" "c d""` idiom --
+! does NOT work here: EXECUTE_COMMAND_LINE hands the string to cmd.exe in a
+! form that leaves the outer pair in place, so cmd then looks for a program
+! literally named '""C:\Program'. Verified both ways against ifx, with quoted
+! arguments and a redirect present (i.e. with more than two quote characters
+! in the command, where cmd's own quote-stripping rule would otherwise apply).
+!
+! For the same reason the result must be run with EXECUTE_COMMAND_LINE, not
+! IFPORT's SYSTEM(): SYSTEM() hands the string to cmd.exe differently and the
+! quotes around the executable are stripped again, which puts the 'C:\Program'
+! failure straight back.
+
+CHARACTER(*), INTENT(IN) :: TOOL, ARGS
+CHARACTER(:), ALLOCATABLE :: CMD
+
+IF (TRIM(OPERATING_SYSTEM) .EQ. 'windows') THEN
+   CMD = '"' // TRIM(PATH_TO_GDAL) // TRIM(TOOL) // '" ' // TRIM(ARGS)
+ELSE
+   CMD = TRIM(PATH_TO_GDAL) // TRIM(TOOL) // ' ' // TRIM(ARGS)
+ENDIF
+
+END FUNCTION GDAL_COMMAND
+
+! *****************************************************************************
+FUNCTION SHELL_PATH(P) RESULT(Q)
+! *****************************************************************************
+! Prepares a path for use as an argument to a shell command.
+!
+! On Windows two separate things have to happen. The path is quoted, because
+! cmd.exe otherwise reads the '/' in a relative path like './scratch\x.bil' as
+! the start of a switch and rejects the argument outright with "Parameter
+! format not correct". And forward slashes become backslashes, because quoting
+! alone is not sufficient: del resolves '"./scratch/x.bil"' to nothing ("The
+! system cannot find the path specified") while it accepts '"./scratch\x.bil"'.
+! Namelist paths routinely mix the two -- SCRATCH = './scratch' keeps its
+! forward slash and only the trailing separator comes from PATH_SEPARATOR.
+!
+! On POSIX the path is returned untouched: it has to stay unquoted so that the
+! shell still expands the wildcard in the CLEAN_SCRATCH sweep.
+
+CHARACTER(*), INTENT(IN) :: P
+CHARACTER(:), ALLOCATABLE :: Q
+INTEGER :: I
+
+Q = TRIM(P)
+
+IF (TRIM(OPERATING_SYSTEM) .EQ. 'windows') THEN
+   DO I = 1, LEN(Q)
+      IF (Q(I:I) .EQ. '/') Q(I:I) = '\'
+   ENDDO
+   Q = '"' // Q // '"'
+ENDIF
+
+END FUNCTION SHELL_PATH
+
+! *****************************************************************************
 END MODULE ELMFIRE_VARS
 ! *****************************************************************************

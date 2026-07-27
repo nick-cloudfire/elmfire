@@ -11,6 +11,11 @@
 *.old
 *.pdb
 BuildLog.*
+# make_windows.bat's output tree. The *.exe/*.obj/*.mod/*.pdb rules above cover
+# most of it, but not the Intel redistributables the build stages next to the
+# binaries (impi.dll, libiomp5md.dll), so ignore the whole tree.
+build/windows/bin/
+build/windows/obj/
 
 # ============================================================
 # GIS / binary rasters

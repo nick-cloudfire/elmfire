@@ -256,7 +256,11 @@ IF (PATH(1:1) .EQ. '/') THEN
 ELSE
    OPERATING_SYSTEM = 'windows'
    PATH_SEPARATOR   = '\'
-   DELETECOMMAND    = 'del   '
+   ! /q matches 'rm -f': without it a wildcard delete (the CLEAN_SCRATCH sweep)
+   ! stops on cmd's "Are you sure (Y/N)?" prompt, which in a batch run with no
+   ! stdin means the files are silently left behind. /f additionally covers
+   ! read-only files, as 'rm -f' does.
+   DELETECOMMAND    = 'del /f /q '
    NULL_REDIRECT    = '2>NUL'
    WHICH_COMMAND    = 'where'
 ENDIF
@@ -1528,7 +1532,7 @@ CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
 CALL MPI_FINALIZE(IERR)
 
-if (IRANK_WORLD .eq. 0 .and. CLEAN_SCRATCH) call execute_command_line(trim(DELETECOMMAND) // " " // trim(SCRATCH) // "*")
+if (IRANK_WORLD .eq. 0 .and. CLEAN_SCRATCH) call execute_command_line(trim(DELETECOMMAND) // " " // SHELL_PATH(trim(SCRATCH) // "*"))
 
 IF (IRANK_WORLD .EQ. 0) WRITE(*,*) 'End of simulation reached successfully. Shutting down.'
 
@@ -1843,8 +1847,8 @@ CLOSE(LUIN)
 
 ! 2. Build gdaltransform command:
 !    gdaltransform -s_srs SRC_SRS -t_srs EPSG:4326 < TMPIN > TMPOUT
-SHELLSTR = TRIM(PATH_TO_GDAL) // 'gdaltransform -s_srs "' // TRIM(A_SRS) // '"' // &
-            ' -t_srs EPSG:4326 < ' // TRIM(TMPIN) // ' > ' // TRIM(TMPOUT) // ' ' // TRIM(NULL_REDIRECT)
+SHELLSTR = GDAL_COMMAND('gdaltransform', '-s_srs "' // TRIM(A_SRS) // '"' // &
+            ' -t_srs EPSG:4326 < ' // TRIM(TMPIN) // ' > ' // TRIM(TMPOUT) // ' ' // TRIM(NULL_REDIRECT))
 
 ! WRITE(*,*) 'Running: ', TRIM(SHELLSTR)
 CALL EXECUTE_COMMAND_LINE(TRIM(SHELLSTR), EXITSTAT=IOS)
@@ -1871,7 +1875,7 @@ IF (IOS .NE. 0) THEN
 END IF
 
 ! 4. (Optional) clean up temp files
-CALL EXECUTE_COMMAND_LINE(TRIM(DELETECOMMAND) // ' ' // TRIM(TMPIN)  // ' ' // TRIM(TMPOUT))
+CALL EXECUTE_COMMAND_LINE(TRIM(DELETECOMMAND) // ' ' // SHELL_PATH(TMPIN)  // ' ' // SHELL_PATH(TMPOUT))
 ! *****************************************************************************
 END SUBROUTINE XY_TO_LATLON
 ! *****************************************************************************
@@ -1942,8 +1946,8 @@ contains
    subroutine read_basic_raster_meta()
    ! Runs gdalinfo on the target raster, writes output to a temp file, and parses
    ! it line by line to extract size, origin, pixel size, and metre-units flag.
-      write(cmd,'(a)') trim(PATH_TO_GDAL) // 'gdalinfo "' // trim(FUELS_AND_TOPOGRAPHY_DIRECTORY) // &
-                       trim(tempFilename) // '" > "' // trim(tmpfile) // '"'
+      write(cmd,'(a)') GDAL_COMMAND('gdalinfo', '"' // trim(FUELS_AND_TOPOGRAPHY_DIRECTORY) // &
+                       trim(tempFilename) // '" > "' // trim(tmpfile) // '"')
       call execute_command_line(trim(cmd))
 
       open(newunit=iu, file=trim(tmpfile), status='old', action='read', iostat=ios)
@@ -1968,8 +1972,8 @@ contains
       integer :: p
       character(len=1024) :: text
 
-      write(cmd,'(a)') trim(PATH_TO_GDAL) // 'gdalsrsinfo -o epsg "' // trim(FUELS_AND_TOPOGRAPHY_DIRECTORY) // &
-                     trim(tempFilename) // '" > "' // trim(tmpfile_epsg) // '"'
+      write(cmd,'(a)') GDAL_COMMAND('gdalsrsinfo', '-o epsg "' // trim(FUELS_AND_TOPOGRAPHY_DIRECTORY) // &
+                     trim(tempFilename) // '" > "' // trim(tmpfile_epsg) // '"')
       call execute_command_line(trim(cmd))
 
       open(newunit=iu, file=trim(tmpfile_epsg), status='old', action='read', iostat=ios)
