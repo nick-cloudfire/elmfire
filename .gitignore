@@ -127,3 +127,7 @@ log.txt
 # Docker
 # ============================================================
 docker_shared_folder
+
+# Unity generates one of these per file when this repo sits under a Unity Assets/ folder.
+# They belong to the parent project, not here.
+*.meta

@@ -163,6 +163,17 @@ set "LDFLAGS=%LDFLAGS% /STACK:327680000,327680000 /HEAP:327680000,327680000 /LAR
 set "BIN=%~dp0bin"
 if not exist "%BIN%" mkdir "%BIN%"
 
+:: This repo is a submodule underneath a Unity project's Assets\ folder, and Unity imports
+:: everything it finds there. Left visible, the build tree breaks the editor: Unity compiles
+:: stray generated .cs with its own older C#, loads managed DLLs as game assemblies, imports
+:: Fortran .obj files as FBX models, and imports .mod module files as AudioClips (.mod is also
+:: a tracker music format) -- a wall of import errors and "assembly can cause crashes".
+:: Unity skips files and folders carrying the Windows hidden attribute, so set it on the build
+:: output. Re-applied every build because a fresh clone or a `clean` recreates these unhidden.
+if not exist "%~dp0obj" mkdir "%~dp0obj"
+attrib +h "%BIN%" >nul 2>&1
+attrib +h "%~dp0obj" >nul 2>&1
+
 :: ===========================================================================
 :: elmfire
 :: ===========================================================================
