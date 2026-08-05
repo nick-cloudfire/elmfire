@@ -210,7 +210,7 @@ WEATHER_DIRECTORY              = ' '
 WS_AT_10M                      = .FALSE.
 WS_IN_KPH                      = .FALSE. 
 ONLY_READ_NEEDED_WX_BANDS      = .FALSE.
-SURFACE_SPREAD_MODEL           = "ROTHERMEL"
+SURFACE_SPREAD_MODEL           = 'ROTHERMEL'    ! set 'CFFDRS' for Canadian model
 START_DC                       = 400.0
 START_DMC                      = 80.0
 DAILY_WEATHER_FILENAME         = ' '
@@ -687,6 +687,7 @@ CHARACTER(256) :: IOSMSG
 NAMELIST /WUI/ BLDG_AREA_CONSTANT, BLDG_NONBURNABLE_FRAC_CONSTANT, BLDG_SEPARATION_DIST_CONSTANT, &
                BLDG_SPREAD_MODEL_TYPE, BLDG_FOOTPRINT_FRAC_CONSTANT, BLDG_FUEL_MODEL_CONSTANT, &
                USE_BLDG_SPREAD_MODEL, USE_CONSTANT_BLDG_SPREAD_MODEL_PARAMS, GLOBAL_HARDENING_FACTOR, INTERFACE_MODEL_TYPE, &
+               USE_UNIGNITED_URBAN_VELOCITY_HACK, &
                BANDTHICKNESS_WUI, CRITICL_HF_WUI, HRR_ELLIPSE_ADJ
 
 IF (IRANK_WORLD .EQ. 0) WRITE(*,*) 'Reading &WUI namelist group'
@@ -696,11 +697,14 @@ BLDG_SEPARATION_DIST_CONSTANT         = 10.0
 BLDG_NONBURNABLE_FRAC_CONSTANT        = 0.0
 BLDG_FOOTPRINT_FRAC_CONSTANT          = 1.0
 BLDG_FUEL_MODEL_CONSTANT              = 1
-BLDG_SPREAD_MODEL_TYPE                = 1 ! 1 = Hamada, 2 = UCB / UMD
+BLDG_SPREAD_MODEL_TYPE                = 1 ! 1 = Hamada, 2 = UCB/UMD (legacy), 3 = efficient 
 USE_BLDG_SPREAD_MODEL                 = .FALSE.
 USE_CONSTANT_BLDG_SPREAD_MODEL_PARAMS = .TRUE.
 GLOBAL_HARDENING_FACTOR               = 1.0
 INTERFACE_MODEL_TYPE                  = 1 ! 1 = Ellipse, 2 = Threshold
+! Legacy-compat: restore the pre-2026.0319 phantom base velocity on unignited
+! urban cells (BLDG_SPREAD_MODEL_TYPE == 3 only). See CHANGELOG for rationale.
+USE_UNIGNITED_URBAN_VELOCITY_HACK     = .FALSE.
 BANDTHICKNESS_WUI                     = 5
 CRITICL_HF_WUI                        = 0.0
 HRR_ELLIPSE_ADJ                       = 0.5

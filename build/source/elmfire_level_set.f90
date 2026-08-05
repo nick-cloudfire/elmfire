@@ -54,6 +54,7 @@ REAL, ALLOCATABLE, SAVE, DIMENSION(:) :: X,Y
 REAL, POINTER, DIMENSION(:,:), SAVE :: M1_LO, M1_HI, M10_LO, M10_HI, M100_LO, M100_HI, WS20_LO, WS20_HI, &
                                        WD20_LO, WD20_HI, MLH_LO, MLH_HI, MLW_LO, MLW_HI, FMC_LO, FMC_HI
 REAL, POINTER, SAVE, DIMENSION(:,:,:) :: A_TIMES_BURNED
+REAL, ALLOCATABLE, DIMENSION(:,:) :: DYNAMIC_ARRAY  ! Dynamic array to store IX and IY DWI_SU
 
 LOGICAL :: IA_HAS_OCCURRED, LOPEN, GO, CALL_SPOTTING, JUST_INTERPOLATED, DUMP_SMOKE_OUTPUTS, RUN, &
             INITIATED, START_CALCS, IS_FINAL_DUMP
@@ -210,6 +211,63 @@ DO WHILE (T .le. totalDuration)
          ALLOCATE(EVERTAGGED      (1:NX,1:NY)); EVERTAGGED(:,:) = .FALSE.
          ALLOCATE(EVERTAGGED_IX   (1:NX*NY))
          ALLOCATE(EVERTAGGED_IY   (1:NX*NY))
+
+#ifdef _WUI
+         ! BLDG_SPREAD_MODEL_TYPE = 3 only. All consumers of NEAR_URBAN and
+         ! BLDG_EMBER_IGNITED_MAP are gated by the same condition at their
+         ! call sites, so allocation is skipped when the model is off.
+         IF (USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .EQ. 3) THEN
+            ALLOCATE(NEAR_URBAN(1:NX,1:NY)); NEAR_URBAN(:,:) = .FALSE.
+            ALLOCATE(BLDG_EMBER_IGNITED_MAP(1:NX,1:NY)); BLDG_EMBER_IGNITED_MAP(:,:) = .FALSE.
+            BLOCK
+               ! Dilate FBFM==91 cells by the 60 m influence radius so
+               ! BLDG_SET_WILDLAND_HRR can skip wildland cells that can't
+               ! reach any structure.
+               INTEGER :: IX_U, IY_U, DX, DY, HAZ
+               REAL, PARAMETER :: NEAR_URBAN_RADIUS_M = 60.0
+               HAZ = CEILING(NEAR_URBAN_RADIUS_M / ANALYSIS_CELLSIZE)
+               DO IY_U = 1, NY
+               DO IX_U = 1, NX
+                  IF (FBFM%I2(IX_U,IY_U,1) .EQ. 91) THEN
+                     DO DY = -HAZ, HAZ
+                     DO DX = -HAZ, HAZ
+                        IF (IX_U+DX .LT. 1 .OR. IX_U+DX .GT. NX) CYCLE
+                        IF (IY_U+DY .LT. 1 .OR. IY_U+DY .GT. NY) CYCLE
+                        NEAR_URBAN(IX_U+DX, IY_U+DY) = .TRUE.
+                     ENDDO
+                     ENDDO
+                  ENDIF
+               ENDDO
+               ENDDO
+            END BLOCK
+
+            ! Precompute the neighborhood view-factor stencil G(dx,dy) = cell_area / r^2
+            ! for the 60 m influence radius. Distance/geometry are static, so the
+            ! per-timestep heat deposition (BLDG_ACCUMULATE_HEAT_STENCIL) reduces to
+            ! multiply-adds over this stencil - no sqrt/divide at runtime. Entries are
+            ! zero outside the radius and at the (0,0) self cell, exactly reproducing
+            ! the in-range/non-self gate of the former all-pairs scan.
+            BLOCK
+               INTEGER :: SDX, SDY, SHAZ
+               REAL :: DM, DM2, CA
+               REAL, PARAMETER :: RADIUS_M = 60.0
+               SHAZ = CEILING(RADIUS_M / ANALYSIS_CELLSIZE)
+               BLDG_STENCIL_HAZ = SHAZ
+               ALLOCATE(BLDG_STENCIL_G(-SHAZ:SHAZ, -SHAZ:SHAZ)); BLDG_STENCIL_G(:,:) = 0.
+               CA = ANALYSIS_CELLSIZE * ANALYSIS_CELLSIZE
+               DO SDY = -SHAZ, SHAZ
+               DO SDX = -SHAZ, SHAZ
+                  IF (SDX .EQ. 0 .AND. SDY .EQ. 0) CYCLE
+                  DM = SQRT(REAL(SDX*SDX + SDY*SDY)) * ANALYSIS_CELLSIZE
+                  IF (DM .LE. RADIUS_M) THEN
+                     DM2 = MAX(DM*DM, CA)
+                     BLDG_STENCIL_G(SDX,SDY) = CA / DM2
+                  ENDIF
+               ENDDO
+               ENDDO
+            END BLOCK
+         ENDIF
+#endif
 
          ! Allocate HRR_TRANSIENT_MAP if dumping of transient HRRPUA is enabled, or if WUI spread model is enabled (since it requires transient HRRPUA for all cells, not just burning cells)
          IF (DUMP_HRR_TRANSIENT .OR. USE_BLDG_SPREAD_MODEL) THEN
@@ -518,8 +576,8 @@ DO WHILE (T .le. totalDuration)
                   ELSE
                      LIST_BURNED%TAIL%IBLDGFM =  NO_DATA
                   ENDIF
-                  ! Tagged WUI cells, for use in the refactored WUI spread model
-                  IF(BLDG_SPREAD_MODEL_TYPE .EQ. 2) CALL TAG_WUI(NX, NY, IX, IY, T)
+                  ! Populate DYNAMIC_ARRAY of burned cells for the UMD-UCB (type 2) model
+                  IF(BLDG_SPREAD_MODEL_TYPE .EQ. 2) CALL APPEND_TO_DYNAMIC_ARRAY(IX, IY, LIST_BURNED%NUM_NODES, DYNAMIC_ARRAY)
                ELSE
                   LIST_BURNED%TAIL%IBLDGFM = NO_DATA
                ENDIF
@@ -547,7 +605,7 @@ DO WHILE (T .le. totalDuration)
             CALL CALC_NORMAL_VECTORS (ISTEP, HALFRCELLSIZE)
 
             ! Calculate x and y components of velocity from elliptical spread dimensions
-            CALL UX_AND_UY_ELLIPTICAL(LIST_BURNED, 1.0, ISTEP, DT)
+            CALL UX_AND_UY_ELLIPTICAL(LIST_BURNED, LIST_BURNED, 1.0, ISTEP, T, DYNAMIC_ARRAY)
             
             !Apply canopy fire and other parts that depend on directional ROS (instead of max head ros)
             call UPDATE_LOCAL_SPREAD_PROPERTIES(LIST_BURNED, C)
@@ -607,8 +665,7 @@ DO WHILE (T .le. totalDuration)
                   L_WUI_P%HRRPUA = L_WUI_P%FLIN_SURFACE / ANALYSIS_CELLSIZE
                ENDIF
                CALL HRR_TRANSIENT(L_WUI_P, T)
-               CALL CALC_WUI_HEATFLUX(L_WUI_P, NX, NY, DT)
-           
+
                HRR_TRANSIENT_MAP(IX,IY) = L_WUI_P%HRR_TRANSIENT
 
                L_WUI_P => L_WUI_P%NEXT
@@ -719,8 +776,8 @@ DO WHILE (T .le. totalDuration)
             CALL APPEND(LIST_BURNED,IX_IGN,IY_IGN,T)
 #ifdef _WUI
             IF (USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .EQ. 2) THEN
-               ! Tag WUI cells
-               CALL TAG_WUI(NX, NY, IX_IGN, IY_IGN, T) 
+               ! Populate DYNAMIC_ARRAY of burned cells for the UMD-UCB (type 2) model
+               CALL APPEND_TO_DYNAMIC_ARRAY(IX_IGN, IY_IGN, LIST_BURNED%NUM_NODES, DYNAMIC_ARRAY)
             ENDIF
 #endif
          ENDIF
@@ -746,8 +803,8 @@ DO WHILE (T .le. totalDuration)
                CALL APPEND(LIST_BURNED,IX_IGN,IY_IGN,T)
 
                IF (USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .EQ. 2) THEN
-                  ! Tag WUI cells
-                  CALL TAG_WUI(NX, NY, IX_IGN, IY_IGN, T) 
+                  ! Populate DYNAMIC_ARRAY of burned cells for the UMD-UCB (type 2) model
+                  CALL APPEND_TO_DYNAMIC_ARRAY(IX_IGN, IY_IGN, LIST_BURNED%NUM_NODES, DYNAMIC_ARRAY)
                ENDIF
             ENDIF
          ENDDO
@@ -981,7 +1038,6 @@ DO WHILE (T .le. totalDuration)
                L_WUI_P%HRRPUA = L_WUI_P%FLIN_SURFACE / ANALYSIS_CELLSIZE
             ENDIF
             CALL HRR_TRANSIENT(L_WUI_P, T) ! This is to be modified to update HRR_TRANSIENT for all burning cells.
-            CALL CALC_WUI_HEATFLUX(L_WUI_P, NX, NY, DT)
 
             L_WUI_P => L_WUI_P%NEXT
          ENDDO
@@ -995,7 +1051,7 @@ DO WHILE (T .le. totalDuration)
          CALL ACCUMULATE_CPU_USAGE(41, IT1, IT2)
 
          ! Calculate x and y components of velocity from elliptical spread dimensions
-         CALL UX_AND_UY_ELLIPTICAL(LIST_TAGGED, SURFACE_ACCELERATION_FACTOR, ISTEP, DT)
+         CALL UX_AND_UY_ELLIPTICAL(LIST_TAGGED, LIST_BURNED, SURFACE_ACCELERATION_FACTOR, ISTEP, T, DYNAMIC_ARRAY)
          CALL ACCUMULATE_CPU_USAGE(42, IT1, IT2)
          
          ! Update local spread properties that depend on canopy / fire velocity
@@ -1034,9 +1090,20 @@ DO WHILE (T .le. totalDuration)
             ENDIF
 #endif
             C%BURNED               = .TRUE.
+#ifdef _WUI
+            ! Model-3 urban: preserve FTP/ember ignition time if already set.
+            IF (USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .EQ. 3 .AND. &
+                C%IFBFM .EQ. 91 .AND. TIME_OF_ARRIVAL(IX,IY) .GT. 0.) THEN
+               C%TIME_OF_ARRIVAL = TIME_OF_ARRIVAL(IX,IY)
+            ELSE
+               C%TIME_OF_ARRIVAL      = T
+               TIME_OF_ARRIVAL(IX,IY) = T
+            ENDIF
+#else
             C%TIME_OF_ARRIVAL      = T
-            SURFACE_FIRE   (IX,IY) = 1
             TIME_OF_ARRIVAL(IX,IY) = T
+#endif
+            SURFACE_FIRE   (IX,IY) = 1
             
             IF (C%CROWN_FIRE .LT. 0) C%CROWN_FIRE = 0
             
@@ -1082,17 +1149,21 @@ DO WHILE (T .le. totalDuration)
             LIST_BURNED%TAIL%HRRPUA = (C%FLIN_SURFACE + C%FLIN_CANOPY) / ASP%CELLSIZE
 
 #ifdef _WUI
-            IF (USE_BLDG_SPREAD_MODEL) THEN
-               IF(BLDG_FUEL_MODEL%I2(IX,IY,1) .NE. NO_DATA) THEN
-                  LIST_BURNED%TAIL%IBLDGFM =  BLDG_FUEL_MODEL%I2(IX,IY,1)
+         IF (USE_BLDG_SPREAD_MODEL) THEN
+            LIST_BURNED%TAIL%IBLDGFM          = C%IBLDGFM
+            ! Propagate model-3 ignition state (wildland cells: both zero).
+            LIST_BURNED%TAIL%BLDG_IGNITED     = C%BLDG_IGNITED
+            LIST_BURNED%TAIL%T_BLDG_IGNITION  = C%T_BLDG_IGNITION
+            ! Prime HRR_TRANSIENT so the freshly-burned cell is a valid
+            ! heat source on the next BLDG_ACCUMULATE pass.
+            IF (BLDG_SPREAD_MODEL_TYPE .EQ. 3) THEN
+               IF (LIST_BURNED%TAIL%IFBFM .EQ. 91) THEN
+                  CALL BLDG_SET_URBAN_HRR(LIST_BURNED%TAIL, T)
                ELSE
-                  LIST_BURNED%TAIL%IBLDGFM =  NO_DATA
+                  CALL BLDG_SET_WILDLAND_HRR(LIST_BURNED%TAIL, T)
                ENDIF
-               ! Tag WUI cells
-               IF(BLDG_SPREAD_MODEL_TYPE .EQ. 2) CALL TAG_WUI(NX, NY, IX, IY, T) 
-            ELSE
-               LIST_BURNED%TAIL%IBLDGFM = NO_DATA
             ENDIF
+         ENDIF
 #endif
 
 #ifdef _SMOKE
@@ -1133,7 +1204,11 @@ DO WHILE (T .le. totalDuration)
             IF (ENABLE_SPOTTING .AND. USE_SUPERSEDED_SPOTTING) THEN
                CALL_SPOTTING = .FALSE.
                IF(C%IFBFM .EQ. 91) THEN
-                  FLIN = HRR_TRANSIENT_MAP(C%IX,C%IY)*ANALYSIS_CELLSIZE+1E-5
+#ifdef _WUI
+               ! Refresh transient HRRPUA for Hamada model, to be used in eulerian firebrand model
+                  IF(USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .EQ. 1) CALL HRR_TRANSIENT(C, T)
+#endif               
+                  FLIN = C%HRR_TRANSIENT*ANALYSIS_CELLSIZE+1E-5
                ELSE
                   FLIN = C%FLIN_SURFACE
                ENDIF
@@ -2089,17 +2164,19 @@ END SUBROUTINE CALC_NORMAL_VECTORS
 ! *****************************************************************************
 
 ! *****************************************************************************
-SUBROUTINE UX_AND_UY_ELLIPTICAL(L, ACCELERATION_FACTOR, ISTEP, DT_ELMFIRE)
+SUBROUTINE UX_AND_UY_ELLIPTICAL(L, LB, ACCELERATION_FACTOR, ISTEP, T_ELMFIRE, DYNAMIC_ARRAY)
 ! *****************************************************************************
 ! Computes the x/y front-propagation velocity components (UX,UY), spread
 ! direction, and fireline intensity for each node in L from the elliptical
 ! spread template: combines slope/wind phi factors, length-to-width ratio,
 ! head/back speeds, crown-fire and WUI (Hamada/UCB) submodels.
 ! Parameter T_ELMFIRE added to update fireline intensity of structures over time
-REAL, INTENT(IN) :: ACCELERATION_FACTOR, DT_ELMFIRE
-TYPE(DLL), INTENT(INOUT) :: L
+REAL, INTENT(IN) :: ACCELERATION_FACTOR
+REAL(8), INTENT(IN) :: T_ELMFIRE
+TYPE(DLL), INTENT(INOUT) :: L, LB
 INTEGER, INTENT(IN) :: ISTEP
-TYPE(NODE), POINTER :: C
+TYPE(NODE), POINTER :: C, LB_P
+REAL, ALLOCATABLE, INTENT(INOUT), DIMENSION(:,:) :: DYNAMIC_ARRAY
 
 REAL :: PHIMAG, PHIWX, PHIWY, PHIX, PHIY, WSMFEFF, BOH, APHIS, APHIW, SINASPMPI, COSASPMPI, &
         RPHIMAG, SQRT_LOW2_M1
@@ -2108,6 +2185,46 @@ REAL, PARAMETER :: KWPM2_TO_BTUPFT2MIN = 60. * 0.3048 * 0.3048 / 1.055, FTPMIN_T
 LOGICAL :: DONE, CROWN_FIRE_AT_START, CROWN_FIRE_AT_END
 
 C => L%HEAD
+#ifdef _WUI
+IF (USE_BLDG_SPREAD_MODEL) THEN
+   LB_P => LB%HEAD
+   IF (BLDG_SPREAD_MODEL_TYPE .EQ. 2) THEN
+      DO I = 1, LB%NUM_NODES
+         CALL ELLIPSE_UCB(LB_P)
+         CALL HRR_TRANSIENT(LB_P, T_ELMFIRE)
+         LB_P%FLIN_SURFACE = LB_P%HRR_TRANSIENT*ANALYSIS_CELLSIZE ! kW/m
+         LB_P => LB_P%NEXT
+      ENDDO
+   ELSEIF (BLDG_SPREAD_MODEL_TYPE .EQ. 3) THEN
+      ! Refresh HRR_TRANSIENT on every burned source each RK stage (idempotent).
+      LB_P => LB%HEAD
+      DO I = 1, LB%NUM_NODES
+         IF (LB_P%IFBFM .EQ. 91) THEN
+            CALL BLDG_SET_URBAN_HRR(LB_P, T_ELMFIRE)
+         ELSE
+            CALL BLDG_SET_WILDLAND_HRR(LB_P, T_ELMFIRE)
+         ENDIF
+         LB_P => LB_P%NEXT
+      ENDDO
+
+      ! Deposit heat once per physical timestep (RK2 calls this routine twice).
+      ! Runs before the ISTEP==1 BLDG_CHECK_IGNITION pass below.
+      IF (ISTEP .EQ. 1) THEN
+         ! Publish current source HRR to the per-cell grid, then deposit heat onto
+         ! unignited urban targets via a precomputed neighborhood stencil. This
+         ! replaces the former O(N_sources x N_front) all-pairs scan
+         ! (BLDG_ACCUMULATE_HEAT_FROM_NEIGHBORS) with an O(N_front x stencil) pass.
+         HRR_TRANSIENT_MAP(:,:) = 0.
+         LB_P => LB%HEAD
+         DO I = 1, LB%NUM_NODES
+            IF (LB_P%HRR_TRANSIENT .GT. 0.) HRR_TRANSIENT_MAP(LB_P%IX, LB_P%IY) = LB_P%HRR_TRANSIENT
+            LB_P => LB_P%NEXT
+         ENDDO
+         CALL BLDG_ACCUMULATE_HEAT_STENCIL(L, SIMULATION_DT)
+      ENDIF
+   ENDIF
+endif
+#endif
 
 IF (ISTEP .EQ. 1) THEN
    DO I = 1, L%NUM_NODES
@@ -2126,6 +2243,7 @@ IF (ISTEP .EQ. 1) THEN
             C%UYOUSY = 1. - ABSCOSASP(IASP) * OMCOSSLPRAD%R4(C%IX,C%IY,1)
             C%NEED_SLOPE_CALC = .FALSE.
          ENDIF
+
          DONE = .FALSE.
          NITER = 0
          DO WHILE (.NOT. DONE)
@@ -2186,18 +2304,16 @@ IF (ISTEP .EQ. 1) THEN
             C%TEST_INTERFACE = .FALSE.
             C%WTU_SPREAD = .FALSE.
 
-            IF (USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .EQ. 2 .AND. CRITICAL_HF_WUI .EQ. 2) THEN
-               C%TEST_INTERFACE = TEST_INTERFACE_WUI(C%IX,C%IY)
-               C%WTU_SPREAD = WTU_SPREAD_WUI(C%IX,C%IY)
-            ENDIF
-
             IF (USE_BLDG_SPREAD_MODEL .AND. C%IFBFM .EQ. 91) THEN
-               CONTINUE
                IF (BLDG_SPREAD_MODEL_TYPE .EQ. 1) CALL HAMADA(C) ! GET C%VELOCITY_DMS, C%VBACK & C%LOW
-               IF (BLDG_SPREAD_MODEL_TYPE .EQ. 2) CALL UMD_UCB_BLDG_SPREAD(C, DT_ELMFIRE) ! GET C%VELOCITY_DMS, C%VBACK & C%LOW
-               CONTINUE
+               IF (BLDG_SPREAD_MODEL_TYPE .EQ. 2) CALL UMD_UCB_BLDG_SPREAD(C, LB, DYNAMIC_ARRAY) ! GET C%VELOCITY_DMS, C%VBACK & C%LOW
+               IF (BLDG_SPREAD_MODEL_TYPE .EQ. 3) THEN
+                  ! Check ignition for unburned cells, then compute spread
+                  IF (.NOT. C%BLDG_IGNITED) CALL BLDG_CHECK_IGNITION(C, T_ELMFIRE)
+                  CALL BLDG_SPREAD_MODEL_3(C, T_ELMFIRE) ! GET C%VELOCITY_DMS, C%VBACK & C%LOW
+               ENDIF
             ENDIF
-#endif      
+#endif
 
             CALL COMPUTE_SPREAD_VELOCITIES(C, ILH)
 
@@ -2244,8 +2360,12 @@ ELSE !ISTEP .EQ. 2
 #endif
 
 #ifdef _WUI                  
-         IF (USE_BLDG_SPREAD_MODEL .AND. (C%IFBFM .EQ. 91)) THEN
-            C%FLIN_SURFACE = HRR_TRANSIENT_MAP(C%IX,C%IY)*ANALYSIS_CELLSIZE ! kW/m
+         IF (USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .EQ. 2 .AND. C%IFBFM .EQ. 91) THEN
+            C%FLIN_SURFACE = C%HRR_TRANSIENT*ANALYSIS_CELLSIZE ! kW/m
+         ENDIF
+         IF (USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .EQ. 1 .AND. C%IFBFM .EQ. 91) THEN
+            CALL HRR_TRANSIENT(C, T_ELMFIRE)
+            C%FLIN_SURFACE = C%HRR_TRANSIENT*ANALYSIS_CELLSIZE ! kW/m
          ENDIF
          ! Model type 3: FLIN_SURFACE is already set in BLDG_SPREAD_MODEL_3
 #endif
@@ -2712,6 +2832,13 @@ DO
          PHIP           (IX,IY) = -1.0
          ! Record firebrand ignited cells
          IF (DUMP_EMBER_IGNITION) EMBER_IGNITION_MAP%I2(IX,IY,1) = 1
+         ! Model-3 ember-ignited urban cell: hand off piloted ignition time
+         ! to BLDG_CHECK_IGNITION via the raster + one-shot flag.
+         IF (USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .EQ. 3 .AND. &
+             FBFM%I2(IX,IY,1) .EQ. 91) THEN
+            BLDG_EMBER_IGNITED_MAP(IX,IY) = .TRUE.
+            TIME_OF_ARRIVAL(IX,IY)        = C%T_LOCAL_IGNITION
+         ENDIF
          CALL DELETE_NODE(LIST_EMBER_DEPOSITED, C) ! Remove ignited cells
       ENDIF
    ENDIF

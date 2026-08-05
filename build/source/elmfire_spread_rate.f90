@@ -497,37 +497,179 @@ END SUBROUTINE HAMADA
 ! *****************************************************************************
 
 ! *****************************************************************************
-SUBROUTINE UMD_UCB_BLDG_SPREAD(C, DT_ELMFIRE)
+SUBROUTINE UMD_UCB_BLDG_SPREAD(C, LB, DYNAMIC_ARRAY)
 ! *****************************************************************************
-! The function calculates the surface fire spreading rate for FBFM91
+
 USE ELMFIRE_VARS
-!ANALYSIS_CELLSIZE, BUILDING_FUEL_MODEL_TABLE
 
 TYPE(NODE), POINTER, INTENT(INOUT) :: C
-REAL, INTENT(IN) :: DT_ELMFIRE
-TYPE(UCB_ELLIPSE) :: ELLIPSE_PARAMETERS
-INTEGER :: IX, IY, BLDG_FM
-REAL :: FTP_PA, ANALYSIS_CELLSIZE_SQUARED, TOTAL_TRANSIENT_DFC, TOTAL_TRANSIENT_RADIATION, &
-        RAD_PER_SQCELL, UCB_DIV, FLAME_FRONT, FLAME_SIDE, FLAME_BACK, SUM_ELLIPSE, V_S !DWI_M1
+TYPE(DLL) , INTENT(INOUT) :: LB
+TYPE(NODE), POINTER :: LB_P
+INTEGER, ALLOCATABLE, DIMENSION(:) :: INDEX_FILTERED
+INTEGER :: I, TEMP_SX, TEMP_SY, DEL_X, DEL_Y, IX_LOW_BORDER, IY_LOW_BORDER, IX_HIGH_BORDER, IY_HIGH_BORDER, &
+           IX_TEMP, IY_TEMP, HAZ, WTU_DIST_LIMIT, BLDG_FM
+! REAL, INTENT(IN) :: T
+REAL :: TARGET_R, TARGET_R_METERS, TARGET_THETA, WIND_THETA, TARGET_THETA_F, MAX_ELLIPSE_DIST, ELLIPSE_DIST_THETA, &
+        DFC_CHECKER, DFC_FACTOR, DFC_HEAT_RECEIVED, RAD_LIMIT_THETA, RAD_CHECKER, DELTA_RAD, RAD_FACTOR, &
+        RAD_EFF_DIST, RAD_HEAT_RECEIVED, V_S, SUM_ELLIPSE, FLAME_FRONT, FLAME_SIDE, FLAME_BACK, UCB_DIV, &
+        DFC_COEFF, RAD_COEFF, FTP_PA, LHRR_PEAK,ANALYSIS_CELLSIZE_SQUARED,RANALYSIS_CELLSIZE, HALF_ANALYSIS_CELLSIZE, &
+        RDEL_X, RDEL_Y, ELLIPSE_MINOR_SQUARED, TOTAL_DFC, TOTAL_RADIATION, RAD_PER_SQCELL, &
+        DFC_HEAT_FLUX, RAD_HEAT_FLUX, DFC_SIGMOID, RAD_SIGMOID, HRR_ADJUSTER, WTU_FLIN_LIMIT   !DWI_M1
+
+!DWI_SU variables
+REAL, ALLOCATABLE, INTENT(INOUT), DIMENSION(:,:) :: DYNAMIC_ARRAY  ! Dynamic array to store IX and IY
+REAL, ALLOCATABLE, DIMENSION(:,:) :: ZERO_FILTERED
 INTEGER, PARAMETER :: NO_DATA = -9999
 
 BLDG_FM = C%IBLDGFM
 IF (C%IBLDGFM .EQ. NO_DATA) BLDG_FM = 1
 
-IX = C%IX
-IY = C%IY
-
+DFC_COEFF = 1 - BUILDING_FUEL_MODEL_TABLE(BLDG_FM)%NONBURNABLE_FRAC
+RAD_COEFF = BUILDING_FUEL_MODEL_TABLE(BLDG_FM)%ABSORPTIVITY
 FTP_PA = BUILDING_FUEL_MODEL_TABLE(BLDG_FM)%FTP_CRIT
 
 ! Set a few constants:
 ANALYSIS_CELLSIZE_SQUARED = ANALYSIS_CELLSIZE * ANALYSIS_CELLSIZE
+RANALYSIS_CELLSIZE = 1. / ANALYSIS_CELLSIZE !Reciprocal analysis cellsize
+HALF_ANALYSIS_CELLSIZE = 0.5 * ANALYSIS_CELLSIZE
 
-TOTAL_TRANSIENT_DFC = TRANSIENT_DFC_WUI(IX, IY)*DT_ELMFIRE*ANALYSIS_CELLSIZE_SQUARED
-TOTAL_TRANSIENT_RADIATION = TRANSIENT_RADIATION_WUI(IX, IY)*DT_ELMFIRE*ANALYSIS_CELLSIZE_SQUARED
+HAZ = 5
 
-RAD_PER_SQCELL = (TOTAL_TRANSIENT_DFC + TOTAL_TRANSIENT_RADIATION)/ANALYSIS_CELLSIZE_SQUARED
+! Interface submodel
+WTU_DIST_LIMIT = 1  ! Arbitrary
+WTU_FLIN_LIMIT = 1.0E3  ! Arbitrary
 
-IF ((TOTAL_TRANSIENT_DFC + TOTAL_TRANSIENT_RADIATION)>30000) THEN
+
+TEMP_SX = 0
+TEMP_SY = 0
+
+TOTAL_DFC = 0.0
+TOTAL_RADIATION = 0.0
+
+IX_TEMP = C%IX - HAZ
+IY_TEMP = C%IY - HAZ
+
+IX_LOW_BORDER = MAX(1, IX_TEMP)
+IY_LOW_BORDER = MAX(1, IY_TEMP)
+
+IX_TEMP = C%IX + HAZ
+IY_TEMP = C%IY + HAZ
+
+IX_HIGH_BORDER = MIN(ANALYSIS_NCOLS, IX_TEMP)
+IY_HIGH_BORDER = MIN(ANALYSIS_NROWS, IY_TEMP)
+
+CALL BURNED_FILTER(DYNAMIC_ARRAY, ZERO_FILTERED, INDEX_FILTERED, IX_LOW_BORDER, IY_LOW_BORDER, IX_HIGH_BORDER, IY_HIGH_BORDER)
+
+!**********************************
+! Main Loop START
+!**********************************
+DO I = 1, SIZE(INDEX_FILTERED)
+
+      LB_P => LB%NODE_POINTERS(INDEX_FILTERED(I))%PTR
+
+ ! For debugging purposes
+      LHRR_PEAK = BUILDING_FUEL_MODEL_TABLE(LB_P%IBLDGFM)%HRRPUA_PEAK
+
+! Introducing effective axes radius of ellipse. Improve physics consideration and make the calibration process less stiff.
+      HRR_ADJUSTER = ANALYSIS_CELLSIZE_SQUARED/(PI*(HRR_ELLIPSE_ADJ*LB_P%ELLIPSE_PARAMETERS%ELLIPSE_MAJOR)*(HRR_ELLIPSE_ADJ*LB_P%ELLIPSE_PARAMETERS%ELLIPSE_MINOR))  !DWI_M2
+     
+      ELLIPSE_MINOR_SQUARED = LB_P%ELLIPSE_PARAMETERS%ELLIPSE_MINOR * LB_P%ELLIPSE_PARAMETERS%ELLIPSE_MINOR
+
+      DEL_X = C%IX - LB_P%IX
+      IF (DEL_X .LT. 0) THEN
+         TEMP_SX = TEMP_SX - 1
+      ELSE
+        TEMP_SX = TEMP_SX + 1
+      ENDIF
+
+      DEL_Y = C%IY - LB_P%IY
+      IF (DEL_Y .LT. 0) THEN
+         TEMP_SY = TEMP_SY - 1
+      ELSE
+         TEMP_SY = TEMP_SY + 1
+      ENDIF
+
+      RDEL_X = REAL(DEL_X)
+      RDEL_Y = REAL(DEL_Y)
+
+      TARGET_R = SQRT( RDEL_X*RDEL_X + RDEL_Y*RDEL_Y)
+      TARGET_R_METERS = TARGET_R*ANALYSIS_CELLSIZE
+
+      IF (TARGET_R .EQ. 0) THEN
+         CYCLE
+      ENDIF
+
+
+! Interface Model
+      IF ((LB_P%IFBFM .NE. 91) .AND. (INTERFACE_MODEL_TYPE .EQ. 2) .AND. (TARGET_R .LE. WTU_DIST_LIMIT)) THEN
+         C%TEST_INTERFACE = .TRUE.
+
+         IF (LB_P%FLIN_SURFACE .GT. WTU_FLIN_LIMIT) THEN
+            C%WTU_SPREAD = .TRUE.
+         ENDIF
+
+         CYCLE
+      ENDIF
+      
+      
+      TARGET_THETA = ATAN2(RDEL_Y, RDEL_X) !in radians
+      WIND_THETA = PIO180 * (270. - LB_P%WD20_NOW) !in radians
+      TARGET_THETA_F = TARGET_THETA - WIND_THETA !in radians
+
+   ! Why is ANALYSIS_CELLSIZE raised to the 0 power here?
+      MAX_ELLIPSE_DIST = 0.3 * LB_P%ELLIPSE_PARAMETERS%DIST_DOWNWIND * (LB_P%ELLIPSE_PARAMETERS%ELLIPSE_MAJOR - LB_P%ELLIPSE_PARAMETERS%ELLIPSE_ECCENTRICITY) / ELLIPSE_MINOR_SQUARED
+
+   !   IF (LB_P%IFBFM .NE. 91) LHRR_PEAK = RANALYSIS_CELLSIZE * LB_P%FLIN_SURFACE
+
+      ! CALL HRR_TRANSIENT(LB_P, T)
+
+   ! Direct Flame Contact
+      ELLIPSE_DIST_THETA = MAX_ELLIPSE_DIST*ELLIPSE_MINOR_SQUARED / (LB_P%ELLIPSE_PARAMETERS%ELLIPSE_MAJOR - LB_P%ELLIPSE_PARAMETERS%ELLIPSE_ECCENTRICITY*COS(TARGET_THETA_F))
+
+      DFC_CHECKER = RANALYSIS_CELLSIZE * (ELLIPSE_DIST_THETA + HALF_ANALYSIS_CELLSIZE - TARGET_R_METERS)
+
+      DFC_FACTOR = AMAX1(0.0,AMIN1(1.0,DFC_CHECKER))
+
+      DFC_HEAT_RECEIVED = DFC_COEFF*DFC_FACTOR*LB_P%HRR_TRANSIENT*HRR_ADJUSTER  !DWI_M3
+
+   ! Radiation
+      RAD_LIMIT_THETA = ELLIPSE_DIST_THETA + LB_P%RAD_DIST
+      RAD_CHECKER = RANALYSIS_CELLSIZE * (RAD_LIMIT_THETA + HALF_ANALYSIS_CELLSIZE - TARGET_R_METERS)
+
+      DELTA_RAD = AMAX1(0.0,AMIN1(1.0,RAD_CHECKER))
+      RAD_FACTOR = DELTA_RAD - DELTA_RAD*DFC_FACTOR
+
+      IF ((DFC_FACTOR .LT. 1) .AND. (DFC_FACTOR .GT. 0)) THEN
+           RAD_EFF_DIST = ANALYSIS_CELLSIZE - DFC_FACTOR*ANALYSIS_CELLSIZE
+      ELSE
+           RAD_EFF_DIST  = TARGET_R_METERS - ELLIPSE_DIST_THETA
+      ENDIF
+
+      RAD_HEAT_RECEIVED = HRR_ADJUSTER*(0.3*DFC_COEFF*RAD_COEFF*RAD_FACTOR*LB_P%HRR_TRANSIENT*ANALYSIS_CELLSIZE_SQUARED)/(4*PI*RAD_EFF_DIST*RAD_EFF_DIST)  !DWI_M4
+
+      C%HEAT_VALUE = C%HEAT_VALUE + (DFC_HEAT_RECEIVED + RAD_HEAT_RECEIVED)*SIMULATION_DT*ANALYSIS_CELLSIZE_SQUARED
+
+      TOTAL_DFC = TOTAL_DFC + DFC_HEAT_RECEIVED*SIMULATION_DT*ANALYSIS_CELLSIZE_SQUARED
+      TOTAL_RADIATION = TOTAL_RADIATION + RAD_HEAT_RECEIVED*SIMULATION_DT*ANALYSIS_CELLSIZE_SQUARED
+
+ENDDO
+
+!**********************************
+! Main Loop END
+!**********************************
+
+DFC_HEAT_FLUX = TOTAL_DFC/ANALYSIS_CELLSIZE_SQUARED
+RAD_HEAT_FLUX = TOTAL_RADIATION/ANALYSIS_CELLSIZE_SQUARED
+
+DFC_SIGMOID = 500/(1 + EXP(2.5 - 0.01*DFC_HEAT_FLUX))
+RAD_SIGMOID = 100/(1 + EXP(2.5 - 0.05*DFC_HEAT_FLUX))
+
+C%TOTAL_DFC_RECEIVED = TOTAL_DFC
+C%TOTAL_RAD_RECEIVED = TOTAL_RADIATION
+
+RAD_PER_SQCELL = (TOTAL_DFC + TOTAL_RADIATION)/ANALYSIS_CELLSIZE_SQUARED
+
+IF ((TOTAL_DFC + TOTAL_RADIATION)>30000) THEN
    FTP_PA = 3000
 ELSE
    FTP_PA = 3000000/AMAX1(1E-3, RAD_PER_SQCELL*RAD_PER_SQCELL)
@@ -538,27 +680,42 @@ IF (C%WS20_NOW .LE. 35) THEN
 ELSE
    UCB_DIV = 1.0
 ENDIF
-! WRITE(*,*) TOTAL_TRANSIENT_DFC, TOTAL_TRANSIENT_RADIATION
-C%ABSOLUTE_U = 60*(TOTAL_TRANSIENT_DFC + TOTAL_TRANSIENT_RADIATION)/(0.3048*DT_ELMFIRE*ANALYSIS_CELLSIZE*FTP_PA)/UCB_DIV ! Unit: ft/min
-C%ABSOLUTE_U = MIN(C%ABSOLUTE_U, 1E5)
 
-ELLIPSE_PARAMETERS = ELLIPSE_PROPERTY_MAP(IX, IY)
+C%ABSOLUTE_U = 60*(TOTAL_DFC + TOTAL_RADIATION)/(0.3048*SIMULATION_DT*ANALYSIS_CELLSIZE*FTP_PA)/UCB_DIV
 
-FLAME_FRONT = ELLIPSE_PARAMETERS%ELLIPSE_MAJOR + ELLIPSE_PARAMETERS%ELLIPSE_ECCENTRICITY
-FLAME_SIDE = 2*ELLIPSE_PARAMETERS%ELLIPSE_MINOR
-FLAME_BACK = ELLIPSE_PARAMETERS%ELLIPSE_MAJOR - ELLIPSE_PARAMETERS%ELLIPSE_ECCENTRICITY
+! WRITE(*,*) T, C%IX, C%IY, TOTAL_DFC, TOTAL_RADIATION, FTP_PA, UCB_DIV
+
+IF (TEMP_SX .LT. 0) THEN
+   C%SIGN_X = -1
+ELSE
+   C%SIGN_X = 1
+ENDIF
+
+IF (TEMP_SY .LT. 0) THEN
+   C%SIGN_Y = -1
+ELSE
+   C%SIGN_Y = 1
+ENDIF
+
+CALL ELLIPSE_UCB(C)
+
+FLAME_FRONT = C%ELLIPSE_PARAMETERS%ELLIPSE_MAJOR + C%ELLIPSE_PARAMETERS%ELLIPSE_ECCENTRICITY
+FLAME_SIDE = 2*C%ELLIPSE_PARAMETERS%ELLIPSE_MINOR
+FLAME_BACK = C%ELLIPSE_PARAMETERS%ELLIPSE_MAJOR - C%ELLIPSE_PARAMETERS%ELLIPSE_ECCENTRICITY
 
 SUM_ELLIPSE = FLAME_FRONT + FLAME_SIDE + FLAME_BACK   !DWI_M6
 
-C%VELOCITY_DMS = C%ABSOLUTE_U*FLAME_FRONT/MAX(1E-5,SUM_ELLIPSE)   !DWI_M7
-C%VBACK = C%ABSOLUTE_U*FLAME_BACK/MAX(1E-5,SUM_ELLIPSE)    !DWI_M7
-V_S = C%ABSOLUTE_U*FLAME_SIDE/MAX(1E-5,SUM_ELLIPSE)    !DWI_M7
+C%VELOCITY_DMS = C%ABSOLUTE_U*FLAME_FRONT/SUM_ELLIPSE   !DWI_M7
+C%VBACK = C%ABSOLUTE_U*FLAME_BACK/SUM_ELLIPSE    !DWI_M7
+V_S = C%ABSOLUTE_U*FLAME_SIDE/SUM_ELLIPSE    !DWI_M7
+
 
 IF (V_S .GT. 1E-4) THEN
    C%LOW = AMIN1((C%VELOCITY_DMS+C%VBACK)/2/V_S,10.0)
 ELSE
    C%LOW = 1.0
 ENDIF
+
 
 ! Interface Model
 IF (C%TEST_INTERFACE) THEN
@@ -568,152 +725,19 @@ IF (C%TEST_INTERFACE) THEN
    ! PRINT *, C%VELOCITY_DMS
 ENDIF
 
-! C%HEAT_VALUE = 0.
+
+
+C%HEAT_VALUE = 0.
 
 ! *****************************************************************************
 END SUBROUTINE UMD_UCB_BLDG_SPREAD
 ! ****************************************************************************
 
 ! *****************************************************************************
-SUBROUTINE CALC_WUI_HEATFLUX(BURNING_NODES, NX, NY, DT_ELMFIRE)
-! *****************************************************************************
-! Calculate the emitted heat flux from BURNING_NODES to adjcent cells (IX,IY), unit kW
-USE ELMFIRE_VARS
-! BANDTHICKNESS_WUI, ANALYSIS_CELLSIZE, BUILDING_FUEL_MODEL_TABLE, PIO180, TOTAL_DFC_WUI, 
-! TOTAL_RADIATION_WUI, TRANSIENT_DFC_WUI, TRANSIENT_RADIATION_WUI
-
-TYPE(NODE), POINTER, INTENT(INOUT) :: BURNING_NODES
-INTEGER, INTENT(IN) :: NX, NY
-REAL, INTENT(IN) :: DT_ELMFIRE
-
-INTEGER :: IX_BURNING, IY_BURNING, IXTAGSTART, IXTAGSTOP, IYTAGSTART, IYTAGSTOP, IX, IY, &
-           DEL_X, DEL_Y, IBLDGFM
-INTEGER, PARAMETER :: NO_DATA = -9999
-REAL :: DFC_COEFF, RAD_COEFF, ANALYSIS_CELLSIZE_SQUARED, RANALYSIS_CELLSIZE, HALF_ANALYSIS_CELLSIZE, HRR_ADJUSTER, ELLIPSE_MINOR_SQUARED, & 
-        RDEL_X, RDEL_Y, TARGET_R, TARGET_R_METERS, TARGET_THETA, WIND_THETA, TARGET_THETA_F, MAX_ELLIPSE_DIST, &
-        ELLIPSE_DIST_THETA, DFC_CHECKER, DFC_FACTOR, DFC_HEAT_RECEIVED, RAD_LIMIT_THETA, RAD_CHECKER, DELTA_RAD, RAD_FACTOR, &
-        RAD_EFF_DIST, RAD_HEAT_RECEIVED, WTU_DIST_LIMIT, WTU_FLIN_LIMIT, HRR_BURNING_NODE
-
-TYPE(UCB_ELLIPSE) :: ELLIPSE_PARAMETERS
-! Interface submodel
-WTU_DIST_LIMIT = 1  ! Arbitrary
-WTU_FLIN_LIMIT = 1.0E3  ! Arbitrary
-
-IX_BURNING = BURNING_NODES%IX
-IY_BURNING = BURNING_NODES%IY
-
-ANALYSIS_CELLSIZE_SQUARED = ANALYSIS_CELLSIZE*ANALYSIS_CELLSIZE
-RANALYSIS_CELLSIZE = 1. / ANALYSIS_CELLSIZE !Reciprocal analysis cellsize
-HALF_ANALYSIS_CELLSIZE = 0.5 * ANALYSIS_CELLSIZE
-
-ELLIPSE_PARAMETERS = ELLIPSE_PROPERTY_MAP(IX_BURNING, IY_BURNING)
-
-! Introducing effective axes radius of ellipse. Improve physics consideration and make the calibration process less stiff.
-HRR_ADJUSTER = ANALYSIS_CELLSIZE_SQUARED/(PI*(HRR_ELLIPSE_ADJ*ELLIPSE_PARAMETERS%ELLIPSE_MAJOR)*(HRR_ELLIPSE_ADJ*ELLIPSE_PARAMETERS%ELLIPSE_MINOR))  !DWI_M2
-
-ELLIPSE_MINOR_SQUARED = ELLIPSE_PARAMETERS%ELLIPSE_MINOR * ELLIPSE_PARAMETERS%ELLIPSE_MINOR
-
-IXTAGSTART = MAX(3,    IX_BURNING - BANDTHICKNESS_WUI) 
-IXTAGSTOP  = MIN(NX-2, IX_BURNING + BANDTHICKNESS_WUI)
-IYTAGSTART = MAX(3,    IY_BURNING - BANDTHICKNESS_WUI)
-IYTAGSTOP  = MIN(NY-2, IY_BURNING + BANDTHICKNESS_WUI)
-
-! These quantities depend only on the burning node / its ellipse, not on the target (IX,IY),
-! so hoist them out of the band loop below (they are otherwise recomputed for every target cell).
-WIND_THETA = PIO180 * (270. - BURNING_NODES%WD20_NOW) !in radians
-MAX_ELLIPSE_DIST = 0.3 * ELLIPSE_PARAMETERS%DIST_DOWNWIND * (ELLIPSE_PARAMETERS%ELLIPSE_MAJOR - ELLIPSE_PARAMETERS%ELLIPSE_ECCENTRICITY) / ELLIPSE_MINOR_SQUARED
-HRR_BURNING_NODE = HRR_TRANSIENT_MAP(IX_BURNING, IY_BURNING)
-
-! Update the aggregated heat flux for each target (IX,IY) from all burning nodes at current time
-DO IY = IYTAGSTART, IYTAGSTOP
-DO IX = IXTAGSTART, IXTAGSTOP
-   DEL_X = IX - IX_BURNING
-   DEL_Y = IY - IY_BURNING
-
-   RDEL_X = REAL(DEL_X)
-   RDEL_Y = REAL(DEL_Y)
-
-   TARGET_R = SQRT( RDEL_X*RDEL_X + RDEL_Y*RDEL_Y)
-   TARGET_R_METERS = TARGET_R*ANALYSIS_CELLSIZE
-
-   IF (TARGET_R .LT. 1E-3) THEN
-      CYCLE
-   ENDIF
-
-   ! Interface Model
-   IF ((CRITICAL_HF_WUI .EQ. 2) .AND. &
-      (BURNING_NODES%IFBFM .NE. 91) .AND. &
-      (TARGET_R .LE. WTU_DIST_LIMIT).AND. &
-      (FBFM%I2(IX,IY,1) .EQ. 91)) THEN
-
-      TEST_INTERFACE_WUI(IX,IY) = .TRUE.
-
-      IF (BURNING_NODES%FLIN_SURFACE .GT. WTU_FLIN_LIMIT) THEN
-         WTU_SPREAD_WUI(IX,IY) = .TRUE.
-      ENDIF
-
-      CYCLE
-   ENDIF
-
-   IF(BLDG_FUEL_MODEL%I2(IX,IY,1) .NE. NO_DATA) THEN
-      IBLDGFM =  BLDG_FUEL_MODEL%I2(IX,IY,1)
-   ELSE
-      IBLDGFM =  1
-   ENDIF
-   DFC_COEFF = 1 - BUILDING_FUEL_MODEL_TABLE(IBLDGFM)%NONBURNABLE_FRAC
-   RAD_COEFF = BUILDING_FUEL_MODEL_TABLE(IBLDGFM)%ABSORPTIVITY
-
-   TARGET_THETA = ATAN2(RDEL_Y, RDEL_X) !in radians
-   TARGET_THETA_F = TARGET_THETA - WIND_THETA !in radians
-
-   ! Direct Flame Contact
-   ELLIPSE_DIST_THETA = MAX_ELLIPSE_DIST*ELLIPSE_MINOR_SQUARED / (ELLIPSE_PARAMETERS%ELLIPSE_MAJOR - ELLIPSE_PARAMETERS%ELLIPSE_ECCENTRICITY*COS(TARGET_THETA_F))
-
-   DFC_CHECKER = RANALYSIS_CELLSIZE * (ELLIPSE_DIST_THETA + HALF_ANALYSIS_CELLSIZE - TARGET_R_METERS)
-
-   DFC_FACTOR = AMAX1(0.0,AMIN1(1.0,DFC_CHECKER))
-
-   DFC_HEAT_RECEIVED = DFC_COEFF*DFC_FACTOR*HRR_BURNING_NODE*HRR_ADJUSTER  !DWI_M3
-
-   ! Radiation
-   RAD_LIMIT_THETA = ELLIPSE_DIST_THETA + BURNING_NODES%RAD_DIST
-   RAD_CHECKER = RANALYSIS_CELLSIZE * (RAD_LIMIT_THETA + HALF_ANALYSIS_CELLSIZE - TARGET_R_METERS)
-
-   DELTA_RAD = AMAX1(0.0,AMIN1(1.0,RAD_CHECKER))
-   RAD_FACTOR = DELTA_RAD - DELTA_RAD*DFC_FACTOR
-
-   IF ((DFC_FACTOR .LT. 1) .AND. (DFC_FACTOR .GT. 0)) THEN
-        RAD_EFF_DIST = ANALYSIS_CELLSIZE - DFC_FACTOR*ANALYSIS_CELLSIZE
-   ELSE
-        RAD_EFF_DIST  = TARGET_R_METERS - ELLIPSE_DIST_THETA
-   ENDIF
-
-   RAD_HEAT_RECEIVED = HRR_ADJUSTER*(0.3*DFC_COEFF*RAD_COEFF*RAD_FACTOR*HRR_BURNING_NODE*ANALYSIS_CELLSIZE_SQUARED)/(4*PI*RAD_EFF_DIST*RAD_EFF_DIST)  !DWI_M4
-   
-   TRANSIENT_DFC_WUI(IX,IY) = TRANSIENT_DFC_WUI(IX,IY) + DFC_HEAT_RECEIVED
-   TRANSIENT_RADIATION_WUI(IX,IY) = TRANSIENT_RADIATION_WUI(IX,IY) + RAD_HEAT_RECEIVED
-   
-   ! Update the accumulated heat uptill now
-   TOTAL_DFC_WUI(IX,IY) = TOTAL_DFC_WUI(IX,IY) + DFC_HEAT_RECEIVED * DT_ELMFIRE * ANALYSIS_CELLSIZE_SQUARED
-   TOTAL_RADIATION_WUI(IX,IY) = TOTAL_RADIATION_WUI(IX,IY) + RAD_HEAT_RECEIVED * DT_ELMFIRE * ANALYSIS_CELLSIZE_SQUARED
-
-ENDDO
-ENDDO
-
-! *****************************************************************************
-END SUBROUTINE CALC_WUI_HEATFLUX
-! *****************************************************************************
-
-! *****************************************************************************
 SUBROUTINE ELLIPSE_UCB(C)
 ! *****************************************************************************
-! Builds the UCB WUI fire-footprint ellipse for node C from wind speed and
-! building area/separation (Hamada-derived regressions, with HAZUS and high-wind
-! branches): computes downwind/upwind/sidewind distances and the resulting
-! ellipse major/minor/eccentricity, storing them in ELLIPSE_PROPERTY_MAP(IX,IY).
 
 USE ELMFIRE_VARS
-!ELLIPSE_PROPERTY_MAP
 
 TYPE(NODE), POINTER, INTENT(INOUT) :: C
 REAL :: V_MPS, EB2, D1, D2, D3, S1, S2, S3, U1, U2, U3, HAMADA_A, HAMADA_D
@@ -800,17 +824,6 @@ IF (EB2 .GT. 0.0) THEN
 ELSE
    C%ELLIPSE_PARAMETERS%ELLIPSE_MINOR = 0.0
 ENDIF
-
-ELLIPSE_PROPERTY_MAP(C%IX, C%IY)%FOREST_FACTOR = C%ELLIPSE_PARAMETERS%FOREST_FACTOR
-
-ELLIPSE_PROPERTY_MAP(C%IX, C%IY)%DIST_DOWNWIND = C%ELLIPSE_PARAMETERS%DIST_DOWNWIND
-ELLIPSE_PROPERTY_MAP(C%IX, C%IY)%DIST_UPWIND = C%ELLIPSE_PARAMETERS%DIST_UPWIND
-ELLIPSE_PROPERTY_MAP(C%IX, C%IY)%DIST_SIDEWIND = C%ELLIPSE_PARAMETERS%DIST_SIDEWIND
-
-ELLIPSE_PROPERTY_MAP(C%IX, C%IY)%ELLIPSE_MAJOR = C%ELLIPSE_PARAMETERS%ELLIPSE_MAJOR
-ELLIPSE_PROPERTY_MAP(C%IX, C%IY)%ELLIPSE_ECCENTRICITY = C%ELLIPSE_PARAMETERS%ELLIPSE_ECCENTRICITY
-ELLIPSE_PROPERTY_MAP(C%IX, C%IY)%ELLIPSE_MINOR = C%ELLIPSE_PARAMETERS%ELLIPSE_MINOR
-
 ! *****************************************************************************
 END SUBROUTINE ELLIPSE_UCB
 ! *****************************************************************************
@@ -818,79 +831,76 @@ END SUBROUTINE ELLIPSE_UCB
 ! *****************************************************************************
 SUBROUTINE HRR_TRANSIENT(BURNING_NODES, T)
 ! *****************************************************************************
-! Evaluates the transient heat-release rate per unit area of a burning node at
-! time T from its time-of-arrival, following the building design-fire curve
-! (growth/full-development/decay) for FBFM91 cells or a residence-time pulse for
-! vegetative cells. Updates HRR_TRANSIENT, FLIN_SURFACE, and HRR_TRANSIENT_MAP.
 
 USE ELMFIRE_VARS
-! HRR_TRANSIENT_MAP, BUILDING_FUEL_MODEL_TABLE
 
 TYPE(NODE), POINTER, INTENT(INOUT) :: BURNING_NODES
+REAL ::  BURNING_TIME, EARLY_TIME, HRR_PEAK, DEVELOPED_TIME, DECAY_TIME
 REAL(8), INTENT(IN) :: T
-
-INTEGER :: IX, IY
-REAL ::  BURNING_TIME, TOA, HRR_PEAK, EARLY_TIME,  DEVELOPED_TIME, DECAY_TIME
 
 INTEGER :: BLDG_FM
 INTEGER, PARAMETER :: NO_DATA = -9999
-REAL(8), PARAMETER :: FT_PER_MIN_TO_MPS = 0.00508
-
-IX = BURNING_NODES%IX
-IY = BURNING_NODES%IY
-
-IF (PHIP(IX,IY) .GT. 0) RETURN
-
-TOA = TIME_OF_ARRIVAL(IX,IY)
-BURNING_TIME = T - TOA
-
-! Pre-burned cells (initial ignition zone) : no HRR transient
-IF (TOA .LE. SIMULATION_TSTART) THEN
-   BURNING_NODES%HRR_TRANSIENT = 0.
-   HRR_TRANSIENT_MAP(IX,IY)    = 0.
-   RETURN
-ENDIF
-
-! This is to be modified. Maybe introduce a design fire curve for non-FBFM91 fuel.
-IF (BURNING_NODES%IFBFM .NE. 91) THEN
-   IF (BURNING_TIME .LT. ANALYSIS_CELLSIZE/MAX(1E-5, BURNING_NODES%VELOCITY*FT_PER_MIN_TO_MPS)) THEN
-      BURNING_NODES%HRR_TRANSIENT = BURNING_NODES%HRRPUA
-   ELSE
-      BURNING_NODES%HRR_TRANSIENT = 0.
-   ENDIF
-   HRR_TRANSIENT_MAP(IX,IY) = BURNING_NODES%HRR_TRANSIENT
-   RETURN
-ENDIF
 
 BLDG_FM = BURNING_NODES%IBLDGFM
-IF (BLDG_FM .NE. NO_DATA) THEN
-   EARLY_TIME = BUILDING_FUEL_MODEL_TABLE(BLDG_FM)%T_EARLY
-   DEVELOPED_TIME = BUILDING_FUEL_MODEL_TABLE(BLDG_FM)%T_FULLDEV
-   DECAY_TIME = BUILDING_FUEL_MODEL_TABLE(BLDG_FM)%T_DECAY
-   HRR_PEAK = BUILDING_FUEL_MODEL_TABLE(BLDG_FM)%HRRPUA_PEAK
+IF (BURNING_NODES%IBLDGFM .EQ. NO_DATA) BLDG_FM = 1
 
-   IF (BURNING_TIME .LE. EARLY_TIME) THEN
-      BURNING_NODES%HRR_TRANSIENT = (HRR_PEAK/ EARLY_TIME)*BURNING_TIME
-   ELSEIF ((BURNING_TIME .GT. EARLY_TIME) .AND. (BURNING_TIME .LE. DEVELOPED_TIME)) THEN
-      BURNING_NODES%HRR_TRANSIENT = HRR_PEAK
-   ELSEIF (BURNING_TIME .GT. DECAY_TIME) THEN
-      BURNING_NODES%HRR_TRANSIENT = 0.
-      BURNING_NODES%BURNED = .TRUE.
-   ELSE
-      BURNING_NODES%HRR_TRANSIENT = (HRR_PEAK/(DEVELOPED_TIME - DECAY_TIME))*(BURNING_TIME - DECAY_TIME)
-   ENDIF
+EARLY_TIME = BUILDING_FUEL_MODEL_TABLE(BLDG_FM)%T_EARLY
+DEVELOPED_TIME = BUILDING_FUEL_MODEL_TABLE(BLDG_FM)%T_FULLDEV
+DECAY_TIME = BUILDING_FUEL_MODEL_TABLE(BLDG_FM)%T_DECAY
+HRR_PEAK = BUILDING_FUEL_MODEL_TABLE(BLDG_FM)%HRRPUA_PEAK
+
+! IF (BURNING_NODES%IFBFM .NE. 91) HRR_PEAK = BURNING_NODES%FLIN_SURFACE / ANALYSIS_CELLSIZE
+IF (BURNING_NODES%IFBFM .NE. 91) HRR_PEAK = 250  ! Constant assumption for now. Subject to change. Waiting for more fundamental research
+
+BURNING_TIME = T - BURNING_NODES%TIME_OF_ARRIVAL
+
+IF (BURNING_TIME .LE. EARLY_TIME) THEN
+   BURNING_NODES%HRR_TRANSIENT = (HRR_PEAK/ EARLY_TIME)*BURNING_TIME
+ELSEIF ((BURNING_TIME .GT. EARLY_TIME) .AND. (BURNING_TIME .LE. DEVELOPED_TIME)) THEN
+   BURNING_NODES%HRR_TRANSIENT = HRR_PEAK
+ELSEIF (BURNING_TIME .GT. DECAY_TIME) THEN
+   BURNING_NODES%HRR_TRANSIENT = 0.
 ELSE
-   BURNING_NODES%HRR_TRANSIENT = 0.0
+   BURNING_NODES%HRR_TRANSIENT = (HRR_PEAK/(DEVELOPED_TIME - DECAY_TIME))*(BURNING_TIME - DECAY_TIME)
 ENDIF
 
 BURNING_NODES%HRR_TRANSIENT = AMAX1(0.0, BURNING_NODES%HRR_TRANSIENT)
-BURNING_NODES%FLIN_SURFACE = BURNING_NODES%HRR_TRANSIENT*ANALYSIS_CELLSIZE ! kW/m
-HRR_TRANSIENT_MAP(IX,IY) = BURNING_NODES%HRR_TRANSIENT
 
 ! *****************************************************************************
 END SUBROUTINE HRR_TRANSIENT
 ! *****************************************************************************
+! *****************************************************************************
+SUBROUTINE BURNED_FILTER(DYNAMIC_ARRAY, ZERO_FILTERED, INDEX_FILTERED, IX_LOW_BORDER, IY_LOW_BORDER, IX_HIGH_BORDER, IY_HIGH_BORDER)
+! *****************************************************************************
 
+REAL, ALLOCATABLE, INTENT(INOUT), DIMENSION(:,:) :: DYNAMIC_ARRAY, ZERO_FILTERED
+INTEGER :: I, TOTAL_ELEMENTS, IX_LOW_BORDER, IY_LOW_BORDER, IX_HIGH_BORDER, IY_HIGH_BORDER
+LOGICAL, ALLOCATABLE :: VALID_VALUES(:)
+INTEGER, ALLOCATABLE, INTENT(OUT) :: INDEX_FILTERED(:)  ! Store indices
+
+
+TOTAL_ELEMENTS = SIZE(DYNAMIC_ARRAY, 1)
+
+    ! Create a logical mask for valid values
+ALLOCATE(VALID_VALUES(TOTAL_ELEMENTS))
+VALID_VALUES = (DYNAMIC_ARRAY(:, 1) >= IX_LOW_BORDER .AND. DYNAMIC_ARRAY(:, 1) <= IX_HIGH_BORDER .AND. &
+               DYNAMIC_ARRAY(:, 2) >= IY_LOW_BORDER .AND. DYNAMIC_ARRAY(:, 2) <= IY_HIGH_BORDER)
+
+    ! Allocate ZERO_FILTERED based on the number of valid values
+ALLOCATE(ZERO_FILTERED(COUNT(VALID_VALUES), 2))
+
+    ! Pack the valid IX and IY values directly into ZERO_FILTERED
+ZERO_FILTERED(:,1) = PACK(DYNAMIC_ARRAY(:,1), VALID_VALUES)
+ZERO_FILTERED(:,2) = PACK(DYNAMIC_ARRAY(:,2), VALID_VALUES)
+
+! Pack the indices of valid values
+INDEX_FILTERED = PACK((/(I, I=1,TOTAL_ELEMENTS)/), VALID_VALUES)
+
+!DEALLOCATE(VALID_VALUES)
+
+! *****************************************************************************
+END SUBROUTINE BURNED_FILTER
+! *****************************************************************************
 ! *****************************************************************************
 SUBROUTINE CALC_FUEL_CONSUMPTION(DT_ELMFIRE, NX, NY)
 ! *****************************************************************************
@@ -922,9 +932,7 @@ ENDDO
 ! *****************************************************************************
 END SUBROUTINE CALC_FUEL_CONSUMPTION
 ! *****************************************************************************
-
 #endif
-
 ! *****************************************************************************
 PURE REAL FUNCTION CFFDRS_FW(WS)
 ! *****************************************************************************
@@ -937,6 +945,482 @@ else
 endif
 ! *****************************************************************************
 END FUNCTION CFFDRS_FW
+! *****************************************************************************
+! *****************************************************************************
+SUBROUTINE BLDG_ACCUMULATE_HEAT_STENCIL(LT, DT)
+! *****************************************************************************
+! Target-centered heat deposition for BLDG_SPREAD_MODEL_TYPE = 3. For each
+! unignited urban target in LT, gather source heat from HRR_TRANSIENT_MAP over
+! the precomputed neighborhood stencil BLDG_STENCIL_G (built once at init) and
+! deposit one DT of heat. Updates ACCUMULATED_HEAT [kJ/m^2] for the FTP ignition
+! check and TOTAL_DFC_RECEIVED / TOTAL_RAD_RECEIVED [kJ] for output.
+!
+! Replaces BLDG_ACCUMULATE_HEAT_FROM_NEIGHBORS, which scanned the entire front
+! once per burning source -- O(N_sources x N_front), the dominant runtime cost.
+! This pass is O(N_front x stencil) and does only multiply-adds (no sqrt/divide)
+! since the distance/view-factor geometry is static and folded into the stencil.
+! Result is identical to the former routine up to floating-point summation order.
+!
+! Decomposition per (target, in-range source), with G(dx,dy) = cell_area / r^2:
+!   ACCUMULATED_HEAT   += RAD_FRAC * (HRR * G)                    * DT
+!   TOTAL_DFC_RECEIVED += DFC_COEFF * cell_area * HRR             * DT   (distance-independent)
+!   TOTAL_RAD_RECEIVED += (RAD_FRAC*DFC_COEFF*RAD_COEFF*cell_area/(4 pi)) * (HRR * G) * DT
+! so only two per-target reductions are needed: SUM_FLAT = sum HRR, SUM_G = sum HRR*G.
+
+USE ELMFIRE_VARS
+
+TYPE(DLL), INTENT(INOUT) :: LT
+REAL, INTENT(IN) :: DT
+
+TYPE(NODE), POINTER :: TARG
+INTEGER :: I, DX, DY, JX, JY, NX_MAP, NY_MAP
+REAL :: G, S, SUM_G, SUM_FLAT, DFC_COEFF, RAD_COEFF, CELL_AREA
+REAL, PARAMETER :: RAD_FRAC = 0.3
+
+IF (.NOT. ALLOCATED(BLDG_STENCIL_G)) RETURN
+
+NX_MAP = SIZE(HRR_TRANSIENT_MAP, 1)
+NY_MAP = SIZE(HRR_TRANSIENT_MAP, 2)
+CELL_AREA = ANALYSIS_CELLSIZE * ANALYSIS_CELLSIZE
+
+TARG => LT%HEAD
+DO I = 1, LT%NUM_NODES
+   IF (.NOT. ASSOCIATED(TARG)) EXIT
+
+   ! Urban + unignited only. Accumulators freeze at ignition.
+   IF (TARG%IFBFM .EQ. 91 .AND. .NOT. TARG%BLDG_IGNITED) THEN
+      SUM_G    = 0.
+      SUM_FLAT = 0.
+      DO DY = -BLDG_STENCIL_HAZ, BLDG_STENCIL_HAZ
+         JY = TARG%IY + DY
+         IF (JY .LT. 1 .OR. JY .GT. NY_MAP) CYCLE
+         DO DX = -BLDG_STENCIL_HAZ, BLDG_STENCIL_HAZ
+            G = BLDG_STENCIL_G(DX,DY)
+            IF (G .LE. 0.) CYCLE                 ! out of range or self cell
+            JX = TARG%IX + DX
+            IF (JX .LT. 1 .OR. JX .GT. NX_MAP) CYCLE
+            S = HRR_TRANSIENT_MAP(JX,JY)
+            IF (S .LE. 0.) CYCLE
+            SUM_FLAT = SUM_FLAT + S
+            SUM_G    = SUM_G    + S * G
+         ENDDO
+      ENDDO
+
+      IF (SUM_FLAT .GT. 0.) THEN
+         DFC_COEFF = 1. - BUILDING_FUEL_MODEL_TABLE(TARG%IBLDGFM)%NONBURNABLE_FRAC
+         RAD_COEFF = BUILDING_FUEL_MODEL_TABLE(TARG%IBLDGFM)%ABSORPTIVITY
+
+         TARG%ACCUMULATED_HEAT   = TARG%ACCUMULATED_HEAT   + RAD_FRAC * SUM_G * DT
+         TARG%TOTAL_DFC_RECEIVED = TARG%TOTAL_DFC_RECEIVED + DFC_COEFF * CELL_AREA * SUM_FLAT * DT
+         TARG%TOTAL_RAD_RECEIVED = TARG%TOTAL_RAD_RECEIVED &
+                                 + (RAD_FRAC * DFC_COEFF * RAD_COEFF * CELL_AREA / (4. * PI)) * SUM_G * DT
+      ENDIF
+   ENDIF
+
+   TARG => TARG%NEXT
+ENDDO
+
+! *****************************************************************************
+END SUBROUTINE BLDG_ACCUMULATE_HEAT_STENCIL
+! *****************************************************************************
+
+! *****************************************************************************
+SUBROUTINE BLDG_ACCUMULATE_HEAT_FROM_NEIGHBORS(SOURCE, LT, DT)
+! *****************************************************************************
+! SUPERSEDED by BLDG_ACCUMULATE_HEAT_STENCIL (kept for reference / A-B testing;
+! no longer called). Deposit one DT of heat from SOURCE onto every unignited
+! urban target within a 60 m radius. Updates ACCUMULATED_HEAT [kJ/m^2] for the
+! FTP ignition check and TOTAL_DFC_RECEIVED / TOTAL_RAD_RECEIVED [kJ] for output.
+! Part of BLDG_SPREAD_MODEL_TYPE = 3.
+
+USE ELMFIRE_VARS
+
+TYPE(NODE), POINTER, INTENT(IN) :: SOURCE
+TYPE(DLL), INTENT(INOUT) :: LT
+REAL, INTENT(IN) :: DT
+
+TYPE(NODE), POINTER :: TARG
+INTEGER :: I, DEL_IX, DEL_IY, HAZ
+REAL :: DIST_M, DIST_M2, CELL_AREA
+REAL :: VF, HF, DFC_COEFF, DFC_FLUX, RAD_COEFF, RAD_FLUX
+REAL, PARAMETER :: INFLUENCE_RADIUS = 60.0
+REAL, PARAMETER :: RAD_FRAC = 0.3
+
+! Skip if source has no heat output
+IF (SOURCE%HRR_TRANSIENT .LE. 0.) RETURN
+
+! Hazard distance in cells based on cell size (60 m radius)
+HAZ = CEILING(INFLUENCE_RADIUS / ANALYSIS_CELLSIZE)
+CELL_AREA = ANALYSIS_CELLSIZE * ANALYSIS_CELLSIZE
+
+! Loop through all tagged cells to find neighbors
+TARG => LT%HEAD
+DO I = 1, LT%NUM_NODES
+   IF (.NOT. ASSOCIATED(TARG)) EXIT
+
+   ! Urban + unignited only. Accumulators freeze at ignition.
+   IF (TARG%IFBFM .EQ. 91 .AND. .NOT. TARG%BLDG_IGNITED) THEN
+      DEL_IX = TARG%IX - SOURCE%IX
+      DEL_IY = TARG%IY - SOURCE%IY
+
+      ! In-range, not self
+      IF (ABS(DEL_IX) .LE. HAZ .AND. ABS(DEL_IY) .LE. HAZ .AND. &
+          (DEL_IX .NE. 0 .OR. DEL_IY .NE. 0)) THEN
+         DIST_M = SQRT(REAL(DEL_IX*DEL_IX + DEL_IY*DEL_IY)) * ANALYSIS_CELLSIZE
+
+         IF (DIST_M .LE. INFLUENCE_RADIUS) THEN
+            DFC_COEFF = 1. - BUILDING_FUEL_MODEL_TABLE(TARG%IBLDGFM)%NONBURNABLE_FRAC
+            RAD_COEFF = BUILDING_FUEL_MODEL_TABLE(TARG%IBLDGFM)%ABSORPTIVITY
+
+            ! Guard the 1/r^2 terms against singularity when DIST_M < cell size
+            DIST_M2 = MAX(DIST_M * DIST_M, CELL_AREA)
+
+            ! View-factor approximation for the FTP accumulator
+            VF = CELL_AREA / DIST_M2
+
+            ! FTP accumulator for ignition check.
+            ! Flux at target [kW/m^2] * DT [s] = energy density [kJ/m^2]
+            HF = SOURCE%HRR_TRANSIENT * VF * RAD_FRAC
+            TARG%ACCUMULATED_HEAT = TARG%ACCUMULATED_HEAT + HF * DT
+
+            ! Cumulative direct-flame-contact energy received by target [kJ]
+            !   flux [kW/m^2] * DT [s] * cell area [m^2] = kJ
+            DFC_FLUX = DFC_COEFF * SOURCE%HRR_TRANSIENT
+            TARG%TOTAL_DFC_RECEIVED = TARG%TOTAL_DFC_RECEIVED &
+                                    + DFC_FLUX * DT * CELL_AREA
+
+            ! Cumulative radiative energy received by target [kJ]
+            !   point-source irradiance P / (4 pi r^2) at actual distance,
+            !   where P = HRR_source * cell_area [kW]
+            RAD_FLUX = RAD_FRAC * DFC_COEFF * RAD_COEFF * &
+                       SOURCE%HRR_TRANSIENT * CELL_AREA / (4. * PI * DIST_M2)
+            TARG%TOTAL_RAD_RECEIVED = TARG%TOTAL_RAD_RECEIVED &
+                                    + RAD_FLUX * DT * CELL_AREA
+         ENDIF
+      ENDIF
+   ENDIF
+
+   TARG => TARG%NEXT
+ENDDO
+
+! *****************************************************************************
+END SUBROUTINE BLDG_ACCUMULATE_HEAT_FROM_NEIGHBORS
+! *****************************************************************************
+
+! *****************************************************************************
+SUBROUTINE BLDG_CHECK_IGNITION(C, T)
+! *****************************************************************************
+! Checks if accumulated heat exceeds ignition threshold for building
+! Part of BLDG_SPREAD_MODEL_TYPE = 3
+
+USE ELMFIRE_VARS
+
+TYPE(NODE), POINTER, INTENT(INOUT) :: C
+REAL(8), INTENT(IN) :: T
+
+REAL :: FTP_CRIT, T_IGN_EMBER
+
+! Guards
+IF (C%IFBFM .NE. 91) RETURN
+IF (C%BLDG_IGNITED) RETURN
+
+! Ember-landing fast-path: bypass the radiative FTP threshold. Piloted-
+! ignition time was stashed in TIME_OF_ARRIVAL by EULERIAN_SPOTTING_MAIN.
+IF (BLDG_EMBER_IGNITED_MAP(C%IX, C%IY)) THEN
+   T_IGN_EMBER = TIME_OF_ARRIVAL(C%IX, C%IY)
+   IF (T_IGN_EMBER .LE. 0.) T_IGN_EMBER = T
+   C%BLDG_IGNITED               = .TRUE.
+   C%T_BLDG_IGNITION            = T_IGN_EMBER
+   C%TIME_OF_ARRIVAL            = T_IGN_EMBER
+   TIME_OF_ARRIVAL(C%IX, C%IY)  = T_IGN_EMBER
+   BLDG_EMBER_IGNITED_MAP(C%IX, C%IY) = .FALSE.  ! one-shot
+   RETURN
+ENDIF
+
+! Get ignition threshold from building fuel model table
+FTP_CRIT = BUILDING_FUEL_MODEL_TABLE(C%IBLDGFM)%FTP_CRIT
+
+! Check if threshold exceeded
+IF (C%ACCUMULATED_HEAT .GE. FTP_CRIT) THEN
+   C%BLDG_IGNITED = .TRUE.
+   C%T_BLDG_IGNITION = T
+   C%TIME_OF_ARRIVAL = T
+   ! Raster write preserves the FTP crossing time through the later
+   ! burn-detection loop (elmfire_level_set.f90:812 guards overwrite).
+   TIME_OF_ARRIVAL(C%IX, C%IY) = T
+ENDIF
+
+! *****************************************************************************
+END SUBROUTINE BLDG_CHECK_IGNITION
+! *****************************************************************************
+
+! *****************************************************************************
+SUBROUTINE BLDG_SET_WILDLAND_HRR(C, T)
+! *****************************************************************************
+! Publish HRR_TRANSIENT for a burned wildland cell: constant at IR for
+! tau = HPUA_SURFACE / IR seconds, then zero. Feeds adjacent urban cells
+! through BLDG_ACCUMULATE_HEAT_FROM_NEIGHBORS. Part of BLDG_SPREAD_MODEL_TYPE = 3.
+
+USE ELMFIRE_VARS
+
+TYPE(NODE), POINTER, INTENT(INOUT) :: C
+REAL(8), INTENT(IN) :: T
+REAL :: BURNING_TIME, TAU_RESIDENCE
+
+! Only for non-urban cells that have burned
+IF (C%IFBFM .EQ. 91) RETURN
+IF (C%TIME_OF_ARRIVAL .LE. 0.) RETURN
+IF (C%IR .LE. 0.) RETURN
+
+! Skip wildland cells that can't radiate to any urban target.
+IF (.NOT. NEAR_URBAN(C%IX, C%IY)) THEN
+   C%HRR_TRANSIENT = 0.
+   RETURN
+ENDIF
+
+BURNING_TIME = T - C%TIME_OF_ARRIVAL
+
+! Derive residence time from HPUA and IR:
+!   HPUA_SURFACE = IR * TR * 60 (kJ/m²), so tau = HPUA_SURFACE / IR (seconds)
+IF (C%HPUA_SURFACE .GT. 0. .AND. C%IR .GT. 0.) THEN
+   TAU_RESIDENCE = C%HPUA_SURFACE / C%IR
+ELSE
+   C%HRR_TRANSIENT = 0.
+   RETURN
+ENDIF
+
+! HRR is constant at I_R during residence time, then zero
+IF (BURNING_TIME .GE. 0. .AND. BURNING_TIME .LE. TAU_RESIDENCE) THEN
+   C%HRR_TRANSIENT = C%IR  ! kW/m² (already in SI from SURFACE_SPREAD_RATE)
+ELSE
+   C%HRR_TRANSIENT = 0.
+ENDIF
+
+! *****************************************************************************
+END SUBROUTINE BLDG_SET_WILDLAND_HRR
+! *****************************************************************************
+
+! *****************************************************************************
+SUBROUTINE BLDG_SET_URBAN_HRR(C, T)
+! *****************************************************************************
+! Publish HRR_TRANSIENT for an ignited urban cell on a growth/peak/decay
+! curve (building-fuel-model table). HRR_TRANSIENT only — no velocity
+! side effects, so safe to call on LIST_BURNED every RK stage.
+! Part of BLDG_SPREAD_MODEL_TYPE = 3.
+
+USE ELMFIRE_VARS
+
+TYPE(NODE), POINTER, INTENT(INOUT) :: C
+REAL(8), INTENT(IN) :: T
+
+REAL :: BURNING_TIME, HRR_PEAK, T_EARLY, T_FULLDEV, T_DECAY
+
+IF (C%IFBFM .NE. 91) RETURN
+IF (C%TIME_OF_ARRIVAL .LE. 0.) THEN
+   C%HRR_TRANSIENT = 0.
+   RETURN
+ENDIF
+
+HRR_PEAK  = BUILDING_FUEL_MODEL_TABLE(C%IBLDGFM)%HRRPUA_PEAK
+T_EARLY   = BUILDING_FUEL_MODEL_TABLE(C%IBLDGFM)%T_EARLY
+T_FULLDEV = BUILDING_FUEL_MODEL_TABLE(C%IBLDGFM)%T_FULLDEV
+T_DECAY   = BUILDING_FUEL_MODEL_TABLE(C%IBLDGFM)%T_DECAY
+
+BURNING_TIME = T - C%TIME_OF_ARRIVAL
+
+IF (BURNING_TIME .LE. 0.) THEN
+   C%HRR_TRANSIENT = 0.
+ELSEIF (BURNING_TIME .LE. T_EARLY) THEN
+   ! Growth phase: linear ramp up
+   C%HRR_TRANSIENT = (HRR_PEAK / MAX(T_EARLY, 1.0)) * BURNING_TIME
+ELSEIF (BURNING_TIME .LE. T_FULLDEV) THEN
+   ! Fully developed phase: constant peak
+   C%HRR_TRANSIENT = HRR_PEAK
+ELSEIF (BURNING_TIME .LE. T_DECAY) THEN
+   ! Decay phase: linear ramp down
+   C%HRR_TRANSIENT = HRR_PEAK * (T_DECAY - BURNING_TIME) / MAX(T_DECAY - T_FULLDEV, 1.0)
+ELSE
+   ! Fire has burned out
+   C%HRR_TRANSIENT = 0.
+ENDIF
+
+C%HRR_TRANSIENT = MAX(0., C%HRR_TRANSIENT)
+
+! *****************************************************************************
+END SUBROUTINE BLDG_SET_URBAN_HRR
+! *****************************************************************************
+
+! *****************************************************************************
+SUBROUTINE BLDG_SPREAD_MODEL_3(C, T)
+! *****************************************************************************
+! Spatiotemporally independent building spread model
+! Spread rate depends only on local cell properties and time since ignition
+! ONLY activates when C%IFBFM = 91 AND C%BLDG_IGNITED = .TRUE.
+! Part of BLDG_SPREAD_MODEL_TYPE = 3
+
+USE ELMFIRE_VARS
+
+TYPE(NODE), POINTER, INTENT(INOUT) :: C
+REAL(8), INTENT(IN) :: T
+
+REAL :: BURNING_TIME, HRR_PEAK, T_EARLY, T_FULLDEV, T_DECAY
+REAL :: UCB_DIV, FLAME_FRONT, FLAME_SIDE, FLAME_BACK, SUM_ELLIPSE, V_S
+REAL :: V_MPS, HAMADA_A, HAMADA_D
+REAL :: D1, D2, S1, S2, U1, U2, EB2
+
+! Guards - only process urban fuel model cells
+IF (C%IFBFM .NE. 91) RETURN
+
+! Unignited: zero velocity + zero HRR (default). Cell stays in LIST_TAGGED and
+! accumulates heat until BLDG_CHECK_IGNITION flips BLDG_IGNITED. Legacy branch
+! gated by USE_UNIGNITED_URBAN_VELOCITY_HACK — see CHANGELOG.
+IF (.NOT. C%BLDG_IGNITED) THEN
+   IF (USE_UNIGNITED_URBAN_VELOCITY_HACK) THEN
+      HRR_PEAK = BUILDING_FUEL_MODEL_TABLE(C%IBLDGFM)%HRRPUA_PEAK
+      IF (C%WS20_NOW .LE. 35.) THEN
+         UCB_DIV = 1.8
+      ELSE
+         UCB_DIV = 1.0
+      ENDIF
+      C%ABSOLUTE_U = 60. * HRR_PEAK / (0.3048 * 3000.) / UCB_DIV
+      C%VELOCITY_DMS = C%ABSOLUTE_U * 0.5
+      C%VBACK = C%ABSOLUTE_U * 0.25
+      C%LOW = 2.0
+   ELSE
+      C%ABSOLUTE_U = 0.
+      C%VELOCITY_DMS = 0.
+      C%VBACK = 0.
+      C%LOW = 1.0
+   ENDIF
+   C%HRR_TRANSIENT = 0.
+   C%FLIN_SURFACE = 0.
+   RETURN
+ENDIF
+
+! Get building fuel model properties
+HRR_PEAK = BUILDING_FUEL_MODEL_TABLE(C%IBLDGFM)%HRRPUA_PEAK
+T_EARLY = BUILDING_FUEL_MODEL_TABLE(C%IBLDGFM)%T_EARLY
+T_FULLDEV = BUILDING_FUEL_MODEL_TABLE(C%IBLDGFM)%T_FULLDEV
+T_DECAY = BUILDING_FUEL_MODEL_TABLE(C%IBLDGFM)%T_DECAY
+
+! Calculate burning time since ignition
+BURNING_TIME = T - C%T_BLDG_IGNITION
+
+! HRR transient curve (growth -> peak -> decay)
+IF (BURNING_TIME .LE. 0.) THEN
+   C%HRR_TRANSIENT = 0.
+ELSEIF (BURNING_TIME .LE. T_EARLY) THEN
+   ! Growth phase: linear ramp up
+   C%HRR_TRANSIENT = (HRR_PEAK / MAX(T_EARLY, 1.0)) * BURNING_TIME
+ELSEIF (BURNING_TIME .LE. T_FULLDEV) THEN
+   ! Fully developed phase: constant peak
+   C%HRR_TRANSIENT = HRR_PEAK
+ELSEIF (BURNING_TIME .LE. T_DECAY) THEN
+   ! Decay phase: linear ramp down
+   C%HRR_TRANSIENT = HRR_PEAK * (T_DECAY - BURNING_TIME) / MAX(T_DECAY - T_FULLDEV, 1.0)
+ELSE
+   ! Fire has burned out
+   C%HRR_TRANSIENT = 0.
+ENDIF
+
+C%HRR_TRANSIENT = MAX(0.0, C%HRR_TRANSIENT)
+
+! If fire has decayed, no spread
+IF (C%HRR_TRANSIENT .LE. 0.) THEN
+   C%VELOCITY_DMS = 0.
+   C%VBACK = 0.
+   C%LOW = 1.0
+   RETURN
+ENDIF
+
+! Wind-dependent divisor (from original UCB model)
+IF (C%WS20_NOW .LE. 35.) THEN
+   UCB_DIV = 1.8
+ELSE
+   UCB_DIV = 1.0
+ENDIF
+
+! Spread rate from HRR - using FTP-based formula
+! Units: [kW/m²] / [kJ/m²] * [s conversion] = [m/s] -> convert to ft/min
+C%ABSOLUTE_U = 60. * C%HRR_TRANSIENT / (0.3048 * 3000.) / UCB_DIV
+
+! Calculate ellipse parameters for wind-driven spread
+V_MPS = C%WS20_NOW * 0.447  ! Convert mph to m/s
+C%ELLIPSE_PARAMETERS%FOREST_FACTOR = 1  ! Urban = 1
+
+! Get building geometry parameters
+HAMADA_A = BLDG_AREA%R4(C%IX, C%IY, 1)
+HAMADA_D = BLDG_SEPARATION_DIST%R4(C%IX, C%IY, 1)
+
+! Ellipse parameters from Hamada regression (simplified for low wind)
+! Coefficients for HAZUS correction regime (V < 10 m/s typically)
+IF (V_MPS .LT. 10.) THEN
+   D1 = 1.679463256 - 0.123901243*HAMADA_A + 0.307612446*HAMADA_D
+   D2 = 78.62957398 + 1.536189561*HAMADA_A - 0.5662073*HAMADA_D
+   
+   S1 = -2.922896622 - 0.05550541*HAMADA_A + 0.017291361*HAMADA_D
+   S2 = 39.31478699 + 0.768094781*HAMADA_A - 0.28310365*HAMADA_D
+   
+   U1 = -6.297892493 - 0.119654483*HAMADA_A + 0.037754535*HAMADA_D
+   U2 = 78.62957398 + 1.536189561*HAMADA_A - 0.5662073*HAMADA_D
+   
+   C%ELLIPSE_PARAMETERS%DIST_DOWNWIND = C%WIND_PROP * (D1*V_MPS + D2)
+   C%ELLIPSE_PARAMETERS%DIST_UPWIND = C%WIND_PROP * (U1*V_MPS + U2)
+   C%ELLIPSE_PARAMETERS%DIST_SIDEWIND = C%WIND_PROP * (S1*V_MPS + S2)
+ELSE
+   ! High wind regime
+   D1 = -7.159031537 - 0.043555289*HAMADA_A - 0.14894238*HAMADA_D
+   D2 = 394.4930697 + 0.720929023*HAMADA_A + 11.42149084*HAMADA_D
+   
+   S1 = -0.577270631 - 0.015285438*HAMADA_A + 0.012786629*HAMADA_D
+   S2 = 38.11784939 + 0.800599307*HAMADA_A - 0.412476476*HAMADA_D
+   
+   U1 = -1.092711783 - 0.025390239*HAMADA_A + 0.016740663*HAMADA_D
+   U2 = 52.39584604 + 1.104793131*HAMADA_A - 0.57241037*HAMADA_D
+   
+   C%ELLIPSE_PARAMETERS%DIST_DOWNWIND = C%WIND_PROP * (D1*V_MPS + D2)
+   C%ELLIPSE_PARAMETERS%DIST_UPWIND = C%WIND_PROP * (U1*V_MPS + U2)
+   C%ELLIPSE_PARAMETERS%DIST_SIDEWIND = C%WIND_PROP * (S1*V_MPS + S2)
+ENDIF
+
+! Ensure positive distances
+C%ELLIPSE_PARAMETERS%DIST_DOWNWIND = MAX(C%ELLIPSE_PARAMETERS%DIST_DOWNWIND, 1.0)
+C%ELLIPSE_PARAMETERS%DIST_UPWIND = MAX(C%ELLIPSE_PARAMETERS%DIST_UPWIND, 1.0)
+C%ELLIPSE_PARAMETERS%DIST_SIDEWIND = MAX(C%ELLIPSE_PARAMETERS%DIST_SIDEWIND, 1.0)
+
+! Convert to ellipse parameters
+C%ELLIPSE_PARAMETERS%ELLIPSE_MAJOR = (C%ELLIPSE_PARAMETERS%DIST_DOWNWIND + C%ELLIPSE_PARAMETERS%DIST_UPWIND) / 2.
+C%ELLIPSE_PARAMETERS%ELLIPSE_ECCENTRICITY = MIN(C%ELLIPSE_PARAMETERS%ELLIPSE_MAJOR / 2., &
+   C%ELLIPSE_PARAMETERS%ELLIPSE_MAJOR - C%ELLIPSE_PARAMETERS%DIST_UPWIND)
+
+EB2 = 1.0 - (C%ELLIPSE_PARAMETERS%ELLIPSE_ECCENTRICITY / C%ELLIPSE_PARAMETERS%ELLIPSE_MAJOR)**2
+IF (EB2 .GT. 0.0) THEN
+   C%ELLIPSE_PARAMETERS%ELLIPSE_MINOR = C%ELLIPSE_PARAMETERS%DIST_SIDEWIND / SQRT(EB2)
+ELSE
+   C%ELLIPSE_PARAMETERS%ELLIPSE_MINOR = C%ELLIPSE_PARAMETERS%DIST_SIDEWIND
+ENDIF
+
+! Distribute velocity across ellipse axes
+FLAME_FRONT = C%ELLIPSE_PARAMETERS%ELLIPSE_MAJOR + C%ELLIPSE_PARAMETERS%ELLIPSE_ECCENTRICITY
+FLAME_SIDE = 2. * C%ELLIPSE_PARAMETERS%ELLIPSE_MINOR
+FLAME_BACK = C%ELLIPSE_PARAMETERS%ELLIPSE_MAJOR - C%ELLIPSE_PARAMETERS%ELLIPSE_ECCENTRICITY
+SUM_ELLIPSE = MAX(FLAME_FRONT + FLAME_SIDE + FLAME_BACK, 1E-6)
+
+C%VELOCITY_DMS = C%ABSOLUTE_U * FLAME_FRONT / SUM_ELLIPSE
+C%VBACK = C%ABSOLUTE_U * FLAME_BACK / SUM_ELLIPSE
+V_S = C%ABSOLUTE_U * FLAME_SIDE / SUM_ELLIPSE
+
+IF (V_S .GT. 1E-4) THEN
+   C%LOW = MIN((C%VELOCITY_DMS + C%VBACK) / (2. * V_S), 10.0)
+ELSE
+   C%LOW = 1.0
+ENDIF
+
+! Set FLIN for compatibility with spotting model
+C%FLIN_SURFACE = C%HRR_TRANSIENT * ANALYSIS_CELLSIZE
+
+! *****************************************************************************
+END SUBROUTINE BLDG_SPREAD_MODEL_3
 ! *****************************************************************************
 
 END MODULE

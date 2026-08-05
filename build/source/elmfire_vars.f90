@@ -111,7 +111,7 @@ INTEGER :: BANDTHICKNESS, BLDG_SPREAD_MODEL_TYPE, BLDG_FUEL_MODEL_CONSTANT, CRIT
 LOGICAL :: ALLOW_MULTIPLE_IGNITIONS_AT_A_PIXEL, ALLOW_NONBURNABLE_PIXEL_IGNITION, &
            ESTIMATE_URBAN_LOSSES, RANDOMIZE_RANDOM_SEED, RANDOM_IGNITIONS, UNTAG_TYPE_2, UNTAG_TYPE_3, &
            WIND_FLUCTUATIONS, USE_CONSTANT_BLDG_SPREAD_MODEL_PARAMS, USE_BLDG_SPREAD_MODEL, USE_PYROMES, &
-           MULTIPLE_HOSTS, WX_BILINEAR_INTERPOLATION
+           MULTIPLE_HOSTS, WX_BILINEAR_INTERPOLATION, USE_UNIGNITED_URBAN_VELOCITY_HACK
 
 CHARACTER(400) :: A_SRS
 
@@ -248,6 +248,10 @@ LOGICAL*1, ALLOCATABLE, DIMENSION (:,:) :: TAGGED
 LOGICAL*1, POINTER, DIMENSION (:,:) :: ISNONBURNABLE
 REAL, ALLOCATABLE, DIMENSION(:,:) :: PHIP
 LOGICAL*1, ALLOCATABLE, DIMENSION(:,:) :: EVERTAGGED
+LOGICAL*1, ALLOCATABLE, DIMENSION(:,:) :: NEAR_URBAN                  ! for bldg spread type 3, cells within influence radius of any FBFM==91 cell
+LOGICAL*1, ALLOCATABLE, DIMENSION(:,:) :: BLDG_EMBER_IGNITED_MAP      ! for bldg spread type 3, ember-ignition flag from EULERIAN_SPOTTING_MAIN
+INTEGER :: BLDG_STENCIL_HAZ = 0                                       ! for bldg spread type 3, influence radius in cells (60 m / cellsize)
+REAL, ALLOCATABLE, DIMENSION(:,:) :: BLDG_STENCIL_G                   ! for bldg spread type 3, precomputed view-factor stencil cell_area/r^2 (0 outside radius / at self)
 REAL(8), ALLOCATABLE, DIMENSION (:,:) :: TIME_OF_ARRIVAL, EMBER_TOA
 
 ! 1D geospatial arrays
@@ -625,7 +629,7 @@ TYPE NODE
 ! WUI model parameters
    TYPE(UCB_ELLIPSE) :: ELLIPSE_PARAMETERS
    INTEGER :: BLDG_FUEL_MODEL       = 0
-   INTEGER :: IBLDGFM               = -9999
+   INTEGER :: IBLDGFM               = 1
    INTEGER :: SIGN_X                = 1
    INTEGER :: SIGN_Y                = 1
    REAL    :: BLDG_AREA             = 0. ! Was HAMADA_A
@@ -634,8 +638,15 @@ TYPE NODE
    REAL    :: BLDG_FOOTPRINT_FRAC   = 0.
    REAL    :: RAD_DIST              = 100.
    REAL    :: WIND_PROP             = 1.
+   REAL    :: HEAT_VALUE            = 0.
    REAL    :: HRR_TRANSIENT         = 0.
    REAL    :: ABSOLUTE_U            = 0.
+   REAL    :: TOTAL_DFC_RECEIVED    = 0.
+   REAL    :: TOTAL_RAD_RECEIVED    = 0.
+   ! BLDG_SPREAD_MODEL_TYPE = 3 fields:
+   REAL    :: ACCUMULATED_HEAT      = 0.       ! Total heat received from neighbors [kJ/m²]
+   REAL    :: T_BLDG_IGNITION       = -1.      ! Time when building ignition threshold reached [s]
+   LOGICAL :: BLDG_IGNITED          = .FALSE.  ! Has building ignited?
 #endif
 
 #ifdef _UMDSPOTTING
@@ -663,11 +674,17 @@ TYPE NODE
 
 END TYPE NODE
 
+! Wrapper of pointers DWI_SU
+TYPE :: NODE_WRAPPER
+    TYPE(NODE), POINTER :: PTR  ! Each wrapper holds a pointer to a NODE
+END TYPE NODE_WRAPPER
+
 TYPE DLL
   TYPE(NODE), POINTER :: HEAD => NULL()
   TYPE(NODE), POINTER :: TAIL => NULL()
   INTEGER :: NUM_NODES = 0
   INTEGER :: NUM_NODES_PREVIOUS = 0
+  TYPE(NODE_WRAPPER), ALLOCATABLE :: NODE_POINTERS(:)   ! Array of pointers DWI_SU
 END TYPE DLL
 
 TYPE(DLL), TARGET :: LIST_TAGGED, LIST_BURNED, LIST_SUPPRESSED, LIST_VIRTUAL_STATIONS, LIST_EMBER_DEPOSITED, LIST_EMBER_TRACKER, LIST_WUI_BURNING

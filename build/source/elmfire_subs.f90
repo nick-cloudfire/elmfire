@@ -1180,7 +1180,7 @@ END FUNCTION CHECK_BARRIER_BREACH
 ! *****************************************************************************
 
 ! *****************************************************************************
-SUBROUTINE APPEND(DL2, IX, IY, T)
+SUBROUTINE APPEND_ss(DL2, IX, IY, T)
 ! *****************************************************************************
 ! Appends a new node for cell (IX,IY) added at time T to the tail of list DL2
 ! (calling INIT if the list is empty), allocating the node and caching its fuel
@@ -1231,7 +1231,121 @@ DL2%TAIL%PREV       => NP
 DL2%TAIL%PREV%NEXT  => DL2%TAIL
 
 ! *****************************************************************************   
+END SUBROUTINE APPEND_ss
+! *****************************************************************************
+
+! *****************************************************************************
+SUBROUTINE APPEND(DL2, IX, IY, T)
+! *****************************************************************************
+   TYPE(DLL), INTENT(INOUT) :: DL2
+   INTEGER,  INTENT(IN)     :: IX, IY
+   REAL(8),  INTENT(IN)     :: T
+
+   TYPE(NODE), POINTER :: NP, NEW_NODE
+#ifdef _WUI
+   TYPE(NODE_WRAPPER), ALLOCATABLE :: TMP(:)
+   INTEGER :: old_cap, new_cap
+#endif
+
+   ! If the list is empty
+   IF (DL2%NUM_NODES == 0) THEN
+      CALL INIT(DL2, IX, IY, T)
+      DL2%NUM_NODES = 1
+#ifdef _WUI
+      ! Initial capacity
+      IF (.NOT. ALLOCATED(DL2%NODE_POINTERS)) THEN
+         ALLOCATE(DL2%NODE_POINTERS(16))
+      END IF
+      NULLIFY(DL2%NODE_POINTERS(1)%PTR)
+      DL2%NODE_POINTERS(1)%PTR => DL2%HEAD
+#endif
+      RETURN
+   END IF
+
+   NP => DL2%TAIL
+
+   ALLOCATE(NEW_NODE)
+
+   NEW_NODE%IX         = IX
+   NEW_NODE%IY         = IY
+   NEW_NODE%TIME_ADDED = T
+
+   NEW_NODE%IFBFM   = FBFM%I2(IX,IY,1)
+#ifdef _WUI
+   IF (USE_BLDG_SPREAD_MODEL) NEW_NODE%IBLDGFM = BLDG_FUEL_MODEL%I2(IX,IY,1)
+#endif
+   NEW_NODE%ADJ     = ADJ%R4(IX,IY,1)
+   NEW_NODE%TANSLP2 = TANSLP2(MAX(MIN(NINT(SLP%R4(IX,IY,1)),90),0))
+
+   NEW_NODE%PREV => NP
+   NEW_NODE%NEXT => NULL()
+   NP%NEXT       => NEW_NODE
+   DL2%TAIL      => NEW_NODE
+
+   DL2%NUM_NODES = DL2%NUM_NODES + 1
+
+#ifdef _WUI
+   !---------------------------------------------------------------------------
+   ! Grow NODE_POINTERS only when needed
+   !---------------------------------------------------------------------------
+   IF (.NOT. ALLOCATED(DL2%NODE_POINTERS)) THEN
+      ! Shouldn't happen if INIT handled correctly, but be defensive
+      ALLOCATE(DL2%NODE_POINTERS(MAX(16, DL2%NUM_NODES)))
+   ELSE
+      old_cap = SIZE(DL2%NODE_POINTERS)
+
+      IF (DL2%NUM_NODES > old_cap) THEN
+         ! Grow capacity, e.g. double it (tunable)
+         new_cap = MAX(2*old_cap, DL2%NUM_NODES)
+         ALLOCATE(TMP(new_cap))
+         TMP(1:DL2%NUM_NODES-1) = DL2%NODE_POINTERS(1:DL2%NUM_NODES-1)
+         CALL MOVE_ALLOC(TMP, DL2%NODE_POINTERS)
+      END IF
+   END IF
+
+   ! Store pointer to the new node
+   NULLIFY(DL2%NODE_POINTERS(DL2%NUM_NODES)%PTR)
+   DL2%NODE_POINTERS(DL2%NUM_NODES)%PTR => DL2%TAIL
+#endif
+
+! *****************************************************************************
 END SUBROUTINE APPEND
+! *****************************************************************************
+
+! *****************************************************************************
+SUBROUTINE APPEND_TO_DYNAMIC_ARRAY(IX, IY, N_ROWS, DYNAMIC_ARRAY)
+! *****************************************************************************
+
+    INTEGER, INTENT(IN) :: IX, IY                         ! NEW_VALUES_TO_APPEND
+    INTEGER, INTENT(INOUT) :: N_ROWS
+    REAL, ALLOCATABLE, INTENT(INOUT), DIMENSION(:,:) :: DYNAMIC_ARRAY  ! Dynamic 2D array to store IX and IY
+
+
+    ! Local temporary array for resizing
+    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: TEMP_ARRAY
+
+    ! Handle the case where the array is unallocated
+    IF (N_ROWS .LE. 1) THEN
+        ALLOCATE(DYNAMIC_ARRAY(1, 2))           ! Allocate first column
+        DYNAMIC_ARRAY(1, 1) = IX
+        DYNAMIC_ARRAY(1, 2) = IY
+        N_ROWS = 1                              ! Set number of rows to 1
+    ELSE
+        ! Allocate a temporary array with one additional column
+        ALLOCATE(TEMP_ARRAY(N_ROWS, 2))
+        TEMP_ARRAY(1:N_ROWS-1, :) = DYNAMIC_ARRAY  ! Copy existing data
+        TEMP_ARRAY(N_ROWS, 1) = IX           ! Add new IX value
+        TEMP_ARRAY(N_ROWS, 2) = IY           ! Add new IY value
+
+        ! Replace the old array with the resized one
+        DEALLOCATE(DYNAMIC_ARRAY)
+        ALLOCATE(DYNAMIC_ARRAY(N_ROWS, 2))
+        DYNAMIC_ARRAY = TEMP_ARRAY
+    END IF
+
+
+! *****************************************************************************
+END SUBROUTINE APPEND_TO_DYNAMIC_ARRAY
 ! *****************************************************************************
 
 ! *****************************************************************************
