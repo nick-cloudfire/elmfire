@@ -441,6 +441,18 @@ IF (IOS > 0) THEN
    STOP
 ENDIF
 
+! An absurd stop time is a legitimate way to ask for "run until the fire front stalls", so it is capped
+! here rather than refused. The cap is what the simulation clock can carry: T is a 32-bit REAL and the
+! output dump takes NINT(T) for the timestamp in its filenames, so beyond HUGE(1) seconds - about 68
+! years - a run that reaches its stop time dies in MAIN_DUMP_ROUTINE with 'floating invalid' after the
+! fire has finished. Capping loses nothing: no fire outlives 68 years of weather.
+IF (SIMULATION_TSTOP .GT. REAL(HUGE(1))) THEN
+   IF (IRANK_WORLD .EQ. 0) WRITE(*,'(A,ES12.5,A,ES12.5,A)') &
+      ' SIMULATION_TSTOP of ', SIMULATION_TSTOP, ' s capped at ', REAL(HUGE(1)), &
+      ' s, the largest the simulation clock can timestamp'
+   SIMULATION_TSTOP = REAL(HUGE(1))
+ENDIF
+
 ! *****************************************************************************
 END SUBROUTINE READ_TIME_CONTROL
 ! *****************************************************************************
