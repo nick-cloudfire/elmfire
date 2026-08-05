@@ -472,11 +472,6 @@ IF (MODE .NE. 1) THEN
    LIST_FIRE_POTENTIAL = NEW_DLL()
    IF (FEEDBACK_LEVEL .GE. 2 .AND. IRANK_WORLD .EQ. 0) PRINT *, "Mode 2: Output rasters allocated"
 
-   ! Every rank builds the full fire potential list (all burnable analysis cells): work is
-   ! distributed by Monte Carlo member, not by spatial point, and each member computes a
-   ! full-domain raster, so each rank needs the complete list. This pass is cheap relative
-   ! to the per-member spread computations. Progress is printed by rank 0 only so the
-   ! carriage-return progress line is not garbled by concurrent output from other ranks.
    DO IY = 1, ANALYSIS_NROWS
       IF (FEEDBACK_LEVEL .GT. 2 .AND. IRANK_WORLD .EQ. 0) THEN
          WRITE(*,'(A)', advance='no') char(13)   ! carriage return
@@ -497,28 +492,17 @@ IF (MODE .NE. 1) THEN
 
    IF (FEEDBACK_LEVEL .GE. 2 .AND. IRANK_WORLD .EQ. 0) PRINT *, "Mode 2: Fire potential list compiled"
 
-   ! Storage for the Monte Carlo coefficients drawn per weather band and ensemble
-   ! member, so they can be written to coeffs.csv (Mode 2 does not run POSTPROCESS,
-   ! which writes coeffs.csv for the other modes). Indexed by (variable, member, band);
-   ! each band is computed by exactly one rank, so an MPI sum-reduce later collects them.
    IF (NUM_MONTE_CARLO_VARIABLES .GT. 0) THEN
       ALLOCATE(COEFFS_MODE2(NUM_MONTE_CARLO_VARIABLES, MAX(NUM_ENSEMBLE_MEMBERS,1), &
                             METEOROLOGY_BAND_START:METEOROLOGY_BAND_STOP))
       COEFFS_MODE2 = 0.
    ENDIF
 
-   ! Mark which weather bands are active (i.e. land on the METEOROLOGY_BAND_SKIP_INTERVAL
-   ! grid). The stored value is unused now that work is distributed per (band, member)
-   ! unit below; only the -1 sentinel ("band not active, skip it") still matters.
    IRANK_TO_RUN_METEOROLOGY_BAND(:) = -1
    DO IWX_BAND = METEOROLOGY_BAND_START, METEOROLOGY_BAND_STOP, METEOROLOGY_BAND_SKIP_INTERVAL
       IRANK_TO_RUN_METEOROLOGY_BAND(IWX_BAND) = 0
    ENDDO
 
-   ! Global work-unit counter spanning all (active weather band x ensemble member) pairs.
-   ! Incremented identically on every rank (all ranks iterate all active bands/members),
-   ! so MOD(IWORK, NPROC) assigns each unit to exactly one rank. This distributes Monte
-   ! Carlo members across MPI ranks even when there is only a single weather band.
    IWORK = -1
    DO IWX_MEM_BAND = METEOROLOGY_BAND_START, METEOROLOGY_BAND_STOP, WX_BANDS_KEPT_IN_MEM
       CALL UPDATE_WEATHER_SLICE(IWX_MEM_BAND, min(IWX_MEM_BAND+WX_BANDS_KEPT_IN_MEM-1, METEOROLOGY_BAND_STOP))
@@ -529,41 +513,21 @@ IF (MODE .NE. 1) THEN
          WRITE(FOUR_IWX_BAND,  '(I4.4)') IWX_BAND + IWX_MEM_BAND -1
          IF (IRANK_WORLD .EQ. 0) WRITE(*,*) 'IWX_BAND: ', IWX_BAND + IWX_MEM_BAND -1
 
-         ! Monte Carlo ensemble for Mode 2. When Monte Carlo variables are configured we
-         ! run NUM_ENSEMBLE_MEMBERS realizations per weather band, drawing a fresh set of
-         ! perturbations (PERTURB_WS, PERTURB_M1, ...) for each. Each realization is written
-         ! out as its own raster set (no averaging) so the ensemble can be post-processed
-         ! externally; filenames get a '_mcNNNN' member tag. With no Monte Carlo variables
-         ! this collapses to a single realization with the original, untagged filenames.
          N_ENS_MODE2 = 1
          IF (NUM_MONTE_CARLO_VARIABLES .GT. 0) N_ENS_MODE2 = MAX(NUM_ENSEMBLE_MEMBERS, 1)
 
          IF (FEEDBACK_LEVEL .GE. 2) PRINT *, "TOTAL FIRE NODES: ", LIST_FIRE_POTENTIAL%NUM_NODES
 
          DO IENS = 1, N_ENS_MODE2
-            ! Member tag appended to output filenames. Empty for a single deterministic
-            ! realization so existing (non-Monte-Carlo) output names are unchanged.
             IF (N_ENS_MODE2 .GT. 1) THEN
                WRITE(SEVEN_IENS,'(I7.7)') IENS
                ENS_TAG = '_mc' // SEVEN_IENS
             ELSE
                ENS_TAG = ''
             ENDIF
-
-            ! Draw this member's perturbations. PERTURB_RASTERS sets the global PERTURB_*
-            ! offsets; ADJ/CBD/CBH perturbations are then applied inside the spread-rate
-            ! routines, while the weather/moisture offsets are applied at the node fill below.
-            ! These draws are made on EVERY rank (not just the owner) so the random-number
-            ! stream stays in lockstep across ranks -- RANDOM_NUMBER here plus any internal
-            ! draws PERTURB_RASTERS makes for Gaussian/lognormal PDFs. As a result a given
-            ! member's coefficients are identical no matter which rank ends up computing it.
             IF (NUM_MONTE_CARLO_VARIABLES .GT. 0) CALL RANDOM_NUMBER(COEFFS(:))
             IF (NUM_RASTERS_TO_PERTURB .GT. 0) CALL PERTURB_RASTERS(COEFFS(:))
-
-            ! Distribute this (weather band x ensemble member) work unit round-robin across
-            ! ranks; only the owning rank performs the (expensive) spread computation and
-            ! raster dump below. Every unit is owned by exactly one rank, so the per-band
-            ! COEFFS_MODE2 sum-reduce later still gathers a complete coeffs.csv table.
+            
             IWORK = IWORK + 1
             IF (MOD(IWORK, NPROC) .NE. IRANK_WORLD) CYCLE
 

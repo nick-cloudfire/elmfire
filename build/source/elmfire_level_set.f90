@@ -60,6 +60,8 @@ LOGICAL :: IA_HAS_OCCURRED, LOPEN, GO, CALL_SPOTTING, JUST_INTERPOLATED, DUMP_SM
 LOGICAL, SAVE :: FIRSTCALL
 LOGICAL, DIMENSION(1:100) :: ALREADY_IGNITED
 
+real, allocatable, dimension(:,:) :: phi_previous
+
 CHARACTER(4) :: FOUR_IWX_BAND, FOUR_IRANK_WORLD
 CHARACTER(256) :: LOG_MSG
 CHARACTER(7) :: SEVEN_ICASE
@@ -117,6 +119,9 @@ if (FEEDBACK_LEVEL .ge. 3) then
    WRITE(LOG_MSG,'(A,I0,A,F10.1,A,F10.1,A,F10.1)') '[',ICASE,'] PRIOR TO MAIN LOOP. T: ',T,', Total Duration: ',REAL(totalDuration),', Start: ',SIMULATION_TSTART+(IWX_BAND-1)*DT_METEOROLOGY
    WRITE(*,'(A)') TRIM(LOG_MSG)
 endif
+
+if (.not. allocated(phi_previous)) allocate(phi_previous(ANALYSIS_NCOLS, ANALYSIS_NROWS))
+phi_previous(:,:) = 2
 
 DO WHILE (T .le. totalDuration)
    ! if (ICASE .ge. 9945) then
@@ -1556,6 +1561,23 @@ DO WHILE (T .le. totalDuration)
          DT = DT_METEOROLOGY
       ENDIF
 
+      ! check if propagation has stalled for an early exit
+      if ( ALL(ALREADY_IGNITED(1:MIN(NUM_IGNITIONS,100))) .AND. &
+           ( (.NOT. ENABLE_SPOTTING) .OR. USE_SUPERSEDED_SPOTTING .OR. &
+             (TRIM(ACCUMULATION_MODEL) .EQ. 'EULERIAN'   .AND. LIST_EMBER_TRACKER%NUM_NODES .LT. 1) .OR. &
+             (TRIM(ACCUMULATION_MODEL) .EQ. 'LAGRANGIAN' .AND. NUM_TRACKED_EMBERS .LT. 1) ) ) then
+         if (all(abs(PHIP - phi_previous) .lt. 0.001)) then
+            WRITE(LOG_MSG,'(A,I0,A,F10.1,A,F10.1)') '[',ICASE,'] STOPPED: FIRE FRONT PROPAGATION STALLED'
+            WRITE(*,'(A)') TRIM(LOG_MSG)
+            SIMULATION_TSTOP_HOURS = T / 3600.
+            STATS_SIMULATION_TSTOP_HOURS(ICASE) = SIMULATION_TSTOP_HOURS
+            rank_finished = 1
+            DT = DT_METEOROLOGY
+         endif
+      endif
+
+      phi_previous = PHIP
+
       CALL ACCUMULATE_CPU_USAGE(54, IT1, IT2)
 
       IS_FINAL_DUMP = T .GE. TSTOP
@@ -2306,6 +2328,9 @@ REAL, INTENT(IN) :: DT
 INTEGER, INTENT(IN) :: ISTEP
 INTEGER :: I
 TYPE(NODE), POINTER :: C
+REAL :: LIMIT
+
+LIMIT = 1.0
 
 ! 2nd order Runge Kutta integration:
 C => LIST_TAGGED%HEAD
@@ -2313,8 +2338,8 @@ IF (ISTEP .EQ. 1) THEN
    DO I = 1, LIST_TAGGED%NUM_NODES
       PHIP(C%IX,C%IY) = C%PHIP_OLD - DT * (C%UX * C%DPHIDX_LIMITED + C%UY * C%DPHIDY_LIMITED)
       IF ( PHIP(C%IX,C%IY) .NE. PHIP(C%IX,C%IY)) PHIP(C%IX,C%IY) = 1.0  !NaN check
-      IF ( PHIP(C%IX,C%IY) .LT. -100.0 ) PHIP(C%IX,C%IY) = -100.0
-      IF ( PHIP(C%IX,C%IY) .GT.  100.0 ) PHIP(C%IX,C%IY) =  100.0
+      IF ( PHIP(C%IX,C%IY) .LT. -1 * LIMIT ) PHIP(C%IX,C%IY) = -1 * LIMIT
+      IF ( PHIP(C%IX,C%IY) .GT.  LIMIT ) PHIP(C%IX,C%IY) =  LIMIT
 
       IF (C%WTU_SPREAD) THEN 
          PHIP (C%IX, C%IY) = -1.0   ! Interface Model
