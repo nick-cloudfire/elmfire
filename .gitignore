@@ -101,13 +101,15 @@ examples/smoke/WARNING.*
 examples/smoke/STARTUP
 
 # ============================================================
-# Validation, verification & tutorials (generated outputs)
+# Validation, verification & tutorials
 # ============================================================
-tutorials/05-UMD-spotting
-validation/01-single-fire/ca-county_20180701_062200
-validation/02-multi-fire/2*
-verification/01-elliptical-shape/exact_ellipses
-verification/04-spotting_eulerian
+# b064a8e trimmed this branch to the WUINITY-relevant subset and dropped these
+# trees from version control. They are still useful to keep on disk for local
+# runs, so ignore them wholesale rather than per-case: without this, every local
+# test case shows up as untracked and gets swept back in by an "add all".
+validation/
+verification/
+tutorials/
 
 # ============================================================
 # Tooling
