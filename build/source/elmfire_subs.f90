@@ -1429,7 +1429,134 @@ DL2%NUM_NODES = DL2%NUM_NODES - 1
 
 ! *****************************************************************************
 END SUBROUTINE DELETE_NODE
-! ***************************************************************************** 
+! *****************************************************************************
+
+#ifdef _WUI
+! *****************************************************************************
+SUBROUTINE ENROLL_BLDG_SRC(C)
+! *****************************************************************************
+! Adds node C to the tail of the active building-spread source thread. C stays a
+! member of LIST_BURNED; only the SRC_NEXT/SRC_PREV links are touched.
+
+TYPE(NODE), POINTER, INTENT(INOUT) :: C
+
+IF (.NOT. ASSOCIATED(C)) RETURN
+IF (C%SRC_ENROLLED) RETURN
+
+C%SRC_PREV => BLDG_SRC_TAIL
+C%SRC_NEXT => NULL()
+
+IF (ASSOCIATED(BLDG_SRC_TAIL)) THEN
+   BLDG_SRC_TAIL%SRC_NEXT => C
+ELSE
+   BLDG_SRC_HEAD => C
+ENDIF
+BLDG_SRC_TAIL => C
+
+C%SRC_ENROLLED = .TRUE.
+N_BLDG_SRC = N_BLDG_SRC + 1
+
+! *****************************************************************************
+END SUBROUTINE ENROLL_BLDG_SRC
+! *****************************************************************************
+
+! *****************************************************************************
+SUBROUTINE RETIRE_BLDG_SRC(C)
+! *****************************************************************************
+! Unlinks node C from the active source thread. NO DEALLOCATE: the node remains
+! in LIST_BURNED so the output dumps still see its payload. Retirement is
+! permanent -- neither "not NEAR_URBAN" nor "burned out" can revert -- so a
+! retired node is never visited by the per-RK-stage source walk again.
+
+TYPE(NODE), POINTER, INTENT(INOUT) :: C
+
+IF (.NOT. ASSOCIATED(C)) RETURN
+IF (.NOT. C%SRC_ENROLLED) RETURN
+
+IF (ASSOCIATED(C%SRC_PREV)) THEN
+   C%SRC_PREV%SRC_NEXT => C%SRC_NEXT
+ELSE
+   BLDG_SRC_HEAD => C%SRC_NEXT
+ENDIF
+
+IF (ASSOCIATED(C%SRC_NEXT)) THEN
+   C%SRC_NEXT%SRC_PREV => C%SRC_PREV
+ELSE
+   BLDG_SRC_TAIL => C%SRC_PREV
+ENDIF
+
+C%SRC_NEXT => NULL()
+C%SRC_PREV => NULL()
+C%SRC_ENROLLED = .FALSE.
+C%HRR_TRANSIENT = 0.   ! keeps DUMP_HRR_TRANSIENT correct after retirement
+N_BLDG_SRC = N_BLDG_SRC - 1
+
+! *****************************************************************************
+END SUBROUTINE RETIRE_BLDG_SRC
+! *****************************************************************************
+#endif
+
+#ifdef _UMDSPOTTING
+! *****************************************************************************
+SUBROUTINE ENROLL_SPOT_SRC(C)
+! *****************************************************************************
+! Adds node C to the tail of the actively-ember-generating source thread. C stays
+! a member of LIST_BURNED; only SPOT_NEXT/SPOT_PREV are touched.
+
+TYPE(NODE), POINTER, INTENT(INOUT) :: C
+
+IF (.NOT. ASSOCIATED(C)) RETURN
+IF (C%SPOT_ENROLLED) RETURN
+
+C%SPOT_PREV => SPOT_SRC_TAIL
+C%SPOT_NEXT => NULL()
+
+IF (ASSOCIATED(SPOT_SRC_TAIL)) THEN
+   SPOT_SRC_TAIL%SPOT_NEXT => C
+ELSE
+   SPOT_SRC_HEAD => C
+ENDIF
+SPOT_SRC_TAIL => C
+
+C%SPOT_ENROLLED = .TRUE.
+N_SPOT_SRC = N_SPOT_SRC + 1
+
+! *****************************************************************************
+END SUBROUTINE ENROLL_SPOT_SRC
+! *****************************************************************************
+
+! *****************************************************************************
+SUBROUTINE RETIRE_SPOT_SRC(C)
+! *****************************************************************************
+! Unlinks node C from the spotting source thread. NO DEALLOCATE -- the node stays
+! in LIST_BURNED for the output dumps and for the BLDG_SRC thread.
+
+TYPE(NODE), POINTER, INTENT(INOUT) :: C
+
+IF (.NOT. ASSOCIATED(C)) RETURN
+IF (.NOT. C%SPOT_ENROLLED) RETURN
+
+IF (ASSOCIATED(C%SPOT_PREV)) THEN
+   C%SPOT_PREV%SPOT_NEXT => C%SPOT_NEXT
+ELSE
+   SPOT_SRC_HEAD => C%SPOT_NEXT
+ENDIF
+
+IF (ASSOCIATED(C%SPOT_NEXT)) THEN
+   C%SPOT_NEXT%SPOT_PREV => C%SPOT_PREV
+ELSE
+   SPOT_SRC_TAIL => C%SPOT_PREV
+ENDIF
+
+C%SPOT_NEXT => NULL()
+C%SPOT_PREV => NULL()
+C%SPOT_ENROLLED = .FALSE.
+N_SPOT_SRC = N_SPOT_SRC - 1
+
+! *****************************************************************************
+END SUBROUTINE RETIRE_SPOT_SRC
+! *****************************************************************************
+#endif
 
 ! *****************************************************************************
 SUBROUTINE TIDY(DL2)

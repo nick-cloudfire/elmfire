@@ -38,6 +38,14 @@ INTEGER :: I, ILOC, J, IX, IY, ITIMESTEP, IX_IGN, IY_IGN, ISTEP, K, LU, IT1, IT2
 INTEGER, SAVE :: NX, NY
 INTEGER, POINTER, SAVE, DIMENSION(:) :: IX_TO_TAG, IY_TO_TAG, IX_SPOT_FIRE, IY_SPOT_FIRE
 INTEGER, PARAMETER :: NO_DATA = -9999
+#ifdef _WUI
+! Set by BLDG_SET_*_HRR when a source can never radiate again (model type 3).
+LOGICAL :: SRC_EXPIRED
+#endif
+#ifdef _UMDSPOTTING
+! Next-node capture for the spotting source thread walk (nodes may unlink).
+TYPE(NODE), POINTER :: SPOT_NEXT_P
+#endif
 
 REAL :: SURFACE_ACCELERATION_FACTOR, F_METEOROLOGY, R0, TAU, ACRES, ACRES_SDI, ELAPSED_TIME, E, FLIN_MAX, HECTARES, POC, SIMULATION_TSTOP_HOURS, &
         BURN_PERIOD_CENTER_HOUR, BURN_PERIOD_START_HOUR, BURN_PERIOD_STOP_HOUR, HOUR_OF_DAY, DT_DAY, TBURN, &
@@ -464,6 +472,14 @@ DO WHILE (T .le. totalDuration)
       LIST_SUPPRESSED             = NEW_DLL(); LIST_SUPPRESSED%NUM_NODES=0
       LIST_WUI_BURNING            = NEW_DLL(); LIST_WUI_BURNING%NUM_NODES=0
       LIST_EMBER_DEPOSITED        = NEW_DLL(); LIST_EMBER_DEPOSITED%NUM_NODES=0 ! linked list for ember deposited cells
+#ifdef _WUI
+      ! Must be reset per ensemble member: these nodes belong to LIST_BURNED,
+      ! which is rebuilt above for each case.
+      BLDG_SRC_HEAD => NULL(); BLDG_SRC_TAIL => NULL(); N_BLDG_SRC = 0
+#endif
+#ifdef _UMDSPOTTING
+      SPOT_SRC_HEAD => NULL(); SPOT_SRC_TAIL => NULL(); N_SPOT_SRC = 0
+#endif
       NUM_EVERTAGGED              = 0
 
       IA_HAS_OCCURRED             = .FALSE.
@@ -537,6 +553,9 @@ DO WHILE (T .le. totalDuration)
                ICOUNT = ICOUNT + 1
 
                CALL APPEND(LIST_BURNED, IX, IY, T)
+#ifdef _UMDSPOTTING
+               IF (ENABLE_SPOTTING .AND. (.NOT. USE_SUPERSEDED_SPOTTING)) CALL ENROLL_SPOT_SRC(LIST_BURNED%TAIL)
+#endif
                
                IF (WX_BILINEAR_INTERPOLATION) THEN
                   CALL INTERP_RASTER_LINKEDLIST_SINGLE_BILINEAR (LIST_BURNED%TAIL, M1_LO  (:,:), M1_HI  (:,:), F_METEOROLOGY, 1)
@@ -769,6 +788,9 @@ DO WHILE (T .le. totalDuration)
 
             CALL TAG_BAND(NX,NY,IX_IGN,IY_IGN,T)
             CALL APPEND(LIST_BURNED,IX_IGN,IY_IGN,T)
+#ifdef _UMDSPOTTING
+            IF (ENABLE_SPOTTING .AND. (.NOT. USE_SUPERSEDED_SPOTTING)) CALL ENROLL_SPOT_SRC(LIST_BURNED%TAIL)
+#endif
 #ifdef _WUI
             IF (USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .EQ. 2) THEN
                ! Populate DYNAMIC_ARRAY of burned cells for the UMD-UCB (type 2) model
@@ -796,6 +818,9 @@ DO WHILE (T .le. totalDuration)
 
                CALL TAG_BAND(NX,NY,IX_IGN,IY_IGN,T)
                CALL APPEND(LIST_BURNED,IX_IGN,IY_IGN,T)
+#ifdef _UMDSPOTTING
+               IF (ENABLE_SPOTTING .AND. (.NOT. USE_SUPERSEDED_SPOTTING)) CALL ENROLL_SPOT_SRC(LIST_BURNED%TAIL)
+#endif
 
                IF (USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .EQ. 2) THEN
                   ! Populate DYNAMIC_ARRAY of burned cells for the UMD-UCB (type 2) model
@@ -1114,6 +1139,9 @@ DO WHILE (T .le. totalDuration)
             ENDIF
 
             CALL APPEND(LIST_BURNED, IX, IY, T)
+#ifdef _UMDSPOTTING
+            IF (ENABLE_SPOTTING .AND. (.NOT. USE_SUPERSEDED_SPOTTING)) CALL ENROLL_SPOT_SRC(LIST_BURNED%TAIL)
+#endif
 
             LIST_BURNED%TAIL%IR                     = C%IR
             LIST_BURNED%TAIL%VS0                    = C%VS0
@@ -1153,10 +1181,14 @@ DO WHILE (T .le. totalDuration)
             ! heat source on the next BLDG_ACCUMULATE pass.
             IF (BLDG_SPREAD_MODEL_TYPE .EQ. 3) THEN
                IF (LIST_BURNED%TAIL%IFBFM .EQ. 91) THEN
-                  CALL BLDG_SET_URBAN_HRR(LIST_BURNED%TAIL, T)
+                  CALL BLDG_SET_URBAN_HRR(LIST_BURNED%TAIL, T, SRC_EXPIRED)
                ELSE
-                  CALL BLDG_SET_WILDLAND_HRR(LIST_BURNED%TAIL, T)
+                  CALL BLDG_SET_WILDLAND_HRR(LIST_BURNED%TAIL, T, SRC_EXPIRED)
                ENDIF
+               ! Enroll on the active source thread only if it can still radiate.
+               ! Cells that are already expired here (not NEAR_URBAN, IR<=0) are
+               ! the bulk of a mostly-wildland domain and never enroll at all.
+               IF (.NOT. SRC_EXPIRED) CALL ENROLL_BLDG_SRC(LIST_BURNED%TAIL)
             ENDIF
          ENDIF
 #endif
@@ -1232,8 +1264,16 @@ DO WHILE (T .le. totalDuration)
 
 #ifdef _UMDSPOTTING
       IF (ENABLE_SPOTTING .AND. (.NOT. USE_SUPERSEDED_SPOTTING)) THEN
-         C => LIST_BURNED%HEAD
-         DO I = 1, LIST_BURNED%NUM_NODES
+         ! Walk only cells still inside their ember-generation window instead of
+         ! all of LIST_BURNED, making this O(actively spotting) rather than
+         ! O(burned area). A node is retired once T passes T_END_SPOTTING, which
+         ! is fixed by CALC_SPOTTING_DURATION and can never be re-entered.
+         ! Bit-identical: an expired node yields DT_SPOTTING <= 0 and so never
+         ! reaches the RANDOM_NUMBER draw or SPOTTING below, meaning nothing is
+         ! skipped -- and the RNG stream is therefore unperturbed.
+         C => SPOT_SRC_HEAD
+         DO WHILE (ASSOCIATED(C))
+            SPOT_NEXT_P => C%SPOT_NEXT   ! capture before a possible unlink
 
 #ifdef _WUI
             ! Refresh transient HRRPUA for Hamada model, to be used in eulerian firebrand model
@@ -1241,6 +1281,16 @@ DO WHILE (T .le. totalDuration)
 #endif
             CALL_SPOTTING = .FALSE.
             IF (.NOT. C%SPOTTING_DURATION_CALCULATED) CALL CALC_SPOTTING_DURATION(C)
+
+            ! Retire once the generation window has closed. Type-1 Hamada needs
+            ! the HRR_TRANSIENT refresh above on every node every step, so that
+            ! configuration keeps the full walk.
+            IF (C%SPOTTING_DURATION_CALCULATED .AND. T .GT. C%T_END_SPOTTING) THEN
+#ifdef _WUI
+               IF (.NOT. (USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .EQ. 1)) &
+#endif
+                  CALL RETIRE_SPOT_SRC(C)
+            ENDIF
 
             ! Set DT_SPOTTING to the overlap length between [T, T+DT] and [C%T_END_SPOTTING,C%T_START_SPOTTING]
             DT_SPOTTING = MIN(T+DT, C%T_END_SPOTTING)-MAX(T, C%T_START_SPOTTING)
@@ -1263,7 +1313,7 @@ DO WHILE (T .le. totalDuration)
                ENDIF
             ENDIF
             ! C%TAU_EMBERGEN = MIN (TAU_EMBERGEN, C%TAU_EMBERGEN + DT)
-            C => C%NEXT
+            C => SPOT_NEXT_P
          ENDDO
       ENDIF
 #endif
@@ -1741,6 +1791,9 @@ DO WHILE (T .le. totalDuration)
                         SURFACE_FIRE(I,J) = 1
 
                         CALL APPEND(LIST_BURNED, I, J, T)
+#ifdef _UMDSPOTTING
+                        IF (ENABLE_SPOTTING .AND. (.NOT. USE_SUPERSEDED_SPOTTING)) CALL ENROLL_SPOT_SRC(LIST_BURNED%TAIL)
+#endif
                         
                         STATS_SURFACE_FIRE_AREA(ICASE) = STATS_SURFACE_FIRE_AREA(ICASE) + ACRES_PER_PIXEL
                         STATS_AFFECTED_POPULATION(ICASE) = STATS_AFFECTED_POPULATION(ICASE) + POPULATION_DENSITY%R4(I,J,1)
@@ -2161,6 +2214,11 @@ REAL :: PHIMAG, PHIWX, PHIWY, PHIX, PHIY, WSMFEFF, BOH, APHIS, APHIW, SINASPMPI,
 INTEGER :: IASP, I, ILH, NITER
 REAL, PARAMETER :: KWPM2_TO_BTUPFT2MIN = 60. * 0.3048 * 0.3048 / 1.055, FTPMIN_TO_MPS = 0.3048 / 60.
 LOGICAL :: DONE, CROWN_FIRE_AT_START, CROWN_FIRE_AT_END
+#ifdef _WUI
+! Active building-spread source thread bookkeeping (BLDG_SPREAD_MODEL_TYPE = 3).
+TYPE(NODE), POINTER :: SRC_NEXT_P
+LOGICAL :: SRC_EXPIRED
+#endif
 
 C => L%HEAD
 #ifdef _WUI
@@ -2174,15 +2232,23 @@ IF (USE_BLDG_SPREAD_MODEL) THEN
          LB_P => LB_P%NEXT
       ENDDO
    ELSEIF (BLDG_SPREAD_MODEL_TYPE .EQ. 3) THEN
-      ! Refresh HRR_TRANSIENT on every burned source each RK stage (idempotent).
-      LB_P => LB%HEAD
-      DO I = 1, LB%NUM_NODES
+      ! Refresh HRR_TRANSIENT on every ACTIVE burned source each RK stage
+      ! (idempotent). Walking BLDG_SRC_HEAD instead of all of LIST_BURNED makes
+      ! this O(active sources) rather than O(burned area): a source is retired
+      ! once, permanently, and never revisited. Retired nodes stay in LIST_BURNED
+      ! with HRR_TRANSIENT=0 so the output dumps are unaffected.
+      ! Both RK stages are called with the same T, so retiring in stage 1 gives
+      ! stage 2 exactly what it would have recomputed (zero).
+      LB_P => BLDG_SRC_HEAD
+      DO WHILE (ASSOCIATED(LB_P))
+         SRC_NEXT_P => LB_P%SRC_NEXT   ! capture before a possible unlink
          IF (LB_P%IFBFM .EQ. 91) THEN
-            CALL BLDG_SET_URBAN_HRR(LB_P, T_ELMFIRE)
+            CALL BLDG_SET_URBAN_HRR(LB_P, T_ELMFIRE, SRC_EXPIRED)
          ELSE
-            CALL BLDG_SET_WILDLAND_HRR(LB_P, T_ELMFIRE)
+            CALL BLDG_SET_WILDLAND_HRR(LB_P, T_ELMFIRE, SRC_EXPIRED)
          ENDIF
-         LB_P => LB_P%NEXT
+         IF (SRC_EXPIRED) CALL RETIRE_BLDG_SRC(LB_P)
+         LB_P => SRC_NEXT_P
       ENDDO
 
       ! Deposit heat once per physical timestep (RK2 calls this routine twice).
@@ -2193,10 +2259,12 @@ IF (USE_BLDG_SPREAD_MODEL) THEN
          ! replaces the former O(N_sources x N_front) all-pairs scan
          ! (BLDG_ACCUMULATE_HEAT_FROM_NEIGHBORS) with an O(N_front x stencil) pass.
          HRR_TRANSIENT_MAP(:,:) = 0.
-         LB_P => LB%HEAD
-         DO I = 1, LB%NUM_NODES
+         ! Only active sources can have HRR_TRANSIENT > 0, so walking the source
+         ! thread visits exactly the nodes the old full-list scan would have kept.
+         LB_P => BLDG_SRC_HEAD
+         DO WHILE (ASSOCIATED(LB_P))
             IF (LB_P%HRR_TRANSIENT .GT. 0.) HRR_TRANSIENT_MAP(LB_P%IX, LB_P%IY) = LB_P%HRR_TRANSIENT
-            LB_P => LB_P%NEXT
+            LB_P => LB_P%SRC_NEXT
          ENDDO
          CALL BLDG_ACCUMULATE_HEAT_STENCIL(L, SIMULATION_DT)
       ENDIF
@@ -2782,6 +2850,20 @@ DO
 
    IF(USE_EMBER_CONSUMPTION) CALL EMBER_CONSUMPTION(IX, IY, T_ELMFIRE, DT_ELMFIRE)
 
+   ! Retire embers whose landing cell already has surface fire: the test below
+   ! can then never pass, so the node would be re-walked every timestep for the
+   ! rest of the run doing nothing. SURFACE_FIRE is only ever set to 1 and never
+   ! cleared after the per-case reset, so this is permanent. Bit-identical: such
+   ! a node fails the outer IF and so never reaches EMBER_IGNITION (which draws
+   ! from the RNG), meaning nothing is skipped by removing it early.
+   ! NOT applied when USE_EMBER_CONSUMPTION is on -- that call is a per-node
+   ! side effect that must keep firing for as long as the node exists.
+   IF (.NOT. USE_EMBER_CONSUMPTION .AND. SURFACE_FIRE(IX,IY) .GT. 0) THEN
+      CALL DELETE_NODE(LIST_EMBER_DEPOSITED, C)
+      C => NEXT_C
+      CYCLE
+   ENDIF
+
    IF(PHIP(IX,IY) .GE. 0 .AND. SURFACE_FIRE(IX,IY) .LE. 0) THEN
       IF (trim(IGNITION_MODEL) .eq. 'SIMPLE' .or. trim(IGNITION_MODEL) .eq. 'PHYSICAL') THEN
          ! Calculate wind speed at newly ignited cells for the non-direct ignition models
@@ -2891,6 +2973,13 @@ IF (TRIM(IGNITION_MODEL) .NE. 'DIRECT') THEN
       IY = C%IY
 
       IF(USE_EMBER_CONSUMPTION) CALL EMBER_CONSUMPTION(IX, IY, T_ELMFIRE, DT_ELMFIRE)
+
+      ! Same permanent retirement as the loop above -- see the comment there.
+      IF (.NOT. USE_EMBER_CONSUMPTION .AND. SURFACE_FIRE(IX,IY) .GT. 0) THEN
+         CALL DELETE_NODE(LIST_EMBER_DEPOSITED, C)
+         C => NEXT_C
+         CYCLE
+      ENDIF
 
       IF(PHIP(IX,IY) .GE. 0 .AND. SURFACE_FIRE(IX,IY) .LE. 0) THEN
          IF (trim(IGNITION_MODEL) .eq. 'SIMPLE' .or. trim(IGNITION_MODEL) .eq. 'PHYSICAL') THEN
