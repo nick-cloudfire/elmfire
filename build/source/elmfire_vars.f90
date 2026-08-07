@@ -535,6 +535,24 @@ TYPE NODE
    TYPE(NODE), POINTER :: NEXT => NULL()
    TYPE(NODE), POINTER :: PREV => NULL()
 
+   ! Secondary thread: active building-spread heat sources (BLDG_SPREAD_MODEL_TYPE=3).
+   ! A node lives in LIST_BURNED for its whole life because elmfire_io walks that
+   ! list at dump time; it is threaded here only while it can still radiate to an
+   ! urban target. Unlinking from this thread never deallocates, so NEXT/PREV and
+   ! the payload stay intact. See ENROLL_BLDG_SRC / RETIRE_BLDG_SRC in elmfire_subs.
+   TYPE(NODE), POINTER :: SRC_NEXT => NULL()
+   TYPE(NODE), POINTER :: SRC_PREV => NULL()
+   LOGICAL :: SRC_ENROLLED = .FALSE.
+
+#ifdef _UMDSPOTTING
+   ! Second thread, same idea: burned cells still inside their ember-generation
+   ! window [T_START_SPOTTING, T_END_SPOTTING]. T only increases and the window
+   ! is fixed once CALC_SPOTTING_DURATION runs, so leaving is permanent.
+   TYPE(NODE), POINTER :: SPOT_NEXT => NULL()
+   TYPE(NODE), POINTER :: SPOT_PREV => NULL()
+   LOGICAL :: SPOT_ENROLLED = .FALSE.
+#endif
+
    INTEGER*1 :: CROWN_FIRE =  0
    INTEGER   :: IX         = -1
    INTEGER   :: IY         = -1
@@ -687,7 +705,27 @@ TYPE DLL
   TYPE(NODE_WRAPPER), ALLOCATABLE :: NODE_POINTERS(:)   ! Array of pointers DWI_SU
 END TYPE DLL
 
+! INVARIANT: nodes in LIST_BURNED are never DELETE_NODEd. DELETE_NODE deallocates
+! unconditionally, which would leave the BLDG_SRC thread below dangling into freed
+! memory. LIST_BURNED is append-only for the life of an ensemble member.
 TYPE(DLL), TARGET :: LIST_TAGGED, LIST_BURNED, LIST_SUPPRESSED, LIST_VIRTUAL_STATIONS, LIST_EMBER_DEPOSITED, LIST_EMBER_TRACKER, LIST_WUI_BURNING
+
+! Active building-spread source thread (NODE%SRC_NEXT/SRC_PREV). Deliberately not
+! a DLL: DLL nodes link through NEXT/PREV, which LIST_BURNED owns exclusively.
+! Walking this instead of all of LIST_BURNED makes the per-RK-stage cost O(active
+! sources) rather than O(burned area).
+TYPE(NODE), POINTER :: BLDG_SRC_HEAD => NULL()
+TYPE(NODE), POINTER :: BLDG_SRC_TAIL => NULL()
+INTEGER :: N_BLDG_SRC = 0
+
+#ifdef _UMDSPOTTING
+! Actively-ember-generating source thread (NODE%SPOT_NEXT/SPOT_PREV). Same
+! rationale as BLDG_SRC above, applied to the spotting walk in
+! LEVEL_SET_PROPAGATION which was also O(burned area) per timestep.
+TYPE(NODE), POINTER :: SPOT_SRC_HEAD => NULL()
+TYPE(NODE), POINTER :: SPOT_SRC_TAIL => NULL()
+INTEGER :: N_SPOT_SRC = 0
+#endif
 
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: ALREADY_REACHED_BURNED_ACRES
 LOGICAL :: PROCESS_TIMED_LOCATIONS

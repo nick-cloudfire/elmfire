@@ -1155,26 +1155,38 @@ END SUBROUTINE BLDG_CHECK_IGNITION
 ! *****************************************************************************
 
 ! *****************************************************************************
-SUBROUTINE BLDG_SET_WILDLAND_HRR(C, T)
+SUBROUTINE BLDG_SET_WILDLAND_HRR(C, T, EXPIRED)
 ! *****************************************************************************
 ! Publish HRR_TRANSIENT for a burned wildland cell: constant at IR for
 ! tau = HPUA_SURFACE / IR seconds, then zero. Feeds adjacent urban cells
 ! through BLDG_ACCUMULATE_HEAT_FROM_NEIGHBORS. Part of BLDG_SPREAD_MODEL_TYPE = 3.
+!
+! EXPIRED reports that this cell can never radiate again, so the caller may drop
+! it from the active source thread permanently. Every EXPIRED=.TRUE. path below
+! sets HRR_TRANSIENT=0 first, so retiring the node changes no result -- it only
+! stops us recomputing a zero that cannot change.
 
 USE ELMFIRE_VARS
 
 TYPE(NODE), POINTER, INTENT(INOUT) :: C
 REAL(8), INTENT(IN) :: T
+LOGICAL, INTENT(OUT) :: EXPIRED
 REAL :: BURNING_TIME, TAU_RESIDENCE
+
+EXPIRED = .FALSE.
 
 ! Only for non-urban cells that have burned
 IF (C%IFBFM .EQ. 91) RETURN
-IF (C%TIME_OF_ARRIVAL .LE. 0.) RETURN
-IF (C%IR .LE. 0.) RETURN
+IF (C%TIME_OF_ARRIVAL .LE. 0.) RETURN   ! not ignited yet: keep, may still ignite
+IF (C%IR .LE. 0.) THEN
+   EXPIRED = .TRUE.                     ! IR is fixed at ignition: never a source
+   RETURN
+ENDIF
 
 ! Skip wildland cells that can't radiate to any urban target.
 IF (.NOT. NEAR_URBAN(C%IX, C%IY)) THEN
    C%HRR_TRANSIENT = 0.
+   EXPIRED = .TRUE.                     ! NEAR_URBAN is static geometry
    RETURN
 ENDIF
 
@@ -1186,6 +1198,7 @@ IF (C%HPUA_SURFACE .GT. 0. .AND. C%IR .GT. 0.) THEN
    TAU_RESIDENCE = C%HPUA_SURFACE / C%IR
 ELSE
    C%HRR_TRANSIENT = 0.
+   EXPIRED = .TRUE.                     ! HPUA/IR fixed at ignition
    RETURN
 ENDIF
 
@@ -1194,6 +1207,8 @@ IF (BURNING_TIME .GE. 0. .AND. BURNING_TIME .LE. TAU_RESIDENCE) THEN
    C%HRR_TRANSIENT = C%IR  ! kW/m² (already in SI from SURFACE_SPREAD_RATE)
 ELSE
    C%HRR_TRANSIENT = 0.
+   ! Burned out. BURNING_TIME only increases, so this is permanent.
+   IF (BURNING_TIME .GT. TAU_RESIDENCE) EXPIRED = .TRUE.
 ENDIF
 
 ! *****************************************************************************
@@ -1201,24 +1216,30 @@ END SUBROUTINE BLDG_SET_WILDLAND_HRR
 ! *****************************************************************************
 
 ! *****************************************************************************
-SUBROUTINE BLDG_SET_URBAN_HRR(C, T)
+SUBROUTINE BLDG_SET_URBAN_HRR(C, T, EXPIRED)
 ! *****************************************************************************
 ! Publish HRR_TRANSIENT for an ignited urban cell on a growth/peak/decay
 ! curve (building-fuel-model table). HRR_TRANSIENT only — no velocity
 ! side effects, so safe to call on LIST_BURNED every RK stage.
 ! Part of BLDG_SPREAD_MODEL_TYPE = 3.
+!
+! EXPIRED reports that the building has burned past T_DECAY and can never
+! radiate again, so the caller may retire it from the active source thread.
 
 USE ELMFIRE_VARS
 
 TYPE(NODE), POINTER, INTENT(INOUT) :: C
 REAL(8), INTENT(IN) :: T
+LOGICAL, INTENT(OUT) :: EXPIRED
 
 REAL :: BURNING_TIME, HRR_PEAK, T_EARLY, T_FULLDEV, T_DECAY
+
+EXPIRED = .FALSE.
 
 IF (C%IFBFM .NE. 91) RETURN
 IF (C%TIME_OF_ARRIVAL .LE. 0.) THEN
    C%HRR_TRANSIENT = 0.
-   RETURN
+   RETURN                            ! not ignited yet: keep, may still ignite
 ENDIF
 
 HRR_PEAK  = BUILDING_FUEL_MODEL_TABLE(C%IBLDGFM)%HRRPUA_PEAK
@@ -1240,8 +1261,9 @@ ELSEIF (BURNING_TIME .LE. T_DECAY) THEN
    ! Decay phase: linear ramp down
    C%HRR_TRANSIENT = HRR_PEAK * (T_DECAY - BURNING_TIME) / MAX(T_DECAY - T_FULLDEV, 1.0)
 ELSE
-   ! Fire has burned out
+   ! Fire has burned out. BURNING_TIME only increases, so this is permanent.
    C%HRR_TRANSIENT = 0.
+   EXPIRED = .TRUE.
 ENDIF
 
 C%HRR_TRANSIENT = MAX(0., C%HRR_TRANSIENT)
