@@ -15,9 +15,9 @@
   "selector_gate_passed": false,
   "reason": "One or more intended heat/FTP transition checks failed; optional FLIN-shortcut diagnostics do not control this decision.",
   "executable": {
-    "resolved_path": "/workspaces/elmfire-nick/ELMFIRE_VnV_Suite/diagnostics/CASE43_CASE49/bin/elmfire",
-    "sha256": "bc2d27483ed3cf409cea0a04fd879e290cfe5b57a0c84b215282ff9d18c458a9",
-    "version": "ELMFIRE 2025.1002"
+    "resolved_path": "/workspaces/elmfire-nick/build/linux/elmfire/elmfire",
+    "sha256": "ab47c5e338a3bc3b325df659b0764ce47d5b071e22d07817e4b5cab9f87da672",
+    "version": "ELMFIRE 1.1"
   },
   "metrics": [
     {
@@ -56,7 +56,7 @@
       "name": "intended W-to-U receiver heat exposure",
       "expected": "positive DFC+radiation at sufficient-heat receivers",
       "calculated": {
-        "contiguous_above": 84.52081632614136,
+        "contiguous_above": 61.92318677902222,
         "isolated_d1_sufficient": 61.923187255859375
       },
       "units": "kW/m2",
@@ -66,19 +66,19 @@
       "name": "intended W-to-U finite ignition delay",
       "expected": "finite target TOA with delay > 0 s",
       "calculated": {
-        "contiguous_above": 49.0,
-        "isolated_d1_sufficient": 51.0
+        "contiguous_above": null,
+        "isolated_d1_sufficient": null
       },
       "units": "s",
-      "status": "PASS"
+      "status": "FAIL"
     },
     {
       "name": "contiguous strict-threshold matrix",
       "expected": "below=false, equal=false, above=true",
       "calculated": {
-        "contiguous_below": true,
-        "contiguous_equal": true,
-        "contiguous_above": true
+        "contiguous_below": false,
+        "contiguous_equal": false,
+        "contiguous_above": false
       },
       "units": "--",
       "status": "NOT EVALUABLE"
@@ -87,8 +87,8 @@
       "name": "isolated distance/threshold matrix",
       "expected": "d1-insufficient=false, d1-sufficient=true, d2-sufficient=false",
       "calculated": {
-        "isolated_d1_insufficient": true,
-        "isolated_d1_sufficient": true,
+        "isolated_d1_insufficient": false,
+        "isolated_d1_sufficient": false,
         "isolated_d2_sufficient": false
       },
       "units": "--",
@@ -99,12 +99,12 @@
       "expected": "eligible target TOA=0 s and target-source delay=0 s",
       "calculated": {
         "contiguous_above": {
-          "target_toa_s": 49.0,
-          "target_source_delay_s": 49.0
+          "target_toa_s": null,
+          "target_source_delay_s": null
         },
         "isolated_d1_sufficient": {
-          "target_toa_s": 51.0,
-          "target_source_delay_s": 51.0
+          "target_toa_s": null,
+          "target_source_delay_s": null
         }
       },
       "units": "s",
@@ -150,16 +150,16 @@
       "source_flin_abs_error_kw_m": 999.0,
       "source_toa_s": 0.0,
       "source_toa_all_zero": true,
-      "target_terminal_phi": -0.1328601837158203,
-      "target_toa_s": 49.0,
-      "target_phi_burning": true,
-      "target_toa_finite": true,
+      "target_terminal_phi": 0.18151861429214478,
+      "target_toa_s": null,
+      "target_phi_burning": false,
+      "target_toa_finite": false,
       "target_state_consistent": true,
-      "target_ignited_observation": true,
-      "transition_ignition_delay_s": 49.0,
-      "target_peak_dfc_kw_m2": 80.12958526611328,
-      "target_peak_radiation_kw_m2": 4.279073715209961,
-      "target_peak_total_heat_kw_m2": 84.40865898132324,
+      "target_ignited_observation": false,
+      "transition_ignition_delay_s": null,
+      "target_peak_dfc_kw_m2": 57.5893440246582,
+      "target_peak_radiation_kw_m2": 4.210126876831055,
+      "target_peak_total_heat_kw_m2": 61.79947090148926,
       "dump_ledger": {
         "path": "variants/contiguous_below/outputs/dump_times_0000001.csv",
         "row_count": 61,
@@ -210,16 +210,16 @@
       "source_flin_abs_error_kw_m": 1000.0,
       "source_toa_s": 0.0,
       "source_toa_all_zero": true,
-      "target_terminal_phi": -0.13375575840473175,
-      "target_toa_s": 49.0,
-      "target_phi_burning": true,
-      "target_toa_finite": true,
+      "target_terminal_phi": 0.18120422959327698,
+      "target_toa_s": null,
+      "target_phi_burning": false,
+      "target_toa_finite": false,
       "target_state_consistent": true,
-      "target_ignited_observation": true,
-      "transition_ignition_delay_s": 49.0,
-      "target_peak_dfc_kw_m2": 80.18146514892578,
-      "target_peak_radiation_kw_m2": 4.283287048339844,
-      "target_peak_total_heat_kw_m2": 84.46475219726562,
+      "target_ignited_observation": false,
+      "transition_ignition_delay_s": null,
+      "target_peak_dfc_kw_m2": 57.64698791503906,
+      "target_peak_radiation_kw_m2": 4.2143402099609375,
+      "target_peak_total_heat_kw_m2": 61.861328125,
       "dump_ledger": {
         "path": "variants/contiguous_equal/outputs/dump_times_0000001.csv",
         "row_count": 61,
@@ -270,16 +270,16 @@
       "source_flin_abs_error_kw_m": 1001.0,
       "source_toa_s": 0.0,
       "source_toa_all_zero": true,
-      "target_terminal_phi": -0.13597047328948975,
-      "target_toa_s": 49.0,
-      "target_phi_burning": true,
-      "target_toa_finite": true,
+      "target_terminal_phi": 0.18025356531143188,
+      "target_toa_s": null,
+      "target_phi_burning": false,
+      "target_toa_finite": false,
       "target_state_consistent": true,
-      "target_ignited_observation": true,
-      "transition_ignition_delay_s": 49.0,
-      "target_peak_dfc_kw_m2": 80.23331451416016,
-      "target_peak_radiation_kw_m2": 4.287501811981201,
-      "target_peak_total_heat_kw_m2": 84.52081632614136,
+      "target_ignited_observation": false,
+      "transition_ignition_delay_s": null,
+      "target_peak_dfc_kw_m2": 57.70463180541992,
+      "target_peak_radiation_kw_m2": 4.218554973602295,
+      "target_peak_total_heat_kw_m2": 61.92318677902222,
       "dump_ledger": {
         "path": "variants/contiguous_above/outputs/dump_times_0000001.csv",
         "row_count": 61,
@@ -330,13 +330,13 @@
       "source_flin_abs_error_kw_m": 999.0,
       "source_toa_s": 0.0,
       "source_toa_all_zero": true,
-      "target_terminal_phi": -0.06527474522590637,
-      "target_toa_s": 52.0,
-      "target_phi_burning": true,
-      "target_toa_finite": true,
+      "target_terminal_phi": 0.18021059036254883,
+      "target_toa_s": null,
+      "target_phi_burning": false,
+      "target_toa_finite": false,
       "target_state_consistent": true,
-      "target_ignited_observation": true,
-      "transition_ignition_delay_s": 52.0,
+      "target_ignited_observation": false,
+      "transition_ignition_delay_s": null,
       "target_peak_dfc_kw_m2": 57.5893440246582,
       "target_peak_radiation_kw_m2": 4.210126876831055,
       "target_peak_total_heat_kw_m2": 61.79947090148926,
@@ -390,13 +390,13 @@
       "source_flin_abs_error_kw_m": 1001.0,
       "source_toa_s": 0.0,
       "source_toa_all_zero": true,
-      "target_terminal_phi": -0.0707964152097702,
-      "target_toa_s": 51.0,
-      "target_phi_burning": true,
-      "target_toa_finite": true,
+      "target_terminal_phi": 0.1784396767616272,
+      "target_toa_s": null,
+      "target_phi_burning": false,
+      "target_toa_finite": false,
       "target_state_consistent": true,
-      "target_ignited_observation": true,
-      "transition_ignition_delay_s": 51.0,
+      "target_ignited_observation": false,
+      "transition_ignition_delay_s": null,
       "target_peak_dfc_kw_m2": 57.70463180541992,
       "target_peak_radiation_kw_m2": 4.218555450439453,
       "target_peak_total_heat_kw_m2": 61.923187255859375,
@@ -450,7 +450,7 @@
       "source_flin_abs_error_kw_m": 1001.0,
       "source_toa_s": 0.0,
       "source_toa_all_zero": true,
-      "target_terminal_phi": 0.9998418688774109,
+      "target_terminal_phi": 0.998956024646759,
       "target_toa_s": null,
       "target_phi_burning": false,
       "target_toa_finite": false,

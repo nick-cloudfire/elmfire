@@ -164,11 +164,6 @@ def main():
                     vdir / "logs/scratch"):
                 directory.mkdir(parents=True, exist_ok=True)
             make_rasters(input_dir, nx, ny, dx)
-            for table_name in ("fuel_models.csv", "building_fuel_models.csv"):
-                shutil.copyfile(
-                    CASE_DIR / "data/misc" / table_name,
-                    misc_dir / table_name)
-
             cfg = base_input
             cfg = replace_once(cfg, f"SIMULATION_DT={BASE_SIMULATION_DT_S}",
                                f"SIMULATION_DT={dt:.17g}", "time step")
@@ -231,9 +226,6 @@ def main():
         for directory in (input_dir, misc_dir, vdir / "outputs", vdir / "logs/scratch"):
             directory.mkdir(parents=True, exist_ok=True)
         make_rasters(input_dir, nx, ny, dx)
-        for table_name in ("fuel_models.csv", "building_fuel_models.csv"):
-            shutil.copyfile(CASE_DIR / "data/misc" / table_name, misc_dir / table_name)
-
         cfg = base_input
         cfg = replace_once(cfg, f"SIMULATION_DT={BASE_SIMULATION_DT_S}",
                            f"SIMULATION_DT={dt:.17g}", "time step")

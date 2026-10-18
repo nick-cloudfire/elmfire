@@ -165,9 +165,9 @@ HRR_ELLIPSE_ADJ = 0.5
 /
 
 &MISCELLANEOUS
-MISCELLANEOUS_INPUTS_DIRECTORY = './data/archive_payload/misc'
-FUEL_MODEL_FILE = 'fuel_models.csv'
-BUILDING_FUEL_MODEL_FILE = 'building_fuel_models.csv'
+MISCELLANEOUS_INPUTS_DIRECTORY = './logs/scratch'
+! Use ELMFIRE's built-in surface fuel table; keep the required WU-E building table.
+BUILDING_FUEL_MODEL_FILE = '../../data/archive_payload/misc/building_fuel_models.csv'
 PATH_TO_GDAL = 'auto'
 SCRATCH = './logs/scratch'
 /

@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 import re
+import shutil
+import subprocess
+import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -50,9 +54,34 @@ class VerificationPortabilityTests(unittest.TestCase):
         for case in self.spotting_cases():
             if case.name.startswith("CASE13_"):
                 continue  # Capability-only design; it does not launch ELMFIRE.
-            for name in ("fuel_models.csv", "building_fuel_models.csv"):
+            names = []
+            template = (case / "elmfire.data.in").read_text(encoding="utf-8")
+            if re.search(r"(?m)^USE_BLDG_SPREAD_MODEL\s*=\s*\.TRUE\.", template):
+                names.append("building_fuel_models.csv")
+            if re.search(r"(?m)^FUEL_MODEL_FILE\s*=", template):
+                names.append("fuel_models.csv")
+            for name in names:
                 self.assertTrue((case / "data" / "misc" / name).is_file(),
                                 f"{case.name} is missing data/misc/{name}")
+
+    def test_non_wue_cases_prepare_without_model_tables(self) -> None:
+        for case_name in ("CASE01_BET", "CASE06_F2D"):
+            source = SPOTTING / case_name
+            with self.subTest(case=case_name), tempfile.TemporaryDirectory() as directory:
+                case = Path(directory)
+                shutil.copytree(source / "scripts", case / "scripts")
+                shutil.copy2(source / "elmfire.data.in", case / "elmfire.data.in")
+                result = subprocess.run(
+                    [sys.executable, str(case / "scripts/preprocess.py")],
+                    capture_output=True, text=True,
+                )
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertFalse((case / "data/misc/fuel_models.csv").exists())
+                self.assertFalse((case / "data/misc/building_fuel_models.csv").exists())
+                if case_name == "CASE01_BET":
+                    self.assertTrue((case / "variants/manifest.json").is_file())
+                else:
+                    self.assertTrue((case / "data/inputs/ws.tif").is_file())
 
     def test_case_runners_are_location_independent(self) -> None:
         absolute_path = re.compile(r"/(?:Users|home|global)/")
@@ -122,7 +151,10 @@ class VerificationPortabilityTests(unittest.TestCase):
             helper = VERIFICATION / relative / "scripts/case_support.py"
             text = helper.read_text(encoding="utf-8")
             self.assertIn(bounded_expression, text)
-            self.assertIn("TARGET_FRONT_ADVANCE_FRACTION = 0.05", text)
+            if relative == "coupling_tests/CASE42_WAF":
+                self.assertIn("timestep_s = min(ZERO_ROS_TIMESTEP_S, cfl_limit_s)", text)
+            else:
+                self.assertIn("TARGET_FRONT_ADVANCE_FRACTION = 0.05", text)
             self.assertIn('"SIMULATION_DTMAX": round(timestep_max_s, 6)', text)
 
         wind_slope = (

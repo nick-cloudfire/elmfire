@@ -115,6 +115,13 @@ cases/Verification/coupling_tests/CASE33_SDO/data/
 !cases/Verification/coupling_tests/CASE42_WAF/data/misc/fuel_models.csv
 
 # Frozen WU-E fuel tables are source inputs; only generated variant copies are ignored.
+!cases/Verification/coupling_tests/CASE1[01249]_*/data/
+!cases/Verification/coupling_tests/CASE1[01249]_*/data/misc/
+!cases/Verification/coupling_tests/CASE1[01249]_*/data/misc/*.csv
 !cases/Verification/coupling_tests/CASE4[3-9]_*/data/
 !cases/Verification/coupling_tests/CASE4[3-9]_*/data/misc/
 !cases/Verification/coupling_tests/CASE4[3-9]_*/data/misc/*.csv
+
+# Archived building-spread inputs required by the landscape validation cases.
+!cases/Validation/landscape_scale/*/data/archive_payload/misc/
+!cases/Validation/landscape_scale/*/data/archive_payload/misc/building_fuel_models.csv

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Prepare the three biomass-emission meshes.
 
-This script creates input rasters, fuel tables, namelists, run directories, and
+This script creates input rasters, namelists, run directories, and
 a manifest without importing any repository-level Python utility.
 """
 from __future__ import annotations
@@ -111,12 +111,6 @@ def main() -> None:
                 "logs/scratch"):
             (variant_dir / relative).mkdir(parents=True, exist_ok=True)
         write_inputs(variant_dir / "data/inputs", dx, nx, ny)
-        for filename in ("fuel_models.csv", "building_fuel_models.csv"):
-            source = source_dir / filename
-            if not source.is_file():
-                raise FileNotFoundError(f"Required case-local input is missing: {source}")
-            shutil.copy2(source, variant_dir / "data/misc" / filename)
-
         nominal_dt = WIND_CFL * dx / WIND_SPEED_MPS
         whole_second_divisors = [
             value for value in range(1, int(math.floor(nominal_dt)) + 1)

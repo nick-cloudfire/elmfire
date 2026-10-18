@@ -2,29 +2,29 @@
   "schema_version": 3,
   "suite": "verification",
   "aggregate_environment": {
-    "Captured at (UTC)": "2026-09-15T18:02:20+00:00",
-    "Repository revision": "f0f117f51b13",
+    "Captured at (UTC)": "2026-10-18T17:19:41+00:00",
+    "Repository revision": "a48721f3f35c",
     "Repository state": "dirty",
-    "Host platform": "macOS-15.7.7-arm64-arm-64bit",
-    "Processor architecture": "arm64",
-    "Fortran compiler": "GNU Fortran (Homebrew GCC 14.2.0_1) 14.2.0",
-    "Python version": "CPython 3.12.9",
-    "Python runtime": "CPython 3.12.9 (/opt/homebrew/anaconda3/bin/python3)",
+    "Host platform": "Linux-7.0.12-linuxkit-aarch64-with-glibc2.35",
+    "Processor architecture": "aarch64",
+    "Fortran compiler": "GNU Fortran (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+    "Python version": "CPython 3.10.12",
+    "Python runtime": "CPython 3.10.12 (/usr/bin/python3)",
     "Conda environment": "not active",
     "ELMFIRE command": "elmfire",
-    "ELMFIRE resolved path": "not found on PATH",
-    "ELMFIRE version declaration": "not declared",
-    "ELMFIRE executable SHA-256": "not available",
-    "MPI launcher": "not available",
+    "ELMFIRE resolved path": "/elmfire/elmfire/build/linux/bin/elmfire",
+    "ELMFIRE version declaration": "2025.1002",
+    "ELMFIRE executable SHA-256": "0c0fe803fdf0048b795a53753aec9c034e53b14be67f529a8d202901838be347",
+    "MPI launcher": "mpirun (Open MPI) 4.1.2",
     "Slurm allocation": "not a Slurm build job",
     "Loaded modules": "not recorded",
-    "Python packages": "NumPy 1.26.4; Matplotlib 3.9.2; PyYAML 6.0.1; Rasterio 1.5.0; GDAL not installed; Pandas 2.2.2; GeoPandas not installed; Shapely not installed"
+    "Python packages": "NumPy 1.26.4; Matplotlib 3.8.4; PyYAML 6.0.3; Rasterio 1.4.4; GDAL 3.4.1; Pandas 2.2.2; GeoPandas 1.1.4; Shapely 2.1.2"
   },
   "case_count": 49,
   "decision_counts": {
-    "FAIL": 12,
-    "NOT EVALUABLE": 7,
-    "PASS": 30
+    "FAIL": 9,
+    "NOT EVALUABLE": 6,
+    "PASS": 34
   },
   "cases": [
     {
@@ -91,9 +91,9 @@
       "report_available": true,
       "metrics_file": "cases/Verification/coupling_tests/CASE04_STI/outputs/metrics.json",
       "metrics_available": true,
-      "raw_status": "pass",
+      "raw_status": "PASS",
       "decision": "PASS",
-      "detail": "Decision normalized from metrics.json field 'status'."
+      "detail": "all required metrics were evaluated"
     },
     {
       "case_id": "CASE05_TDW",
@@ -516,8 +516,8 @@
       "report_available": true,
       "metrics_file": "cases/Verification/coupling_tests/CASE29_SUP/outputs/metrics.json",
       "metrics_available": true,
-      "raw_status": "FAIL",
-      "decision": "FAIL",
+      "raw_status": "PASS",
+      "decision": "PASS",
       "detail": "Decision normalized from metrics.json field 'overall_status'."
     },
     {
@@ -754,9 +754,9 @@
       "report_available": true,
       "metrics_file": "cases/Verification/coupling_tests/CASE43_WER/outputs/metrics.json",
       "metrics_available": true,
-      "raw_status": "NOT EVALUABLE",
-      "decision": "NOT EVALUABLE",
-      "detail": "ELMFIRE execution was attempted, but no variant has complete current evidence."
+      "raw_status": "PASS",
+      "decision": "PASS",
+      "detail": "All required variants and acceptance metrics passed."
     },
     {
       "case_id": "CASE44_WHP",
@@ -771,9 +771,9 @@
       "report_available": true,
       "metrics_file": "cases/Verification/coupling_tests/CASE44_WHP/outputs/metrics.json",
       "metrics_available": true,
-      "raw_status": "NOT EVALUABLE",
-      "decision": "NOT EVALUABLE",
-      "detail": "ELMFIRE execution was attempted, but no variant has complete current evidence."
+      "raw_status": "PASS",
+      "decision": "PASS",
+      "detail": "All required variants and acceptance metrics passed."
     },
     {
       "case_id": "CASE45_HRS",
@@ -788,9 +788,9 @@
       "report_available": true,
       "metrics_file": "cases/Verification/coupling_tests/CASE45_HRS/outputs/metrics.json",
       "metrics_available": true,
-      "raw_status": "FAIL",
-      "decision": "FAIL",
-      "detail": "All required run evidence was complete, but one or more scientific metrics failed."
+      "raw_status": "PASS",
+      "decision": "PASS",
+      "detail": "All required run evidence was complete; every scientific metric passed."
     },
     {
       "case_id": "CASE46_WUT",
@@ -839,9 +839,9 @@
       "report_available": true,
       "metrics_file": "cases/Verification/coupling_tests/CASE48_WGC/outputs/metrics.json",
       "metrics_available": true,
-      "raw_status": "FAIL",
-      "decision": "FAIL",
-      "detail": "One or more spatial-convergence acceptance components failed."
+      "raw_status": "NOT EVALUABLE",
+      "decision": "NOT EVALUABLE",
+      "detail": "ELMFIRE execution was attempted, but one or more current-fingerprint variants lack valid required evidence."
     },
     {
       "case_id": "CASE49_WTC",

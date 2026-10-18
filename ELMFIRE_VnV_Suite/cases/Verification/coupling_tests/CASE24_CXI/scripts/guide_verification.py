@@ -229,10 +229,10 @@ def L(**overrides):
 # ---------------------------------------------------------------------------
 def complex_interaction_target():
     """Derive the domain-maximum head ROS from the dominant SW condition."""
-    fuel_path = os.path.normpath(
-        os.path.join(HERE, "..", "data", "inputs", "fuel_models.csv")
-    )
-    fuel = read_fuel_models(Path(fuel_path))[4]
+    # This reference is evaluated when the module is imported, before ELMFIRE
+    # generates its default fuel table in data/inputs. Keep the matching FBFM04
+    # parameters as case-owned source data rather than reading a runtime output.
+    fuel = read_fuel_models(Path(HERE) / "reference_fbfm04.csv")[4]
     waf = wind_adjustment_factor(0.0, 0.0, fuel.depth_ft)
     base = calculate(
         fuel, m1=0.06, m10=0.07, m100=0.08, mlh=0.60, mlw=0.90

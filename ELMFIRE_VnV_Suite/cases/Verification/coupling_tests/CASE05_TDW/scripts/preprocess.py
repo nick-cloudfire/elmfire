@@ -112,11 +112,6 @@ def main() -> None:
     for name in ("m1", "m10", "m100"):
         write_tif(input_dir / f"{name}.tif", np.zeros_like(wind_mps), np.float32)
 
-    for filename in ("fuel_models.csv", "building_fuel_models.csv"):
-        source = CASE_DIR / "data" / "misc" / filename
-        if not source.is_file():
-            raise FileNotFoundError(source)
-
     for directory in ("outputs", "figures", "logs/scratch"):
         (CASE_DIR / directory).mkdir(parents=True, exist_ok=True)
     metadata = {

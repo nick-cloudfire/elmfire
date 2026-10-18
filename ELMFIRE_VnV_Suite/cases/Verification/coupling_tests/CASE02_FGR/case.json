@@ -9,8 +9,8 @@
   "physical_width_m": 60.0,
   "buffer_cells": 2,
   "timesteps_s": [
-    0.13,
-    12.7
+    0.1875,
+    12.0
   ],
   "generation_rate_pcs_s": 10.0,
   "residence_time_s": 10.0,

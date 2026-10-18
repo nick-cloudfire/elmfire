@@ -134,7 +134,7 @@ CRITICL_HF_WUI=0.0
 
 &MISCELLANEOUS
 MISCELLANEOUS_INPUTS_DIRECTORY='./data/misc/'
-FUEL_MODEL_FILE='fuel_models.csv'
+! Use ELMFIRE built-in fuel models; no external fuel CSV is required.
 BUILDING_FUEL_MODEL_FILE='building_fuel_models.csv'
 PATH_TO_GDAL='auto'
 SCRATCH='./logs/scratch/'

@@ -375,16 +375,16 @@
       "ir_absolute_error_kw_m2": 0.0002098034306712384,
       "toa_ros_relative_error": null,
       "terminal_evidence": {
-        "mode": "stalled_expected_extinction",
+        "mode": "regular",
         "configured_tstop_s": 600.0,
         "configured_timestep_s": 5.0,
         "configured_meteorology_interval_s": 9999999.0,
-        "recorded_final_time_s": 10000004.0,
-        "pre_jump_time_s": 5.0
+        "recorded_final_time_s": 600.0,
+        "pre_jump_time_s": null
       },
       "source_files": [
-        "variants/fuel_003_r_100/outputs/vs_0000001_*******.tif",
-        "variants/fuel_003_r_100/outputs/ir_0000001_*******.tif"
+        "variants/fuel_003_r_100/outputs/vs_0000001_0000600.tif",
+        "variants/fuel_003_r_100/outputs/ir_0000001_0000600.tif"
       ]
     },
     {
@@ -423,16 +423,16 @@
       "ir_absolute_error_kw_m2": 0.0,
       "toa_ros_relative_error": null,
       "terminal_evidence": {
-        "mode": "stalled_expected_extinction",
+        "mode": "regular",
         "configured_tstop_s": 600.0,
         "configured_timestep_s": 5.0,
         "configured_meteorology_interval_s": 9999999.0,
-        "recorded_final_time_s": 10000004.0,
-        "pre_jump_time_s": 5.0
+        "recorded_final_time_s": 600.0,
+        "pre_jump_time_s": null
       },
       "source_files": [
-        "variants/fuel_003_r_110/outputs/vs_0000001_*******.tif",
-        "variants/fuel_003_r_110/outputs/ir_0000001_*******.tif"
+        "variants/fuel_003_r_110/outputs/vs_0000001_0000600.tif",
+        "variants/fuel_003_r_110/outputs/ir_0000001_0000600.tif"
       ]
     },
     {
@@ -763,16 +763,16 @@
       "ir_absolute_error_kw_m2": 0.00026390285317615353,
       "toa_ros_relative_error": null,
       "terminal_evidence": {
-        "mode": "stalled_expected_extinction",
+        "mode": "regular",
         "configured_tstop_s": 600.0,
         "configured_timestep_s": 5.0,
         "configured_meteorology_interval_s": 9999999.0,
-        "recorded_final_time_s": 10000004.0,
-        "pre_jump_time_s": 5.0
+        "recorded_final_time_s": 600.0,
+        "pre_jump_time_s": null
       },
       "source_files": [
-        "variants/fuel_186_r_100/outputs/vs_0000001_*******.tif",
-        "variants/fuel_186_r_100/outputs/ir_0000001_*******.tif"
+        "variants/fuel_186_r_100/outputs/vs_0000001_0000600.tif",
+        "variants/fuel_186_r_100/outputs/ir_0000001_0000600.tif"
       ]
     },
     {
@@ -811,16 +811,16 @@
       "ir_absolute_error_kw_m2": 0.0,
       "toa_ros_relative_error": null,
       "terminal_evidence": {
-        "mode": "stalled_expected_extinction",
+        "mode": "regular",
         "configured_tstop_s": 600.0,
         "configured_timestep_s": 5.0,
         "configured_meteorology_interval_s": 9999999.0,
-        "recorded_final_time_s": 10000004.0,
-        "pre_jump_time_s": 5.0
+        "recorded_final_time_s": 600.0,
+        "pre_jump_time_s": null
       },
       "source_files": [
-        "variants/fuel_186_r_110/outputs/vs_0000001_*******.tif",
-        "variants/fuel_186_r_110/outputs/ir_0000001_*******.tif"
+        "variants/fuel_186_r_110/outputs/vs_0000001_0000600.tif",
+        "variants/fuel_186_r_110/outputs/ir_0000001_0000600.tif"
       ]
     }
   ],

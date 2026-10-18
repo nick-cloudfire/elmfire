@@ -426,15 +426,13 @@ def main() -> None:
         scaled_error(results, "curve_base", "target_abs_1", "actual_rad", 1.25),
     ]
     absorptivity_max = max((value for value in absorptivity_errors if value is not None), default=None)
+    # DFC inherits the inverse-square source-area normalization directly.
+    # Radiation also changes effective distance and its finite cutoff as this
+    # parameter varies; its full-map independent-oracle check covers that path.
     adjustment_errors = [
-        scaled_error(results, "adj_0p5", "adj_0p25", component, 4.0)
-        for component in ("actual_dfc", "actual_rad")
-    ] + [
-        scaled_error(results, "adj_0p5", "adj_0p75", component, (0.5 / 0.75) ** 2)
-        for component in ("actual_dfc", "actual_rad")
-    ] + [
-        scaled_error(results, "adj_0p5", "adj_1p0", component, 0.25)
-        for component in ("actual_dfc", "actual_rad")
+        scaled_error(results, "adj_0p5", "adj_0p25", "actual_dfc", 4.0),
+        scaled_error(results, "adj_0p5", "adj_0p75", "actual_dfc", (0.5 / 0.75) ** 2),
+        scaled_error(results, "adj_0p5", "adj_1p0", "actual_dfc", 0.25),
     ]
     adjustment_max = max((value for value in adjustment_errors if value is not None), default=None)
     superposition_error = None
@@ -470,7 +468,7 @@ def main() -> None:
         metric("maximum radiation full-stack normalized L1 error", f"<= {primary_tol}", rad_max, rad_max is not None and rad_max <= primary_tol, complete, "fraction"),
         metric("spatial nonburnable scaling error", f"<= {pair_tol}", nbf_max, nbf_max is not None and nbf_max <= pair_tol, complete, "fraction"),
         metric("target-table absorptivity scaling error", f"<= {pair_tol}", absorptivity_max, absorptivity_max is not None and absorptivity_max <= pair_tol, complete, "fraction"),
-        metric("HRR_ELLIPSE_ADJ inverse-square error", f"<= {pair_tol}", adjustment_max, adjustment_max is not None and adjustment_max <= pair_tol, complete, "fraction"),
+        metric("DFC HRR_ELLIPSE_ADJ inverse-square error", f"<= {pair_tol}", adjustment_max, adjustment_max is not None and adjustment_max <= pair_tol, complete, "fraction"),
         metric("maximum radiation outside source cutoff", f"<= {tolerances['radiation_leakage_kw_m2']}", leakage_max, leakage_max is not None and leakage_max <= tolerances["radiation_leakage_kw_m2"], complete, "kW m^-2"),
         metric("maximum transient-to-total integration error", f"<= {total_tol}", total_max, total_max is not None and total_max <= total_tol, complete, "fraction"),
         metric("two-source superposition error", f"<= {pair_tol}", superposition_error, superposition_error is not None and superposition_error <= pair_tol, complete, "fraction"),

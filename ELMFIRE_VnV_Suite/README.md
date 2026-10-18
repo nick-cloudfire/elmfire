@@ -98,6 +98,10 @@ correct packages and versions are available.
    ```
    or edit `cases/<case-path>/case.yaml` to reference the absolute path under the
    `elmfire.bin` key. Using the environment variable keeps the YAML portable.
+   When `tools/run_all.py` runs beside an ELMFIRE source checkout and
+   `ELMFIRE_BIN` is unset, it uses an executable at
+   `../build/linux/elmfire/elmfire` if one has been built there. An explicit
+   `ELMFIRE_BIN` takes precedence.
 3. **Configure the suite after cloning or copying it.** Run `make configure`
    to restore executable permissions on all shell scripts, including every
    `run_case.sh` and `compile_case.sh`. This is particularly important after a
@@ -595,3 +599,14 @@ All individual case reports and aggregate summaries use Times New Roman: 12 pt j
 To rebuild only a report from its existing evidence, run `latexmk -lualatex -interaction=nonstopmode -halt-on-error case_report.tex` inside that case’s `report/` directory. This avoids preprocessing and simulation. After rebuilding the standalone PDFs, `make reports` refreshes both aggregate guides from existing results. Do not run `run_case.sh`, preprocessing, or numerical postprocessing for a typography-only change.
 
 Both individual and summary wrappers use a 12 pt document-class base. Compact table sizing must be locally scoped; restore `\ReportBodyText` afterward so surrounding narrative remains 12 pt.
+
+### Fuel model tables
+
+Cases using built-in surface fuels omit `FUEL_MODEL_FILE`, allowing ELMFIRE to
+create its default table at runtime. Non-WU-E case preparation does not require
+an external fuel-model CSV or building-model CSV for the simulator. Cases with
+building spread enabled require building tables. CASE41_CFP (the custom-fuel
+test) and some WU-E verification cases retain explicit surface tables. Some analytical verification
+scripts also retain bundled CSVs as reference data for expected results.
+Generated sweep tables use variant-local directories; Camp Fire uses
+`logs/scratch` so ELMFIRE does not overwrite the archived input table.

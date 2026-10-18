@@ -75,10 +75,6 @@ def preprocess(case_dir):
         write_tif(inp / "bldg_nonburnable.tif", np.where(isb, 0.0, NODATA).astype(np.float32), dx)
         write_tif(inp / "bldg_footprint_frac.tif", np.where(isb, 1.0, NODATA).astype(np.float32), dx)
         write_tif(inp / "bldg_fuel_model.tif", np.where(isb, 14, -9999).astype(np.int16), dx, np.int16)
-    for fn in ["fuel_models.csv", "building_fuel_models.csv"]:
-        src = case_dir / "data" / "misc" / fn
-        if not src.is_file():
-            raise FileNotFoundError(f"Required case-local table is missing: {src}")
     for d in ["outputs", "figures", "logs/scratch"]:
         (case_dir / d).mkdir(parents=True, exist_ok=True)
     print("[OK] wrote inputs for " + c["id"])

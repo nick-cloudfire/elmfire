@@ -306,7 +306,12 @@ def main() -> None:
         errors.append(f"missing source archive: {source_archive}")
     elif sha256(source_archive) != archive["source_archive"]["sha256"]:
         errors.append("source archive checksum mismatch")
-    for record in archive["payload_files"]:
+    # The source-generated surface table is optional; the WU-E building table is not.
+    required_payload_files = [
+        record for record in archive["payload_files"]
+        if Path(str(record["relative_path"])).name != "fuel_models.csv"
+    ]
+    for record in required_payload_files:
         verify_file(record, errors)
     for record in source["observation"]["files"]:
         verify_file(record, errors)
@@ -381,7 +386,7 @@ def main() -> None:
     result = {
         "method_version": "landscape_inputs_v2",
         "case_id": CASE_DIR.name,
-        "archive_payload_files_verified": len(archive["payload_files"]),
+        "archive_payload_files_verified": len(required_payload_files),
         "observation_files_verified": len(source["observation"]["files"]),
         "fields": fields,
         "weather_band_means": series,

@@ -137,8 +137,6 @@ def main():
         for path in (misc, outputs, scratch):
             path.mkdir(parents=True, exist_ok=True)
         build_inputs(inputs, nx, ny, dx)
-        for filename in ("fuel_models.csv", "building_fuel_models.csv"):
-            shutil.copyfile(REFERENCE_MISC_DIR / filename, misc / filename)
         text = template
         substitutions = {
             "FUELS_AND_TOPOGRAPHY_DIRECTORY": "'./data/inputs'",

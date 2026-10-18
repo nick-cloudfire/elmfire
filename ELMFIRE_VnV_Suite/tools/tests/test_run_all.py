@@ -126,9 +126,8 @@ class DiscoverCasesTests(unittest.TestCase):
         for case_id in ("camp_fire", "thomas_fire", "tubbs_fire"):
             runner = (cases / case_id / "run_case.sh").read_text(encoding="utf-8")
             with self.subTest(case_id=case_id):
-                self.assertIn('if [[ -n "${SLURM_NTASKS:-}" ]]', runner)
-                self.assertIn("ELMFIRE_MPI_RANKS=$SLURM_NTASKS", runner)
                 self.assertIn('ELMFIRE_MPI_RANKS=${ELMFIRE_MPI_RANKS:-50}', runner)
+                self.assertIn('launcher=(mpirun -np "$ELMFIRE_MPI_RANKS")', runner)
                 self.assertIn('bash "$CASE_DIR/compile_case.sh"', runner)
                 self.assertIn("export PROJ_NETWORK=OFF", runner)
 

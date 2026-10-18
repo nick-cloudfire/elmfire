@@ -1,24 +1,24 @@
 {
   "case_id": "CASE29_SUP",
   "case_title": "Case 29: Initial- and extended-attack suppression",
-  "overall_status": "FAIL",
+  "overall_status": "PASS",
   "workflow_status": "COMPLETE",
   "metric_count": 2,
-  "passing_metric_count": 1,
+  "passing_metric_count": 2,
   "variants": [
     {
       "label": "extended_attack",
       "guide_case": "Suppression-extended",
       "configuration": "elmfire.data.in",
-      "status": "FAIL",
+      "status": "PASS",
       "metrics": [
         {
           "name": "time at simulation end",
           "target": 88200.0,
-          "measured": 0.0,
-          "percent_error": -100.0,
+          "measured": 80388.0,
+          "percent_error": -8.857142857142858,
           "units": "s",
-          "status": "FAIL"
+          "status": "PASS"
         }
       ]
     },

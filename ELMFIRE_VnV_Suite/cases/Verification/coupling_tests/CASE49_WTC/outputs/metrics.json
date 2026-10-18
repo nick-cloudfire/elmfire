@@ -37,14 +37,14 @@
       ],
       "toa_ros_m_s": null,
       "toa_fit_r2": null,
-      "burned_fraction": 0.20833333333333334,
-      "total_received_heat_kj": 14039315.107975006,
-      "maximum_sampled_cell_step_energy_kj": 25081.768226623535,
+      "burned_fraction": 0.16666666666666666,
+      "total_received_heat_kj": 12706785.797973633,
+      "maximum_sampled_cell_step_energy_kj": 23035.22882461548,
       "transient_dump_count": 15,
       "logged_solver_step_count": 75,
       "maximum_logged_step_deviation_s": 0.0,
       "completion_receipt": "variants/subthreshold_dt_4p0s/logs/completion_marker.json",
-      "executable_sha256": "bc2d27483ed3cf409cea0a04fd879e290cfe5b57a0c84b215282ff9d18c458a9",
+      "executable_sha256": "ab47c5e338a3bc3b325df659b0764ce47d5b071e22d07817e4b5cab9f87da672",
       "profile_x_m": [
         10.0,
         30.0,
@@ -62,7 +62,7 @@
       "profile_toa_s": [
         0.0,
         0.0,
-        192.0,
+        null,
         null,
         null,
         null,
@@ -115,7 +115,7 @@
       "logged_solver_step_count": 150,
       "maximum_logged_step_deviation_s": 0.0,
       "completion_receipt": "variants/subthreshold_dt_2p0s/logs/completion_marker.json",
-      "executable_sha256": "bc2d27483ed3cf409cea0a04fd879e290cfe5b57a0c84b215282ff9d18c458a9",
+      "executable_sha256": "ab47c5e338a3bc3b325df659b0764ce47d5b071e22d07817e4b5cab9f87da672",
       "profile_x_m": [
         10.0,
         30.0,
@@ -186,7 +186,7 @@
       "logged_solver_step_count": 300,
       "maximum_logged_step_deviation_s": 0.0,
       "completion_receipt": "variants/subthreshold_dt_1p0s/logs/completion_marker.json",
-      "executable_sha256": "bc2d27483ed3cf409cea0a04fd879e290cfe5b57a0c84b215282ff9d18c458a9",
+      "executable_sha256": "ab47c5e338a3bc3b325df659b0764ce47d5b071e22d07817e4b5cab9f87da672",
       "profile_x_m": [
         10.0,
         30.0,
@@ -257,7 +257,7 @@
       "logged_solver_step_count": 600,
       "maximum_logged_step_deviation_s": 0.0,
       "completion_receipt": "variants/subthreshold_dt_0p5s/logs/completion_marker.json",
-      "executable_sha256": "bc2d27483ed3cf409cea0a04fd879e290cfe5b57a0c84b215282ff9d18c458a9",
+      "executable_sha256": "ab47c5e338a3bc3b325df659b0764ce47d5b071e22d07817e4b5cab9f87da672",
       "profile_x_m": [
         10.0,
         30.0,
@@ -315,20 +315,20 @@
       "input_fingerprint": "5be0a11f22d0996f09fe33ed4ad0ad30dc71ff95ad474a1c99931c8c1b0071b9",
       "final_time_s": 300.0,
       "landmark_toa_s": [
-        56.0,
-        116.0,
-        180.0
+        84.0,
+        188.0,
+        288.0
       ],
-      "toa_ros_m_s": 0.646551724137931,
-      "toa_fit_r2": 0.999826625386997,
-      "burned_fraction": 0.9166666666666666,
-      "total_received_heat_kj": 1685181123.875,
-      "maximum_sampled_cell_step_energy_kj": 1175697.0458984375,
+      "toa_ros_m_s": 0.3932584269662923,
+      "toa_fit_r2": 0.9997980460959786,
+      "burned_fraction": 0.625,
+      "total_received_heat_kj": 1212137900.1757812,
+      "maximum_sampled_cell_step_energy_kj": 1166621.435546875,
       "transient_dump_count": 15,
       "logged_solver_step_count": 75,
       "maximum_logged_step_deviation_s": 0.0,
       "completion_receipt": "variants/threshold_stress_dt_4p0s/logs/completion_marker.json",
-      "executable_sha256": "bc2d27483ed3cf409cea0a04fd879e290cfe5b57a0c84b215282ff9d18c458a9",
+      "executable_sha256": "ab47c5e338a3bc3b325df659b0764ce47d5b071e22d07817e4b5cab9f87da672",
       "profile_x_m": [
         10.0,
         30.0,
@@ -346,15 +346,15 @@
       "profile_toa_s": [
         0.0,
         0.0,
-        24.0,
-        56.0,
-        88.0,
-        116.0,
-        148.0,
-        180.0,
-        212.0,
+        36.0,
+        84.0,
+        136.0,
+        188.0,
         240.0,
-        272.0,
+        288.0,
+        null,
+        null,
+        null,
         null
       ],
       "source_files": {
@@ -386,20 +386,20 @@
       "input_fingerprint": "fcf8910845a8a810c436a2307df6e4708997b8bf0cd2ed814f2a40d30bdf5525",
       "final_time_s": 300.0,
       "landmark_toa_s": [
-        56.0,
-        116.0,
-        178.0
+        84.0,
+        186.0,
+        288.0
       ],
-      "toa_ros_m_s": 0.6514657980456028,
-      "toa_fit_r2": 0.9999540246145141,
-      "burned_fraction": 0.9166666666666666,
-      "total_received_heat_kj": 1706791045.25,
-      "maximum_sampled_cell_step_energy_kj": 587879.0893554688,
+      "toa_ros_m_s": 0.3923766816143499,
+      "toa_fit_r2": 0.9999380011226824,
+      "burned_fraction": 0.625,
+      "total_received_heat_kj": 1221850738.7070312,
+      "maximum_sampled_cell_step_energy_kj": 583380.3894042969,
       "transient_dump_count": 15,
       "logged_solver_step_count": 150,
       "maximum_logged_step_deviation_s": 0.0,
       "completion_receipt": "variants/threshold_stress_dt_2p0s/logs/completion_marker.json",
-      "executable_sha256": "bc2d27483ed3cf409cea0a04fd879e290cfe5b57a0c84b215282ff9d18c458a9",
+      "executable_sha256": "ab47c5e338a3bc3b325df659b0764ce47d5b071e22d07817e4b5cab9f87da672",
       "profile_x_m": [
         10.0,
         30.0,
@@ -417,15 +417,15 @@
       "profile_toa_s": [
         0.0,
         0.0,
-        24.0,
-        56.0,
-        86.0,
-        116.0,
-        148.0,
-        178.0,
-        208.0,
-        240.0,
-        270.0,
+        34.0,
+        84.0,
+        134.0,
+        186.0,
+        238.0,
+        288.0,
+        null,
+        null,
+        null,
         null
       ],
       "source_files": {
@@ -457,20 +457,20 @@
       "input_fingerprint": "4bf6750d3532bb02d52db05f3ce2c9ff4408445171d66bb7c1d7d04f11d687b2",
       "final_time_s": 300.0,
       "landmark_toa_s": [
-        55.0,
-        116.0,
-        177.0
+        84.0,
+        186.0,
+        289.0
       ],
-      "toa_ros_m_s": 0.6511123168746609,
-      "toa_fit_r2": 0.999979097482277,
-      "burned_fraction": 0.9166666666666666,
-      "total_received_heat_kj": 1715849300.625,
-      "maximum_sampled_cell_step_energy_kj": 293955.84411621094,
+      "toa_ros_m_s": 0.39215686274509814,
+      "toa_fit_r2": 0.9999707080951841,
+      "burned_fraction": 0.625,
+      "total_received_heat_kj": 1223427179.7851562,
+      "maximum_sampled_cell_step_energy_kj": 291693.52111816406,
       "transient_dump_count": 15,
       "logged_solver_step_count": 300,
       "maximum_logged_step_deviation_s": 0.0,
       "completion_receipt": "variants/threshold_stress_dt_1p0s/logs/completion_marker.json",
-      "executable_sha256": "bc2d27483ed3cf409cea0a04fd879e290cfe5b57a0c84b215282ff9d18c458a9",
+      "executable_sha256": "ab47c5e338a3bc3b325df659b0764ce47d5b071e22d07817e4b5cab9f87da672",
       "profile_x_m": [
         10.0,
         30.0,
@@ -488,15 +488,15 @@
       "profile_toa_s": [
         0.0,
         0.0,
-        24.0,
-        55.0,
-        85.0,
-        116.0,
-        146.0,
-        177.0,
-        208.0,
-        239.0,
-        270.0,
+        34.0,
+        84.0,
+        135.0,
+        186.0,
+        237.0,
+        289.0,
+        null,
+        null,
+        null,
         null
       ],
       "source_files": {
@@ -528,20 +528,20 @@
       "input_fingerprint": "7f492a0729f6d8c03f46b0a4153cc9a055581028e057a9e44b01880cacff1213",
       "final_time_s": 300.0,
       "landmark_toa_s": [
-        52.5,
-        110.5,
-        169.0
+        83.5,
+        185.5,
+        288.5
       ],
-      "toa_ros_m_s": 0.6821705426356589,
-      "toa_fit_r2": 0.9999623113778201,
-      "burned_fraction": 1.0,
-      "total_received_heat_kj": 1743300877.3125,
-      "maximum_sampled_cell_step_energy_kj": 147073.64654541016,
+      "toa_ros_m_s": 0.3923766816143499,
+      "toa_fit_r2": 0.9999563276931125,
+      "burned_fraction": 0.625,
+      "total_received_heat_kj": 1226334867.7929688,
+      "maximum_sampled_cell_step_energy_kj": 145850.28533935547,
       "transient_dump_count": 15,
       "logged_solver_step_count": 600,
       "maximum_logged_step_deviation_s": 0.0,
       "completion_receipt": "variants/threshold_stress_dt_0p5s/logs/completion_marker.json",
-      "executable_sha256": "bc2d27483ed3cf409cea0a04fd879e290cfe5b57a0c84b215282ff9d18c458a9",
+      "executable_sha256": "ab47c5e338a3bc3b325df659b0764ce47d5b071e22d07817e4b5cab9f87da672",
       "profile_x_m": [
         10.0,
         30.0,
@@ -559,16 +559,16 @@
       "profile_toa_s": [
         0.0,
         0.0,
-        21.0,
-        52.5,
-        81.0,
-        110.5,
-        139.5,
-        169.0,
-        198.0,
-        227.5,
-        256.5,
-        286.0
+        34.0,
+        83.5,
+        134.5,
+        185.5,
+        237.0,
+        288.5,
+        null,
+        null,
+        null,
+        null
       ],
       "source_files": {
         "toa": "variants/threshold_stress_dt_0p5s/outputs/time_of_arrival_0000001_0000300.tif",
@@ -577,7 +577,7 @@
       }
     }
   ],
-  "executed_binary_sha256": "bc2d27483ed3cf409cea0a04fd879e290cfe5b57a0c84b215282ff9d18c458a9",
+  "executed_binary_sha256": "ab47c5e338a3bc3b325df659b0764ce47d5b071e22d07817e4b5cab9f87da672",
   "reason": "One or more temporal-convergence acceptance components failed.",
   "metrics": [
     {
@@ -590,14 +590,14 @@
     {
       "name": "low-HRR positive sampled FBFM91 cell-step energy",
       "expected": "> 0 and finite",
-      "calculated": 25081.768226623535,
+      "calculated": 23035.22882461548,
       "units": "kJ",
       "status": "PASS"
     },
     {
       "name": "high-HRR positive sampled FBFM91 cell-step energy",
       "expected": "> 0 and finite",
-      "calculated": 147073.64654541016,
+      "calculated": 145850.28533935547,
       "units": "kJ",
       "status": "PASS"
     },
@@ -611,21 +611,21 @@
     {
       "name": "finest-pair landmark TOA relative L2 change",
       "expected": "<= 0.05",
-      "calculated": 0.04805086042439956,
+      "calculated": 0.0024532731540815897,
       "units": "fraction",
       "status": "PASS"
     },
     {
       "name": "finest-pair community ROS relative change",
       "expected": "<= 0.05",
-      "calculated": 0.04552853549055394,
+      "calculated": 0.0005602240896359251,
       "units": "fraction",
       "status": "PASS"
     },
     {
       "name": "high-HRR finest-pair total-heat relative change",
       "expected": "<= 0.05",
-      "calculated": 0.015746895469828354,
+      "calculated": 0.002371039170602282,
       "units": "fraction",
       "status": "PASS"
     },
@@ -639,21 +639,21 @@
     {
       "name": "landmark TOA observed temporal order",
       "expected": ">= 0.5 or roundoff-flat three-level sequence",
-      "calculated": -2.825525845589464,
+      "calculated": 0.2075187496394221,
       "units": "-",
       "status": "FAIL"
     },
     {
       "name": "community ROS observed temporal order",
       "expected": ">= 0.5 or roundoff-flat three-level sequence",
-      "calculated": -6.457198237817202,
+      "calculated": 0.0,
       "units": "-",
       "status": "FAIL"
     },
     {
       "name": "high-HRR heat observed temporal order",
       "expected": ">= 0.5 or roundoff-flat three-level sequence",
-      "calculated": -1.5995838948497807,
+      "calculated": -0.8832012296265096,
       "units": "-",
       "status": "FAIL"
     },
@@ -667,7 +667,7 @@
     {
       "name": "minimum high-HRR TOA-fit coefficient of determination",
       "expected": ">= 0.95",
-      "calculated": 0.999826625386997,
+      "calculated": 0.9997980460959786,
       "units": "-",
       "status": "PASS"
     }

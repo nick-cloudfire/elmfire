@@ -169,9 +169,6 @@ def main():
                     vdir / "logs/scratch"):
                 directory.mkdir(parents=True, exist_ok=True)
             write_inputs(input_dir, nx, ny, dx, wind_mph)
-            for table in ("fuel_models.csv", "building_fuel_models.csv"):
-                shutil.copyfile(CASE_DIR / "data/misc" / table, misc_dir / table)
-
             cfg = template
             cfg = replace_once(cfg, f"SIMULATION_DT={BASE_DT_S}",
                                f"SIMULATION_DT={dt:.17g}", "time step")
