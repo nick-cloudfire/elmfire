@@ -4,6 +4,7 @@ MODULE ELMFIRE_SUBS
 
 USE ELMFIRE_VARS
 USE MPI_F08
+USE, INTRINSIC :: IEEE_ARITHMETIC, ONLY: IEEE_IS_FINITE, IEEE_VALUE, IEEE_QUIET_NAN
 
 IMPLICIT NONE
 
@@ -12,7 +13,7 @@ CONTAINS
 ! *****************************************************************************
 SUBROUTINE WRITE_TIMINGS_TO_DISK
 ! *****************************************************************************
-! Writes the per-rank TIMINGS array (62 timing blocks x all host ranks) to a
+! Writes the per-rank TIMINGS array (all timing blocks x all host ranks) to a
 ! formatted CSV file 'timings_<PROCNAME>.csv' in OUTPUTS_DIRECTORY.
 
 INTEGER :: I,IOS,IR,LU
@@ -23,13 +24,13 @@ LU=3939
 FN = TRIM(OUTPUTS_DIRECTORY) // 'timings_' // TRIM(PROCNAME) // '.csv'  
 OPEN(LU,FILE=TRIM(FN),FORM='FORMATTED',STATUS='REPLACE',IOSTAT=IOS)
 WRITE(LU,100) '#,', (IR, IR=0, NPROC_HOST-1)
-DO I = 1, 62
+DO I = 1, SIZE(TIMINGS,2)
    WRITE(LU,300) I, (TIMINGS(IR+1,I), IR=0, NPROC_HOST-1)
 ENDDO
 CLOSE(LU)
 
-100 FORMAT (A,128(I3,','))
-300 FORMAT (I3,',',128(F11.5,','))
+100 FORMAT (A,*(I0,','))
+300 FORMAT (I0,',',*(ES16.8E3,','))
 
 ! *****************************************************************************
 END SUBROUTINE WRITE_TIMINGS_TO_DISK
@@ -114,12 +115,21 @@ CALL MPI_BCAST(MLH%R4 , WEATHER_COUNT, MPI_REAL, 0, MPI_COMM_HOST_IRANK0, IERR)
 CALL MPI_BCAST(MLW%R4 , WEATHER_COUNT, MPI_REAL, 0, MPI_COMM_HOST_IRANK0, IERR)
 CALL MPI_BCAST(MFOL%R4, WEATHER_COUNT, MPI_REAL, 0, MPI_COMM_HOST_IRANK0, IERR)
 
+IF (SURFACE_MODEL_CFFDRS .AND. USE_BUI_RASTER) THEN
+   CALL MPI_BCAST(BUI%R4, WEATHER_COUNT, MPI_REAL, 0, MPI_COMM_HOST_IRANK0, IERR)
+ENDIF
+IF (SURFACE_MODEL_CFFDRS .AND. USE_GCF_RASTER) THEN
+   CALL MPI_BCAST(GCF%R4, WEATHER_COUNT, MPI_REAL, 0, MPI_COMM_HOST_IRANK0, IERR)
+ENDIF
+
 IF (USE_ERC) THEN
    CALL MPI_BCAST(ERC%R4, WEATHER_COUNT, MPI_REAL, 0, MPI_COMM_HOST_IRANK0, IERR)
    CALL MPI_BCAST(IGNFAC%R4, WEATHER_COUNT, MPI_REAL, 0, MPI_COMM_HOST_IRANK0, IERR)
 ENDIF
 
+! *****************************************************************************
 END SUBROUTINE BCAST_WEATHER
+! *****************************************************************************
 
 ! *****************************************************************************
 SUBROUTINE BCAST_FUEL_TOPOGRAPHY
@@ -183,6 +193,11 @@ INTEGER :: I
 
 !Format is X_actual = X_input + COEFFS_UNSCALED(I)
 
+! Conservatively refresh resident data at the next collective weather request.
+! Perturbations currently use per-rank offsets, but must never leave stale cache
+! state if raster perturbation is extended to modify the shared arrays.
+WEATHER_CACHE_VALID = .FALSE.
+
 DO I = 1, NUM_RASTERS_TO_PERTURB
    if (PDF_TYPE(I) .eq. 'UNIFORM') then
       COEFFS_UNSCALED(I) = PDF_LOWER_LIMIT(I) + R1(I) * (PDF_UPPER_LIMIT(I) - PDF_LOWER_LIMIT(I))
@@ -243,25 +258,82 @@ END SUBROUTINE PERTURB_RASTERS
 ! *****************************************************************************
 SUBROUTINE GET_OPERATING_SYSTEM
 ! *****************************************************************************
-! Detects the host OS by inspecting the PATH environment variable and sets the
-! global OPERATING_SYSTEM, PATH_SEPARATOR, and DELETECOMMAND module variables.
-
-CHARACTER(2000) :: PATH
-
-CALL GET_ENVIRONMENT_VARIABLE('PATH',PATH)
-
-IF (PATH(1:1) .EQ. '/') THEN 
+! Use the compiler's target OS: PATH may be empty or begin with a relative path.
+#if defined(_WIN32) || defined(_WIN64)
+   OPERATING_SYSTEM = 'windows'
+   PATH_SEPARATOR   = ACHAR(92)
+   DELETECOMMAND    = 'del /f /q'
+   NULL_DEVICE      = 'NUL'
+#else
    OPERATING_SYSTEM = 'linux  '
    PATH_SEPARATOR   = '/'
    DELETECOMMAND    = '/bin/rm -f '
-ELSE
-   OPERATING_SYSTEM = 'windows'
-   PATH_SEPARATOR   = '\'
-   DELETECOMMAND    = 'del   '
-ENDIF
+   NULL_DEVICE      = '/dev/null'
+#endif
 
 ! *****************************************************************************
 END SUBROUTINE GET_OPERATING_SYSTEM
+! *****************************************************************************
+
+! *****************************************************************************
+SUBROUTINE RUN_SHELL_COMMAND(COMMAND, EXITSTAT)
+! *****************************************************************************
+! Invoke cmd explicitly so quoted executable paths work with both Intel and GNU
+! runtimes. /S removes only the outer quotes; /D disables shell startup commands.
+CHARACTER(*), INTENT(IN) :: COMMAND
+INTEGER, OPTIONAL, INTENT(OUT) :: EXITSTAT
+INTEGER :: ISTAT, CSTAT
+CHARACTER(1024) :: CMSG
+CHARACTER(:), ALLOCATABLE :: CMD
+
+CMD = TRIM(COMMAND)
+IF (OPERATING_SYSTEM .EQ. 'windows' .AND. LEN_TRIM(CMD) .GT. 0) THEN
+   CMD = 'cmd /d /s /c "' // CMD // '"'
+ENDIF
+ISTAT = -1
+CMSG = ''
+CALL EXECUTE_COMMAND_LINE(CMD, EXITSTAT=ISTAT, CMDSTAT=CSTAT, CMDMSG=CMSG)
+IF (CSTAT /= 0) THEN
+   ISTAT = -1
+   WRITE(*,*) 'Could not start command on rank ', IRANK_WORLD, ': ', CMD, ': ', TRIM(CMSG)
+ENDIF
+IF (PRESENT(EXITSTAT)) EXITSTAT = ISTAT
+END SUBROUTINE RUN_SHELL_COMMAND
+! *****************************************************************************
+
+! *****************************************************************************
+SUBROUTINE DELETE_FILE(FILENAME)
+! *****************************************************************************
+! Delete a single temporary file without relying on shell commands or quoting.
+CHARACTER(*), INTENT(IN) :: FILENAME
+INTEGER :: LU, IOS
+
+OPEN(NEWUNIT=LU, FILE=FILENAME, STATUS='OLD', IOSTAT=IOS)
+IF (IOS .EQ. 0) CLOSE(LU, STATUS='DELETE', IOSTAT=IOS)
+END SUBROUTINE DELETE_FILE
+! *****************************************************************************
+
+! *****************************************************************************
+SUBROUTINE CLEAN_SCRATCH_DIRECTORY
+! *****************************************************************************
+! Remove files only; quote the directory while allowing the POSIX shell to glob.
+CHARACTER(:), ALLOCATABLE :: DIRECTORY
+INTEGER :: I
+
+IF (LEN_TRIM(SCRATCH) .EQ. 0 .OR. TRIM(SCRATCH) .EQ. 'null') RETURN
+DIRECTORY = TRIM(SCRATCH)
+IF (OPERATING_SYSTEM .EQ. 'windows') THEN
+   DO I = 1, LEN(DIRECTORY)
+      IF (DIRECTORY(I:I) .EQ. '/') DIRECTORY(I:I) = PATH_SEPARATOR
+   ENDDO
+ENDIF
+IF (DIRECTORY(LEN(DIRECTORY):) .NE. PATH_SEPARATOR) DIRECTORY = DIRECTORY // PATH_SEPARATOR
+IF (OPERATING_SYSTEM .EQ. 'windows') THEN
+   CALL RUN_SHELL_COMMAND(TRIM(DELETECOMMAND) // ' "' // DIRECTORY // '*"')
+ELSE
+   CALL RUN_SHELL_COMMAND(TRIM(DELETECOMMAND) // ' "' // DIRECTORY // '"*')
+ENDIF
+END SUBROUTINE CLEAN_SCRATCH_DIRECTORY
 ! *****************************************************************************
 
 ! *****************************************************************************
@@ -570,6 +642,22 @@ SELECT CASE (IQUANTITY)
          C => C%NEXT
       ENDDO
 
+   CASE (8)
+      DO I = 1, L%NUM_NODES
+         ICOL = WX_ICOL_FROM_ANALYSIS_IX(C%IX)
+         IROW = WX_IROW_FROM_ANALYSIS_IY(C%IY)
+         C%BUI = MAX(LO(ICOL,IROW), 0.0)
+         C => C%NEXT
+      ENDDO
+
+   CASE (9)
+      DO I = 1, L%NUM_NODES
+         ICOL = WX_ICOL_FROM_ANALYSIS_IX(C%IX)
+         IROW = WX_IROW_FROM_ANALYSIS_IY(C%IY)
+         C%GCF = MAX(0.0,MIN(100.0,LO(ICOL,IROW)))
+         C => C%NEXT
+      ENDDO
+
 END SELECT
 
 ! *****************************************************************************
@@ -626,7 +714,11 @@ DO I = 1, L%NUM_NODES
          C%WS20_INTERP = MAX(PNOW + PERTURB_WS, 0.0)
          C%WS20_NOW = C%WS20_INTERP
          C%WSMF = C%WS20_NOW * MAX((WAF%R4(C%IX,C%IY,1) + PERTURB_WAF),0.) * CONVERSION_FACTOR
-      END SELECT
+      CASE (8)
+         C%BUI = MAX(PNOW, 0.0)
+      CASE (9)
+         C%GCF = MAX(0.0,MIN(100.0,PNOW))
+   END SELECT
    
    C => C%NEXT
 
@@ -753,7 +845,7 @@ SUBROUTINE INTERP_WIND_SINGLE_BILINEAR(NODEIN,WSLO,WSHI,WDLO,WDHI,F)
 ! temporally interpolates the wind field at NODEIN via U/V components and sets
 ! its WS20_NOW, WD20_NOW, and midflame wind WSMF (with PERTURB_WS/WD/WAF).
 
-TYPE(NODE), POINTER, INTENT(OUT) :: NODEIN
+TYPE(NODE), POINTER, INTENT(INOUT) :: NODEIN
 REAL, DIMENSION(:,:), INTENT(IN) :: WSLO,WSHI,WDLO,WDHI
 REAL, INTENT(IN) :: F
 TYPE(NODE), POINTER :: C
@@ -1007,7 +1099,7 @@ SUBROUTINE INTERP_RASTER_LINKEDLIST_SINGLE(NODEIN,LO,HI,F,IQUANTITY)
 ! interpolates the weather quantity selected by IQUANTITY between LO and HI
 ! (fraction F) at NODEIN and applies the matching PERTURB_* offset/floor.
 
-TYPE (NODE), POINTER, INTENT(OUT) :: NODEIN
+TYPE (NODE), POINTER, INTENT(INOUT) :: NODEIN
 REAL, DIMENSION(:,:), INTENT(IN) :: LO,HI
 INTEGER, INTENT(IN) :: IQUANTITY
 REAL, INTENT(IN) :: F
@@ -1050,6 +1142,10 @@ SELECT CASE (IQUANTITY)
       C%WS20_INTERP = MAX(C%WS20_INTERP + PERTURB_WS, 0.0)
       C%WS20_NOW = C%WS20_INTERP
       C%WSMF = C%WS20_NOW * MAX((WAF%R4(C%IX,C%IY,1) + PERTURB_WAF),0.) * CONVERSION_FACTOR
+   CASE (8)
+      C%BUI = MAX(LO(ICOL,IROW),0.0)
+   CASE (9)
+      C%GCF = MAX(0.0,MIN(100.0,LO(ICOL,IROW)))
 
 END SELECT
 
@@ -1064,7 +1160,7 @@ SUBROUTINE INTERP_RASTER_LINKEDLIST_SINGLE_BILINEAR(NODEIN,LO,HI,F,IQUANTITY)
 ! and temporally interpolates the weather quantity selected by IQUANTITY between
 ! LO and HI (fraction F) at NODEIN, applying the matching PERTURB_* offset.
 
-TYPE (NODE), POINTER, INTENT(OUT) :: NODEIN
+TYPE (NODE), POINTER, INTENT(INOUT) :: NODEIN
 REAL, DIMENSION(:,:), INTENT(IN) :: LO,HI
 INTEGER, INTENT(IN) :: IQUANTITY
 REAL, INTENT(IN) :: F
@@ -1105,6 +1201,10 @@ SELECT CASE (IQUANTITY)
       C%WS20_INTERP = MAX(PNOW + PERTURB_WS, 0.0)
       C%WS20_NOW = C%WS20_INTERP
       C%WSMF = C%WS20_NOW * MAX((WAF%R4(C%IX,C%IY,1) + PERTURB_WAF),0.) * CONVERSION_FACTOR
+   CASE (8)
+      C%BUI = MAX(PNOW, 0.0)
+   CASE (9)
+      C%GCF = MAX(0.0,MIN(100.0,PNOW))
 END SELECT
 
 ! *****************************************************************************
@@ -1390,46 +1490,74 @@ END SUBROUTINE LOCATE
 ! *****************************************************************************
 
 !******************************************************************************
+INTEGER FUNCTION SOLAR_DAYS_IN_YEAR(YEAR)
+INTEGER, INTENT(IN) :: YEAR
+SOLAR_DAYS_IN_YEAR = 365
+IF (MOD(YEAR,4) == 0 .AND. (MOD(YEAR,100) /= 0 .OR. MOD(YEAR,400) == 0)) SOLAR_DAYS_IN_YEAR = 366
+END FUNCTION SOLAR_DAYS_IN_YEAR
+
+FUNCTION SOLAR_INPUT_ERROR() RESULT(REASON)
+CHARACTER(:), ALLOCATABLE :: REASON
+REASON = ''
+IF (.NOT. USE_DIURNAL_ADJUSTMENT_FACTOR) RETURN
+IF (.NOT. IEEE_IS_FINITE(SUNRISE_HOUR) .OR. .NOT. IEEE_IS_FINITE(SUNSET_HOUR)) THEN
+   REASON = 'SUNRISE_HOUR and SUNSET_HOUR must be finite UTC hours'
+   RETURN
+ENDIF
+IF (SUNRISE_HOUR >= 0.0 .AND. SUNSET_HOUR >= 0.0) RETURN
+IF (CURRENT_YEAR <= 0) THEN
+   REASON = 'Automatic diurnal hours require positive CURRENT_YEAR'
+ELSE IF (HOUR_OF_YEAR < 0 .OR. HOUR_OF_YEAR >= 24*SOLAR_DAYS_IN_YEAR(CURRENT_YEAR)) THEN
+   REASON = 'Automatic diurnal hours require zero-based HOUR_OF_YEAR within CURRENT_YEAR'
+ENDIF
+END FUNCTION SOLAR_INPUT_ERROR
+
+SUBROUTINE INITIALIZE_SOLAR_HOURS
+INTEGER :: IERR
+CHARACTER(:), ALLOCATABLE :: REASON
+IF (.NOT. USE_DIURNAL_ADJUSTMENT_FACTOR) RETURN
+REASON = SOLAR_INPUT_ERROR()
+IF (LEN(REASON) > 0) CALL SPATIAL_ERROR(REASON)
+IF (SUNRISE_HOUR >= 0.0 .AND. SUNSET_HOUR >= 0.0) RETURN
+IF (IRANK_WORLD == PARALLEL_IO_RANK(1)) CALL SUNRISE_SUNSET_CALCS
+CALL MPI_BCAST(SUNRISE_HOUR, 1, MPI_REAL, PARALLEL_IO_RANK(1), MPI_COMM_WORLD, IERR)
+CALL MPI_BCAST(SUNSET_HOUR, 1, MPI_REAL, PARALLEL_IO_RANK(1), MPI_COMM_WORLD, IERR)
+END SUBROUTINE INITIALIZE_SOLAR_HOURS
+
 SUBROUTINE SUNRISE_SUNSET_CALCS
-!******************************************************************************
-! Computes the UTC sunrise and sunset hours for the domain's lower-left lat/lon
-! and current day of year (NOAA solar equations), storing them in the global
-! SUNRISE_HOUR and SUNSET_HOUR module variables.
-LOGICAL :: LEAPYEAR
-INTEGER :: DAY_OF_YEAR, HOUR_OF_DAY
-REAL :: DAYS_PER_YEAR, GAMMA, EQTIME, DECL, HA_SUNRISE, LAT_RAD, LON_RAD, &
-        SUNRISE_MIN_UTC, SUNRISE_H_UTC, SUNSET_MIN_UTC, HA_SUNSET, SUNSET_H_UTC, LON_DEG, LAT_DEG
-
+! Keep the existing NOAA equations and unwrapped UTC hours at the lower-left.
+INTEGER :: DAY_OF_YEAR
+REAL :: DAYS_PER_YEAR, GAMMA, EQTIME, DECL, HA_SUNRISE, LAT_RAD, &
+        SUNRISE_H_UTC, SUNSET_H_UTC, LON_DEG, LAT_DEG, ACOS_ARG, DENOM
+CHARACTER(:), ALLOCATABLE :: REASON
+REASON = SOLAR_INPUT_ERROR()
+IF (LEN(REASON) > 0) CALL SPATIAL_ERROR(REASON)
+IF (.NOT. ALL(IEEE_IS_FINITE([ASP%XLLCORNER, ASP%YLLCORNER, ASP%CELLSIZE]))) &
+   CALL SPATIAL_ERROR('Solar calculation requires finite aspect header coordinates/cell size')
+IF (ASP%CELLSIZE <= 0.0) CALL SPATIAL_ERROR('Solar calculation requires positive aspect cell size')
+CALL REQUIRE_ANALYSIS_SRS
 CALL XY_TO_LATLON(ASP%XLLCORNER, ASP%YLLCORNER, LAT_DEG, LON_DEG)
-
-LON_RAD = LON_DEG * PI / 180.
 LAT_RAD = LAT_DEG * PI / 180.
-
-LEAPYEAR = .FALSE.
-IF (MOD(CURRENT_YEAR,4) .EQ. 0) LEAPYEAR = .TRUE.
-DAYS_PER_YEAR = 365.
-IF (LEAPYEAR) DAYS_PER_YEAR = 366.
-
-DAY_OF_YEAR = 1 + FLOOR(REAL(HOUR_OF_YEAR) / 24.)
-HOUR_OF_DAY = HOUR_OF_YEAR - (DAY_OF_YEAR - 1) * 24
+DAYS_PER_YEAR = REAL(SOLAR_DAYS_IN_YEAR(CURRENT_YEAR))
+DAY_OF_YEAR = 1 + HOUR_OF_YEAR / 24
 GAMMA = 2.0 * (PI/DAYS_PER_YEAR) * (DAY_OF_YEAR - 1)
-
-EQTIME = 229.18 * ( 0.000075 + 0.001868*COS(GAMMA) - 0.032077*SIN(GAMMA) - 0.014615*COS(2.*GAMMA) - 0.040849*SIN(2.*GAMMA) )
-DECL   = 0.006918 - 0.399912*COS(GAMMA) + 0.070257*SIN(GAMMA) - 0.006758*COS(2.*GAMMA) + 0.000907*SIN(2.*GAMMA) - 0.002697*COS(3.*GAMMA) + 0.00148*SIN(3.*GAMMA)
-
-HA_SUNRISE = ACOS( COS(90.833*PI/180) / (COS(LAT_RAD)*COS(DECL)) -TAN(LAT_RAD)*TAN(DECL) )
-SUNRISE_MIN_UTC = 720. - 4.*(LON_DEG + HA_SUNRISE*180./PI) - EQTIME
-SUNRISE_H_UTC = SUNRISE_MIN_UTC / 60.
-
-HA_SUNSET = -HA_SUNRISE
-SUNSET_MIN_UTC = 720. - 4.*(LON_DEG + HA_SUNSET*180./PI) - EQTIME
-SUNSET_H_UTC = SUNSET_MIN_UTC / 60.
-
-SUNRISE_HOUR = SUNRISE_H_UTC ! Scope is global
-SUNSET_HOUR  = SUNSET_H_UTC ! Scope is global
-
-! *****************************************************************************
+EQTIME = 229.18 * (0.000075 + 0.001868*COS(GAMMA) - 0.032077*SIN(GAMMA) &
+         - 0.014615*COS(2.*GAMMA) - 0.040849*SIN(2.*GAMMA))
+DECL = 0.006918 - 0.399912*COS(GAMMA) + 0.070257*SIN(GAMMA) - 0.006758*COS(2.*GAMMA) &
+       + 0.000907*SIN(2.*GAMMA) - 0.002697*COS(3.*GAMMA) + 0.00148*SIN(3.*GAMMA)
+DENOM = COS(LAT_RAD)*COS(DECL)
+IF (ABS(DENOM) <= TINY(DENOM)) CALL SPATIAL_ERROR('Unsupported solar no-rise/no-set location')
+ACOS_ARG = COS(90.833*PI/180.) / DENOM - TAN(LAT_RAD)*TAN(DECL)
+IF (.NOT. IEEE_IS_FINITE(ACOS_ARG)) CALL SPATIAL_ERROR('Nonfinite solar hour angle')
+IF (ABS(ACOS_ARG) > 1.0) CALL SPATIAL_ERROR('Unsupported solar no-rise/no-set date/location')
+HA_SUNRISE = ACOS(ACOS_ARG)
+SUNRISE_H_UTC = (720. - 4.*(LON_DEG + HA_SUNRISE*180./PI) - EQTIME) / 60.
+SUNSET_H_UTC = (720. - 4.*(LON_DEG - HA_SUNRISE*180./PI) - EQTIME) / 60.
+IF (SUNRISE_HOUR < 0.0) SUNRISE_HOUR = SUNRISE_H_UTC
+IF (SUNSET_HOUR < 0.0) SUNSET_HOUR = SUNSET_H_UTC
 END SUBROUTINE SUNRISE_SUNSET_CALCS
+
+
 !******************************************************************************
 
 ! *****************************************************************************
@@ -1468,6 +1596,12 @@ IF (NPROC .GT. 1) THEN
    CALL MPI_WIN_FREE(WIN_M1           )
    CALL MPI_WIN_FREE(WIN_M10          )
    CALL MPI_WIN_FREE(WIN_M100         )
+   IF (SURFACE_MODEL_CFFDRS .AND. USE_BUI_RASTER) THEN
+      CALL MPI_WIN_FREE(WIN_BUI)
+   ENDIF
+   IF (SURFACE_MODEL_CFFDRS .AND. USE_GCF_RASTER) THEN
+      CALL MPI_WIN_FREE(WIN_GCF)
+   ENDIF
    IF (USE_ERC) THEN
       CALL MPI_WIN_FREE(WIN_ERC       )
       CALL MPI_WIN_FREE(WIN_IGNFAC    )
@@ -1515,8 +1649,10 @@ ENDIF
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
 ! Dump timings:
-CALL SYSTEM_CLOCK(IT_STOP)
-TIMINGS(IRANK_HOST+1,1) = REAL(IT_STOP - IT_START) / REAL(CLOCK_COUNT_RATE)
+IF (DUMP_TIMINGS) THEN
+   CALL SYSTEM_CLOCK(IT_STOP)
+   TIMINGS(IRANK_HOST+1,1) = REAL(IT_STOP - IT_START) / REAL(CLOCK_COUNT_RATE)
+ENDIF
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 IF (DUMP_TIMINGS .AND. IRANK_HOST .EQ. 0) CALL WRITE_TIMINGS_TO_DISK
 
@@ -1525,9 +1661,10 @@ IF (NPROC .GT. 1) CALL MPI_WIN_FREE(WIN_TIMINGS)
 
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
+CALL CLEANUP_ANALYSIS_SRS
 CALL MPI_FINALIZE(IERR)
 
-if (IRANK_WORLD .eq. 0 .and. CLEAN_SCRATCH) call execute_command_line("rm -f " // trim(SCRATCH) // "/*")
+IF (IRANK_WORLD .EQ. 0 .AND. CLEAN_SCRATCH) CALL CLEAN_SCRATCH_DIRECTORY
 
 IF (IRANK_WORLD .EQ. 0) WRITE(*,*) 'End of simulation reached successfully. Shutting down.'
 
@@ -1701,7 +1838,7 @@ select case (FUEL)
       PC = mod(FUEL, 100)/100.0
       out = PC * SFC(2_2,FFMC,BUI) + (1 - PC) * SFC(11_2,FFMC,BUI)
    case(31,32,33)
-      out = 0.35
+      out = MAX(FUEL_MODEL_TABLE_FBP(FUEL)%GFL, 0.0)
    case (21)
       out = max(0.0,4*(1-exp(-0.034*BUI)))+4.0*(1-exp(-0.025*BUI))
    case (22)
@@ -1717,7 +1854,7 @@ END FUNCTION SFC
 ! *****************************************************************************
 
 ! *****************************************************************************
-REAL FUNCTION BUI(day_of_weather, month_of_weather)
+REAL FUNCTION CALC_DAILY_BUI(day_of_weather, month_of_weather)
 ! *****************************************************************************
 ! Returns the Canadian FWI Buildup Index for the given day/month by advancing
 ! the Drought Code and Duff Moisture Code from temperature, humidity, and
@@ -1762,9 +1899,9 @@ DC_prev = DC
 
 ! -------------- BUILD-UP INDEX ---------------------
 
-BUI = 0.8*DMC*DC/(DMC+0.4*DC)
+CALC_DAILY_BUI = 0.8*DMC*DC/(DMC+0.4*DC)
 ! *****************************************************************************
-END FUNCTION BUI
+END FUNCTION CALC_DAILY_BUI
 ! *****************************************************************************
 
 ! *****************************************************************************
@@ -2162,4 +2299,3 @@ end subroutine read_geotiff_meta_gdalinfo
 
 ! *****************************************************************************
 END MODULE ELMFIRE_SUBS
-! *****************************************************************************
