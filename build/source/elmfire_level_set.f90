@@ -62,7 +62,7 @@ LOGICAL :: IA_HAS_OCCURRED, LOPEN, GO, CALL_SPOTTING, JUST_INTERPOLATED, DUMP_SM
 LOGICAL, SAVE :: FIRSTCALL
 LOGICAL, DIMENSION(1:100) :: ALREADY_IGNITED
 
-!real, allocatable, dimension(:,:) :: phi_previous
+real, allocatable, dimension(:,:) :: phi_previous
 
 CHARACTER(4) :: FOUR_IWX_BAND, FOUR_IRANK_WORLD
 CHARACTER(256) :: LOG_MSG
@@ -125,8 +125,8 @@ if (FEEDBACK_LEVEL .ge. 3) then
    WRITE(*,'(A)') TRIM(LOG_MSG)
 endif
 
-!if (.not. allocated(phi_previous)) allocate(phi_previous(ANALYSIS_NCOLS, ANALYSIS_NROWS))
-!phi_previous(:,:) = 2
+if (.not. allocated(phi_previous)) allocate(phi_previous(ANALYSIS_NCOLS, ANALYSIS_NROWS))
+phi_previous(:,:) = 2
 
 DO
    ! if (ICASE .ge. 9945) then
