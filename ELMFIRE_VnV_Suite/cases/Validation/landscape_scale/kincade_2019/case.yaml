@@ -1,0 +1,43 @@
+case_id: "kincade_2019"
+case_title: "2019 Kincade Fire reconstruction against GOFER hourly perimeters"
+case_type: "validation"
+category: "landscape_scale"
+
+elmfire:
+  bin: "${ELMFIRE_BIN:-elmfire}"
+  config: "elmfire.data.in"
+  mpi_ranks: 1
+
+validation:
+  observation: "GOFER-Combined hourly perimeters (arrival-time raster)"
+  event_start_utc: "2019-10-24T04:00:00Z"
+  event_end_utc: "2019-10-29T18:00:00Z"
+  comparison_times_h: [24, 48, 72, "final GOFER arrival"]
+
+postprocess:
+  metrics: "outputs/metrics.json"
+  figures:
+    - "figures/observation_summary.pdf"
+    - "figures/input_overview.pdf"
+    - "figures/input_distributions.pdf"
+    - "figures/weather_time_series.pdf"
+    - "figures/weather_summary.pdf"
+    - "figures/burned_area_growth.pdf"
+    - "figures/comparison_reference_spotting.pdf"
+    - "figures/arrival_reference_spotting.pdf"
+    - "figures/fields_reference_spotting.pdf"
+
+namelist_contract:
+  schema_version: 1
+  report: "report/case_body.tex"
+  files:
+    - path: "elmfire.data.in"
+      invariants:
+        OUTPUTS.OUTPUTS_DIRECTORY: "./outputs"
+        TIME_CONTROL.SIMULATION_TSTOP: 482400.0
+        TIME_CONTROL.TARGET_CFL: 0.2
+        MONTE_CARLO.NUM_METEOROLOGY_TIMES: 135
+        SIMULATOR.NUM_IGNITIONS: 1
+        SIMULATOR.CROWN_FIRE_MODEL: 1
+        SPOTTING.ENABLE_SPOTTING: true
+        OUTPUTS.DUMP_TIME_OF_ARRIVAL: true

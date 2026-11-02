@@ -71,6 +71,17 @@ rag_db
 # Regenerable repository-level runtime and scratch artifacts
 /output/
 /tmp/
+**/tex-cache/
+
+# Zenodo upload bundles and explicit per-case download caches.
+# Keep dataset manifests, metadata worksheets and staging scripts tracked.
+/zenodo/dist/
+/cases/Validation/landscape_scale/*/data/.zenodo-cache/
+/zenodo/datasets/*/data/.zenodo-cache/
+/zenodo/datasets/*/data/archive_payload/
+/zenodo/datasets/*/data/provenance/archive/
+# Retired source collection and legacy case generator.
+/cases/Validation/GOFER/
 
 # Generated input rasters retained outside version control for these cases
 cases/Verification/unit_tests/*/data/
@@ -118,10 +129,27 @@ cases/Verification/coupling_tests/CASE33_SDO/data/
 !cases/Verification/coupling_tests/CASE1[01249]_*/data/
 !cases/Verification/coupling_tests/CASE1[01249]_*/data/misc/
 !cases/Verification/coupling_tests/CASE1[01249]_*/data/misc/*.csv
+# CASE11 uses the built-in surface table; keep an old generated copy untracked.
+cases/Verification/coupling_tests/CASE11_WSC/data/misc/fuel_models.csv
 !cases/Verification/coupling_tests/CASE4[3-9]_*/data/
 !cases/Verification/coupling_tests/CASE4[3-9]_*/data/misc/
 !cases/Verification/coupling_tests/CASE4[3-9]_*/data/misc/*.csv
 
-# Archived building-spread inputs required by the landscape validation cases.
-!cases/Validation/landscape_scale/*/data/archive_payload/misc/
-!cases/Validation/landscape_scale/*/data/archive_payload/misc/building_fuel_models.csv
+# Validation source data live in the checksummed per-fire Zenodo bundles.
+# Keep case-local manifests, configurations, restore scripts and report evidence.
+# These rules also cover restored optional historical outputs and older inputs.
+/cases/Validation/landscape_scale/*/data/archive_payload/
+/cases/Validation/landscape_scale/*/data/viirs_observation/
+/cases/Validation/landscape_scale/*/data/provenance/archive/
+/cases/Validation/landscape_scale/*/data/fuels_and_topography/
+/cases/Validation/landscape_scale/*/data/weather/
+/cases/Validation/landscape_scale/*/data/misc/
+
+# Canonical input folders restored from per-fire datasets.
+/zenodo/datasets/*/data/weather/
+/zenodo/datasets/*/data/fuels_and_topography/
+/zenodo/datasets/*/data/misc/
+
+# Comparison observations restored from the checksummed per-fire archives.
+/cases/Validation/landscape_scale/*/data/observation/
+/zenodo/datasets/*/data/observation/

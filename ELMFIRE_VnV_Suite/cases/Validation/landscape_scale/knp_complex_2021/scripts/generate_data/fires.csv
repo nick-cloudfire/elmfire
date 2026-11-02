@@ -1,0 +1,2 @@
+fname,fyear,fire_id,t_start_utc,t_end_utc,t_first_perim_utc,duration_h,n_timesteps,west,south,east,north,center_lon,center_lat,t_ign_utc,ign_lon,ign_lat,n_ignitions,utm_epsg,local_tz,local_tzGMT,acres_official,final_area_km2
+KNP Complex,2021,KNP_Complex_2021,2021-09-10T14:00:00Z,2021-10-07T02:00:00Z,2021-09-10T18:00:00Z,636.0,633,-118.9585,36.42669,-118.67419,36.73166,-118.81634,36.57917,2021-09-10T17:00:00Z,-118.80824,36.57124,3,32611,America/Los_Angeles,Etc/GMT+8,88307,388.647

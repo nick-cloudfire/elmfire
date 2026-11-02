@@ -1,0 +1,2 @@
+fname,fyear,fire_id,t_start_utc,t_end_utc,t_first_perim_utc,duration_h,n_timesteps,west,south,east,north,center_lon,center_lat,t_ign_utc,ign_lon,ign_lat,n_ignitions,utm_epsg,local_tz,local_tzGMT,acres_official,final_area_km2
+Bobcat,2020,Bobcat_2020,2020-09-06T19:00:00Z,2020-09-24T20:00:00Z,2020-09-06T20:00:00Z,433.0,433,-118.1078,34.15619,-117.75746,34.48453,-117.93263,34.32036,2020-09-06T19:00:00Z,-117.96506,34.2477,3,32611,America/Los_Angeles,Etc/GMT+8,115997,583.864

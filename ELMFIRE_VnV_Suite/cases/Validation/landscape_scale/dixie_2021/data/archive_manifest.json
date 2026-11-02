@@ -1,0 +1,282 @@
+{
+  "schema_version": 1,
+  "case_id": "dixie_2021",
+  "fire_id": "Dixie_2021",
+  "generation_files": [
+    {
+      "path": "scripts/generate_data/README.txt",
+      "size": 3398,
+      "sha256": "c912d095af4668b608b39cbeff24baaef14cb23bfc13913720b7284a5aa1f232"
+    },
+    {
+      "path": "scripts/generate_data/fires.csv",
+      "size": 479,
+      "sha256": "1fa108fc1456326f2389861ca641b6f567daedc0d1de4216cb2fa510655f3389"
+    },
+    {
+      "path": "scripts/generate_data/generate_observations.py",
+      "size": 3360,
+      "sha256": "504622c5a2c99679a5fab3b49b9c77bb5e6531ac48313bd381d5e9c957810ad1"
+    },
+    {
+      "path": "scripts/generate_data/make_fires.py",
+      "size": 3674,
+      "sha256": "db102eaee83a12ee43cc5430db56f9ac2f98e215a97b1eda473a5f22d640350b"
+    },
+    {
+      "path": "scripts/generate_data/prepare_inputs.py",
+      "size": 11872,
+      "sha256": "71ce2e3df4c5afcc3bca8d3762580ff61ab76b6d7bdecf917e6aa54df2f20693"
+    },
+    {
+      "path": "scripts/generate_data/rtma_gusts.py",
+      "size": 9949,
+      "sha256": "dbcb0529bc2c1fb4d8c4fb0ca2f4492064f4af1c9269a5d5f52d848e8660c05a"
+    },
+    {
+      "path": "scripts/generate_data/source/exploratory.py",
+      "size": 21531,
+      "sha256": "3ce3f69eb0bab864adbaab85d1032934c9bcdcc89c8e41cf6ef6f354b7ab851e"
+    },
+    {
+      "path": "scripts/generate_data/source/make_fires.py",
+      "size": 3167,
+      "sha256": "a6f8dd87475483086a939c308770b10d19790456a0d6ece569ff0d3b020cfb94"
+    },
+    {
+      "path": "scripts/generate_data/source/prepare_inputs.py",
+      "size": 17423,
+      "sha256": "d6cda9ee410a239161ea216cdf090dc00153c4fb5fc3c9fd719b509e6dbf6c96"
+    },
+    {
+      "path": "scripts/generate_data/source/rtma_gusts.py",
+      "size": 7499,
+      "sha256": "e27a383239f441b8785234e7785490287ea3769a21fe660068fbe2d9717ae347"
+    },
+    {
+      "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign.py",
+      "size": 15656,
+      "sha256": "15520e8dcf4e666e234a6a1d789f2b13be555e414ce3f9910fceaa80f440a96f"
+    },
+    {
+      "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign_pb2.py",
+      "size": 2623,
+      "sha256": "e86063cc2999ca121bd3cc35330c66c31ac5ea6a8a78d119e1a2220b981db8d6"
+    },
+    {
+      "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign_pb2.pyi",
+      "size": 3441,
+      "sha256": "e4d1df13858c591316fc077d2d5d1fbafcb9a7c03540eaba1e92156e41f94eac"
+    },
+    {
+      "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign_pb2_grpc.py",
+      "size": 3384,
+      "sha256": "e36e6f35b1fe672a57e9e6535b4cd79cadced48016b473d2dc3a0dbb2487b8ee"
+    }
+  ],
+  "previous_source_archive": {
+    "filename": "ELMFIRE_GOFER_validation.tar.gz",
+    "size": 7038832441,
+    "sha256": "714b9f2b3c3417336ea200bfc6f2bba2955376bf3088d675a811a11d28b0fffe",
+    "files": 583,
+    "skipped_macos_metadata": 682,
+    "received_date_utc": "2026-10-21",
+    "provider": "User-supplied archive",
+    "license": "Not documented in the supplied archive; upstream access and redistribution terms still apply."
+  },
+  "source_directory": {
+    "name": "ELMFIRE_GOFER_validation",
+    "received_date": "2026-10-22",
+    "selected_files_sha256": "2b5eeafa39e274177003c2a6dda87f89c18a96e7f4ac3c7a7d57d364bdc83462"
+  },
+  "generation_sources": [
+    {
+      "source_relative_path": "make_fires.py",
+      "sha256": "a6f8dd87475483086a939c308770b10d19790456a0d6ece569ff0d3b020cfb94",
+      "size": 3167
+    },
+    {
+      "source_relative_path": "exploratory.py",
+      "sha256": "3ce3f69eb0bab864adbaab85d1032934c9bcdcc89c8e41cf6ef6f354b7ab851e",
+      "size": 21531
+    },
+    {
+      "source_relative_path": "prepare_inputs.py",
+      "sha256": "d6cda9ee410a239161ea216cdf090dc00153c4fb5fc3c9fd719b509e6dbf6c96",
+      "size": 17423,
+      "source_directory": "ELMFIRE_GOFER_validation 2"
+    },
+    {
+      "source_relative_path": "rtma_gusts.py",
+      "sha256": "e27a383239f441b8785234e7785490287ea3769a21fe660068fbe2d9717ae347",
+      "size": 7499,
+      "source_directory": "ELMFIRE_GOFER_validation 2"
+    }
+  ],
+  "files": [
+    {
+      "path": "data/fuels_and_topography/adj.tif",
+      "role": "inputs",
+      "size": 205341,
+      "sha256": "63e13101024d3a87036e16ec194acf36fd6b3e7aab2d1a951747e609bd48de59",
+      "source_relative_path": "Dixie_2021/inputs/adj.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/misc/fuel_models.csv",
+      "role": "inputs",
+      "size": 3948,
+      "sha256": "bf32ba154b230bf16e38941d662c9a49e72652307ffe5e1468a511b514eaaf5b",
+      "source_relative_path": "Dixie_2021/inputs/fuel_models.csv",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/fuels_and_topography/ignition_mask.tif",
+      "role": "inputs",
+      "size": 190878,
+      "sha256": "c64452ca633f65e3c12f762ebaa429c7365066ac15d03642a917d0b1054a8119",
+      "source_relative_path": "Dixie_2021/inputs/ignition_mask.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/misc/ignitions.csv",
+      "role": "inputs",
+      "size": 911,
+      "sha256": "1e606a272935b8a9d26618fd2864e4bce68877c83f32d5e4e82f3ac25a3357e1",
+      "source_relative_path": "Dixie_2021/inputs/ignitions.csv",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/fuels_and_topography/landscape.tif",
+      "role": "inputs",
+      "size": 75729933,
+      "sha256": "3b9be066bccb2aa056450f878981f4ad5c37fb4a7518ba2210fb20b8173d087a",
+      "source_relative_path": "Dixie_2021/inputs/landscape.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/lh.tif",
+      "role": "inputs",
+      "size": 16724890,
+      "sha256": "9a1b65c1b35f37dc6c1f1f78b00fcb997f645306ea3704052ab605792fb72db0",
+      "source_relative_path": "Dixie_2021/inputs/lh.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/lw.tif",
+      "role": "inputs",
+      "size": 16092933,
+      "sha256": "c1f2cce847265a68620e70cc521eefa7ed532191e5700717287e2fd8d1168e01",
+      "source_relative_path": "Dixie_2021/inputs/lw.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/m1.tif",
+      "role": "inputs",
+      "size": 256566613,
+      "sha256": "c680639d5a79aa2fb8df8c76d800e56cd9e8144c83b7d6c5e8d7bf3cf597aa1d",
+      "source_relative_path": "Dixie_2021/inputs/m1.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/m10.tif",
+      "role": "inputs",
+      "size": 255040189,
+      "sha256": "5a42b9f55c4b427044137a8813802cb2a39fb07a04c42d767b4c3e9d635837f9",
+      "source_relative_path": "Dixie_2021/inputs/m10.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/m100.tif",
+      "role": "inputs",
+      "size": 253962657,
+      "sha256": "7da267dd7eef629ba80b885ed67588a1ad1e3a0b2f056e1dca0ba0fc7f8ced37",
+      "source_relative_path": "Dixie_2021/inputs/m100.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/fuels_and_topography/phi.tif",
+      "role": "inputs",
+      "size": 205341,
+      "sha256": "63e13101024d3a87036e16ec194acf36fd6b3e7aab2d1a951747e609bd48de59",
+      "source_relative_path": "Dixie_2021/inputs/phi.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/wd.tif",
+      "role": "inputs",
+      "size": 39394586,
+      "sha256": "5b1d48127a7b0e4587d5b96617e7ff32fa5d70582aa948d10588219c08ea9c41",
+      "source_relative_path": "Dixie_2021/inputs/wd.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/ws.tif",
+      "role": "inputs",
+      "size": 263480932,
+      "sha256": "f231a0602b0512d965e5f4e118dedb6e5145d3551031735f2939598f9787edd5",
+      "source_relative_path": "Dixie_2021/inputs/ws.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/observation/Dixie_2021_final_perimeter.gpkg",
+      "role": "observations",
+      "size": 3399680,
+      "sha256": "ef411da5dc4a4b6aa08aae6c5df36df1e6c3acd3f9bbc00f0ea3836c714702dd",
+      "source_relative_path": "Dixie_2021/observations/Dixie_2021_final_perimeter.gpkg",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/observation/Dixie_2021_final_perimeter_30m.tif",
+      "role": "observations",
+      "size": 78714,
+      "sha256": "e923a138c76077ff95a752f78c22a18b95038d2842e41a9f39588bd880b59097",
+      "source_relative_path": "Dixie_2021/observations/Dixie_2021_final_perimeter_30m.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/observation/Dixie_2021_toa.png",
+      "role": "observations",
+      "size": 254901,
+      "sha256": "d2d994059b684b453447b2f1dd0b188a3a16000c604a0fa481f27bc653e9e201",
+      "source_relative_path": "Dixie_2021/observations/Dixie_2021_toa.png",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/observation/Dixie_2021_toa.tif",
+      "role": "observations",
+      "size": 171156,
+      "sha256": "608e179cfffe6313ae185ea477c5d80f81dc39e4da4a04570c8b2957bff3ea96",
+      "source_relative_path": "Dixie_2021/observations/Dixie_2021_toa.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/ws_gust.tif",
+      "size": 263280674,
+      "sha256": "514de344849aef7157899bd5e2ba7f53f75fa4ead0fc6a85fb9e27971fef0516",
+      "role": "inputs",
+      "source_relative_path": "Dixie_2021/inputs/ws_gust.tif",
+      "processing": "copied unchanged from user-supplied ELMFIRE_GOFER_validation 2",
+      "used_by_current_simulation": false
+    }
+  ],
+  "generation_source_history": [
+    {
+      "source_directory": "ELMFIRE_GOFER_validation",
+      "files": [
+        {
+          "source_relative_path": "prepare_inputs.py",
+          "sha256": "02428b42cc3ea1f92b61afd7a1293fb004b1d2e670100e32460b33a40dfadc2c",
+          "size": 16402
+        }
+      ]
+    }
+  ],
+  "source_updates": [
+    {
+      "name": "ELMFIRE_GOFER_validation 2",
+      "received_date": "2026-10-22",
+      "scope": "supplementary ws_gust.tif and updated gust/input generation sources; existing data and wind selection unchanged"
+    }
+  ]
+}

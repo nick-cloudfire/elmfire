@@ -1,0 +1,2 @@
+fname,fyear,fire_id,t_start_utc,t_end_utc,t_first_perim_utc,duration_h,n_timesteps,west,south,east,north,center_lon,center_lat,t_ign_utc,ign_lon,ign_lat,n_ignitions,utm_epsg,local_tz,local_tzGMT,acres_official,final_area_km2
+McFarland,2021,McFarland_2021,2021-07-30T01:00:00Z,2021-08-25T22:00:00Z,2021-07-30T10:00:00Z,645.0,637,-123.17115,40.15065,-122.70178,40.39634,-122.93647,40.27349,2021-07-30T09:00:00Z,-123.04018,40.36074,1,32610,America/Los_Angeles,Etc/GMT+8,122653,566.952

@@ -1,0 +1,324 @@
+{
+  "schema_version": 1,
+  "case_id": "mcfarland_2021",
+  "fire_id": "McFarland_2021",
+  "case_status": "implemented validation case; simulation not run",
+  "model_inputs": {
+    "source": {
+      "kind": "user-supplied directory",
+      "name": "ELMFIRE_GOFER_validation",
+      "received_date": "2026-10-22",
+      "provider": "User-supplied updated directory",
+      "license": "Not documented in the supplied directory; upstream access and redistribution terms still apply."
+    },
+    "processing": "unchanged file contents; case-relative paths normalized",
+    "updated_source": {
+      "kind": "user-supplied directory",
+      "name": "ELMFIRE_GOFER_validation",
+      "received_date": "2026-10-22"
+    },
+    "previous_source_archive": {
+      "filename": "ELMFIRE_GOFER_validation.tar.gz",
+      "size": 7038832441,
+      "sha256": "714b9f2b3c3417336ea200bfc6f2bba2955376bf3088d675a811a11d28b0fffe",
+      "files": 583,
+      "skipped_macos_metadata": 682,
+      "received_date_utc": "2026-10-21",
+      "provider": "User-supplied archive",
+      "license": "Not documented in the supplied archive; upstream access and redistribution terms still apply."
+    },
+    "provider": "CloudFire historical fuel, weather and ignition service",
+    "fuel_source": "LANDFIRE",
+    "fuel_version": "2.2.0",
+    "weather_source": "Historical weather supplied through CloudFire; underlying analysis product not identified in the supplied preparation source",
+    "offshore_cells_filled": null,
+    "files": [
+      {
+        "name": "adj.tif",
+        "path": "data/fuels_and_topography/adj.tif",
+        "size": 67590,
+        "sha256": "68ade1b37a7296005ed5f9b0e61da086b71551a64637fa723a3509a691a39e47",
+        "source_relative_path": "McFarland_2021/inputs/adj.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "name": "fuel_models.csv",
+        "path": "data/misc/fuel_models.csv",
+        "size": 3948,
+        "sha256": "bf32ba154b230bf16e38941d662c9a49e72652307ffe5e1468a511b514eaaf5b",
+        "source_relative_path": "McFarland_2021/inputs/fuel_models.csv",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "name": "ignition_mask.tif",
+        "path": "data/fuels_and_topography/ignition_mask.tif",
+        "size": 58765,
+        "sha256": "b26cccd235b5da6fab8ebe469bf061a86ee349d93286ea45c64d2b3e39126e8a",
+        "source_relative_path": "McFarland_2021/inputs/ignition_mask.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "name": "ignitions.csv",
+        "path": "data/misc/ignitions.csv",
+        "size": 174,
+        "sha256": "553f208f45ef40986ffed861e60487f835c0da0389e19ea5dc1202d4bda9926e",
+        "source_relative_path": "McFarland_2021/inputs/ignitions.csv",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "name": "landscape.tif",
+        "path": "data/fuels_and_topography/landscape.tif",
+        "size": 16474649,
+        "sha256": "dcab82286cb363ece112a52a91f9077795f451059475a319547205d8819dca12",
+        "source_relative_path": "McFarland_2021/inputs/landscape.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "name": "lh.tif",
+        "path": "data/weather/lh.tif",
+        "size": 1190897,
+        "sha256": "f6d9ed915ac1af7c4fc064521a0507558d0cebbee1d652eeb4e169852e74d099",
+        "source_relative_path": "McFarland_2021/inputs/lh.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "name": "lw.tif",
+        "path": "data/weather/lw.tif",
+        "size": 1144096,
+        "sha256": "78bcbda4e7cb337fd7b730c7879db4b55586d3fe0279bf2a658b6261a6b87ee2",
+        "source_relative_path": "McFarland_2021/inputs/lw.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "name": "m1.tif",
+        "path": "data/weather/m1.tif",
+        "size": 25982465,
+        "sha256": "103b4e694e0c5ad72dc0ea0d852270f12547774504e8962a96c89b903b5ace8a",
+        "source_relative_path": "McFarland_2021/inputs/m1.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "name": "m10.tif",
+        "path": "data/weather/m10.tif",
+        "size": 25817650,
+        "sha256": "8788d40cb9d49de5709db08f77b5089fcc177d075ced843ef9d9f2038f4262e8",
+        "source_relative_path": "McFarland_2021/inputs/m10.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "name": "m100.tif",
+        "path": "data/weather/m100.tif",
+        "size": 25681873,
+        "sha256": "7a3ed4407c51eb5a5bd2c7f55406151f372e9d8247d40985c058397e6e188963",
+        "source_relative_path": "McFarland_2021/inputs/m100.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "name": "phi.tif",
+        "path": "data/fuels_and_topography/phi.tif",
+        "size": 67590,
+        "sha256": "68ade1b37a7296005ed5f9b0e61da086b71551a64637fa723a3509a691a39e47",
+        "source_relative_path": "McFarland_2021/inputs/phi.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "name": "wd.tif",
+        "path": "data/weather/wd.tif",
+        "size": 3694269,
+        "sha256": "56fc3762841eadc02d00482b1b9c1efe7f1c89766656779de7967c37c6ca0d6a",
+        "source_relative_path": "McFarland_2021/inputs/wd.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "name": "ws.tif",
+        "path": "data/weather/ws.tif",
+        "size": 26892385,
+        "sha256": "8f4aad27c98d783d9da9af7574d5fab89e95f5b9d4fa6500867827147396bd93",
+        "source_relative_path": "McFarland_2021/inputs/ws.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      }
+    ]
+  },
+  "observation": {
+    "product": "GOFER arrival-time rasters and previews, plus CAL FIRE final-perimeter GeoPackages and aligned raster masks",
+    "source_dataset": "https://doi.org/10.5281/zenodo.8327264",
+    "reference": "https://doi.org/10.5194/essd-16-1395-2024",
+    "files": [
+      {
+        "path": "data/observation/McFarland_2021_final_perimeter.gpkg",
+        "size": 430080,
+        "sha256": "5953fe6f0778aed140e9669d68f1e81d4620751a7bb91a95ba0fbc22b9f75e35",
+        "source_relative_path": "McFarland_2021/observations/McFarland_2021_final_perimeter.gpkg",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "path": "data/observation/McFarland_2021_final_perimeter_30m.tif",
+        "size": 13550,
+        "sha256": "dd161a125bc15eeb77cdc5d4136eb48bd91f96e679dad53204b0c9beebc6d9d0",
+        "source_relative_path": "McFarland_2021/observations/McFarland_2021_final_perimeter_30m.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "path": "data/observation/McFarland_2021_toa.png",
+        "size": 183263,
+        "sha256": "dd03a31791dff7d3ad3844c4b38a137961a124002ac3390dfea54dc2accb1b81",
+        "source_relative_path": "McFarland_2021/observations/McFarland_2021_toa.png",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "path": "data/observation/McFarland_2021_toa.tif",
+        "size": 42767,
+        "sha256": "da8d9d3ff2915e6f0fa6cbe9ba5e1ed84413566247c3e9f34d2d6ef971ac2292",
+        "source_relative_path": "McFarland_2021/observations/McFarland_2021_toa.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      }
+    ],
+    "products": {
+      "gofer_arrival": "data/observation/McFarland_2021_toa.tif",
+      "gofer_preview": "data/observation/McFarland_2021_toa.png",
+      "final_perimeter": "data/observation/McFarland_2021_final_perimeter.gpkg",
+      "final_perimeter_mask": "data/observation/McFarland_2021_final_perimeter_30m.tif"
+    },
+    "final_perimeter_source": {
+      "provider": "CAL FIRE FRAP",
+      "source_identification": "California Historic Fire Perimeters (2026-05-26), as identified by the supplied exploratory.py",
+      "generator": "scripts/generate_data/source/exploratory.py",
+      "layers": [
+        "calfire_final",
+        "calfire_records",
+        "gofer_final"
+      ],
+      "matching": "year, name/complex name, and more than 20 percent of each CAL FIRE record overlapping the final GOFER perimeter",
+      "mask": "cell-centre rasterization on the input landscape grid; burned=1, unburned=0, nodata=255",
+      "license_evidence": "not supplied in the referenced directory"
+    },
+    "gofer_final_area_km2": 566.952,
+    "hourly_perimeters": 637,
+    "derivation": "supplied arrival-time raster; upstream raster-generation code was not supplied",
+    "area_series_basis": "growth calculated from this case arrival-time raster; no separate hourly vector-area series was supplied"
+  },
+  "known_provenance_gaps": [
+    "Upstream access and redistribution terms remain undocumented.",
+    "Exact GOFER version and arrival-time raster transformation history are unverified.",
+    "Original calibration history and independently predeclared acceptance thresholds are not documented.",
+    "Underlying historical weather product and moisture derivation are not identified in the supplied preparation source."
+  ],
+  "generation": {
+    "input_scripts": "scripts/generate_data/prepare_inputs.py",
+    "observation_scripts": "scripts/generate_data/generate_observations.py",
+    "supplied_sources": "scripts/generate_data/source",
+    "limitations": "CAL FIRE final-perimeter generation is supplied in exploratory.py; GOFER arrival-time TIFF/PNG generation code is absent. Upstream CAL FIRE/GOFER files and CloudFire service access are external requirements.",
+    "gust_scripts": "scripts/generate_data/rtma_gusts.py",
+    "gust_usage": "prepare_inputs.py --gusts or standalone rtma_gusts.py --output-file NEW_FILE; existing files and model configuration are preserved",
+    "frozen_archive_note": "Zenodo 2.2.0 includes supplementary gust rasters and updated generation scripts; 2.1.0 predates them."
+  },
+  "fire_name": "McFarland",
+  "fire_year": 2021,
+  "event_start_utc": "2021-07-30T01:00:00Z",
+  "event_end_utc": "2021-08-25T22:00:00Z",
+  "official_size_ac": 122653.0,
+  "model_domain": {
+    "crs": "EPSG:32610",
+    "crs_name": "UTM zone 10N (EPSG:32610)",
+    "cell_size_m": 30.0,
+    "extent": [
+      475401.202500157,
+      4434114.68873741,
+      535401.2025001571,
+      4482114.68873741
+    ],
+    "width": 2000,
+    "height": 1600,
+    "margin_km": 10.0
+  },
+  "weather": {
+    "first_time_utc": "2021-07-30T09:00:00Z",
+    "band_count": 638,
+    "interval_s": 3600,
+    "offset_from_event_start_h": 8.0,
+    "units_basis": "supplied exploratory.py: 20-ft wind speed mph, wind direction from degrees, moisture percent"
+  },
+  "simulation": {
+    "planned_stop_h": 637.0,
+    "results_directory": "outputs",
+    "configuration_basis": "supplied per-fire elmfire.data with only input and scratch directory strings adapted"
+  },
+  "ignitions": [
+    {
+      "t_utc": "2021-07-30T09:00:00Z",
+      "lon": -123.04017822155197,
+      "lat": 40.360739767226086,
+      "x": 496626.203,
+      "y": 4467789.689,
+      "t_ign_s": 0.0,
+      "moved_m": 38.6
+    }
+  ],
+  "elmfire_source": {
+    "provided_source_path": "/Users/yiren/Desktop/MyResearch/ELMFIRE/ELMFIRE_Git/elmfire-nick/build/source",
+    "branch": "yiren",
+    "git_commit": "8981f14e0170ced6cc28c4d308d4545ba925f5ef",
+    "repository_dirty": true,
+    "source_directory_dirty": false,
+    "files_sha256": {
+      "elmfire.f90": "f1820f890123c2808a15eafaeade82d172b8603041255d0f367ebcce4e9a401f",
+      "elmfire_calibration.f90": "75838a14439ba25661e1ad90a90e37ac25e5776d81326df8f3d8fdb04aad5cb5",
+      "elmfire_ignition.f90": "2586ece44726ab93eb5170169cf25b4098f90888ee11fea4da17dd3bb25b1bea",
+      "elmfire_init.f90": "fcf37a2ca392ca6c6af901c53cdcc64a3dfd44f632e31980be9b8a63cd94047d",
+      "elmfire_io.f90": "e5a54c76c7e71b18ce2751eb839724843fee0e1f90823c8544a9ce9fc10550a6",
+      "elmfire_level_set.f90": "148c1ce043f3b3d0041f2b1b27abe4bace8f4fcb635f03931bec180bfb39c9cf",
+      "elmfire_namelists.f90": "07a5429d45036ba0363cc42ad2df69e1c572b8244687a3fe80ad9214572aa517",
+      "elmfire_post.f90": "bcd8346451840a5b877dd88efef98087f20da497acc775ebcae6ed47cf546311",
+      "elmfire_spotting.f90": "b0f1adb1dd80c889a42819bcee187c5a0d800f927a1af99d1166aa03137dcd5f",
+      "elmfire_spotting_superseded.f90": "1f1d69667327fd3737ac3555b272410769987a16cb99708306d519b22dab1a43",
+      "elmfire_spread_rate.f90": "f5783d6db2d2677c2ff9834d610c2055dd5f7d31764d10296459d390d2d1117e",
+      "elmfire_subs.f90": "180e0e2bd1c6b0801fed92a2d70491fae525137e85ae6d42cf7332b0980bd8a5",
+      "elmfire_suppression.f90": "1eb8e309f78d9706e299e620cf18b51a35686b4e8edca12779f405035d9bd6a2",
+      "elmfire_vars.f90": "5b7a9e00798216d6516922e2a27bde8907a4e518dbfb68b8f4be42dd1841f215"
+    }
+  },
+  "configuration": {
+    "supplied_source_relative_path": "McFarland_2021/inputs/elmfire.data",
+    "supplied_sha256": "10503efcbcc745a7b274405ec72b4cda9093112283cb94bdd7436fe72f8de2cb",
+    "adapted_sha256": "5af828a2196940027657a197bb75dd7514f46b3689e56e35f187957bf4a729f6",
+    "changed_assignments": [
+      "INPUTS.FUELS_AND_TOPOGRAPHY_DIRECTORY",
+      "INPUTS.WEATHER_DIRECTORY",
+      "MISCELLANEOUS.SCRATCH"
+    ],
+    "scientific_assignments_preserved": true
+  },
+  "supplementary_weather": {
+    "source_directory": "ELMFIRE_GOFER_validation 2",
+    "received_date": "2026-10-22",
+    "files": [
+      {
+        "path": "data/weather/ws_gust.tif",
+        "size": 26873686,
+        "sha256": "57be170b9f55f99e343422d458855ecd83ba02828d077dd6407eacb55cc0cf95",
+        "source_relative_path": "McFarland_2021/inputs/ws_gust.tif",
+        "processing": "copied unchanged from user-supplied ELMFIRE_GOFER_validation 2",
+        "used_by_current_simulation": false,
+        "name": "ws_gust.tif"
+      }
+    ],
+    "role": "supplementary; not selected by current ELMFIRE namelist",
+    "source": "NOAA RTMA 2.5 km GUST at 10 m, as identified by supplied raster tags and source script",
+    "units": "mph at 20 ft",
+    "conversion": "0.87 * 2.23694 * GUST[m/s at 10 m]",
+    "resampling": "bilinear onto the ws.tif grid",
+    "first_time_utc": "2021-07-30T09:00:00Z",
+    "interval_s": 3600,
+    "band_count": 638,
+    "time_basis": "band order and first UTC hour from supplied inputs_log.csv; per-band timestamps were not supplied in the TIFF",
+    "import_checks": {
+      "grid_and_band_count_match_ws": true,
+      "missing_cells": 0,
+      "negative_cells": 0,
+      "minimum_mph": 0.0,
+      "maximum_mph": 40.941898345947266,
+      "mean_mph": 8.532479674160285
+    },
+    "regeneration_verified": false
+  }
+}

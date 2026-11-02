@@ -1,0 +1,2 @@
+fname,fyear,fire_id,t_start_utc,t_end_utc,t_first_perim_utc,duration_h,n_timesteps,west,south,east,north,center_lon,center_lat,t_ign_utc,ign_lon,ign_lat,n_ignitions,utm_epsg,local_tz,local_tzGMT,acres_official,final_area_km2
+Caldor,2021,Caldor_2021,2021-08-15T01:00:00Z,2021-09-10T03:00:00Z,2021-08-15T08:00:00Z,626.0,620,-120.66755,38.55435,-119.95024,38.87055,-120.30889,38.71245,2021-08-15T07:00:00Z,-120.54679,38.59169,1,32610,America/Los_Angeles,Etc/GMT+8,221835,994.148

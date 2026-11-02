@@ -18,13 +18,13 @@ mkdir -p "$CASE_DIR/outputs" "$CASE_DIR/figures" "$CASE_DIR/logs/scratch"
 
 if [[ "$ELMFIRE_MPI_RANKS" -gt 1 ]]; then
   command -v mpirun >/dev/null || { echo "[ERROR] mpirun is required for $ELMFIRE_MPI_RANKS ranks." >&2; exit 127; }
-  launcher=(mpirun -np "$ELMFIRE_MPI_RANKS")
+  launcher=(mpirun -np "$ELMFIRE_MPI_RANKS" "$ELMFIRE_BIN")
 else
-  launcher=()
+  launcher=("$ELMFIRE_BIN")
 fi
 
 echo "[INFO] Running Tubbs Fire validation with $ELMFIRE_MPI_RANKS MPI rank(s)."
-(cd "$CASE_DIR" && "${launcher[@]}" "$ELMFIRE_BIN" elmfire.data.in) \
+(cd "$CASE_DIR" && "${launcher[@]}" elmfire.data.in) \
   >"$CASE_DIR/logs/elmfire.stdout" 2>"$CASE_DIR/logs/elmfire.stderr"
 
 "$PYTHON_BIN" "$CASE_DIR/scripts/postprocess.py"

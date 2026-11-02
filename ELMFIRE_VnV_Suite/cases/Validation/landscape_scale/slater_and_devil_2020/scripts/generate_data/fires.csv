@@ -1,0 +1,2 @@
+fname,fyear,fire_id,t_start_utc,t_end_utc,t_first_perim_utc,duration_h,n_timesteps,west,south,east,north,center_lon,center_lat,t_ign_utc,ign_lon,ign_lat,n_ignitions,utm_epsg,local_tz,local_tzGMT,acres_official,final_area_km2
+Slater and Devil,2020,Slater_and_Devil_2020,2020-09-08T13:00:00Z,2020-09-22T03:00:00Z,2020-09-08T14:00:00Z,326.0,326,-123.77482,41.76357,-123.18822,42.08787,-123.48152,41.92572,2020-09-08T13:00:00Z,-123.354,41.85158,4,32610,America/Los_Angeles,Etc/GMT+8,166127,697.049

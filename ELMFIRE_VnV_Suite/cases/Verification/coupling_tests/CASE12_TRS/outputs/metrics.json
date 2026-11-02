@@ -61,14 +61,14 @@
     {
       "metric": "CFL 1 accumulation-history NRMSE",
       "limit": "<= 0.05",
-      "calculated": 0.008465921503353038,
+      "calculated": 0.008465923689525074,
       "status": "PASS",
       "note": ""
     },
     {
       "metric": "CFL 10 accumulation-history NRMSE",
       "limit": "<= 0.05",
-      "calculated": 0.6244419886702642,
+      "calculated": 0.6244419885397547,
       "status": "FAIL",
       "note": ""
     }

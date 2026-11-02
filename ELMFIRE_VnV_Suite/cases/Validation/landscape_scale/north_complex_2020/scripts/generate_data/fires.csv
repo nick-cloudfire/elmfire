@@ -1,0 +1,2 @@
+fname,fyear,fire_id,t_start_utc,t_end_utc,t_first_perim_utc,duration_h,n_timesteps,west,south,east,north,center_lon,center_lat,t_ign_utc,ign_lon,ign_lat,n_ignitions,utm_epsg,local_tz,local_tzGMT,acres_official,final_area_km2
+North Complex,2020,North_Complex_2020,2020-08-17T16:00:00Z,2020-10-01T16:00:00Z,2020-08-17T22:00:00Z,1080.0,1075,-121.47603,39.51015,-120.75648,39.94449,-121.11626,39.72732,2020-08-17T21:00:00Z,-120.92271,39.84342,6,32610,America/Los_Angeles,Etc/GMT+8,318935,1344.502

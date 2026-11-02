@@ -1,7 +1,14 @@
 % Suite report typography. Keep a local copy for standalone portability.
-% Build with LuaLaTeX and an installed, genuine Times New Roman font family.
+% Build with LuaLaTeX and the free TeX Gyre Termes fonts from TeX Live.
 \usepackage{fontspec}
-\setmainfont{Times New Roman}
+% Select TeX-distributed files explicitly; no system font registration is needed.
+\setmainfont{texgyretermes}[
+  Extension = .otf,
+  UprightFont = *-regular,
+  BoldFont = *-bold,
+  ItalicFont = *-italic,
+  BoldItalicFont = *-bolditalic
+]
 \usepackage{ragged2e,titlesec,caption,etoolbox}
 \titleformat{\section}{\normalfont\bfseries\fontsize{15}{17}\selectfont\raggedright}{\thesection}{0.6em}{}
 \titleformat{\subsection}{\normalfont\bfseries\fontsize{15}{17}\selectfont\raggedright}{\thesubsection}{0.6em}{}

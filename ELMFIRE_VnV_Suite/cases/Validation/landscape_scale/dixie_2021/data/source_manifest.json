@@ -1,0 +1,378 @@
+{
+  "schema_version": 1,
+  "case_id": "dixie_2021",
+  "fire_id": "Dixie_2021",
+  "case_status": "implemented validation case; simulation not run",
+  "model_inputs": {
+    "source": {
+      "kind": "user-supplied directory",
+      "name": "ELMFIRE_GOFER_validation",
+      "received_date": "2026-10-22",
+      "provider": "User-supplied updated directory",
+      "license": "Not documented in the supplied directory; upstream access and redistribution terms still apply."
+    },
+    "processing": "unchanged file contents; case-relative paths normalized",
+    "updated_source": {
+      "kind": "user-supplied directory",
+      "name": "ELMFIRE_GOFER_validation",
+      "received_date": "2026-10-22"
+    },
+    "previous_source_archive": {
+      "filename": "ELMFIRE_GOFER_validation.tar.gz",
+      "size": 7038832441,
+      "sha256": "714b9f2b3c3417336ea200bfc6f2bba2955376bf3088d675a811a11d28b0fffe",
+      "files": 583,
+      "skipped_macos_metadata": 682,
+      "received_date_utc": "2026-10-21",
+      "provider": "User-supplied archive",
+      "license": "Not documented in the supplied archive; upstream access and redistribution terms still apply."
+    },
+    "provider": "CloudFire historical fuel, weather and ignition service",
+    "fuel_source": "LANDFIRE",
+    "fuel_version": "2.2.0",
+    "weather_source": "Historical weather supplied through CloudFire; underlying analysis product not identified in the supplied preparation source",
+    "offshore_cells_filled": null,
+    "files": [
+      {
+        "name": "adj.tif",
+        "path": "data/fuels_and_topography/adj.tif",
+        "size": 205341,
+        "sha256": "63e13101024d3a87036e16ec194acf36fd6b3e7aab2d1a951747e609bd48de59",
+        "source_relative_path": "Dixie_2021/inputs/adj.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "name": "fuel_models.csv",
+        "path": "data/misc/fuel_models.csv",
+        "size": 3948,
+        "sha256": "bf32ba154b230bf16e38941d662c9a49e72652307ffe5e1468a511b514eaaf5b",
+        "source_relative_path": "Dixie_2021/inputs/fuel_models.csv",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "name": "ignition_mask.tif",
+        "path": "data/fuels_and_topography/ignition_mask.tif",
+        "size": 190878,
+        "sha256": "c64452ca633f65e3c12f762ebaa429c7365066ac15d03642a917d0b1054a8119",
+        "source_relative_path": "Dixie_2021/inputs/ignition_mask.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "name": "ignitions.csv",
+        "path": "data/misc/ignitions.csv",
+        "size": 911,
+        "sha256": "1e606a272935b8a9d26618fd2864e4bce68877c83f32d5e4e82f3ac25a3357e1",
+        "source_relative_path": "Dixie_2021/inputs/ignitions.csv",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "name": "landscape.tif",
+        "path": "data/fuels_and_topography/landscape.tif",
+        "size": 75729933,
+        "sha256": "3b9be066bccb2aa056450f878981f4ad5c37fb4a7518ba2210fb20b8173d087a",
+        "source_relative_path": "Dixie_2021/inputs/landscape.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "name": "lh.tif",
+        "path": "data/weather/lh.tif",
+        "size": 16724890,
+        "sha256": "9a1b65c1b35f37dc6c1f1f78b00fcb997f645306ea3704052ab605792fb72db0",
+        "source_relative_path": "Dixie_2021/inputs/lh.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "name": "lw.tif",
+        "path": "data/weather/lw.tif",
+        "size": 16092933,
+        "sha256": "c1f2cce847265a68620e70cc521eefa7ed532191e5700717287e2fd8d1168e01",
+        "source_relative_path": "Dixie_2021/inputs/lw.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "name": "m1.tif",
+        "path": "data/weather/m1.tif",
+        "size": 256566613,
+        "sha256": "c680639d5a79aa2fb8df8c76d800e56cd9e8144c83b7d6c5e8d7bf3cf597aa1d",
+        "source_relative_path": "Dixie_2021/inputs/m1.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "name": "m10.tif",
+        "path": "data/weather/m10.tif",
+        "size": 255040189,
+        "sha256": "5a42b9f55c4b427044137a8813802cb2a39fb07a04c42d767b4c3e9d635837f9",
+        "source_relative_path": "Dixie_2021/inputs/m10.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "name": "m100.tif",
+        "path": "data/weather/m100.tif",
+        "size": 253962657,
+        "sha256": "7da267dd7eef629ba80b885ed67588a1ad1e3a0b2f056e1dca0ba0fc7f8ced37",
+        "source_relative_path": "Dixie_2021/inputs/m100.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "name": "phi.tif",
+        "path": "data/fuels_and_topography/phi.tif",
+        "size": 205341,
+        "sha256": "63e13101024d3a87036e16ec194acf36fd6b3e7aab2d1a951747e609bd48de59",
+        "source_relative_path": "Dixie_2021/inputs/phi.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "name": "wd.tif",
+        "path": "data/weather/wd.tif",
+        "size": 39394586,
+        "sha256": "5b1d48127a7b0e4587d5b96617e7ff32fa5d70582aa948d10588219c08ea9c41",
+        "source_relative_path": "Dixie_2021/inputs/wd.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "name": "ws.tif",
+        "path": "data/weather/ws.tif",
+        "size": 263480932,
+        "sha256": "f231a0602b0512d965e5f4e118dedb6e5145d3551031735f2939598f9787edd5",
+        "source_relative_path": "Dixie_2021/inputs/ws.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      }
+    ]
+  },
+  "observation": {
+    "product": "GOFER arrival-time rasters and previews, plus CAL FIRE final-perimeter GeoPackages and aligned raster masks",
+    "source_dataset": "https://doi.org/10.5281/zenodo.8327264",
+    "reference": "https://doi.org/10.5194/essd-16-1395-2024",
+    "files": [
+      {
+        "path": "data/observation/Dixie_2021_final_perimeter.gpkg",
+        "size": 3399680,
+        "sha256": "ef411da5dc4a4b6aa08aae6c5df36df1e6c3acd3f9bbc00f0ea3836c714702dd",
+        "source_relative_path": "Dixie_2021/observations/Dixie_2021_final_perimeter.gpkg",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "path": "data/observation/Dixie_2021_final_perimeter_30m.tif",
+        "size": 78714,
+        "sha256": "e923a138c76077ff95a752f78c22a18b95038d2842e41a9f39588bd880b59097",
+        "source_relative_path": "Dixie_2021/observations/Dixie_2021_final_perimeter_30m.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "path": "data/observation/Dixie_2021_toa.png",
+        "size": 254901,
+        "sha256": "d2d994059b684b453447b2f1dd0b188a3a16000c604a0fa481f27bc653e9e201",
+        "source_relative_path": "Dixie_2021/observations/Dixie_2021_toa.png",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      },
+      {
+        "path": "data/observation/Dixie_2021_toa.tif",
+        "size": 171156,
+        "sha256": "608e179cfffe6313ae185ea477c5d80f81dc39e4da4a04570c8b2957bff3ea96",
+        "source_relative_path": "Dixie_2021/observations/Dixie_2021_toa.tif",
+        "processing": "copied unchanged from the user-supplied updated directory"
+      }
+    ],
+    "products": {
+      "gofer_arrival": "data/observation/Dixie_2021_toa.tif",
+      "gofer_preview": "data/observation/Dixie_2021_toa.png",
+      "final_perimeter": "data/observation/Dixie_2021_final_perimeter.gpkg",
+      "final_perimeter_mask": "data/observation/Dixie_2021_final_perimeter_30m.tif"
+    },
+    "final_perimeter_source": {
+      "provider": "CAL FIRE FRAP",
+      "source_identification": "California Historic Fire Perimeters (2026-05-26), as identified by the supplied exploratory.py",
+      "generator": "scripts/generate_data/source/exploratory.py",
+      "layers": [
+        "calfire_final",
+        "calfire_records",
+        "gofer_final"
+      ],
+      "matching": "year, name/complex name, and more than 20 percent of each CAL FIRE record overlapping the final GOFER perimeter",
+      "mask": "cell-centre rasterization on the input landscape grid; burned=1, unburned=0, nodata=255",
+      "license_evidence": "not supplied in the referenced directory"
+    },
+    "gofer_final_area_km2": 4389.173,
+    "hourly_perimeters": 1390,
+    "derivation": "supplied arrival-time raster; upstream raster-generation code was not supplied",
+    "area_series_basis": "growth calculated from this case arrival-time raster; no separate hourly vector-area series was supplied"
+  },
+  "known_provenance_gaps": [
+    "Upstream access and redistribution terms remain undocumented.",
+    "Exact GOFER version and arrival-time raster transformation history are unverified.",
+    "Original calibration history and independently predeclared acceptance thresholds are not documented.",
+    "Underlying historical weather product and moisture derivation are not identified in the supplied preparation source."
+  ],
+  "generation": {
+    "input_scripts": "scripts/generate_data/prepare_inputs.py",
+    "observation_scripts": "scripts/generate_data/generate_observations.py",
+    "supplied_sources": "scripts/generate_data/source",
+    "limitations": "CAL FIRE final-perimeter generation is supplied in exploratory.py; GOFER arrival-time TIFF/PNG generation code is absent. Upstream CAL FIRE/GOFER files and CloudFire service access are external requirements.",
+    "gust_scripts": "scripts/generate_data/rtma_gusts.py",
+    "gust_usage": "prepare_inputs.py --gusts or standalone rtma_gusts.py --output-file NEW_FILE; existing files and model configuration are preserved",
+    "frozen_archive_note": "Zenodo 2.2.0 includes supplementary gust rasters and updated generation scripts; 2.1.0 predates them."
+  },
+  "fire_name": "Dixie",
+  "fire_year": 2021,
+  "event_start_utc": "2021-07-14T00:00:00Z",
+  "event_end_utc": "2021-09-10T03:00:00Z",
+  "official_size_ac": 963309.0,
+  "model_domain": {
+    "crs": "EPSG:32610",
+    "crs_name": "UTM zone 10N (EPSG:32610)",
+    "cell_size_m": 30.0,
+    "extent": [
+      610768.448160931,
+      4401948.16274516,
+      750778.448160931,
+      4517958.16274516
+    ],
+    "width": 4667,
+    "height": 3867,
+    "margin_km": 10.0
+  },
+  "weather": {
+    "first_time_utc": "2021-07-14T05:00:00Z",
+    "band_count": 1391,
+    "interval_s": 3600,
+    "offset_from_event_start_h": 5.0,
+    "units_basis": "supplied exploratory.py: 20-ft wind speed mph, wind direction from degrees, moisture percent"
+  },
+  "simulation": {
+    "planned_stop_h": 1390.0,
+    "results_directory": "outputs",
+    "configuration_basis": "supplied per-fire elmfire.data with only input and scratch directory strings adapted"
+  },
+  "ignitions": [
+    {
+      "t_utc": "2021-07-14T05:00:00Z",
+      "lon": -121.37934740424058,
+      "lat": 39.87766796029552,
+      "x": 638588.295,
+      "y": 4415436.564,
+      "t_ign_s": 0.0,
+      "moved_m": 0.0
+    },
+    {
+      "t_utc": "2021-07-23T18:00:00Z",
+      "lon": -120.92887535715302,
+      "lat": 40.02428020945742,
+      "x": 676734.679,
+      "y": 4432506.872,
+      "t_ign_s": 824400.0,
+      "moved_m": 0.0
+    },
+    {
+      "t_utc": "2021-08-05T00:00:00Z",
+      "lon": -121.39285272482293,
+      "lat": 40.2954669512811,
+      "x": 636595.465,
+      "y": 4461791.15,
+      "t_ign_s": 1882800.0,
+      "moved_m": 0.0
+    },
+    {
+      "t_utc": "2021-08-16T19:00:00Z",
+      "lon": -121.53040763280251,
+      "lat": 40.44322735728537,
+      "x": 624631.335,
+      "y": 4477989.972,
+      "t_ign_s": 2901600.0,
+      "moved_m": 0.0
+    },
+    {
+      "t_utc": "2021-08-16T20:00:00Z",
+      "lon": -121.52098675232963,
+      "lat": 40.376131520731136,
+      "x": 625554.976,
+      "y": 4470555.4,
+      "t_ign_s": 2905200.0,
+      "moved_m": 0.0
+    },
+    {
+      "t_utc": "2021-08-17T02:00:00Z",
+      "lon": -120.51439854507788,
+      "lat": 40.241040913875395,
+      "x": 711433.389,
+      "y": 4457474.677,
+      "t_ign_s": 2926800.0,
+      "moved_m": 0.0
+    },
+    {
+      "t_utc": "2021-08-23T10:00:00Z",
+      "lon": -121.28615137548418,
+      "lat": 40.56588090963999,
+      "x": 645082.227,
+      "y": 4491978.888,
+      "t_ign_s": 3474000.0,
+      "moved_m": 0.0
+    }
+  ],
+  "elmfire_source": {
+    "provided_source_path": "/Users/yiren/Desktop/MyResearch/ELMFIRE/ELMFIRE_Git/elmfire-nick/build/source",
+    "branch": "yiren",
+    "git_commit": "8981f14e0170ced6cc28c4d308d4545ba925f5ef",
+    "repository_dirty": true,
+    "source_directory_dirty": false,
+    "files_sha256": {
+      "elmfire.f90": "f1820f890123c2808a15eafaeade82d172b8603041255d0f367ebcce4e9a401f",
+      "elmfire_calibration.f90": "75838a14439ba25661e1ad90a90e37ac25e5776d81326df8f3d8fdb04aad5cb5",
+      "elmfire_ignition.f90": "2586ece44726ab93eb5170169cf25b4098f90888ee11fea4da17dd3bb25b1bea",
+      "elmfire_init.f90": "fcf37a2ca392ca6c6af901c53cdcc64a3dfd44f632e31980be9b8a63cd94047d",
+      "elmfire_io.f90": "e5a54c76c7e71b18ce2751eb839724843fee0e1f90823c8544a9ce9fc10550a6",
+      "elmfire_level_set.f90": "148c1ce043f3b3d0041f2b1b27abe4bace8f4fcb635f03931bec180bfb39c9cf",
+      "elmfire_namelists.f90": "07a5429d45036ba0363cc42ad2df69e1c572b8244687a3fe80ad9214572aa517",
+      "elmfire_post.f90": "bcd8346451840a5b877dd88efef98087f20da497acc775ebcae6ed47cf546311",
+      "elmfire_spotting.f90": "b0f1adb1dd80c889a42819bcee187c5a0d800f927a1af99d1166aa03137dcd5f",
+      "elmfire_spotting_superseded.f90": "1f1d69667327fd3737ac3555b272410769987a16cb99708306d519b22dab1a43",
+      "elmfire_spread_rate.f90": "f5783d6db2d2677c2ff9834d610c2055dd5f7d31764d10296459d390d2d1117e",
+      "elmfire_subs.f90": "180e0e2bd1c6b0801fed92a2d70491fae525137e85ae6d42cf7332b0980bd8a5",
+      "elmfire_suppression.f90": "1eb8e309f78d9706e299e620cf18b51a35686b4e8edca12779f405035d9bd6a2",
+      "elmfire_vars.f90": "5b7a9e00798216d6516922e2a27bde8907a4e518dbfb68b8f4be42dd1841f215"
+    }
+  },
+  "configuration": {
+    "supplied_source_relative_path": "Dixie_2021/inputs/elmfire.data",
+    "supplied_sha256": "791a1b66f70728c8026b178be78f3536544892ce899c6e7c183a41ea5e3f8470",
+    "adapted_sha256": "d7175910378630fc61dfb9afc8c3528df61860b11dc488a6f73584de002be16d",
+    "changed_assignments": [
+      "INPUTS.FUELS_AND_TOPOGRAPHY_DIRECTORY",
+      "INPUTS.WEATHER_DIRECTORY",
+      "MISCELLANEOUS.SCRATCH"
+    ],
+    "scientific_assignments_preserved": true
+  },
+  "supplementary_weather": {
+    "source_directory": "ELMFIRE_GOFER_validation 2",
+    "received_date": "2026-10-22",
+    "files": [
+      {
+        "path": "data/weather/ws_gust.tif",
+        "size": 263280674,
+        "sha256": "514de344849aef7157899bd5e2ba7f53f75fa4ead0fc6a85fb9e27971fef0516",
+        "source_relative_path": "Dixie_2021/inputs/ws_gust.tif",
+        "processing": "copied unchanged from user-supplied ELMFIRE_GOFER_validation 2",
+        "used_by_current_simulation": false,
+        "name": "ws_gust.tif"
+      }
+    ],
+    "role": "supplementary; not selected by current ELMFIRE namelist",
+    "source": "NOAA RTMA 2.5 km GUST at 10 m, as identified by supplied raster tags and source script",
+    "units": "mph at 20 ft",
+    "conversion": "0.87 * 2.23694 * GUST[m/s at 10 m]",
+    "resampling": "bilinear onto the ws.tif grid",
+    "first_time_utc": "2021-07-14T05:00:00Z",
+    "interval_s": 3600,
+    "band_count": 1391,
+    "time_basis": "band order and first UTC hour from supplied inputs_log.csv; per-band timestamps were not supplied in the TIFF",
+    "import_checks": {
+      "grid_and_band_count_match_ws": true,
+      "missing_cells": 0,
+      "negative_cells": 0,
+      "minimum_mph": 0.0,
+      "maximum_mph": 48.60301971435547,
+      "mean_mph": 8.836746673042736
+    },
+    "regeneration_verified": false
+  }
+}

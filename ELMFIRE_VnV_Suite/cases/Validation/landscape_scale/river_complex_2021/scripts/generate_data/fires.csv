@@ -1,0 +1,2 @@
+fname,fyear,fire_id,t_start_utc,t_end_utc,t_first_perim_utc,duration_h,n_timesteps,west,south,east,north,center_lon,center_lat,t_ign_utc,ign_lon,ign_lat,n_ignitions,utm_epsg,local_tz,local_tzGMT,acres_official,final_area_km2
+River Complex,2021,River_Complex_2021,2021-07-30T21:00:00Z,2021-09-26T13:00:00Z,2021-08-01T05:00:00Z,1384.0,1353,-123.3068,40.9497,-122.70088,41.34272,-123.00384,41.14621,2021-08-01T04:00:00Z,-123.20056,41.31695,5,32610,America/Los_Angeles,Etc/GMT+8,199359,931.308

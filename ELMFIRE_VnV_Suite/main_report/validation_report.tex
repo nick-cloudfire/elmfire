@@ -8,6 +8,11 @@
 \emergencystretch=2em
 
 \input{report_style.tex}
+% Reserve space between long case titles and three-digit page numbers.
+\makeatletter
+\renewcommand{\@pnumwidth}{2.5em}
+\renewcommand{\@tocrmarg}{3.5em}
+\makeatother
 \begin{document}
 \newcommand{\GuideTitle}{ELMFIRE Validation Guide}
 \input{generated/validation_cover_metadata.tex}

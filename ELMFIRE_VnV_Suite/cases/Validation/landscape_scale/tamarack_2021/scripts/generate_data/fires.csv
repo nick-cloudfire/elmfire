@@ -1,0 +1,2 @@
+fname,fyear,fire_id,t_start_utc,t_end_utc,t_first_perim_utc,duration_h,n_timesteps,west,south,east,north,center_lon,center_lat,t_ign_utc,ign_lon,ign_lat,n_ignitions,utm_epsg,local_tz,local_tzGMT,acres_official,final_area_km2
+Tamarack,2021,Tamarack_2021,2021-07-04T18:00:00Z,2021-07-25T20:00:00Z,2021-07-04T21:00:00Z,506.0,504,-119.88601,38.60869,-119.53118,38.81396,-119.7086,38.71133,2021-07-04T20:00:00Z,-119.72668,38.76991,2,32611,America/Los_Angeles,Etc/GMT+8,68637,375.326

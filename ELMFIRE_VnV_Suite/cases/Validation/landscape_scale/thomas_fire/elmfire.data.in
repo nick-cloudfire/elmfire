@@ -1,6 +1,6 @@
 ! Modernized from Thomas_VAL/elmfire_jfsp_SOTA.data for the current source.
 &INPUTS
-FUELS_AND_TOPOGRAPHY_DIRECTORY = './data/archive_payload/fuels'
+FUELS_AND_TOPOGRAPHY_DIRECTORY = './data/fuels_and_topography'
 ASP_FILENAME = 'asp'
 CBD_FILENAME = 'cbd'
 CBH_FILENAME = 'cbh'
@@ -17,7 +17,7 @@ BLDG_FOOTPRINT_FRAC_FILENAME = 'ff'
 BLDG_FUEL_MODEL_FILENAME = 'bfm13'
 BLDG_NONBURNABLE_FRAC_FILENAME = 'nbf'
 BLDG_SEPARATION_DIST_FILENAME = 'ssd_min'
-WEATHER_DIRECTORY = './data/archive_payload/weather'
+WEATHER_DIRECTORY = './data/weather'
 DT_METEOROLOGY = 3600.0
 WS_FILENAME = 'ws'
 WD_FILENAME = 'wd'
@@ -172,7 +172,7 @@ USE_CONSTANT_BLDG_SPREAD_MODEL_PARAMS = .FALSE.
 &MISCELLANEOUS
 MISCELLANEOUS_INPUTS_DIRECTORY = './logs/scratch'
 ! Use ELMFIRE's built-in surface fuel table; keep the required WU-E building table.
-BUILDING_FUEL_MODEL_FILE = '../../data/archive_payload/misc/building_fuel_models.csv'
+BUILDING_FUEL_MODEL_FILE = '../../data/misc/building_fuel_models.csv'
 PATH_TO_GDAL = 'auto'
 SCRATCH = './logs/scratch'
 /

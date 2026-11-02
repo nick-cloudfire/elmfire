@@ -1,0 +1,282 @@
+{
+  "schema_version": 1,
+  "case_id": "dolan_2020",
+  "fire_id": "Dolan_2020",
+  "generation_files": [
+    {
+      "path": "scripts/generate_data/README.txt",
+      "size": 3398,
+      "sha256": "c912d095af4668b608b39cbeff24baaef14cb23bfc13913720b7284a5aa1f232"
+    },
+    {
+      "path": "scripts/generate_data/fires.csv",
+      "size": 475,
+      "sha256": "1c5b522806b0cd49f090511f7fd1049aabdc79dc4235667e57d46d183ed988c8"
+    },
+    {
+      "path": "scripts/generate_data/generate_observations.py",
+      "size": 3360,
+      "sha256": "504622c5a2c99679a5fab3b49b9c77bb5e6531ac48313bd381d5e9c957810ad1"
+    },
+    {
+      "path": "scripts/generate_data/make_fires.py",
+      "size": 3674,
+      "sha256": "db102eaee83a12ee43cc5430db56f9ac2f98e215a97b1eda473a5f22d640350b"
+    },
+    {
+      "path": "scripts/generate_data/prepare_inputs.py",
+      "size": 11872,
+      "sha256": "71ce2e3df4c5afcc3bca8d3762580ff61ab76b6d7bdecf917e6aa54df2f20693"
+    },
+    {
+      "path": "scripts/generate_data/rtma_gusts.py",
+      "size": 9949,
+      "sha256": "dbcb0529bc2c1fb4d8c4fb0ca2f4492064f4af1c9269a5d5f52d848e8660c05a"
+    },
+    {
+      "path": "scripts/generate_data/source/exploratory.py",
+      "size": 21531,
+      "sha256": "3ce3f69eb0bab864adbaab85d1032934c9bcdcc89c8e41cf6ef6f354b7ab851e"
+    },
+    {
+      "path": "scripts/generate_data/source/make_fires.py",
+      "size": 3167,
+      "sha256": "a6f8dd87475483086a939c308770b10d19790456a0d6ece569ff0d3b020cfb94"
+    },
+    {
+      "path": "scripts/generate_data/source/prepare_inputs.py",
+      "size": 17423,
+      "sha256": "d6cda9ee410a239161ea216cdf090dc00153c4fb5fc3c9fd719b509e6dbf6c96"
+    },
+    {
+      "path": "scripts/generate_data/source/rtma_gusts.py",
+      "size": 7499,
+      "sha256": "e27a383239f441b8785234e7785490287ea3769a21fe660068fbe2d9717ae347"
+    },
+    {
+      "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign.py",
+      "size": 15656,
+      "sha256": "15520e8dcf4e666e234a6a1d789f2b13be555e414ce3f9910fceaa80f440a96f"
+    },
+    {
+      "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign_pb2.py",
+      "size": 2623,
+      "sha256": "e86063cc2999ca121bd3cc35330c66c31ac5ea6a8a78d119e1a2220b981db8d6"
+    },
+    {
+      "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign_pb2.pyi",
+      "size": 3441,
+      "sha256": "e4d1df13858c591316fc077d2d5d1fbafcb9a7c03540eaba1e92156e41f94eac"
+    },
+    {
+      "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign_pb2_grpc.py",
+      "size": 3384,
+      "sha256": "e36e6f35b1fe672a57e9e6535b4cd79cadced48016b473d2dc3a0dbb2487b8ee"
+    }
+  ],
+  "previous_source_archive": {
+    "filename": "ELMFIRE_GOFER_validation.tar.gz",
+    "size": 7038832441,
+    "sha256": "714b9f2b3c3417336ea200bfc6f2bba2955376bf3088d675a811a11d28b0fffe",
+    "files": 583,
+    "skipped_macos_metadata": 682,
+    "received_date_utc": "2026-10-21",
+    "provider": "User-supplied archive",
+    "license": "Not documented in the supplied archive; upstream access and redistribution terms still apply."
+  },
+  "source_directory": {
+    "name": "ELMFIRE_GOFER_validation",
+    "received_date": "2026-10-22",
+    "selected_files_sha256": "13c593858e1a0ebaf9a7af355551d444105d87fdb34c88b268db6bea9ab2fb09"
+  },
+  "generation_sources": [
+    {
+      "source_relative_path": "make_fires.py",
+      "sha256": "a6f8dd87475483086a939c308770b10d19790456a0d6ece569ff0d3b020cfb94",
+      "size": 3167
+    },
+    {
+      "source_relative_path": "exploratory.py",
+      "sha256": "3ce3f69eb0bab864adbaab85d1032934c9bcdcc89c8e41cf6ef6f354b7ab851e",
+      "size": 21531
+    },
+    {
+      "source_relative_path": "prepare_inputs.py",
+      "sha256": "d6cda9ee410a239161ea216cdf090dc00153c4fb5fc3c9fd719b509e6dbf6c96",
+      "size": 17423,
+      "source_directory": "ELMFIRE_GOFER_validation 2"
+    },
+    {
+      "source_relative_path": "rtma_gusts.py",
+      "sha256": "e27a383239f441b8785234e7785490287ea3769a21fe660068fbe2d9717ae347",
+      "size": 7499,
+      "source_directory": "ELMFIRE_GOFER_validation 2"
+    }
+  ],
+  "files": [
+    {
+      "path": "data/fuels_and_topography/adj.tif",
+      "role": "inputs",
+      "size": 68737,
+      "sha256": "4904ec8079ba95912ee8cd0884e4933133481ebdda538ac55296f5d732688c21",
+      "source_relative_path": "Dolan_2020/inputs/adj.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/misc/fuel_models.csv",
+      "role": "inputs",
+      "size": 3948,
+      "sha256": "bf32ba154b230bf16e38941d662c9a49e72652307ffe5e1468a511b514eaaf5b",
+      "source_relative_path": "Dolan_2020/inputs/fuel_models.csv",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/fuels_and_topography/ignition_mask.tif",
+      "role": "inputs",
+      "size": 62864,
+      "sha256": "14634a2e817e36af62d1377be578ea3bcc351df662501608d5a77f241a127b63",
+      "source_relative_path": "Dolan_2020/inputs/ignition_mask.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/misc/ignitions.csv",
+      "role": "inputs",
+      "size": 173,
+      "sha256": "517ea26f9fc64ff7ac80c459da2e47a56a67159f987cc71e072ee1f244bcb1de",
+      "source_relative_path": "Dolan_2020/inputs/ignitions.csv",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/fuels_and_topography/landscape.tif",
+      "role": "inputs",
+      "size": 23695302,
+      "sha256": "fd249fd81da78d96c831ceb1a0218cbf5244f24996ee8da7d78be4c98a32b10b",
+      "source_relative_path": "Dolan_2020/inputs/landscape.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/lh.tif",
+      "role": "inputs",
+      "size": 8360075,
+      "sha256": "e4ea8b6ea43e2c0bffee0f84eac54dbd42c6b0868746f671f342c73b4c392dab",
+      "source_relative_path": "Dolan_2020/inputs/lh.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/lw.tif",
+      "role": "inputs",
+      "size": 8260493,
+      "sha256": "4c92f31c78c299bbd56054dff61e6f774324f782e854c706eb18b6d939c017a1",
+      "source_relative_path": "Dolan_2020/inputs/lw.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/m1.tif",
+      "role": "inputs",
+      "size": 29142100,
+      "sha256": "d3b09e43f6c590fb754f38a467b4e4dc0555b32b423b783ec8e4f05730570913",
+      "source_relative_path": "Dolan_2020/inputs/m1.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/m10.tif",
+      "role": "inputs",
+      "size": 29106217,
+      "sha256": "faebab6033b4bf6437df1bde086ce2e392386636d1cf8f22e6e82275c735d482",
+      "source_relative_path": "Dolan_2020/inputs/m10.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/m100.tif",
+      "role": "inputs",
+      "size": 29031484,
+      "sha256": "4658f38ea208a2b5a460e71cc1972f57be785ed6e6325ae0d8a60e2396e121ba",
+      "source_relative_path": "Dolan_2020/inputs/m100.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/fuels_and_topography/phi.tif",
+      "role": "inputs",
+      "size": 68737,
+      "sha256": "4904ec8079ba95912ee8cd0884e4933133481ebdda538ac55296f5d732688c21",
+      "source_relative_path": "Dolan_2020/inputs/phi.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/wd.tif",
+      "role": "inputs",
+      "size": 4136614,
+      "sha256": "17c6bb6972d5d5bd6b128b13f421704e352e3956c40ed4508e7361621948eddb",
+      "source_relative_path": "Dolan_2020/inputs/wd.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/ws.tif",
+      "role": "inputs",
+      "size": 29818267,
+      "sha256": "ce6a1b58c1d06123abab6bf9575338b329ee97cb33f0759b7d9c379464d39ca2",
+      "source_relative_path": "Dolan_2020/inputs/ws.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/observation/Dolan_2020_final_perimeter.gpkg",
+      "role": "observations",
+      "size": 348160,
+      "sha256": "b9a86b6534c16b61fc5284101e99dcb438616254d7757dbdf9cfa8ba63d9a66a",
+      "source_relative_path": "Dolan_2020/observations/Dolan_2020_final_perimeter.gpkg",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/observation/Dolan_2020_final_perimeter_30m.tif",
+      "role": "observations",
+      "size": 13460,
+      "sha256": "f7d1afb045db270e5f1fbc43eaf1955638b3e476c795c0015dde327778b89fc6",
+      "source_relative_path": "Dolan_2020/observations/Dolan_2020_final_perimeter_30m.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/observation/Dolan_2020_toa.png",
+      "role": "observations",
+      "size": 208336,
+      "sha256": "fc19e33da6a0cac0056c8ad2fb99621de2ecfa275916e3dddb5ead48b54d7ca2",
+      "source_relative_path": "Dolan_2020/observations/Dolan_2020_toa.png",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/observation/Dolan_2020_toa.tif",
+      "role": "observations",
+      "size": 45730,
+      "sha256": "9d0bd2addbf1b62c21f7395f5c25aff9ac43f96c778c8db000cdadb63328c5ae",
+      "source_relative_path": "Dolan_2020/observations/Dolan_2020_toa.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/ws_gust.tif",
+      "size": 29734072,
+      "sha256": "cc19b61cf68b94a9ceab18dec5470da3ae7c909c15c0804ecaeed43f06a5a401",
+      "role": "inputs",
+      "source_relative_path": "Dolan_2020/inputs/ws_gust.tif",
+      "processing": "copied unchanged from user-supplied ELMFIRE_GOFER_validation 2",
+      "used_by_current_simulation": false
+    }
+  ],
+  "generation_source_history": [
+    {
+      "source_directory": "ELMFIRE_GOFER_validation",
+      "files": [
+        {
+          "source_relative_path": "prepare_inputs.py",
+          "sha256": "02428b42cc3ea1f92b61afd7a1293fb004b1d2e670100e32460b33a40dfadc2c",
+          "size": 16402
+        }
+      ]
+    }
+  ],
+  "source_updates": [
+    {
+      "name": "ELMFIRE_GOFER_validation 2",
+      "received_date": "2026-10-22",
+      "scope": "supplementary ws_gust.tif and updated gust/input generation sources; existing data and wind selection unchanged"
+    }
+  ]
+}

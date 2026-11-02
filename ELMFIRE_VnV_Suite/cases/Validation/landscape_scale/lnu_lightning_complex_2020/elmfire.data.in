@@ -1,0 +1,81 @@
+&INPUTS
+FUELS_AND_TOPOGRAPHY_DIRECTORY = './data/fuels_and_topography'
+LANDSCAPE_FILENAME             = 'landscape'
+ADJ_FILENAME                   = 'adj'
+PHI_FILENAME                   = 'phi'
+DT_METEOROLOGY                 = 3600.0
+WEATHER_DIRECTORY              = './data/weather'
+WS_FILENAME                    = 'ws'
+WD_FILENAME                    = 'wd'
+M1_FILENAME                    = 'm1'
+M10_FILENAME                   = 'm10'
+M100_FILENAME                  = 'm100'
+USE_CONSTANT_LH                = .FALSE.
+MLH_FILENAME                   = 'lh'
+USE_CONSTANT_LW                = .FALSE.
+MLW_FILENAME                   = 'lw'
+/
+
+&OUTPUTS
+OUTPUTS_DIRECTORY    = './outputs'
+DTDUMP               = 972000.0
+DUMP_FLIN            = .TRUE.
+DUMP_SPREAD_RATE     = .TRUE.
+DUMP_TIME_OF_ARRIVAL = .TRUE.
+DUMP_FIRE_SIZE_STATS = .TRUE.
+CONVERT_TO_GEOTIFF   = .TRUE.
+/
+
+&TIME_CONTROL
+SIMULATION_DT    = 1.0
+TARGET_CFL       = 0.2
+SIMULATION_TSTOP = 972000.0
+/
+
+&MONTE_CARLO
+NUM_METEOROLOGY_TIMES = 271
+/
+
+&SIMULATOR
+CROWN_FIRE_MODEL = 1
+NUM_IGNITIONS = 10
+X_IGN(1) = 559216.249
+Y_IGN(1) = 4261582.326
+T_IGN(1) = 0.0
+X_IGN(2) = 561693.829
+Y_IGN(2) = 4279623.349
+T_IGN(2) = 50400.0
+X_IGN(3) = 562290.407
+Y_IGN(3) = 4288062.100
+T_IGN(3) = 50400.0
+X_IGN(4) = 555074.771
+Y_IGN(4) = 4281271.551
+T_IGN(4) = 108000.0
+X_IGN(5) = 567774.681
+Y_IGN(5) = 4285688.645
+T_IGN(5) = 140400.0
+X_IGN(6) = 559871.468
+Y_IGN(6) = 4297706.389
+T_IGN(6) = 140400.0
+X_IGN(7) = 492165.546
+Y_IGN(7) = 4276893.811
+T_IGN(7) = 154800.0
+X_IGN(8) = 499104.620
+Y_IGN(8) = 4270738.936
+T_IGN(8) = 158400.0
+X_IGN(9) = 547712.638
+Y_IGN(9) = 4300559.031
+T_IGN(9) = 180000.0
+X_IGN(10) = 544059.496
+Y_IGN(10) = 4282826.947
+T_IGN(10) = 180000.0
+/
+
+&SPOTTING
+ENABLE_SPOTTING = .TRUE.
+/
+
+&MISCELLANEOUS
+PATH_TO_GDAL                   = 'auto'
+SCRATCH                        = './logs/scratch'
+/

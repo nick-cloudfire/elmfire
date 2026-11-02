@@ -1,0 +1,62 @@
+case_id: river_complex_2021
+case_title: 2021 River Complex fire reconstruction against GOFER observations
+case_type: validation
+category: landscape_scale
+elmfire:
+  bin: ${ELMFIRE_BIN:-elmfire}
+  config: elmfire.data.in
+  mpi_ranks: 1
+validation:
+  observation: GOFER arrival-time raster; CAL FIRE supporting final extent
+  event_start_utc: '2021-07-30T21:00:00Z'
+  event_end_utc: '2021-09-26T13:00:00Z'
+  comparison_times_h:
+  - 24
+  - 48
+  - 72
+  - final GOFER arrival
+postprocess:
+  metrics: outputs/metrics.json
+  figures:
+  - figures/observation_summary.pdf
+  - figures/final_perimeter_summary.pdf
+  - figures/input_overview.pdf
+  - figures/input_distributions.pdf
+  - figures/weather_time_series.pdf
+  - figures/weather_summary.pdf
+  - figures/burned_area_growth.pdf
+  - figures/comparison_current.pdf
+  - figures/arrival_current.pdf
+  - figures/fields_current.pdf
+namelist_contract:
+  schema_version: 1
+  report: report/case_body.tex
+  files:
+  - path: elmfire.data.in
+    invariants:
+      OUTPUTS.OUTPUTS_DIRECTORY: ./outputs
+      OUTPUTS.DTDUMP: 4870800.0
+      OUTPUTS.DUMP_TIME_OF_ARRIVAL: true
+      OUTPUTS.CONVERT_TO_GEOTIFF: true
+      TIME_CONTROL.SIMULATION_DT: 1.0
+      TIME_CONTROL.TARGET_CFL: 0.2
+      TIME_CONTROL.SIMULATION_TSTOP: 4870800.0
+      MONTE_CARLO.NUM_METEOROLOGY_TIMES: 1354
+      SIMULATOR.CROWN_FIRE_MODEL: 1
+      SIMULATOR.NUM_IGNITIONS: 5
+      SIMULATOR.X_IGN(1): 483213.479
+      SIMULATOR.Y_IGN(1): 4573961.772
+      SIMULATOR.T_IGN(1): 0.0
+      SIMULATOR.X_IGN(2): 497296.876
+      SIMULATOR.Y_IGN(2): 4554586.548
+      SIMULATOR.T_IGN(2): 126000.0
+      SIMULATOR.X_IGN(3): 493452.967
+      SIMULATOR.Y_IGN(3): 4545512.941
+      SIMULATOR.T_IGN(3): 133200.0
+      SIMULATOR.X_IGN(4): 490101.005
+      SIMULATOR.Y_IGN(4): 4548657.742
+      SIMULATOR.T_IGN(4): 151200.0
+      SIMULATOR.X_IGN(5): 512390.791
+      SIMULATOR.Y_IGN(5): 4541714.271
+      SIMULATOR.T_IGN(5): 1954800.0
+      SPOTTING.ENABLE_SPOTTING: true

@@ -167,7 +167,7 @@ def read_observations() -> list[dict[str, object]]:
         ogr2ogr = str(candidate) if candidate.is_file() else None
     if not ogr2ogr:
         raise RuntimeError("ogr2ogr is required to characterize the VIIRS shapefile")
-    shapefile = next((CASE_DIR / "data" / "viirs_observation").glob("*.shp"))
+    shapefile = next((CASE_DIR / "data" / "observation").glob("*.shp"))
     result = subprocess.run(
         [ogr2ogr, "-f", "GeoJSON", "/vsistdout/", str(shapefile)],
         check=True,
@@ -301,11 +301,8 @@ def main() -> None:
     archive = json.loads(ARCHIVE_MANIFEST.read_text(encoding="utf-8"))
     source = json.loads(SOURCE_MANIFEST.read_text(encoding="utf-8"))
     errors: list[str] = []
-    source_archive = CASE_DIR / archive["source_archive"]["relative_path"]
-    if not source_archive.is_file():
-        errors.append(f"missing source archive: {source_archive}")
-    elif sha256(source_archive) != archive["source_archive"]["sha256"]:
-        errors.append("source archive checksum mismatch")
+    # Execute from the extracted data only. Original archive metadata records
+    # provenance; no original container or legacy source directory is needed.
     # The source-generated surface table is optional; the WU-E building table is not.
     required_payload_files = [
         record for record in archive["payload_files"]

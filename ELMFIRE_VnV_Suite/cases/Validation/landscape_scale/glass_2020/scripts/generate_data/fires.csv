@@ -1,0 +1,2 @@
+fname,fyear,fire_id,t_start_utc,t_end_utc,t_first_perim_utc,duration_h,n_timesteps,west,south,east,north,center_lon,center_lat,t_ign_utc,ign_lon,ign_lat,n_ignitions,utm_epsg,local_tz,local_tzGMT,acres_official,final_area_km2
+Glass,2020,Glass_2020,2020-09-27T10:00:00Z,2020-10-05T07:00:00Z,2020-09-27T11:00:00Z,189.0,189,-122.67124,38.43981,-122.42959,38.67876,-122.55042,38.55928,2020-09-27T10:00:00Z,-122.48855,38.56611,1,32610,America/Los_Angeles,Etc/GMT+8,67484,352.521

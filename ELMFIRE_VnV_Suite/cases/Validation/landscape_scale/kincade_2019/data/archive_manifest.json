@@ -1,0 +1,314 @@
+{
+  "schema_version": 1,
+  "case_id": "kincade_2019",
+  "fire_id": "Kincade_2019",
+  "files": [
+    {
+      "path": "data/fuels_and_topography/adj.tif",
+      "role": "inputs",
+      "size": 63736,
+      "sha256": "0da3881ce8af4ab34e1e5c7911fef89e24cc71639e5504850a539f31261b65a9",
+      "source_relative_path": "Kincade_2019/inputs/adj.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/misc/fuel_models.csv",
+      "role": "inputs",
+      "size": 3948,
+      "sha256": "bf32ba154b230bf16e38941d662c9a49e72652307ffe5e1468a511b514eaaf5b",
+      "source_relative_path": "Kincade_2019/inputs/fuel_models.csv",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/fuels_and_topography/ignition_mask.tif",
+      "role": "inputs",
+      "size": 57803,
+      "sha256": "031630246b535c856498fbe2785422ebd6d77e90d5311fd2e3d10960bf8842b3",
+      "source_relative_path": "Kincade_2019/inputs/ignition_mask.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/fuels_and_topography/ignition_mask.tif.aux.xml",
+      "role": "inputs",
+      "size": 412,
+      "sha256": "2107ad4f1f6911fe8ed0c5b7be9d9869b7063211679defd64a6c6b6dc197d5a0",
+      "source_relative_path": "Kincade_2019/inputs/ignition_mask.tif.aux.xml",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/misc/ignitions.csv",
+      "role": "inputs",
+      "size": 171,
+      "sha256": "4d7e85c308a154028af6e33af327553536654dc8537912ffb90dd2375ac84092",
+      "source_relative_path": "Kincade_2019/inputs/ignitions.csv",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/fuels_and_topography/landscape.tif",
+      "role": "inputs",
+      "size": 11232241,
+      "sha256": "7932f3ffb6c89df316e8a6018bc413d8f1353137b584e055f318f9e63415ce58",
+      "source_relative_path": "Kincade_2019/inputs/landscape.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/fuels_and_topography/landscape.tif.aux.xml",
+      "role": "inputs",
+      "size": 8468,
+      "sha256": "ea076d11bac20ea683b07884e5676157ab258475b8f6b7f003807c4688ce2343",
+      "source_relative_path": "Kincade_2019/inputs/landscape.tif.aux.xml",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/lh.tif",
+      "role": "inputs",
+      "size": 2208404,
+      "sha256": "efda3cabd4fcb03ddce0bbe9748b317e62a89989eb3ad794be81779f49eb00fa",
+      "source_relative_path": "Kincade_2019/inputs/lh.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/lw.tif",
+      "role": "inputs",
+      "size": 2146989,
+      "sha256": "5b1b2eb83531961e0c12996a28475723e0bdb53875ab6c0be5c30f5ee6d7e185",
+      "source_relative_path": "Kincade_2019/inputs/lw.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/m1.tif",
+      "role": "inputs",
+      "size": 4277471,
+      "sha256": "d41bcf1f3e5b4b6f3639e17adff74fc93c3df167df288b0b8b3a7df4bd4cb14c",
+      "source_relative_path": "Kincade_2019/inputs/m1.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/m10.tif",
+      "role": "inputs",
+      "size": 4252892,
+      "sha256": "410b261ec589378e7a73d10b11432cf4c3e65f938ebfaf601887be5ca653cc2e",
+      "source_relative_path": "Kincade_2019/inputs/m10.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/m100.tif",
+      "role": "inputs",
+      "size": 4304091,
+      "sha256": "864133b52d944ae480f121a75ba7692f95d64075c647396c96971f16d20bd830",
+      "source_relative_path": "Kincade_2019/inputs/m100.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/fuels_and_topography/phi.tif",
+      "role": "inputs",
+      "size": 63736,
+      "sha256": "0da3881ce8af4ab34e1e5c7911fef89e24cc71639e5504850a539f31261b65a9",
+      "source_relative_path": "Kincade_2019/inputs/phi.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/wd.tif",
+      "role": "inputs",
+      "size": 602537,
+      "sha256": "23cbd0dbc6d77ea96f1f53e74770f1258c2bb20de75e6db403a458a2f4a05bb2",
+      "source_relative_path": "Kincade_2019/inputs/wd.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/wd.tif.aux.xml",
+      "role": "inputs",
+      "size": 59104,
+      "sha256": "e61c56b086641e7c6f4a7e72f2e651e6555ebb5eaa03ec3fcdfde189fb73a40b",
+      "source_relative_path": "Kincade_2019/inputs/wd.tif.aux.xml",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/ws.tif",
+      "role": "inputs",
+      "size": 4331072,
+      "sha256": "2a60702e5835f8600f31b470e0e78a26f3ce52abd106aea8a36f6aedd34914c9",
+      "source_relative_path": "Kincade_2019/inputs/ws.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/ws.tif.aux.xml",
+      "role": "inputs",
+      "size": 57683,
+      "sha256": "7ff2039fe5ab8c56fc84eedfa322677a08247cfdd79f907fd8ade2daad4a49ca",
+      "source_relative_path": "Kincade_2019/inputs/ws.tif.aux.xml",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/observation/Kincade_2019_final_perimeter.gpkg",
+      "role": "observations",
+      "size": 393216,
+      "sha256": "6ae1c01dd00b660583d689da672245dea1073006efd763bb1c84c07a161084ac",
+      "source_relative_path": "Kincade_2019/observations/Kincade_2019_final_perimeter.gpkg",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/observation/Kincade_2019_final_perimeter_30m.tif",
+      "role": "observations",
+      "size": 11480,
+      "sha256": "ee78640daa6785e221c8e451f09e2290ba29841ef3a0b530199541852f173900",
+      "source_relative_path": "Kincade_2019/observations/Kincade_2019_final_perimeter_30m.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/observation/Kincade_2019_toa.png",
+      "role": "observations",
+      "size": 150919,
+      "sha256": "d1d7559f01333502247557b54c7c395758c1ad1f9c92b8eb8b6a6705e9aac469",
+      "source_relative_path": "Kincade_2019/observations/Kincade_2019_toa.png",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/observation/Kincade_2019_toa.tif",
+      "role": "observations",
+      "size": 20184,
+      "sha256": "eb018cf60095a5c61d3475ce2c4f9b3a1202b14f0ed1fee431c7fa5b82498197",
+      "source_relative_path": "Kincade_2019/observations/Kincade_2019_toa.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/ws_gust.tif",
+      "size": 4413312,
+      "sha256": "4a2c875bfcc9456e03ea2ee242fce974403242891ac6efc8b39d9edab0d4db38",
+      "role": "inputs",
+      "source_relative_path": "Kincade_2019/inputs/ws_gust.tif",
+      "processing": "copied unchanged from user-supplied ELMFIRE_GOFER_validation 2",
+      "used_by_current_simulation": false
+    }
+  ],
+  "generation_files": [
+    {
+      "path": "scripts/generate_data/README.txt",
+      "size": 3398,
+      "sha256": "c912d095af4668b608b39cbeff24baaef14cb23bfc13913720b7284a5aa1f232"
+    },
+    {
+      "path": "scripts/generate_data/fires.csv",
+      "size": 478,
+      "sha256": "728bc01e26408ce797dc70811626d533337c4b1df983942841e4121ace922a0c"
+    },
+    {
+      "path": "scripts/generate_data/generate_observations.py",
+      "size": 3360,
+      "sha256": "504622c5a2c99679a5fab3b49b9c77bb5e6531ac48313bd381d5e9c957810ad1"
+    },
+    {
+      "path": "scripts/generate_data/make_fires.py",
+      "size": 3674,
+      "sha256": "db102eaee83a12ee43cc5430db56f9ac2f98e215a97b1eda473a5f22d640350b"
+    },
+    {
+      "path": "scripts/generate_data/prepare_inputs.py",
+      "size": 11872,
+      "sha256": "71ce2e3df4c5afcc3bca8d3762580ff61ab76b6d7bdecf917e6aa54df2f20693"
+    },
+    {
+      "path": "scripts/generate_data/rtma_gusts.py",
+      "size": 9949,
+      "sha256": "dbcb0529bc2c1fb4d8c4fb0ca2f4492064f4af1c9269a5d5f52d848e8660c05a"
+    },
+    {
+      "path": "scripts/generate_data/source/exploratory.py",
+      "size": 21531,
+      "sha256": "3ce3f69eb0bab864adbaab85d1032934c9bcdcc89c8e41cf6ef6f354b7ab851e"
+    },
+    {
+      "path": "scripts/generate_data/source/make_fires.py",
+      "size": 3167,
+      "sha256": "a6f8dd87475483086a939c308770b10d19790456a0d6ece569ff0d3b020cfb94"
+    },
+    {
+      "path": "scripts/generate_data/source/prepare_inputs.py",
+      "size": 17423,
+      "sha256": "d6cda9ee410a239161ea216cdf090dc00153c4fb5fc3c9fd719b509e6dbf6c96"
+    },
+    {
+      "path": "scripts/generate_data/source/rtma_gusts.py",
+      "size": 7499,
+      "sha256": "e27a383239f441b8785234e7785490287ea3769a21fe660068fbe2d9717ae347"
+    },
+    {
+      "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign.py",
+      "size": 15656,
+      "sha256": "15520e8dcf4e666e234a6a1d789f2b13be555e414ce3f9910fceaa80f440a96f"
+    },
+    {
+      "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign_pb2.py",
+      "size": 2623,
+      "sha256": "e86063cc2999ca121bd3cc35330c66c31ac5ea6a8a78d119e1a2220b981db8d6"
+    },
+    {
+      "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign_pb2.pyi",
+      "size": 3441,
+      "sha256": "e4d1df13858c591316fc077d2d5d1fbafcb9a7c03540eaba1e92156e41f94eac"
+    },
+    {
+      "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign_pb2_grpc.py",
+      "size": 3384,
+      "sha256": "e36e6f35b1fe672a57e9e6535b4cd79cadced48016b473d2dc3a0dbb2487b8ee"
+    }
+  ],
+  "previous_source_archive": {
+    "filename": "ELMFIRE_GOFER_validation.tar.gz",
+    "size": 7038832441,
+    "sha256": "714b9f2b3c3417336ea200bfc6f2bba2955376bf3088d675a811a11d28b0fffe",
+    "files": 583,
+    "skipped_macos_metadata": 682,
+    "received_date_utc": "2026-10-21",
+    "provider": "User-supplied archive",
+    "license": "Not documented in the supplied archive; upstream access and redistribution terms still apply."
+  },
+  "source_directory": {
+    "name": "ELMFIRE_GOFER_validation",
+    "received_date": "2026-10-22",
+    "selected_files_sha256": "062c67e44af967a4f5e5fa80b5cc0b2dec4a2b0ac9d7c9a17dc878bbfbf98f6b"
+  },
+  "generation_sources": [
+    {
+      "source_relative_path": "make_fires.py",
+      "sha256": "a6f8dd87475483086a939c308770b10d19790456a0d6ece569ff0d3b020cfb94",
+      "size": 3167
+    },
+    {
+      "source_relative_path": "exploratory.py",
+      "sha256": "3ce3f69eb0bab864adbaab85d1032934c9bcdcc89c8e41cf6ef6f354b7ab851e",
+      "size": 21531
+    },
+    {
+      "source_relative_path": "prepare_inputs.py",
+      "sha256": "d6cda9ee410a239161ea216cdf090dc00153c4fb5fc3c9fd719b509e6dbf6c96",
+      "size": 17423,
+      "source_directory": "ELMFIRE_GOFER_validation 2"
+    },
+    {
+      "source_relative_path": "rtma_gusts.py",
+      "sha256": "e27a383239f441b8785234e7785490287ea3769a21fe660068fbe2d9717ae347",
+      "size": 7499,
+      "source_directory": "ELMFIRE_GOFER_validation 2"
+    }
+  ],
+  "generation_source_history": [
+    {
+      "source_directory": "ELMFIRE_GOFER_validation",
+      "files": [
+        {
+          "source_relative_path": "prepare_inputs.py",
+          "sha256": "02428b42cc3ea1f92b61afd7a1293fb004b1d2e670100e32460b33a40dfadc2c",
+          "size": 16402
+        }
+      ]
+    }
+  ],
+  "source_updates": [
+    {
+      "name": "ELMFIRE_GOFER_validation 2",
+      "received_date": "2026-10-22",
+      "scope": "supplementary ws_gust.tif and updated gust/input generation sources; existing data and wind selection unchanged"
+    }
+  ]
+}

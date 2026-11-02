@@ -1,0 +1,32 @@
+{
+  "checked_at_utc": "2026-10-21T21:13:49+00:00",
+  "scope": "Static namelist keys and declared invariants only; no simulation, historical-run equivalence, or container-binary validation.",
+  "source": {
+    "file": "build/source/elmfire_namelists.f90",
+    "git_commit": "8981f14e0170ced6cc28c4d308d4545ba925f5ef",
+    "git_dirty": true,
+    "root_label": "elmfire-nick",
+    "sha256": "07a5429d45036ba0363cc42ad2df69e1c572b8244687a3fe80ad9214572aa517",
+    "source_directory_dirty": false
+  },
+  "namelist": {
+    "path": "elmfire.data.in",
+    "sha256": "777c99b4c1a89f7b0c00c9ff54fbe4359095bccec1b2c44e7fe10d88a8760415",
+    "previous_layout_sha256": "232f9a34238499d5d5928d79f3719d06655115822e09d18b626814ebfb76b239",
+    "previous_outputs_directory_sha256": "35898b19bb10e927b282ffeaf9b3ff215349b4479da91986298805c8408d2535"
+  },
+  "status": "PASS",
+  "checked_invariants": 8,
+  "errors": [],
+  "layout_change": "Input and output directory strings updated only; scientific values unchanged.",
+  "output_layout_check": {
+    "checked_at_utc": "2026-10-22T22:54:27.735527+00:00",
+    "schema": "schemas/elmfire/efa0b8fa-working-tree.json",
+    "schema_sha256": "cd4c61d5efbe7bdaeb380f4c2434d59b6c29291fce3535d913fa7baa501efe15",
+    "results_directory": "outputs",
+    "log_directory": "logs",
+    "scratch_directory": "logs/scratch",
+    "status": "PASS",
+    "errors": []
+  }
+}

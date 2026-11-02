@@ -13,7 +13,7 @@
     {
       "name": "maximum spread rate",
       "expected": 0.697992,
-      "calculated": 0.6985318660736084,
+      "calculated": 0.6985318064689636,
       "units": "m/min",
       "tolerance": "5% relative",
       "status": "PASS"

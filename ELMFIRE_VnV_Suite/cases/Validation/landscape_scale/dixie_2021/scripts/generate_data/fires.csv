@@ -1,0 +1,2 @@
+fname,fyear,fire_id,t_start_utc,t_end_utc,t_first_perim_utc,duration_h,n_timesteps,west,south,east,north,center_lon,center_lat,t_ign_utc,ign_lon,ign_lat,n_ignitions,utm_epsg,local_tz,local_tzGMT,acres_official,final_area_km2
+Dixie,2021,Dixie_2021,2021-07-14T00:00:00Z,2021-09-10T03:00:00Z,2021-07-14T06:00:00Z,1395.0,1390,-121.55239,39.85286,-120.19548,40.68829,-120.87394,40.27058,2021-07-14T05:00:00Z,-121.37935,39.87767,7,32610,America/Los_Angeles,Etc/GMT+8,963309,4389.173

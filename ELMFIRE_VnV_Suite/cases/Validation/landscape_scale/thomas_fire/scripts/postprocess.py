@@ -86,7 +86,7 @@ def viirs_observation(target_crs, target_time):
     import geopandas as gpd
     import pandas as pd
 
-    shapefiles = sorted((CASE_DIR / "data" / "viirs_observation").glob("*.shp"))
+    shapefiles = sorted((CASE_DIR / "data" / "observation").glob("*.shp"))
     if len(shapefiles) != 1:
         raise ValueError(f"Expected exactly one observation shapefile; found {len(shapefiles)}")
     observations = gpd.read_file(shapefiles[0])

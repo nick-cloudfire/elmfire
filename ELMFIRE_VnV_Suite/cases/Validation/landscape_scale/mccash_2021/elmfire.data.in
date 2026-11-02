@@ -1,0 +1,60 @@
+&INPUTS
+FUELS_AND_TOPOGRAPHY_DIRECTORY = './data/fuels_and_topography'
+LANDSCAPE_FILENAME             = 'landscape'
+ADJ_FILENAME                   = 'adj'
+PHI_FILENAME                   = 'phi'
+DT_METEOROLOGY                 = 3600.0
+WEATHER_DIRECTORY              = './data/weather'
+WS_FILENAME                    = 'ws'
+WD_FILENAME                    = 'wd'
+M1_FILENAME                    = 'm1'
+M10_FILENAME                   = 'm10'
+M100_FILENAME                  = 'm100'
+USE_CONSTANT_LH                = .FALSE.
+MLH_FILENAME                   = 'lh'
+USE_CONSTANT_LW                = .FALSE.
+MLW_FILENAME                   = 'lw'
+/
+
+&OUTPUTS
+OUTPUTS_DIRECTORY    = './outputs'
+DTDUMP               = 4669200.0
+DUMP_FLIN            = .TRUE.
+DUMP_SPREAD_RATE     = .TRUE.
+DUMP_TIME_OF_ARRIVAL = .TRUE.
+DUMP_FIRE_SIZE_STATS = .TRUE.
+CONVERT_TO_GEOTIFF   = .TRUE.
+/
+
+&TIME_CONTROL
+SIMULATION_DT    = 1.0
+TARGET_CFL       = 0.2
+SIMULATION_TSTOP = 4669200.0
+/
+
+&MONTE_CARLO
+NUM_METEOROLOGY_TIMES = 1298
+/
+
+&SIMULATOR
+CROWN_FIRE_MODEL = 1
+NUM_IGNITIONS = 3
+X_IGN(1) = 466658.527
+Y_IGN(1) = 4601307.626
+T_IGN(1) = 0.0
+X_IGN(2) = 472561.739
+Y_IGN(2) = 4604860.477
+T_IGN(2) = 2426400.0
+X_IGN(3) = 475106.857
+Y_IGN(3) = 4610191.844
+T_IGN(3) = 2566800.0
+/
+
+&SPOTTING
+ENABLE_SPOTTING = .TRUE.
+/
+
+&MISCELLANEOUS
+PATH_TO_GDAL                   = 'auto'
+SCRATCH                        = './logs/scratch'
+/

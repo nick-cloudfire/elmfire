@@ -1,0 +1,2 @@
+fname,fyear,fire_id,t_start_utc,t_end_utc,t_first_perim_utc,duration_h,n_timesteps,west,south,east,north,center_lon,center_lat,t_ign_utc,ign_lon,ign_lat,n_ignitions,utm_epsg,local_tz,local_tzGMT,acres_official,final_area_km2
+Red Salmon Complex,2020,Red_Salmon_Complex_2020,2020-07-27T18:00:00Z,2020-10-10T00:00:00Z,2020-07-27T23:00:00Z,1782.0,1778,-123.57001,40.97755,-123.23134,41.24705,-123.40067,41.1123,2020-07-27T22:00:00Z,-123.40757,41.15905,2,32610,America/Los_Angeles,Etc/GMT+8,144698,575.114

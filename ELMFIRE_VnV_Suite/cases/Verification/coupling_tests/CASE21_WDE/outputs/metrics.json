@@ -15,16 +15,16 @@
         {
           "name": "head ROS",
           "target": 3.635,
-          "measured": 3.6443769931793213,
-          "percent_error": 0.2579640489496975,
+          "measured": 3.644375801086426,
+          "percent_error": 0.25793125409700124,
           "units": "m/min",
           "status": "PASS"
         },
         {
           "name": "L/W ratio",
           "target": 1.24,
-          "measured": 1.2485918200051653,
-          "percent_error": 0.6928887100939791,
+          "measured": 1.2485918200051662,
+          "percent_error": 0.6928887100940507,
           "units": "-",
           "status": "PASS"
         }

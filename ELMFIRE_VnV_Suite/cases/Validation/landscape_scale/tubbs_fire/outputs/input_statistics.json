@@ -5,7 +5,7 @@
   "observation_files_verified": 7,
   "fields": {
     "dem": {
-      "relative_path": "data/archive_payload/fuels_weather/dem.tif",
+      "relative_path": "data/fuels_and_topography/dem.tif",
       "width": 700,
       "height": 900,
       "band_count": 1,
@@ -33,7 +33,7 @@
       "quantile_method": "deterministic nearest-neighbour sample, at most 512 x 512 cells per band"
     },
     "slp": {
-      "relative_path": "data/archive_payload/fuels_weather/slp.tif",
+      "relative_path": "data/fuels_and_topography/slp.tif",
       "width": 700,
       "height": 900,
       "band_count": 1,
@@ -61,7 +61,7 @@
       "quantile_method": "deterministic nearest-neighbour sample, at most 512 x 512 cells per band"
     },
     "asp": {
-      "relative_path": "data/archive_payload/fuels_weather/asp.tif",
+      "relative_path": "data/fuels_and_topography/asp.tif",
       "width": 700,
       "height": 900,
       "band_count": 1,
@@ -90,7 +90,7 @@
       "circular_mean_degrees": 351.5135941757417
     },
     "fbfm40b": {
-      "relative_path": "data/archive_payload/fuels_weather/fbfm40b.tif",
+      "relative_path": "data/fuels_and_topography/fbfm40b.tif",
       "valid_count": 630000,
       "class_counts": {
         "91": 123555,
@@ -146,7 +146,7 @@
       }
     },
     "ignition_mask": {
-      "relative_path": "data/archive_payload/fuels_weather/ignition_mask.tif",
+      "relative_path": "data/fuels_and_topography/ignition_mask.tif",
       "valid_count": 630000,
       "class_counts": {
         "0": 629643,
@@ -158,7 +158,7 @@
       }
     },
     "ws": {
-      "relative_path": "data/archive_payload/fuels_weather/ws.tif",
+      "relative_path": "data/weather/ws.tif",
       "width": 70,
       "height": 90,
       "band_count": 25,
@@ -186,7 +186,7 @@
       "quantile_method": "deterministic nearest-neighbour sample, at most 512 x 512 cells per band"
     },
     "wd": {
-      "relative_path": "data/archive_payload/fuels_weather/wd.tif",
+      "relative_path": "data/weather/wd.tif",
       "width": 70,
       "height": 90,
       "band_count": 25,
@@ -215,7 +215,7 @@
       "circular_mean_degrees": 40.20769439946365
     },
     "m1": {
-      "relative_path": "data/archive_payload/fuels_weather/m1.tif",
+      "relative_path": "data/weather/m1.tif",
       "width": 70,
       "height": 90,
       "band_count": 25,
@@ -243,7 +243,7 @@
       "quantile_method": "deterministic nearest-neighbour sample, at most 512 x 512 cells per band"
     },
     "m10": {
-      "relative_path": "data/archive_payload/fuels_weather/m10.tif",
+      "relative_path": "data/weather/m10.tif",
       "width": 70,
       "height": 90,
       "band_count": 25,
@@ -271,7 +271,7 @@
       "quantile_method": "deterministic nearest-neighbour sample, at most 512 x 512 cells per band"
     },
     "m100": {
-      "relative_path": "data/archive_payload/fuels_weather/m100.tif",
+      "relative_path": "data/weather/m100.tif",
       "width": 70,
       "height": 90,
       "band_count": 25,

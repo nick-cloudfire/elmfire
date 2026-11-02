@@ -1,0 +1,2 @@
+fname,fyear,fire_id,t_start_utc,t_end_utc,t_first_perim_utc,duration_h,n_timesteps,west,south,east,north,center_lon,center_lat,t_ign_utc,ign_lon,ign_lat,n_ignitions,utm_epsg,local_tz,local_tzGMT,acres_official,final_area_km2
+Walker,2019,Walker_2019,2019-09-04T07:00:00Z,2019-09-12T22:00:00Z,2019-09-04T22:00:00Z,207.0,193,-120.71201,40.00423,-120.46273,40.17266,-120.58737,40.08844,2019-09-04T21:00:00Z,-120.68324,40.04603,1,32610,America/Los_Angeles,Etc/GMT+8,54612,267.693

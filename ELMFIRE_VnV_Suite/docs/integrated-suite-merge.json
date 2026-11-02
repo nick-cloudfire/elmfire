@@ -1,0 +1,108 @@
+{
+  "operation": "Import integrated suite compatibility edits and verification evidence; exclude validation reports",
+  "date": "2026-10-21",
+  "source_root": "/Users/yiren/Desktop/MyResearch/ELMFIRE/ELMFIRE_Git/elmfire-nick",
+  "source_suite": "/Users/yiren/Desktop/MyResearch/ELMFIRE/ELMFIRE_Git/elmfire-nick/ELMFIRE_VnV_Suite",
+  "source_commit": "8981f14e0170ced6cc28c4d308d4545ba925f5ef",
+  "source_worktree_dirty": true,
+  "source_build_tree_dirty": false,
+  "destination_start_commit": "b043427b43a37d827618dd388b82c15594953920",
+  "common_suite_commit": "d3ece78649b1e0cd79d4d5b9aec341f0a9becc54",
+  "common_tree_sha": "937f130ad8ebb95b8fe5101b265eace36d736fdc",
+  "integrated_import_tree_sha": "937f130ad8ebb95b8fe5101b265eace36d736fdc",
+  "source_files_sha256": {
+    "build/source/elmfire_namelists.f90": "07a5429d45036ba0363cc42ad2df69e1c572b8244687a3fe80ad9214572aa517",
+    "build/source/elmfire_init.f90": "fcf37a2ca392ca6c6af901c53cdcc64a3dfd44f632e31980be9b8a63cd94047d",
+    "build/source/elmfire_spread_rate.f90": "f5783d6db2d2677c2ff9834d610c2055dd5f7d31764d10296459d390d2d1117e"
+  },
+  "merge_decisions": [
+    "Apply integrated changes relative to the identical imported base tree, including committed and uncommitted source edits.",
+    "Keep all newer GOFER cases, case-local scripts, data, provenance, and ignore rules.",
+    "Do not import validation report sources, PDFs, figures, outputs JSON, or aggregate validation artifacts.",
+    "Retain canonical Times New Roman styles; omit incoming Nimbus Roman substitutions.",
+    "Import verification metrics and figures without changing numerical evidence.",
+    "Use integrated verification evidence to resolve conflicting aggregate results, then regenerate summaries from that evidence.",
+    "Keep a temporary backup of two formerly ignored CASE19 tables replaced by integrated case-owned source tables.",
+    "Merge both sets of ignore additions while keeping generated surface tables and GOFER bulk data ignored.",
+    "Retain integrated scheduler account and time-limit settings in common/slurm_validation_head.txt.",
+    "Align CASE44 report metric-name validation with the imported DFC-specific postprocessor metric; preserve all evidence checks.",
+    "Refresh report macros and all 49 verification PDFs plus the guide from existing metrics only. No simulations or numerical postprocessors executed."
+  ],
+  "checks": {
+    "protected_validation_and_shared_style_files_unchanged": 145,
+    "tracked_gofer_files_unchanged": 147,
+    "discovery": {
+      "verification": 49,
+      "validation": 7,
+      "total": 56
+    },
+    "changed_canonical_namelist_cases_passing": 21,
+    "all_case_namelist_checks": {
+      "successful": 54,
+      "unsuccessful": 2,
+      "known_unchanged_issues": {
+        "CASE26_CNF": "Contract references generated variants/1mph and variants/10mph decks absent in this checkout.",
+        "CASE29_SUP": "Canonical DT_EXTENDED_ATTACK is 300 while unchanged contract expects 3600; generated initial_attack deck absent."
+      }
+    },
+    "schema_comparison": {
+      "added": [
+        "OUTPUTS.DUMP_MIDFLAME_WINDSPEED",
+        "SUPPRESSION.ENABLE_INDIRECT_ATTACK"
+      ],
+      "removed": 0,
+      "moved": 0,
+      "changed_defaults": 0
+    },
+    "clean_input_generation_cases": 20,
+    "clean_input_generation_failures": 0,
+    "standalone_report_builds": 49,
+    "aggregate_verification_build": "PASS",
+    "report_checks": "Embedded Times New Roman confirmed in all 49 rebuilt case PDFs; no undefined references, missing macros, or overfull boxes. Visually reviewed six representative reports and all four guide summary pages.",
+    "unit_tests": {
+      "run": 96,
+      "failures": 9,
+      "errors": 1,
+      "new_failures": 0,
+      "remaining_preexisting_failures_or_errors": [
+        "test_case40_requires_the_configured_terminal_time (test_verification_sweep_runtime.CoupledFrontEvidenceTests.test_case40_requires_the_configured_terminal_time)",
+        "test_case_local_helper_and_evaluator_copies_are_synchronized (test_verification_sweep_runtime.SweepRuntimeContractTests.test_case_local_helper_and_evaluator_copies_are_synchronized)",
+        "test_direct_field_grid_must_match_current_front (test_verification_sweep_runtime.SweepRuntimeContractTests.test_direct_field_grid_must_match_current_front)",
+        "test_direct_only_variant_may_terminate_before_tstop (test_verification_sweep_runtime.SweepRuntimeContractTests.test_direct_only_variant_may_terminate_before_tstop)",
+        "test_optional_toa_is_not_required_or_fabricated (test_verification_sweep_runtime.SweepRuntimeContractTests.test_optional_toa_is_not_required_or_fabricated)",
+        "test_report_macro_converter_accepts_corrected_schema (test_landscape_postprocess.LandscapePostprocessTests.test_report_macro_converter_accepts_corrected_schema)",
+        "test_required_unfit_toa_is_not_evaluable (test_verification_sweep_runtime.SweepRuntimeContractTests.test_required_unfit_toa_is_not_evaluable)",
+        "test_required_valid_toa_is_evaluable (test_verification_sweep_runtime.SweepRuntimeContractTests.test_required_valid_toa_is_evaluable)",
+        "test_toa_grid_must_match_current_front (test_verification_sweep_runtime.SweepRuntimeContractTests.test_toa_grid_must_match_current_front)",
+        "test_zero_direct_fields_remain_valid_without_toa (test_verification_sweep_runtime.SweepRuntimeContractTests.test_zero_direct_fields_remain_valid_without_toa)"
+      ]
+    },
+    "verification_decision_counts": {
+      "FAIL": 11,
+      "NOT EVALUABLE": 7,
+      "PASS": 31
+    },
+    "simulation_execution": "NOT RUN; imported decisions are historical evidence, not new model verification."
+  },
+  "original_integrated_guide_environment": {
+    "Captured at (UTC)": "2026-10-21T20:05:24+00:00",
+    "Repository revision": "not available",
+    "Repository state": "unknown",
+    "Host platform": "Linux-4.18.0-553.144.1.el8_10.x86_64-x86_64-with-glibc2.28",
+    "Processor architecture": "x86_64",
+    "Fortran compiler": "GNU Fortran (Spack GCC) 11.4.0",
+    "Python version": "CPython 3.11.7",
+    "Python runtime": "CPython 3.11.7 (/global/software/rocky-8.x86_64/manual/modules/langs/anaconda3/2024.02-1/bin/python3)",
+    "Conda environment": "base / /global/software/rocky-8.x86_64/manual/modules/langs/anaconda3/2024.02-1",
+    "ELMFIRE command": "elmfire",
+    "ELMFIRE resolved path": "/global/home/users/yirenqin712/applications/elmfire/elmfire-main/build/linux/bin/elmfire",
+    "ELMFIRE version declaration": "not declared",
+    "ELMFIRE executable SHA-256": "91e4289750c2bf5b7979596c65e6f6bc2e942efb96ad7a8009bc6aab2feb50fc",
+    "MPI launcher": "mpirun (Open MPI) 4.1.6",
+    "Slurm allocation": "not a Slurm build job",
+    "Loaded modules": "gcc/11.4.0:ucx/1.14.1:openmpi/4.1.6:geos/3.12.0:sqlite/3.43.2:proj/9.2.1:gdal/3.7.3:anaconda3/2024.02-1-11.4",
+    "Python packages": "NumPy 1.26.4; Matplotlib 3.8.0; PyYAML 6.0.1; Rasterio 1.4.3; GDAL 0.0.0; Pandas 2.1.4; GeoPandas 1.1.1; Shapely 2.1.1"
+  },
+  "local_review_artifacts": "/private/tmp/suite-integration-6mg0v4tr",
+  "git_disposition": "Working tree changes only; no new commit or push."
+}

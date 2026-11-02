@@ -10,6 +10,7 @@ import sys
 import tempfile
 import unittest
 import warnings
+from unittest.mock import patch
 from pathlib import Path
 
 import numpy as np
@@ -24,7 +25,8 @@ MODULE_PATH = (
 SPEC = importlib.util.spec_from_file_location("landscape_postprocess", MODULE_PATH)
 POSTPROCESS = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
-SPEC.loader.exec_module(POSTPROCESS)
+with patch.object(sys, "path", [str(MODULE_PATH.parent), *sys.path]):
+    SPEC.loader.exec_module(POSTPROCESS)
 
 
 class LandscapePostprocessTests(unittest.TestCase):
@@ -85,6 +87,7 @@ class LandscapePostprocessTests(unittest.TestCase):
             (case / "outputs").mkdir()
             (case / "report").mkdir()
             shutil.copy2(source, case / "scripts/metrics_to_macro.py")
+            shutil.copy2(source.with_name("report_language.py"), case / "scripts/report_language.py")
             (case / "outputs/metrics.json").write_text(
                 json.dumps(
                     {

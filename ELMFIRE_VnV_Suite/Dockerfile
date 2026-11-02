@@ -10,7 +10,7 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
       gdal-bin libgdal-dev proj-bin libproj-dev \
       # Python geospatial stack from APT (compatible with the above GDAL)
       python3-rasterio python3-fiona python3-shapely python3-geopandas \
-      make && \
+      make latexmk texlive-luatex texlive-latex-extra texlive-science fonts-texgyre fontconfig && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /workspace/ELMFIRE_VnV_Suite

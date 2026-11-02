@@ -18,14 +18,14 @@ Configuration & Recorded value \\
 \endhead
 \bottomrule
 \endlastfoot
-Recorded at (Coordinated Universal Time) & 2026-10-18T17:19:41+00:00 \\
-Declared ELMFIRE release & 2025.1002 \\
-Operating system & Linux-7.0.12-linuxkit-aarch64-with-glibc2.35 \\
-Processor architecture & aarch64 \\
-Message Passing Interface (MPI) implementation & mpirun (Open MPI) 4.1.2 \\
-Available Fortran compiler & GNU Fortran (Ubuntu 11.4.0-1ubuntu1\textasciitilde{}22.04.3) 11.4.0 \\
-Python version & CPython 3.10.12 \\
-Scientific analysis libraries & NumPy 1.26.4; \allowbreak{}Matplotlib 3.8.4; \allowbreak{}PyYAML 6.0.3; \allowbreak{}Rasterio 1.4.4; \allowbreak{}GDAL 3.4.1; \allowbreak{}Pandas 2.2.2; \allowbreak{}GeoPandas 1.1.4; \allowbreak{}Shapely 2.1.2 \\
+Recorded at (Coordinated Universal Time) & 2026-10-23T01:45:07+00:00 \\
+Declared ELMFIRE release & not declared \\
+Operating system & macOS-15.7.7-arm64-arm-64bit \\
+Processor architecture & arm64 \\
+Message Passing Interface (MPI) implementation & not available \\
+Available Fortran compiler & GNU Fortran (Homebrew GCC 14.2.0\_1) 14.2.0 \\
+Python version & CPython 3.12.9 \\
+Scientific analysis libraries & NumPy 1.26.4; \allowbreak{}Matplotlib 3.9.2; \allowbreak{}PyYAML 6.0.1; \allowbreak{}Rasterio 1.5.0; \allowbreak{}GDAL not installed; \allowbreak{}Pandas 2.2.2; \allowbreak{}GeoPandas not installed; \allowbreak{}Shapely not installed \\
 \end{longtable}
 \endgroup\ReportBodyText
 
@@ -47,20 +47,48 @@ Case & Comparison type & MPI processes \\
 \endfoot
 \bottomrule
 \endlastfoot
+\hyperref[case-detail:antelope-2021]{antelope\_2021} & Landscape-scale validation & 1 \\
+\hyperref[case-detail:august-complex-2020]{august\_complex\_2020} & Landscape-scale validation & 1 \\
+\hyperref[case-detail:beckwourth-complex-2021]{beckwourth\_complex\_2021} & Landscape-scale validation & 1 \\
+\hyperref[case-detail:bobcat-2020]{bobcat\_2020} & Landscape-scale validation & 1 \\
+\hyperref[case-detail:caldor-2021]{caldor\_2021} & Landscape-scale validation & 1 \\
 \hyperref[case-detail:camp-fire]{camp\_fire} & Landscape-scale validation & 50 \\
+\hyperref[case-detail:creek-2020]{creek\_2020} & Landscape-scale validation & 1 \\
+\hyperref[case-detail:czu-lightning-complex-2020]{czu\_lightning\_complex\_2020} & Landscape-scale validation & 1 \\
+\hyperref[case-detail:dixie-2021]{dixie\_2021} & Landscape-scale validation & 1 \\
+\hyperref[case-detail:dolan-2020]{dolan\_2020} & Landscape-scale validation & 1 \\
+\hyperref[case-detail:glass-2020]{glass\_2020} & Landscape-scale validation & 1 \\
+\hyperref[case-detail:july-complex-2020]{july\_complex\_2020} & Landscape-scale validation & 1 \\
+\hyperref[case-detail:kincade-2019]{kincade\_2019} & Landscape-scale validation & 1 \\
+\hyperref[case-detail:knp-complex-2021]{knp\_complex\_2021} & Landscape-scale validation & 1 \\
+\hyperref[case-detail:lnu-lightning-complex-2020]{lnu\_lightning\_complex\_2020} & Landscape-scale validation & 1 \\
+\hyperref[case-detail:mccash-2021]{mccash\_2021} & Landscape-scale validation & 1 \\
+\hyperref[case-detail:mcfarland-2021]{mcfarland\_2021} & Landscape-scale validation & 1 \\
+\hyperref[case-detail:monument-2021]{monument\_2021} & Landscape-scale validation & 1 \\
+\hyperref[case-detail:north-complex-2020]{north\_complex\_2020} & Landscape-scale validation & 1 \\
+\hyperref[case-detail:red-salmon-complex-2020]{red\_salmon\_complex\_2020} & Landscape-scale validation & 1 \\
+\hyperref[case-detail:river-complex-2021]{river\_complex\_2021} & Landscape-scale validation & 1 \\
+\hyperref[case-detail:scu-lightning-complex-2020]{scu\_lightning\_complex\_2020} & Landscape-scale validation & 1 \\
+\hyperref[case-detail:slater-and-devil-2020]{slater\_and\_devil\_2020} & Landscape-scale validation & 1 \\
+\hyperref[case-detail:sqf-complex-2020]{sqf\_complex\_2020} & Landscape-scale validation & 1 \\
+\hyperref[case-detail:tamarack-2021]{tamarack\_2021} & Landscape-scale validation & 1 \\
 \hyperref[case-detail:thomas-fire]{thomas\_fire} & Landscape-scale validation & 50 \\
 \hyperref[case-detail:tubbs-fire]{tubbs\_fire} & Landscape-scale validation & 50 \\
+\hyperref[case-detail:w-5-cold-springs-2020]{w\_5\_cold\_springs\_2020} & Landscape-scale validation & 1 \\
+\hyperref[case-detail:walker-2019]{walker\_2019} & Landscape-scale validation & 1 \\
+\hyperref[case-detail:windy-2021]{windy\_2021} & Landscape-scale validation & 1 \\
+\hyperref[case-detail:zogg-2020]{zogg\_2020} & Landscape-scale validation & 1 \\
 \end{longtable}
 \endgroup\ReportBodyText
 
 \subsection{Scientific decision summary}
 The decisions below follow the established calculated metrics and case-specific acceptance criteria. Completing a simulation or preparing a report does not establish PASS. Missing or insufficient scientific evidence is reported as NOT EVALUABLE.
 
-\textbf{Total cases:} 3\quad
+\textbf{Total cases:} 31\quad
 \textbf{PASS:} 0\quad
 \textbf{FAIL:} 0\quad
-\textbf{CHARACTERIZED:} 3\quad
-\textbf{NOT EVALUABLE:} 0
+\textbf{CHARACTERIZED:} 0\quad
+\textbf{NOT EVALUABLE:} 31
 
 \begingroup\small
 \setlength{\LTpre}{0.8em}
@@ -79,9 +107,37 @@ Case & Category & Title & Decision \\
 \endfoot
 \bottomrule
 \endlastfoot
-\hyperref[case-detail:camp-fire]{camp\_fire} & Landscape-scale validation & \hyperref[case-detail:camp-fire]{2018 Camp Fire landscape reconstruction} & \mbox{\textcolor{blue!70!black}{\textbf{CHARACTERIZED}}} \\
-\hyperref[case-detail:thomas-fire]{thomas\_fire} & Landscape-scale validation & \hyperref[case-detail:thomas-fire]{2017 Thomas Fire landscape reconstruction} & \mbox{\textcolor{blue!70!black}{\textbf{CHARACTERIZED}}} \\
-\hyperref[case-detail:tubbs-fire]{tubbs\_fire} & Landscape-scale validation & \hyperref[case-detail:tubbs-fire]{2017 Tubbs Fire landscape reconstruction} & \mbox{\textcolor{blue!70!black}{\textbf{CHARACTERIZED}}} \\
+\hyperref[case-detail:antelope-2021]{antelope\_2021} & Landscape-scale validation & \hyperref[case-detail:antelope-2021]{2021 Antelope fire reconstruction against GOFER observations} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:august-complex-2020]{august\_complex\_2020} & Landscape-scale validation & \hyperref[case-detail:august-complex-2020]{2020 August Complex fire reconstruction against GOFER observations} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:beckwourth-complex-2021]{beckwourth\_complex\_2021} & Landscape-scale validation & \hyperref[case-detail:beckwourth-complex-2021]{2021 Beckwourth Complex fire reconstruction against GOFER observations} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:bobcat-2020]{bobcat\_2020} & Landscape-scale validation & \hyperref[case-detail:bobcat-2020]{2020 Bobcat fire reconstruction against GOFER observations} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:caldor-2021]{caldor\_2021} & Landscape-scale validation & \hyperref[case-detail:caldor-2021]{2021 Caldor Fire reconstruction against GOFER hourly perimeters} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:camp-fire]{camp\_fire} & Landscape-scale validation & \hyperref[case-detail:camp-fire]{2018 Camp Fire landscape reconstruction} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:creek-2020]{creek\_2020} & Landscape-scale validation & \hyperref[case-detail:creek-2020]{2020 Creek fire reconstruction against GOFER observations} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:czu-lightning-complex-2020]{czu\_lightning\_complex\_2020} & Landscape-scale validation & \hyperref[case-detail:czu-lightning-complex-2020]{2020 CZU Lightning Complex reconstruction against GOFER hourly perimeters} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:dixie-2021]{dixie\_2021} & Landscape-scale validation & \hyperref[case-detail:dixie-2021]{2021 Dixie fire reconstruction against GOFER observations} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:dolan-2020]{dolan\_2020} & Landscape-scale validation & \hyperref[case-detail:dolan-2020]{2020 Dolan fire reconstruction against GOFER observations} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:glass-2020]{glass\_2020} & Landscape-scale validation & \hyperref[case-detail:glass-2020]{2020 Glass Fire reconstruction against GOFER hourly perimeters} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:july-complex-2020]{july\_complex\_2020} & Landscape-scale validation & \hyperref[case-detail:july-complex-2020]{2020 July Complex fire reconstruction against GOFER observations} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:kincade-2019]{kincade\_2019} & Landscape-scale validation & \hyperref[case-detail:kincade-2019]{2019 Kincade Fire reconstruction against GOFER hourly perimeters} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:knp-complex-2021]{knp\_complex\_2021} & Landscape-scale validation & \hyperref[case-detail:knp-complex-2021]{2021 KNP Complex fire reconstruction against GOFER observations} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:lnu-lightning-complex-2020]{lnu\_lightning\_complex\_2020} & Landscape-scale validation & \hyperref[case-detail:lnu-lightning-complex-2020]{2020 LNU Lightning Complex fire reconstruction against GOFER observations} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:mccash-2021]{mccash\_2021} & Landscape-scale validation & \hyperref[case-detail:mccash-2021]{2021 McCash fire reconstruction against GOFER observations} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:mcfarland-2021]{mcfarland\_2021} & Landscape-scale validation & \hyperref[case-detail:mcfarland-2021]{2021 McFarland fire reconstruction against GOFER observations} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:monument-2021]{monument\_2021} & Landscape-scale validation & \hyperref[case-detail:monument-2021]{2021 Monument fire reconstruction against GOFER observations} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:north-complex-2020]{north\_complex\_2020} & Landscape-scale validation & \hyperref[case-detail:north-complex-2020]{2020 North Complex fire reconstruction against GOFER observations} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:red-salmon-complex-2020]{red\_salmon\_complex\_2020} & Landscape-scale validation & \hyperref[case-detail:red-salmon-complex-2020]{2020 Red Salmon Complex fire reconstruction against GOFER observations} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:river-complex-2021]{river\_complex\_2021} & Landscape-scale validation & \hyperref[case-detail:river-complex-2021]{2021 River Complex fire reconstruction against GOFER observations} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:scu-lightning-complex-2020]{scu\_lightning\_complex\_2020} & Landscape-scale validation & \hyperref[case-detail:scu-lightning-complex-2020]{2020 SCU Lightning Complex fire reconstruction against GOFER observations} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:slater-and-devil-2020]{slater\_and\_devil\_2020} & Landscape-scale validation & \hyperref[case-detail:slater-and-devil-2020]{2020 Slater and Devil fire reconstruction against GOFER observations} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:sqf-complex-2020]{sqf\_complex\_2020} & Landscape-scale validation & \hyperref[case-detail:sqf-complex-2020]{2020 SQF Complex fire reconstruction against GOFER observations} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:tamarack-2021]{tamarack\_2021} & Landscape-scale validation & \hyperref[case-detail:tamarack-2021]{2021 Tamarack fire reconstruction against GOFER observations} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:thomas-fire]{thomas\_fire} & Landscape-scale validation & \hyperref[case-detail:thomas-fire]{2017 Thomas Fire landscape reconstruction} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:tubbs-fire]{tubbs\_fire} & Landscape-scale validation & \hyperref[case-detail:tubbs-fire]{2017 Tubbs Fire landscape reconstruction} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:w-5-cold-springs-2020]{w\_5\_cold\_springs\_2020} & Landscape-scale validation & \hyperref[case-detail:w-5-cold-springs-2020]{2020 W-5 Cold Springs fire reconstruction against GOFER observations} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:walker-2019]{walker\_2019} & Landscape-scale validation & \hyperref[case-detail:walker-2019]{2019 Walker fire reconstruction against GOFER observations} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:windy-2021]{windy\_2021} & Landscape-scale validation & \hyperref[case-detail:windy-2021]{2021 Windy fire reconstruction against GOFER observations} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
+\hyperref[case-detail:zogg-2020]{zogg\_2020} & Landscape-scale validation & \hyperref[case-detail:zogg-2020]{2020 Zogg fire reconstruction against GOFER observations} & \mbox{\textcolor{orange!75!black}{\textbf{NOT EVALUABLE}}} \\
 \end{longtable}
 \endgroup\ReportBodyText
 

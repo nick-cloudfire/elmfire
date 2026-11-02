@@ -12,6 +12,17 @@ docs
 *.ipynb_checkpoints/
 __pycache__/
 *.pyc
+zenodo/dist/
+zenodo/datasets/*/data/archive_payload/
+zenodo/datasets/*/data/provenance/archive/
+cases/Validation/landscape_scale/*/data/archive_payload/
+cases/Validation/landscape_scale/*/data/viirs_observation/
+cases/Validation/landscape_scale/*/data/provenance/archive/
+cases/Validation/landscape_scale/*/data/fuels_and_topography/
+cases/Validation/landscape_scale/*/data/weather/
+cases/Validation/landscape_scale/*/data/misc/
+**/.zenodo-cache/
+**/tex-cache/
 
 # git
 .git

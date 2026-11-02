@@ -23,8 +23,8 @@
         {
           "name": "max ROS",
           "target": 1.809,
-          "measured": 1.7451090812683105,
-          "percent_error": -3.5318363035759757,
+          "measured": 1.7451092004776,
+          "percent_error": -3.531829713786614,
           "units": "m/min",
           "status": "PASS"
         }

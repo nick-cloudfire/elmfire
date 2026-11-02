@@ -49,8 +49,8 @@
         "ember_ignition": "ember_ignition_0000001_0000450.tif"
       },
       "ember_ignition_cells": 0,
-      "mean_ros_mps": 0.5777207011717328,
-      "rothermel_ros_mps": 0.5770151672363282,
+      "mean_ros_mps": 0.577720701171733,
+      "rothermel_ros_mps": 0.5770152059936524,
       "fit_cells": 22
     },
     "mixed_mode": {
@@ -64,8 +64,8 @@
         "ember_ignition": "ember_ignition_0000001_0000300.tif"
       },
       "ember_ignition_cells": 64,
-      "mean_ros_mps": 1.0058969920563006,
-      "rothermel_ros_mps": 0.5770151672363282,
+      "mean_ros_mps": 1.005896992056301,
+      "rothermel_ros_mps": 0.5770152447509767,
       "fit_cells": 19
     }
   }

@@ -1,0 +1,623 @@
+{
+  "schema_version": 1,
+  "case_id": "august_complex_2020",
+  "dataset_version": "2.2.0",
+  "source_revision": "bddc2cef6107f4be8c0c2b4ef08a1d547efe339e",
+  "source_state": "working tree snapshot; file hashes are authoritative",
+  "archive_scope": "input data, observations and data-generation source only",
+  "source_metadata": {
+    "schema_version": 1,
+    "case_id": "august_complex_2020",
+    "fire_id": "August_Complex_2020",
+    "case_status": "implemented validation case; simulation not run",
+    "model_inputs": {
+      "source": {
+        "kind": "user-supplied directory",
+        "name": "ELMFIRE_GOFER_validation",
+        "received_date": "2026-10-22",
+        "provider": "User-supplied updated directory",
+        "license": "Not documented in the supplied directory; upstream access and redistribution terms still apply."
+      },
+      "processing": "unchanged file contents; case-relative paths normalized",
+      "updated_source": {
+        "kind": "user-supplied directory",
+        "name": "ELMFIRE_GOFER_validation",
+        "received_date": "2026-10-22"
+      },
+      "previous_source_archive": {
+        "filename": "ELMFIRE_GOFER_validation.tar.gz",
+        "size": 7038832441,
+        "sha256": "714b9f2b3c3417336ea200bfc6f2bba2955376bf3088d675a811a11d28b0fffe",
+        "files": 583,
+        "skipped_macos_metadata": 682,
+        "received_date_utc": "2026-10-21",
+        "provider": "User-supplied archive",
+        "license": "Not documented in the supplied archive; upstream access and redistribution terms still apply."
+      },
+      "provider": "CloudFire historical fuel, weather and ignition service",
+      "fuel_source": "LANDFIRE",
+      "fuel_version": "2.1.0",
+      "weather_source": "Historical weather supplied through CloudFire; underlying analysis product not identified in the supplied preparation source",
+      "offshore_cells_filled": null,
+      "files": [
+        {
+          "name": "adj.tif",
+          "path": "data/fuels_and_topography/adj.tif",
+          "size": 214806,
+          "sha256": "d168e9d13df6dda7e540dee6a733168eb08b282c1ef0e2ab5602fbc2d0356f9c",
+          "source_relative_path": "August_Complex_2020/inputs/adj.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "name": "fuel_models.csv",
+          "path": "data/misc/fuel_models.csv",
+          "size": 3948,
+          "sha256": "bf32ba154b230bf16e38941d662c9a49e72652307ffe5e1468a511b514eaaf5b",
+          "source_relative_path": "August_Complex_2020/inputs/fuel_models.csv",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "name": "ignition_mask.tif",
+          "path": "data/fuels_and_topography/ignition_mask.tif",
+          "size": 197859,
+          "sha256": "407e489c3f84417a38ac5866f0ba19b68f25cb14352a006ff86f3946d635207b",
+          "source_relative_path": "August_Complex_2020/inputs/ignition_mask.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "name": "ignitions.csv",
+          "path": "data/misc/ignitions.csv",
+          "size": 1516,
+          "sha256": "ca59c12115b9a91f9b438c7b948940c105d69d752abe61cbb3b991ea660549be",
+          "source_relative_path": "August_Complex_2020/inputs/ignitions.csv",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "name": "landscape.tif",
+          "path": "data/fuels_and_topography/landscape.tif",
+          "size": 81717187,
+          "sha256": "a72dc75dfd3a13b1c72e01758521e1ef7b324e8ec081d1a9e5a028607e0e4d9e",
+          "source_relative_path": "August_Complex_2020/inputs/landscape.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "name": "lh.tif",
+          "path": "data/weather/lh.tif",
+          "size": 76137446,
+          "sha256": "c8de5ea3b20a6e1cc73a4ef71b52b12550193ae25d180331f91eddd3afe8c9cc",
+          "source_relative_path": "August_Complex_2020/inputs/lh.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "name": "lw.tif",
+          "path": "data/weather/lw.tif",
+          "size": 74061378,
+          "sha256": "86ab94cbfcf90a3a26d4845a54aa1eb8a704c4cda2d5d46f4775821a51058ff6",
+          "source_relative_path": "August_Complex_2020/inputs/lw.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "name": "m1.tif",
+          "path": "data/weather/m1.tif",
+          "size": 243165885,
+          "sha256": "44cffdc02485b0a79ea61977822aa9fc7616eee2f99efb5b6c1e79c52409577b",
+          "source_relative_path": "August_Complex_2020/inputs/m1.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "name": "m10.tif",
+          "path": "data/weather/m10.tif",
+          "size": 242982455,
+          "sha256": "18a44c8b121403e68ea2f099028125b6010389c2327501e2429105e51f1caf4f",
+          "source_relative_path": "August_Complex_2020/inputs/m10.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "name": "m100.tif",
+          "path": "data/weather/m100.tif",
+          "size": 243789132,
+          "sha256": "18b5858ae481247d6a93041df976493958d17bf42b318821217e481f16641dc4",
+          "source_relative_path": "August_Complex_2020/inputs/m100.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "name": "phi.tif",
+          "path": "data/fuels_and_topography/phi.tif",
+          "size": 214806,
+          "sha256": "d168e9d13df6dda7e540dee6a733168eb08b282c1ef0e2ab5602fbc2d0356f9c",
+          "source_relative_path": "August_Complex_2020/inputs/phi.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "name": "wd.tif",
+          "path": "data/weather/wd.tif",
+          "size": 37458557,
+          "sha256": "76d22bda625030a5cac60ff1b4cb0d6adeec01a20d23cdef5b43e1be966c859d",
+          "source_relative_path": "August_Complex_2020/inputs/wd.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "name": "ws.tif",
+          "path": "data/weather/ws.tif",
+          "size": 247865161,
+          "sha256": "e2680c7372a52f7f1266f439130b4c820de79d3068fc59e56911e08a725d596f",
+          "source_relative_path": "August_Complex_2020/inputs/ws.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        }
+      ]
+    },
+    "observation": {
+      "product": "GOFER arrival-time rasters and previews, plus CAL FIRE final-perimeter GeoPackages and aligned raster masks",
+      "source_dataset": "https://doi.org/10.5281/zenodo.8327264",
+      "reference": "https://doi.org/10.5194/essd-16-1395-2024",
+      "files": [
+        {
+          "path": "data/observation/August_Complex_2020_final_perimeter.gpkg",
+          "size": 3293184,
+          "sha256": "833bc639d7b016b70940c7cbfb459ec56bce5ecb17d115cf52c6b63963c04c1c",
+          "source_relative_path": "August_Complex_2020/observations/August_Complex_2020_final_perimeter.gpkg",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "path": "data/observation/August_Complex_2020_final_perimeter_30m.tif",
+          "size": 65103,
+          "sha256": "848a9cd1347372fb111b54d80cab002ac5207f2651d8266896e5a1f9226c192e",
+          "source_relative_path": "August_Complex_2020/observations/August_Complex_2020_final_perimeter_30m.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "path": "data/observation/August_Complex_2020_toa.png",
+          "size": 241443,
+          "sha256": "e97c50f1da5b5472425e3153966e62ff9e3fc2e78cf8ac7b7647f5ac8d602c1c",
+          "source_relative_path": "August_Complex_2020/observations/August_Complex_2020_toa.png",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "path": "data/observation/August_Complex_2020_toa.tif",
+          "size": 131115,
+          "sha256": "e6948d44b4fc36e345f334c8e136ce20662b86830fba5ba2772c3993e5ef1dda",
+          "source_relative_path": "August_Complex_2020/observations/August_Complex_2020_toa.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        }
+      ],
+      "products": {
+        "gofer_arrival": "data/observation/August_Complex_2020_toa.tif",
+        "gofer_preview": "data/observation/August_Complex_2020_toa.png",
+        "final_perimeter": "data/observation/August_Complex_2020_final_perimeter.gpkg",
+        "final_perimeter_mask": "data/observation/August_Complex_2020_final_perimeter_30m.tif"
+      },
+      "final_perimeter_source": {
+        "provider": "CAL FIRE FRAP",
+        "source_identification": "California Historic Fire Perimeters (2026-05-26), as identified by the supplied exploratory.py",
+        "generator": "scripts/generate_data/source/exploratory.py",
+        "layers": [
+          "calfire_final",
+          "calfire_records",
+          "gofer_final"
+        ],
+        "matching": "year, name/complex name, and more than 20 percent of each CAL FIRE record overlapping the final GOFER perimeter",
+        "mask": "cell-centre rasterization on the input landscape grid; burned=1, unburned=0, nodata=255",
+        "license_evidence": "not supplied in the referenced directory"
+      },
+      "gofer_final_area_km2": 4342.791,
+      "hourly_perimeters": 1465,
+      "derivation": "supplied arrival-time raster; upstream raster-generation code was not supplied",
+      "area_series_basis": "growth calculated from this case arrival-time raster; no separate hourly vector-area series was supplied"
+    },
+    "known_provenance_gaps": [
+      "Upstream access and redistribution terms remain undocumented.",
+      "Exact GOFER version and arrival-time raster transformation history are unverified.",
+      "Original calibration history and independently predeclared acceptance thresholds are not documented.",
+      "Underlying historical weather product and moisture derivation are not identified in the supplied preparation source."
+    ],
+    "generation": {
+      "input_scripts": "scripts/generate_data/prepare_inputs.py",
+      "observation_scripts": "scripts/generate_data/generate_observations.py",
+      "supplied_sources": "scripts/generate_data/source",
+      "limitations": "CAL FIRE final-perimeter generation is supplied in exploratory.py; GOFER arrival-time TIFF/PNG generation code is absent. Upstream CAL FIRE/GOFER files and CloudFire service access are external requirements.",
+      "gust_scripts": "scripts/generate_data/rtma_gusts.py",
+      "gust_usage": "prepare_inputs.py --gusts or standalone rtma_gusts.py --output-file NEW_FILE; existing files and model configuration are preserved",
+      "frozen_archive_note": "Zenodo 2.2.0 includes supplementary gust rasters and updated generation scripts; 2.1.0 predates them."
+    },
+    "fire_name": "August Complex",
+    "fire_year": 2020,
+    "event_start_utc": "2020-08-16T21:00:00Z",
+    "event_end_utc": "2020-10-16T22:00:00Z",
+    "official_size_ac": 1032648.0,
+    "model_domain": {
+      "crs": "EPSG:32610",
+      "crs_name": "UTM zone 10N (EPSG:32610)",
+      "cell_size_m": 30.0,
+      "extent": [
+        443525.187654445,
+        4354088.47954363,
+        549515.187654445,
+        4488098.47954363
+      ],
+      "width": 3533,
+      "height": 4467,
+      "margin_km": 10.0
+    },
+    "weather": {
+      "first_time_utc": "2020-08-16T21:00:00Z",
+      "band_count": 1466,
+      "interval_s": 3600,
+      "offset_from_event_start_h": 0.0,
+      "units_basis": "supplied exploratory.py: 20-ft wind speed mph, wind direction from degrees, moisture percent"
+    },
+    "ignitions": [
+      {
+        "t_utc": "2020-08-16T21:00:00Z",
+        "lon": -122.68430648672837,
+        "lat": 39.769361323599696,
+        "x": 527037.971,
+        "y": 4402206.742,
+        "t_ign_s": 0.0,
+        "moved_m": 0.0
+      },
+      {
+        "t_utc": "2020-08-19T01:00:00Z",
+        "lon": -122.770270399297,
+        "lat": 39.67132185122991,
+        "x": 519703.354,
+        "y": 4391303.413,
+        "t_ign_s": 187200.0,
+        "moved_m": 0.0
+      },
+      {
+        "t_utc": "2020-08-19T05:00:00Z",
+        "lon": -122.64641913022261,
+        "lat": 39.60543154419591,
+        "x": 530354.59,
+        "y": 4384025.183,
+        "t_ign_s": 201600.0,
+        "moved_m": 0.0
+      },
+      {
+        "t_utc": "2020-08-19T11:00:00Z",
+        "lon": -122.74747258398605,
+        "lat": 40.11722889645388,
+        "x": 521518.77,
+        "y": 4440799.168,
+        "t_ign_s": 223200.0,
+        "moved_m": 0.0
+      },
+      {
+        "t_utc": "2020-08-19T22:00:00Z",
+        "lon": -122.66647192886452,
+        "lat": 39.911237075628584,
+        "x": 528506.714,
+        "y": 4417958.713,
+        "t_ign_s": 262800.0,
+        "moved_m": 0.0
+      },
+      {
+        "t_utc": "2020-08-19T23:00:00Z",
+        "lon": -122.72962934260781,
+        "lat": 39.5338072920847,
+        "x": 523234.953,
+        "y": 4376051.369,
+        "t_ign_s": 266400.0,
+        "moved_m": 0.0
+      },
+      {
+        "t_utc": "2020-08-20T00:00:00Z",
+        "lon": -122.8937294556695,
+        "lat": 39.9379673248505,
+        "x": 509079.426,
+        "y": 4420877.641,
+        "t_ign_s": 270000.0,
+        "moved_m": 0.0
+      },
+      {
+        "t_utc": "2020-08-20T02:00:00Z",
+        "lon": -122.92362694205238,
+        "lat": 39.532359780061995,
+        "x": 506630.188,
+        "y": 4375853.48,
+        "t_ign_s": 277200.0,
+        "moved_m": 67.0
+      },
+      {
+        "t_utc": "2020-08-20T03:00:00Z",
+        "lon": -122.7791841046674,
+        "lat": 39.56442975497344,
+        "x": 518968.001,
+        "y": 4379438.284,
+        "t_ign_s": 280800.0,
+        "moved_m": 0.0
+      },
+      {
+        "t_utc": "2020-08-20T18:00:00Z",
+        "lon": -123.06350947597839,
+        "lat": 40.11131427286513,
+        "x": 494587.663,
+        "y": 4440114.066,
+        "t_ign_s": 334800.0,
+        "moved_m": 0.0
+      },
+      {
+        "t_utc": "2020-09-13T17:00:00Z",
+        "lon": -122.93495627948653,
+        "lat": 40.05765393672525,
+        "x": 505547.44,
+        "y": 4434158.3,
+        "t_ign_s": 2404800.0,
+        "moved_m": 0.0
+      },
+      {
+        "t_utc": "2020-09-13T22:00:00Z",
+        "lon": -123.09188323089829,
+        "lat": 39.579405778376554,
+        "x": 492108.967,
+        "y": 4381081.103,
+        "t_ign_s": 2422800.0,
+        "moved_m": 0.0
+      }
+    ],
+    "elmfire_source": {
+      "provided_source_path": "/Users/yiren/Desktop/MyResearch/ELMFIRE/ELMFIRE_Git/elmfire-nick/build/source",
+      "branch": "yiren",
+      "git_commit": "8981f14e0170ced6cc28c4d308d4545ba925f5ef",
+      "repository_dirty": true,
+      "source_directory_dirty": false,
+      "files_sha256": {
+        "elmfire.f90": "f1820f890123c2808a15eafaeade82d172b8603041255d0f367ebcce4e9a401f",
+        "elmfire_calibration.f90": "75838a14439ba25661e1ad90a90e37ac25e5776d81326df8f3d8fdb04aad5cb5",
+        "elmfire_ignition.f90": "2586ece44726ab93eb5170169cf25b4098f90888ee11fea4da17dd3bb25b1bea",
+        "elmfire_init.f90": "fcf37a2ca392ca6c6af901c53cdcc64a3dfd44f632e31980be9b8a63cd94047d",
+        "elmfire_io.f90": "e5a54c76c7e71b18ce2751eb839724843fee0e1f90823c8544a9ce9fc10550a6",
+        "elmfire_level_set.f90": "148c1ce043f3b3d0041f2b1b27abe4bace8f4fcb635f03931bec180bfb39c9cf",
+        "elmfire_namelists.f90": "07a5429d45036ba0363cc42ad2df69e1c572b8244687a3fe80ad9214572aa517",
+        "elmfire_post.f90": "bcd8346451840a5b877dd88efef98087f20da497acc775ebcae6ed47cf546311",
+        "elmfire_spotting.f90": "b0f1adb1dd80c889a42819bcee187c5a0d800f927a1af99d1166aa03137dcd5f",
+        "elmfire_spotting_superseded.f90": "1f1d69667327fd3737ac3555b272410769987a16cb99708306d519b22dab1a43",
+        "elmfire_spread_rate.f90": "f5783d6db2d2677c2ff9834d610c2055dd5f7d31764d10296459d390d2d1117e",
+        "elmfire_subs.f90": "180e0e2bd1c6b0801fed92a2d70491fae525137e85ae6d42cf7332b0980bd8a5",
+        "elmfire_suppression.f90": "1eb8e309f78d9706e299e620cf18b51a35686b4e8edca12779f405035d9bd6a2",
+        "elmfire_vars.f90": "5b7a9e00798216d6516922e2a27bde8907a4e518dbfb68b8f4be42dd1841f215"
+      }
+    },
+    "configuration": {
+      "supplied_source_relative_path": "August_Complex_2020/inputs/elmfire.data",
+      "supplied_sha256": "8d265f8c088cc5903cfcb164a3300fb21e85ae5fb786fc0878584ff9f97bdfca",
+      "adapted_sha256": "3d8d129ab1be332370a8ef0833f7fd0738165c062d5933a07f3bb4e824644602",
+      "changed_assignments": [
+        "INPUTS.FUELS_AND_TOPOGRAPHY_DIRECTORY",
+        "INPUTS.WEATHER_DIRECTORY",
+        "MISCELLANEOUS.SCRATCH"
+      ],
+      "scientific_assignments_preserved": true
+    },
+    "supplementary_weather": {
+      "source_directory": "ELMFIRE_GOFER_validation 2",
+      "received_date": "2026-10-22",
+      "files": [
+        {
+          "path": "data/weather/ws_gust.tif",
+          "size": 247725714,
+          "sha256": "45744b2373b219f38b9763d0f7f2972abdaeea71f07f9c19a7de15d992044f8f",
+          "source_relative_path": "August_Complex_2020/inputs/ws_gust.tif",
+          "processing": "copied unchanged from user-supplied ELMFIRE_GOFER_validation 2",
+          "used_by_current_simulation": false,
+          "name": "ws_gust.tif"
+        }
+      ],
+      "role": "supplementary; not selected by current ELMFIRE namelist",
+      "source": "NOAA RTMA 2.5 km GUST at 10 m, as identified by supplied raster tags and source script",
+      "units": "mph at 20 ft",
+      "conversion": "0.87 * 2.23694 * GUST[m/s at 10 m]",
+      "resampling": "bilinear onto the ws.tif grid",
+      "first_time_utc": "2020-08-16T21:00:00Z",
+      "interval_s": 3600,
+      "band_count": 1466,
+      "time_basis": "band order and first UTC hour from supplied inputs_log.csv; per-band timestamps were not supplied in the TIFF",
+      "import_checks": {
+        "grid_and_band_count_match_ws": true,
+        "missing_cells": 0,
+        "negative_cells": 0,
+        "minimum_mph": 0.0,
+        "maximum_mph": 49.5091667175293,
+        "mean_mph": 8.462197506746245
+      },
+      "regeneration_verified": false
+    }
+  },
+  "zenodo": {
+    "record_id": null,
+    "version_doi": null,
+    "concept_doi": null
+  },
+  "bundles": [
+    {
+      "role": "inputs",
+      "filename": "inputs.tar.gz",
+      "required": true,
+      "size": 1473320666,
+      "sha256": "34d963cb2b623dbdc7033233166865b285cebfc3b9dedb123aea86cda5b6e750",
+      "url": null,
+      "files": [
+        {
+          "path": "data/weather/lh.tif",
+          "size": 76137446,
+          "sha256": "c8de5ea3b20a6e1cc73a4ef71b52b12550193ae25d180331f91eddd3afe8c9cc"
+        },
+        {
+          "path": "data/weather/lw.tif",
+          "size": 74061378,
+          "sha256": "86ab94cbfcf90a3a26d4845a54aa1eb8a704c4cda2d5d46f4775821a51058ff6"
+        },
+        {
+          "path": "data/weather/m1.tif",
+          "size": 243165885,
+          "sha256": "44cffdc02485b0a79ea61977822aa9fc7616eee2f99efb5b6c1e79c52409577b"
+        },
+        {
+          "path": "data/weather/m10.tif",
+          "size": 242982455,
+          "sha256": "18a44c8b121403e68ea2f099028125b6010389c2327501e2429105e51f1caf4f"
+        },
+        {
+          "path": "data/weather/m100.tif",
+          "size": 243789132,
+          "sha256": "18b5858ae481247d6a93041df976493958d17bf42b318821217e481f16641dc4"
+        },
+        {
+          "path": "data/weather/wd.tif",
+          "size": 37458557,
+          "sha256": "76d22bda625030a5cac60ff1b4cb0d6adeec01a20d23cdef5b43e1be966c859d"
+        },
+        {
+          "path": "data/weather/ws.tif",
+          "size": 247865161,
+          "sha256": "e2680c7372a52f7f1266f439130b4c820de79d3068fc59e56911e08a725d596f"
+        },
+        {
+          "path": "data/weather/ws_gust.tif",
+          "size": 247725714,
+          "sha256": "45744b2373b219f38b9763d0f7f2972abdaeea71f07f9c19a7de15d992044f8f"
+        },
+        {
+          "path": "data/fuels_and_topography/adj.tif",
+          "size": 214806,
+          "sha256": "d168e9d13df6dda7e540dee6a733168eb08b282c1ef0e2ab5602fbc2d0356f9c"
+        },
+        {
+          "path": "data/fuels_and_topography/ignition_mask.tif",
+          "size": 197859,
+          "sha256": "407e489c3f84417a38ac5866f0ba19b68f25cb14352a006ff86f3946d635207b"
+        },
+        {
+          "path": "data/fuels_and_topography/landscape.tif",
+          "size": 81717187,
+          "sha256": "a72dc75dfd3a13b1c72e01758521e1ef7b324e8ec081d1a9e5a028607e0e4d9e"
+        },
+        {
+          "path": "data/fuels_and_topography/phi.tif",
+          "size": 214806,
+          "sha256": "d168e9d13df6dda7e540dee6a733168eb08b282c1ef0e2ab5602fbc2d0356f9c"
+        },
+        {
+          "path": "data/misc/fuel_models.csv",
+          "size": 3948,
+          "sha256": "bf32ba154b230bf16e38941d662c9a49e72652307ffe5e1468a511b514eaaf5b"
+        },
+        {
+          "path": "data/misc/ignitions.csv",
+          "size": 1516,
+          "sha256": "ca59c12115b9a91f9b438c7b948940c105d69d752abe61cbb3b991ea660549be"
+        }
+      ]
+    },
+    {
+      "role": "observations",
+      "filename": "observations.tar.gz",
+      "required": true,
+      "size": 2689722,
+      "sha256": "1246f317529094e32ea68c8f0f753ad6893080b51cb8a56d5ba80026970cda37",
+      "url": null,
+      "files": [
+        {
+          "path": "data/observation/August_Complex_2020_final_perimeter.gpkg",
+          "size": 3293184,
+          "sha256": "833bc639d7b016b70940c7cbfb459ec56bce5ecb17d115cf52c6b63963c04c1c"
+        },
+        {
+          "path": "data/observation/August_Complex_2020_final_perimeter_30m.tif",
+          "size": 65103,
+          "sha256": "848a9cd1347372fb111b54d80cab002ac5207f2651d8266896e5a1f9226c192e"
+        },
+        {
+          "path": "data/observation/August_Complex_2020_toa.png",
+          "size": 241443,
+          "sha256": "e97c50f1da5b5472425e3153966e62ff9e3fc2e78cf8ac7b7647f5ac8d602c1c"
+        },
+        {
+          "path": "data/observation/August_Complex_2020_toa.tif",
+          "size": 131115,
+          "sha256": "e6948d44b4fc36e345f334c8e136ce20662b86830fba5ba2772c3993e5ef1dda"
+        }
+      ]
+    },
+    {
+      "role": "generation",
+      "filename": "generation.tar.gz",
+      "required": true,
+      "size": 32669,
+      "sha256": "6e690f37b24710c87e6fd9cdebba196b2ad2fc5afde0cd7a6fab752e12845e2e",
+      "url": null,
+      "files": [
+        {
+          "path": "scripts/generate_data/README.txt",
+          "size": 3398,
+          "sha256": "c912d095af4668b608b39cbeff24baaef14cb23bfc13913720b7284a5aa1f232"
+        },
+        {
+          "path": "scripts/generate_data/fires.csv",
+          "size": 496,
+          "sha256": "323c433b0256fc0109acd5430656435cf066ba127dc768dc22d00f4f9aa341c4"
+        },
+        {
+          "path": "scripts/generate_data/generate_observations.py",
+          "size": 3360,
+          "sha256": "504622c5a2c99679a5fab3b49b9c77bb5e6531ac48313bd381d5e9c957810ad1"
+        },
+        {
+          "path": "scripts/generate_data/make_fires.py",
+          "size": 3674,
+          "sha256": "db102eaee83a12ee43cc5430db56f9ac2f98e215a97b1eda473a5f22d640350b"
+        },
+        {
+          "path": "scripts/generate_data/prepare_inputs.py",
+          "size": 11872,
+          "sha256": "71ce2e3df4c5afcc3bca8d3762580ff61ab76b6d7bdecf917e6aa54df2f20693"
+        },
+        {
+          "path": "scripts/generate_data/rtma_gusts.py",
+          "size": 9949,
+          "sha256": "dbcb0529bc2c1fb4d8c4fb0ca2f4492064f4af1c9269a5d5f52d848e8660c05a"
+        },
+        {
+          "path": "scripts/generate_data/source/exploratory.py",
+          "size": 21531,
+          "sha256": "3ce3f69eb0bab864adbaab85d1032934c9bcdcc89c8e41cf6ef6f354b7ab851e"
+        },
+        {
+          "path": "scripts/generate_data/source/make_fires.py",
+          "size": 3167,
+          "sha256": "a6f8dd87475483086a939c308770b10d19790456a0d6ece569ff0d3b020cfb94"
+        },
+        {
+          "path": "scripts/generate_data/source/prepare_inputs.py",
+          "size": 17423,
+          "sha256": "d6cda9ee410a239161ea216cdf090dc00153c4fb5fc3c9fd719b509e6dbf6c96"
+        },
+        {
+          "path": "scripts/generate_data/source/rtma_gusts.py",
+          "size": 7499,
+          "sha256": "e27a383239f441b8785234e7785490287ea3769a21fe660068fbe2d9717ae347"
+        },
+        {
+          "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign.py",
+          "size": 15656,
+          "sha256": "15520e8dcf4e666e234a6a1d789f2b13be555e414ce3f9910fceaa80f440a96f"
+        },
+        {
+          "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign_pb2.py",
+          "size": 2623,
+          "sha256": "e86063cc2999ca121bd3cc35330c66c31ac5ea6a8a78d119e1a2220b981db8d6"
+        },
+        {
+          "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign_pb2.pyi",
+          "size": 3441,
+          "sha256": "e4d1df13858c591316fc077d2d5d1fbafcb9a7c03540eaba1e92156e41f94eac"
+        },
+        {
+          "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign_pb2_grpc.py",
+          "size": 3384,
+          "sha256": "e36e6f35b1fe672a57e9e6535b4cd79cadced48016b473d2dc3a0dbb2487b8ee"
+        }
+      ]
+    }
+  ]
+}

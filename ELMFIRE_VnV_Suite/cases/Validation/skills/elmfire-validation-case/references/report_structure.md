@@ -96,11 +96,11 @@ Use the current suite style for every standalone verification and validation cas
 
 | Element | Font and size | Alignment |
 | --- | --- | --- |
-| Report title | Times New Roman, bold, 15 pt | Left |
-| Main prose in individual reports and aggregate summaries | Times New Roman, regular, 12 pt | Justified |
-| Section, subsection, subsubsection, and paragraph headings | Times New Roman, bold, 15 pt | Left |
-| Figure and table captions | Times New Roman, regular, 12 pt | Justified |
-| Tables | Times New Roman, normally 12 pt; compact text at least 10 pt | Appropriate to column contents |
+| Report title | TeX Gyre Termes, bold, 15 pt | Left |
+| Main prose in individual reports and aggregate summaries | TeX Gyre Termes, regular, 12 pt | Justified |
+| Section, subsection, subsubsection, and paragraph headings | TeX Gyre Termes, bold, 15 pt | Left |
+| Figure and table captions | TeX Gyre Termes, regular, 12 pt | Justified |
+| Tables | TeX Gyre Termes, normally 12 pt; compact text at least 10 pt | Appropriate to column contents |
 
 Case titles contain only the report title: omit subtitle, author/organization subtitle blocks, and title dates. Retain scientifically relevant dates and provenance in the body. The aggregate guide's separately maintained cover layout is independent of the case title rule.
 
@@ -108,7 +108,7 @@ Keep figure labels readable at their final printed size. Wrap table cells, split
 
 The canonical style is `main_report/report_style.tex`. When formatting changes are approved, update that style and synchronize exact local copies into every current case's `report/report_style.tex` and the case template. Load the local file last in the case wrapper's preamble. Cases must never load the canonical file by an external relative path at runtime: independent compilation must remain possible without the suite. Future cases inherit the template copy.
 
-Compile using `latexmk -lualatex`. Genuine Times New Roman regular, bold, italic, and bold italic fonts are required system dependencies; do not silently substitute Nimbus Roman, Liberation Serif, or TeX Gyre Termes. The current style uses 15/17 pt size/leading for titles and headings, 12/14 pt for body text and figure/table captions, and 10/12 pt for compact text.
+Compile using `latexmk -lualatex`. Use the free TeX Gyre Termes regular, bold, italic, and bold italic files supplied by the TeX distribution. The shared style selects them by filename; proprietary system fonts are not required. The current style uses 15/17 pt size/leading for titles and headings, 12/14 pt for body text and figure/table captions, and 10/12 pt for compact text.
 
 For a formatting-only request, edit report sources/styles, report build commands, and these instructions only. Do not run preprocessing, simulation, or numerical postprocessing; do not alter namelists, input data, model parameters, evaluation criteria, or result artifacts. Compile directly from existing report inputs, then refresh the guides from the standalone PDFs. Inspect actual PDF font embedding, title weight and size, page layout, captions, and tables. Resolve line overflow through report layout changes while preserving the approved style and scientific content. Distinguish pre-existing missing evidence from formatting failures.
 

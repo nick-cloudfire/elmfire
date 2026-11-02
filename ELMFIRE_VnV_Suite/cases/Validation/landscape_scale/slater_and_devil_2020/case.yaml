@@ -1,0 +1,59 @@
+case_id: slater_and_devil_2020
+case_title: 2020 Slater and Devil fire reconstruction against GOFER observations
+case_type: validation
+category: landscape_scale
+elmfire:
+  bin: ${ELMFIRE_BIN:-elmfire}
+  config: elmfire.data.in
+  mpi_ranks: 1
+validation:
+  observation: GOFER arrival-time raster; CAL FIRE supporting final extent
+  event_start_utc: '2020-09-08T13:00:00Z'
+  event_end_utc: '2020-09-22T03:00:00Z'
+  comparison_times_h:
+  - 24
+  - 48
+  - 72
+  - final GOFER arrival
+postprocess:
+  metrics: outputs/metrics.json
+  figures:
+  - figures/observation_summary.pdf
+  - figures/final_perimeter_summary.pdf
+  - figures/input_overview.pdf
+  - figures/input_distributions.pdf
+  - figures/weather_time_series.pdf
+  - figures/weather_summary.pdf
+  - figures/burned_area_growth.pdf
+  - figures/comparison_current.pdf
+  - figures/arrival_current.pdf
+  - figures/fields_current.pdf
+namelist_contract:
+  schema_version: 1
+  report: report/case_body.tex
+  files:
+  - path: elmfire.data.in
+    invariants:
+      OUTPUTS.OUTPUTS_DIRECTORY: ./outputs
+      OUTPUTS.DTDUMP: 1173600.0
+      OUTPUTS.DUMP_TIME_OF_ARRIVAL: true
+      OUTPUTS.CONVERT_TO_GEOTIFF: true
+      TIME_CONTROL.SIMULATION_DT: 1.0
+      TIME_CONTROL.TARGET_CFL: 0.2
+      TIME_CONTROL.SIMULATION_TSTOP: 1173600.0
+      MONTE_CARLO.NUM_METEOROLOGY_TIMES: 327
+      SIMULATOR.CROWN_FIRE_MODEL: 1
+      SIMULATOR.NUM_IGNITIONS: 4
+      SIMULATOR.X_IGN(1): 470614.889
+      SIMULATOR.Y_IGN(1): 4633358.061
+      SIMULATOR.T_IGN(1): 0.0
+      SIMULATOR.X_IGN(2): 450121.988
+      SIMULATOR.Y_IGN(2): 4647144.485
+      SIMULATOR.T_IGN(2): 75600.0
+      SIMULATOR.X_IGN(3): 442354.6
+      SIMULATOR.Y_IGN(3): 4649693.673
+      SIMULATOR.T_IGN(3): 79200.0
+      SIMULATOR.X_IGN(4): 481228.401
+      SIMULATOR.Y_IGN(4): 4638406.681
+      SIMULATOR.T_IGN(4): 100800.0
+      SPOTTING.ENABLE_SPOTTING: true

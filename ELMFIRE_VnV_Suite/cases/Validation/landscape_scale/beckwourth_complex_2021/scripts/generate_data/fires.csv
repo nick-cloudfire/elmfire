@@ -1,0 +1,2 @@
+fname,fyear,fire_id,t_start_utc,t_end_utc,t_first_perim_utc,duration_h,n_timesteps,west,south,east,north,center_lon,center_lat,t_ign_utc,ign_lon,ign_lat,n_ignitions,utm_epsg,local_tz,local_tzGMT,acres_official,final_area_km2
+Beckwourth Complex,2021,Beckwourth_Complex_2021,2021-06-30T23:00:00Z,2021-08-05T03:00:00Z,2021-07-01T00:00:00Z,844.0,844,-120.40479,39.82546,-120.00504,40.08642,-120.20491,39.95594,2021-06-30T23:00:00Z,-120.37731,39.91718,2,32610,America/Los_Angeles,Etc/GMT+8,105670,558.307

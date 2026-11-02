@@ -1,0 +1,282 @@
+{
+  "schema_version": 1,
+  "case_id": "antelope_2021",
+  "fire_id": "Antelope_2021",
+  "generation_files": [
+    {
+      "path": "scripts/generate_data/README.txt",
+      "size": 3398,
+      "sha256": "c912d095af4668b608b39cbeff24baaef14cb23bfc13913720b7284a5aa1f232"
+    },
+    {
+      "path": "scripts/generate_data/fires.csv",
+      "size": 480,
+      "sha256": "b4dcfc8ef7718be82dc168f9f38a4ca67810d9f6e04707a8d677a44e22ccd48a"
+    },
+    {
+      "path": "scripts/generate_data/generate_observations.py",
+      "size": 3360,
+      "sha256": "504622c5a2c99679a5fab3b49b9c77bb5e6531ac48313bd381d5e9c957810ad1"
+    },
+    {
+      "path": "scripts/generate_data/make_fires.py",
+      "size": 3674,
+      "sha256": "db102eaee83a12ee43cc5430db56f9ac2f98e215a97b1eda473a5f22d640350b"
+    },
+    {
+      "path": "scripts/generate_data/prepare_inputs.py",
+      "size": 11872,
+      "sha256": "71ce2e3df4c5afcc3bca8d3762580ff61ab76b6d7bdecf917e6aa54df2f20693"
+    },
+    {
+      "path": "scripts/generate_data/rtma_gusts.py",
+      "size": 9949,
+      "sha256": "dbcb0529bc2c1fb4d8c4fb0ca2f4492064f4af1c9269a5d5f52d848e8660c05a"
+    },
+    {
+      "path": "scripts/generate_data/source/exploratory.py",
+      "size": 21531,
+      "sha256": "3ce3f69eb0bab864adbaab85d1032934c9bcdcc89c8e41cf6ef6f354b7ab851e"
+    },
+    {
+      "path": "scripts/generate_data/source/make_fires.py",
+      "size": 3167,
+      "sha256": "a6f8dd87475483086a939c308770b10d19790456a0d6ece569ff0d3b020cfb94"
+    },
+    {
+      "path": "scripts/generate_data/source/prepare_inputs.py",
+      "size": 17423,
+      "sha256": "d6cda9ee410a239161ea216cdf090dc00153c4fb5fc3c9fd719b509e6dbf6c96"
+    },
+    {
+      "path": "scripts/generate_data/source/rtma_gusts.py",
+      "size": 7499,
+      "sha256": "e27a383239f441b8785234e7785490287ea3769a21fe660068fbe2d9717ae347"
+    },
+    {
+      "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign.py",
+      "size": 15656,
+      "sha256": "15520e8dcf4e666e234a6a1d789f2b13be555e414ce3f9910fceaa80f440a96f"
+    },
+    {
+      "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign_pb2.py",
+      "size": 2623,
+      "sha256": "e86063cc2999ca121bd3cc35330c66c31ac5ea6a8a78d119e1a2220b981db8d6"
+    },
+    {
+      "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign_pb2.pyi",
+      "size": 3441,
+      "sha256": "e4d1df13858c591316fc077d2d5d1fbafcb9a7c03540eaba1e92156e41f94eac"
+    },
+    {
+      "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign_pb2_grpc.py",
+      "size": 3384,
+      "sha256": "e36e6f35b1fe672a57e9e6535b4cd79cadced48016b473d2dc3a0dbb2487b8ee"
+    }
+  ],
+  "previous_source_archive": {
+    "filename": "ELMFIRE_GOFER_validation.tar.gz",
+    "size": 7038832441,
+    "sha256": "714b9f2b3c3417336ea200bfc6f2bba2955376bf3088d675a811a11d28b0fffe",
+    "files": 583,
+    "skipped_macos_metadata": 682,
+    "received_date_utc": "2026-10-21",
+    "provider": "User-supplied archive",
+    "license": "Not documented in the supplied archive; upstream access and redistribution terms still apply."
+  },
+  "source_directory": {
+    "name": "ELMFIRE_GOFER_validation",
+    "received_date": "2026-10-22",
+    "selected_files_sha256": "ffddb158c88e4c70ee3a9ddd5051007a71bc63a5dd02b3814679d1a7e6e74dd5"
+  },
+  "generation_sources": [
+    {
+      "source_relative_path": "make_fires.py",
+      "sha256": "a6f8dd87475483086a939c308770b10d19790456a0d6ece569ff0d3b020cfb94",
+      "size": 3167
+    },
+    {
+      "source_relative_path": "exploratory.py",
+      "sha256": "3ce3f69eb0bab864adbaab85d1032934c9bcdcc89c8e41cf6ef6f354b7ab851e",
+      "size": 21531
+    },
+    {
+      "source_relative_path": "prepare_inputs.py",
+      "sha256": "d6cda9ee410a239161ea216cdf090dc00153c4fb5fc3c9fd719b509e6dbf6c96",
+      "size": 17423,
+      "source_directory": "ELMFIRE_GOFER_validation 2"
+    },
+    {
+      "source_relative_path": "rtma_gusts.py",
+      "sha256": "e27a383239f441b8785234e7785490287ea3769a21fe660068fbe2d9717ae347",
+      "size": 7499,
+      "source_directory": "ELMFIRE_GOFER_validation 2"
+    }
+  ],
+  "files": [
+    {
+      "path": "data/fuels_and_topography/adj.tif",
+      "role": "inputs",
+      "size": 80671,
+      "sha256": "538fe387eb9201ea20cb383834727ef69d8391fe9a75dee24dabfbdcf82fc8b1",
+      "source_relative_path": "Antelope_2021/inputs/adj.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/misc/fuel_models.csv",
+      "role": "inputs",
+      "size": 3948,
+      "sha256": "bf32ba154b230bf16e38941d662c9a49e72652307ffe5e1468a511b514eaaf5b",
+      "source_relative_path": "Antelope_2021/inputs/fuel_models.csv",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/fuels_and_topography/ignition_mask.tif",
+      "role": "inputs",
+      "size": 72146,
+      "sha256": "4cbb843c1512c39d7f8d9cbf5844d73f96a4067c0580194f555e03a8003e1634",
+      "source_relative_path": "Antelope_2021/inputs/ignition_mask.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/misc/ignitions.csv",
+      "role": "inputs",
+      "size": 171,
+      "sha256": "c672641b01ce275a8d327e3fb229f614728643fba6fbfdb7089e1a6a45fc606a",
+      "source_relative_path": "Antelope_2021/inputs/ignitions.csv",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/fuels_and_topography/landscape.tif",
+      "role": "inputs",
+      "size": 15111775,
+      "sha256": "0ea9eccf8f390b1297a2773803f0bdc67d5a965a03fbbba719770db886cadf32",
+      "source_relative_path": "Antelope_2021/inputs/landscape.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/lh.tif",
+      "role": "inputs",
+      "size": 6411010,
+      "sha256": "c78446089f322c69b8ff6893d83db29372b213b91ad72555566fe494ba98ead6",
+      "source_relative_path": "Antelope_2021/inputs/lh.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/lw.tif",
+      "role": "inputs",
+      "size": 6227474,
+      "sha256": "1df56542b1cf7223efd2ad0fc8e32d36c23cd87313defa9d8f134c47f7172b47",
+      "source_relative_path": "Antelope_2021/inputs/lw.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/m1.tif",
+      "role": "inputs",
+      "size": 44293339,
+      "sha256": "b1f175101f058de385a854ef6e90caa5f7c6ac88a44fed51c83f6561211cbde9",
+      "source_relative_path": "Antelope_2021/inputs/m1.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/m10.tif",
+      "role": "inputs",
+      "size": 44056686,
+      "sha256": "a21778408d9fab64e6aabe02e19b6802996933227c24f4f8f60d39269ab0e68e",
+      "source_relative_path": "Antelope_2021/inputs/m10.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/m100.tif",
+      "role": "inputs",
+      "size": 43910972,
+      "sha256": "ae51420d3b7f3381c65fb73b12558a6a07a7e270fa3805e2b4718125fda46fdb",
+      "source_relative_path": "Antelope_2021/inputs/m100.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/fuels_and_topography/phi.tif",
+      "role": "inputs",
+      "size": 80671,
+      "sha256": "538fe387eb9201ea20cb383834727ef69d8391fe9a75dee24dabfbdcf82fc8b1",
+      "source_relative_path": "Antelope_2021/inputs/phi.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/wd.tif",
+      "role": "inputs",
+      "size": 6457242,
+      "sha256": "00aac12f76cb36e6e428e18f762d81dd0eb325504be8cc5b0b7e5db0452bd9e4",
+      "source_relative_path": "Antelope_2021/inputs/wd.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/ws.tif",
+      "role": "inputs",
+      "size": 45867039,
+      "sha256": "252060ee94d474f7473b3f7b15b9af5786aeb096d3b0c23614815603f11c7091",
+      "source_relative_path": "Antelope_2021/inputs/ws.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/observation/Antelope_2021_final_perimeter.gpkg",
+      "role": "observations",
+      "size": 1126400,
+      "sha256": "504808e28c5989a7e4f6cf48de8fdd6f071c77d7a76498ade0ca580ffc6b74e1",
+      "source_relative_path": "Antelope_2021/observations/Antelope_2021_final_perimeter.gpkg",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/observation/Antelope_2021_final_perimeter_30m.tif",
+      "role": "observations",
+      "size": 19097,
+      "sha256": "33197060e81e0118b7867d3873e5a5ccc4d7e0b7e81c887848a76241191e85e5",
+      "source_relative_path": "Antelope_2021/observations/Antelope_2021_final_perimeter_30m.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/observation/Antelope_2021_toa.png",
+      "role": "observations",
+      "size": 171377,
+      "sha256": "9da659297b8224578d21a6aed8a65492ed435d92f388f344a3ac32e7fb2760c4",
+      "source_relative_path": "Antelope_2021/observations/Antelope_2021_toa.png",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/observation/Antelope_2021_toa.tif",
+      "role": "observations",
+      "size": 51673,
+      "sha256": "39e23df2ac781e6c7b11591669ce6c24b39b026b4def26de6758b13239177b8f",
+      "source_relative_path": "Antelope_2021/observations/Antelope_2021_toa.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/ws_gust.tif",
+      "size": 45726692,
+      "sha256": "0de51f466ae1e266925ed9d4bc50d32e249fc29763f7bed8ea57500c18b19a1b",
+      "role": "inputs",
+      "source_relative_path": "Antelope_2021/inputs/ws_gust.tif",
+      "processing": "copied unchanged from user-supplied ELMFIRE_GOFER_validation 2",
+      "used_by_current_simulation": false
+    }
+  ],
+  "generation_source_history": [
+    {
+      "source_directory": "ELMFIRE_GOFER_validation",
+      "files": [
+        {
+          "source_relative_path": "prepare_inputs.py",
+          "sha256": "02428b42cc3ea1f92b61afd7a1293fb004b1d2e670100e32460b33a40dfadc2c",
+          "size": 16402
+        }
+      ]
+    }
+  ],
+  "source_updates": [
+    {
+      "name": "ELMFIRE_GOFER_validation 2",
+      "received_date": "2026-10-22",
+      "scope": "supplementary ws_gust.tif and updated gust/input generation sources; existing data and wind selection unchanged"
+    }
+  ]
+}

@@ -1,0 +1,282 @@
+{
+  "schema_version": 1,
+  "case_id": "beckwourth_complex_2021",
+  "fire_id": "Beckwourth_Complex_2021",
+  "generation_files": [
+    {
+      "path": "scripts/generate_data/README.txt",
+      "size": 3398,
+      "sha256": "c912d095af4668b608b39cbeff24baaef14cb23bfc13913720b7284a5aa1f232"
+    },
+    {
+      "path": "scripts/generate_data/fires.csv",
+      "size": 502,
+      "sha256": "d00d0c15cdf9ed2dd999fed26f9fff5f31fd89c240f44317ac9dfe96b3aee0ef"
+    },
+    {
+      "path": "scripts/generate_data/generate_observations.py",
+      "size": 3360,
+      "sha256": "504622c5a2c99679a5fab3b49b9c77bb5e6531ac48313bd381d5e9c957810ad1"
+    },
+    {
+      "path": "scripts/generate_data/make_fires.py",
+      "size": 3674,
+      "sha256": "db102eaee83a12ee43cc5430db56f9ac2f98e215a97b1eda473a5f22d640350b"
+    },
+    {
+      "path": "scripts/generate_data/prepare_inputs.py",
+      "size": 11872,
+      "sha256": "71ce2e3df4c5afcc3bca8d3762580ff61ab76b6d7bdecf917e6aa54df2f20693"
+    },
+    {
+      "path": "scripts/generate_data/rtma_gusts.py",
+      "size": 9949,
+      "sha256": "dbcb0529bc2c1fb4d8c4fb0ca2f4492064f4af1c9269a5d5f52d848e8660c05a"
+    },
+    {
+      "path": "scripts/generate_data/source/exploratory.py",
+      "size": 21531,
+      "sha256": "3ce3f69eb0bab864adbaab85d1032934c9bcdcc89c8e41cf6ef6f354b7ab851e"
+    },
+    {
+      "path": "scripts/generate_data/source/make_fires.py",
+      "size": 3167,
+      "sha256": "a6f8dd87475483086a939c308770b10d19790456a0d6ece569ff0d3b020cfb94"
+    },
+    {
+      "path": "scripts/generate_data/source/prepare_inputs.py",
+      "size": 17423,
+      "sha256": "d6cda9ee410a239161ea216cdf090dc00153c4fb5fc3c9fd719b509e6dbf6c96"
+    },
+    {
+      "path": "scripts/generate_data/source/rtma_gusts.py",
+      "size": 7499,
+      "sha256": "e27a383239f441b8785234e7785490287ea3769a21fe660068fbe2d9717ae347"
+    },
+    {
+      "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign.py",
+      "size": 15656,
+      "sha256": "15520e8dcf4e666e234a6a1d789f2b13be555e414ce3f9910fceaa80f440a96f"
+    },
+    {
+      "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign_pb2.py",
+      "size": 2623,
+      "sha256": "e86063cc2999ca121bd3cc35330c66c31ac5ea6a8a78d119e1a2220b981db8d6"
+    },
+    {
+      "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign_pb2.pyi",
+      "size": 3441,
+      "sha256": "e4d1df13858c591316fc077d2d5d1fbafcb9a7c03540eaba1e92156e41f94eac"
+    },
+    {
+      "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign_pb2_grpc.py",
+      "size": 3384,
+      "sha256": "e36e6f35b1fe672a57e9e6535b4cd79cadced48016b473d2dc3a0dbb2487b8ee"
+    }
+  ],
+  "previous_source_archive": {
+    "filename": "ELMFIRE_GOFER_validation.tar.gz",
+    "size": 7038832441,
+    "sha256": "714b9f2b3c3417336ea200bfc6f2bba2955376bf3088d675a811a11d28b0fffe",
+    "files": 583,
+    "skipped_macos_metadata": 682,
+    "received_date_utc": "2026-10-21",
+    "provider": "User-supplied archive",
+    "license": "Not documented in the supplied archive; upstream access and redistribution terms still apply."
+  },
+  "source_directory": {
+    "name": "ELMFIRE_GOFER_validation",
+    "received_date": "2026-10-22",
+    "selected_files_sha256": "33ac6ebd7e0f71a3c2519b9551fa4e2ef571699a24cad0c36728929da2653c52"
+  },
+  "generation_sources": [
+    {
+      "source_relative_path": "make_fires.py",
+      "sha256": "a6f8dd87475483086a939c308770b10d19790456a0d6ece569ff0d3b020cfb94",
+      "size": 3167
+    },
+    {
+      "source_relative_path": "exploratory.py",
+      "sha256": "3ce3f69eb0bab864adbaab85d1032934c9bcdcc89c8e41cf6ef6f354b7ab851e",
+      "size": 21531
+    },
+    {
+      "source_relative_path": "prepare_inputs.py",
+      "sha256": "d6cda9ee410a239161ea216cdf090dc00153c4fb5fc3c9fd719b509e6dbf6c96",
+      "size": 17423,
+      "source_directory": "ELMFIRE_GOFER_validation 2"
+    },
+    {
+      "source_relative_path": "rtma_gusts.py",
+      "sha256": "e27a383239f441b8785234e7785490287ea3769a21fe660068fbe2d9717ae347",
+      "size": 7499,
+      "source_directory": "ELMFIRE_GOFER_validation 2"
+    }
+  ],
+  "files": [
+    {
+      "path": "data/fuels_and_topography/adj.tif",
+      "role": "inputs",
+      "size": 71443,
+      "sha256": "ceaf4cff1bbfda3c4cf12f3ff0ed843b71bd6dafe7fb971fd57de92f59c44dd4",
+      "source_relative_path": "Beckwourth_Complex_2021/inputs/adj.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/misc/fuel_models.csv",
+      "role": "inputs",
+      "size": 3948,
+      "sha256": "bf32ba154b230bf16e38941d662c9a49e72652307ffe5e1468a511b514eaaf5b",
+      "source_relative_path": "Beckwourth_Complex_2021/inputs/fuel_models.csv",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/fuels_and_topography/ignition_mask.tif",
+      "role": "inputs",
+      "size": 65276,
+      "sha256": "abfd11bb772303df023b639642a7b9ad358262fb3e69254754fb869ab2c7f787",
+      "source_relative_path": "Beckwourth_Complex_2021/inputs/ignition_mask.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/misc/ignitions.csv",
+      "role": "inputs",
+      "size": 297,
+      "sha256": "2a32b8f0eef5d79350f0866f289e89c7d930440e17c4b08715d935ba0c2743d6",
+      "source_relative_path": "Beckwourth_Complex_2021/inputs/ignitions.csv",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/fuels_and_topography/landscape.tif",
+      "role": "inputs",
+      "size": 11235039,
+      "sha256": "141ba22ceaceb4b49267a4dca8a7be41b183be0c2d93de94bb06945f5fcf59df",
+      "source_relative_path": "Beckwourth_Complex_2021/inputs/landscape.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/lh.tif",
+      "role": "inputs",
+      "size": 597578,
+      "sha256": "2325e50e3f53bfef0c48ab32a020ada135451716c0aecfaf23a2255cd1e6f8ae",
+      "source_relative_path": "Beckwourth_Complex_2021/inputs/lh.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/lw.tif",
+      "role": "inputs",
+      "size": 579993,
+      "sha256": "b45c3d51b6bc8194072a949828baa0c19b12b899077932606e19b0c31504a33b",
+      "source_relative_path": "Beckwourth_Complex_2021/inputs/lw.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/m1.tif",
+      "role": "inputs",
+      "size": 34635245,
+      "sha256": "e0743b388b063d4c33c167e689d44a51f2448a682167a8af124685bd35c163a8",
+      "source_relative_path": "Beckwourth_Complex_2021/inputs/m1.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/m10.tif",
+      "role": "inputs",
+      "size": 34489714,
+      "sha256": "80b19af85792285f43d956050d5509a1306b7cc6855bb43418b4a44b04de6b73",
+      "source_relative_path": "Beckwourth_Complex_2021/inputs/m10.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/m100.tif",
+      "role": "inputs",
+      "size": 34311205,
+      "sha256": "48d054bf5f118f61f408cdf11c98e814a52190a7965f6bc014d6140dd2aa7381",
+      "source_relative_path": "Beckwourth_Complex_2021/inputs/m100.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/fuels_and_topography/phi.tif",
+      "role": "inputs",
+      "size": 71443,
+      "sha256": "ceaf4cff1bbfda3c4cf12f3ff0ed843b71bd6dafe7fb971fd57de92f59c44dd4",
+      "source_relative_path": "Beckwourth_Complex_2021/inputs/phi.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/wd.tif",
+      "role": "inputs",
+      "size": 4914322,
+      "sha256": "f5a2585b71b349b58a21413f14fb7d1fdcad18141749a46889e754740834298f",
+      "source_relative_path": "Beckwourth_Complex_2021/inputs/wd.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/ws.tif",
+      "role": "inputs",
+      "size": 35814847,
+      "sha256": "9651275ffe108ee5a0baff242154ed46b9467148a17b995b107d656a696413c2",
+      "source_relative_path": "Beckwourth_Complex_2021/inputs/ws.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/observation/Beckwourth_Complex_2021_final_perimeter.gpkg",
+      "role": "observations",
+      "size": 348160,
+      "sha256": "f80cbb62fb4c5732ea5378c4873b56d0924ad643a0c960d5a1f6c786aabd8359",
+      "source_relative_path": "Beckwourth_Complex_2021/observations/Beckwourth_Complex_2021_final_perimeter.gpkg",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/observation/Beckwourth_Complex_2021_final_perimeter_30m.tif",
+      "role": "observations",
+      "size": 14243,
+      "sha256": "c50889b564d5faa8a8136d1dffcd9faf36aabf5df2ec63470311f613a4267821",
+      "source_relative_path": "Beckwourth_Complex_2021/observations/Beckwourth_Complex_2021_final_perimeter_30m.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/observation/Beckwourth_Complex_2021_toa.png",
+      "role": "observations",
+      "size": 169947,
+      "sha256": "dd9ce6d202fb964ce9a145fa6f783d6871af52f93044cf374e717adcfd0bd118",
+      "source_relative_path": "Beckwourth_Complex_2021/observations/Beckwourth_Complex_2021_toa.png",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/observation/Beckwourth_Complex_2021_toa.tif",
+      "role": "observations",
+      "size": 37430,
+      "sha256": "0b80c2b9ce81ac8f3198bac8f421c1a430589ee4fbd6ec9853cdb87297eae682",
+      "source_relative_path": "Beckwourth_Complex_2021/observations/Beckwourth_Complex_2021_toa.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/ws_gust.tif",
+      "size": 35543860,
+      "sha256": "7bd5810cfc40f4b248b31f141ea8d198e538fd338acc647afafd5831e7a910b5",
+      "role": "inputs",
+      "source_relative_path": "Beckwourth_Complex_2021/inputs/ws_gust.tif",
+      "processing": "copied unchanged from user-supplied ELMFIRE_GOFER_validation 2",
+      "used_by_current_simulation": false
+    }
+  ],
+  "generation_source_history": [
+    {
+      "source_directory": "ELMFIRE_GOFER_validation",
+      "files": [
+        {
+          "source_relative_path": "prepare_inputs.py",
+          "sha256": "02428b42cc3ea1f92b61afd7a1293fb004b1d2e670100e32460b33a40dfadc2c",
+          "size": 16402
+        }
+      ]
+    }
+  ],
+  "source_updates": [
+    {
+      "name": "ELMFIRE_GOFER_validation 2",
+      "received_date": "2026-10-22",
+      "scope": "supplementary ws_gust.tif and updated gust/input generation sources; existing data and wind selection unchanged"
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+case_id: dixie_2021
+case_title: 2021 Dixie fire reconstruction against GOFER observations
+case_type: validation
+category: landscape_scale
+elmfire:
+  bin: ${ELMFIRE_BIN:-elmfire}
+  config: elmfire.data.in
+  mpi_ranks: 1
+validation:
+  observation: GOFER arrival-time raster; CAL FIRE supporting final extent
+  event_start_utc: '2021-07-14T00:00:00Z'
+  event_end_utc: '2021-09-10T03:00:00Z'
+  comparison_times_h:
+  - 24
+  - 48
+  - 72
+  - final GOFER arrival
+postprocess:
+  metrics: outputs/metrics.json
+  figures:
+  - figures/observation_summary.pdf
+  - figures/final_perimeter_summary.pdf
+  - figures/input_overview.pdf
+  - figures/input_distributions.pdf
+  - figures/weather_time_series.pdf
+  - figures/weather_summary.pdf
+  - figures/burned_area_growth.pdf
+  - figures/comparison_current.pdf
+  - figures/arrival_current.pdf
+  - figures/fields_current.pdf
+namelist_contract:
+  schema_version: 1
+  report: report/case_body.tex
+  files:
+  - path: elmfire.data.in
+    invariants:
+      OUTPUTS.OUTPUTS_DIRECTORY: ./outputs
+      OUTPUTS.DTDUMP: 5004000.0
+      OUTPUTS.DUMP_TIME_OF_ARRIVAL: true
+      OUTPUTS.CONVERT_TO_GEOTIFF: true
+      TIME_CONTROL.SIMULATION_DT: 1.0
+      TIME_CONTROL.TARGET_CFL: 0.2
+      TIME_CONTROL.SIMULATION_TSTOP: 5004000.0
+      MONTE_CARLO.NUM_METEOROLOGY_TIMES: 1391
+      SIMULATOR.CROWN_FIRE_MODEL: 1
+      SIMULATOR.NUM_IGNITIONS: 7
+      SIMULATOR.X_IGN(1): 638588.295
+      SIMULATOR.Y_IGN(1): 4415436.564
+      SIMULATOR.T_IGN(1): 0.0
+      SIMULATOR.X_IGN(2): 676734.679
+      SIMULATOR.Y_IGN(2): 4432506.872
+      SIMULATOR.T_IGN(2): 824400.0
+      SIMULATOR.X_IGN(3): 636595.465
+      SIMULATOR.Y_IGN(3): 4461791.15
+      SIMULATOR.T_IGN(3): 1882800.0
+      SIMULATOR.X_IGN(4): 624631.335
+      SIMULATOR.Y_IGN(4): 4477989.972
+      SIMULATOR.T_IGN(4): 2901600.0
+      SIMULATOR.X_IGN(5): 625554.976
+      SIMULATOR.Y_IGN(5): 4470555.4
+      SIMULATOR.T_IGN(5): 2905200.0
+      SIMULATOR.X_IGN(6): 711433.389
+      SIMULATOR.Y_IGN(6): 4457474.677
+      SIMULATOR.T_IGN(6): 2926800.0
+      SIMULATOR.X_IGN(7): 645082.227
+      SIMULATOR.Y_IGN(7): 4491978.888
+      SIMULATOR.T_IGN(7): 3474000.0
+      SPOTTING.ENABLE_SPOTTING: true

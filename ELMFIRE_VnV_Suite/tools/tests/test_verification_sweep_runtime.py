@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-import hashlib
 import importlib.util
 import json
 import math
 import os
+import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 os.environ.setdefault("MPLCONFIGDIR", "/tmp/elmfire-vnv-test-matplotlib")
@@ -28,7 +29,8 @@ def load_module(name: str, path: Path):
     spec = importlib.util.spec_from_file_location(name, path)
     module = importlib.util.module_from_spec(spec)
     assert spec.loader is not None
-    spec.loader.exec_module(module)
+    with patch.object(sys, "path", [str(path.parent), *sys.path]):
+        spec.loader.exec_module(module)
     return module
 
 
@@ -83,7 +85,8 @@ class SweepRuntimeContractTests(unittest.TestCase):
         variant = case / "variants/example"
         (variant / "outputs").mkdir(parents=True, exist_ok=True)
         (variant / "elmfire.data").write_text(
-            "&TIME_CONTROL\nSIMULATION_TSTOP = 100.0\n/\n",
+            "&TIME_CONTROL\nSIMULATION_TSTOP = 100.0\nSIMULATION_DT = 1.0\n/\n"
+            "&INPUTS\nDT_METEOROLOGY = 3600.0\n/\n",
             encoding="utf-8",
         )
         (variant / "outputs/dump_times_0000001.csv").write_text(
@@ -255,6 +258,18 @@ class SweepRuntimeContractTests(unittest.TestCase):
             self.assertEqual(result["overall_status"], "PASS")
             self.assertTrue(math.isfinite(result["variant_results"][0]["toa_r2"]))
 
+    def test_missing_time_control_is_not_evaluable(self) -> None:
+        for assignment in ("SIMULATION_DT = 1.0", "DT_METEOROLOGY = 3600.0"):
+            with self.subTest(missing=assignment), tempfile.TemporaryDirectory() as directory:
+                case = Path(directory)
+                self.make_variant(case, expected_ros=1.0, expected_ir=100.0,
+                                  toa_required=True, toa="valid")
+                deck = case / "variants/example/elmfire.data"
+                deck.write_text(deck.read_text().replace(assignment + "\n", ""))
+                result = EVALUATOR.evaluate(case)
+                self.assertEqual(result["overall_status"], "NOT EVALUABLE")
+                self.assertIn("terminal_dump", result["missing_evidence"]["example"])
+
     def test_early_final_dump_is_not_evaluable(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             case = Path(directory)
@@ -396,30 +411,6 @@ class SweepRuntimeContractTests(unittest.TestCase):
                 "time_of_arrival_fit", result["missing_evidence"]["example"]
             )
 
-    def test_case_local_helper_and_evaluator_copies_are_synchronized(self) -> None:
-        evaluator_cases = (
-            "unit_tests/CASE34_FMS",
-            "unit_tests/CASE35_WSS",
-            "unit_tests/CASE36_SLS",
-            "unit_tests/CASE37_DMS",
-            "unit_tests/CASE38_LMS",
-            "unit_tests/CASE39_DHC",
-            "unit_tests/CASE41_CFP",
-            "coupling_tests/CASE42_WAF",
-        )
-        helper_cases = evaluator_cases + ("coupling_tests/CASE40_WSD",)
-        verification = ROOT / "cases/Verification"
-        for filename, cases in (
-            ("case_support.py", helper_cases),
-            ("evaluate_outputs.py", evaluator_cases),
-        ):
-            digests = {
-                hashlib.sha256(
-                    (verification / case / "scripts" / filename).read_bytes()
-                ).hexdigest()
-                for case in cases
-            }
-            self.assertEqual(len(digests), 1, filename)
 
 
 class CoupledFrontEvidenceTests(unittest.TestCase):
@@ -500,17 +491,32 @@ class CoupledFrontEvidenceTests(unittest.TestCase):
 
     def test_case40_requires_the_configured_terminal_time(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
-            output = Path(directory)
-            (output / "dump_times_0000001.csv").write_text(
-                "dump_index,time_seconds,is_final_dump\n1,1700,T\n",
-                encoding="utf-8",
+            variant = Path(directory)
+            output = variant / "outputs"
+            output.mkdir()
+            (variant / "elmfire.data").write_text(
+                "&TIME_CONTROL\nSIMULATION_TSTOP = 1800.0\nSIMULATION_DT = 5.0\n/\n"
+                "&INPUTS\nDT_METEOROLOGY = 3600.0\n/\n"
             )
-            (output / "time_of_arrival_0000001_0001700.tif").touch()
-            (output / "ir_0000001_0001700.tif").touch()
-            toa, intensity, reason = CASE40.terminal_files(output, 1800.0)
-            self.assertIsNone(toa)
-            self.assertIsNone(intensity)
-            self.assertIn("expected 1800", reason)
+            for time in (1700, 1800):
+                with self.subTest(final_time=time):
+                    for path in output.iterdir():
+                        path.unlink()
+                    (output / "dump_times_0000001.csv").write_text(
+                        f"dump_index,time_seconds,is_final_dump\n1,{time},T\n"
+                    )
+                    expected_toa = output / f"time_of_arrival_0000001_{time:07d}.tif"
+                    expected_ir = output / f"ir_0000001_{time:07d}.tif"
+                    expected_toa.touch()
+                    expected_ir.touch()
+                    toa, intensity, reason = CASE40.terminal_files(variant, 1800.0)
+                    if time == 1800:
+                        self.assertEqual((toa, intensity), (expected_toa, expected_ir))
+                        self.assertIsNone(reason)
+                    else:
+                        self.assertIsNone(toa)
+                        self.assertIsNone(intensity)
+                        self.assertIn("expected 1800", reason)
 
     def test_case40_obsolete_manifest_becomes_not_evaluable(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

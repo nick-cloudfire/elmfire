@@ -346,7 +346,28 @@ def discover_case_summaries(suite: str) -> list[CaseSummary]:
                 detail=detail,
             )
         )
-    return sorted(summaries, key=case_sort_key)
+    # Old copied case folders can remain beside their relocated counterparts.
+    # A report label and scientific decision must appear only once per case ID.
+    categories = ({'unit_tests', 'coupling_tests'} if suite == 'verification'
+                  else {'landscape_scale', 'structure_scale'})
+    by_id: dict[str, list[CaseSummary]] = {}
+    for summary in summaries:
+        by_id.setdefault(summary.case_id, []).append(summary)
+    unique = []
+    for case_id, copies in by_id.items():
+        if len(copies) == 1:
+            unique.append(copies[0])
+            continue
+        canonical = [case for case in copies if case.category.split('/')[0] in categories]
+        if len(canonical) != 1:
+            locations = ', '.join(case.relative_directory for case in copies)
+            raise ValueError(f'Ambiguous duplicate report case ID {case_id}: {locations}')
+        chosen = canonical[0]
+        unique.append(chosen)
+        ignored = ', '.join(case.relative_directory for case in copies if case != chosen)
+        print(f'[WARN] Report {case_id}: using {chosen.relative_directory}; '
+              f'ignoring duplicate copied definitions: {ignored}', file=sys.stderr)
+    return sorted(unique, key=case_sort_key)
 
 
 def decision_tex(decision: str) -> str:

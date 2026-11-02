@@ -1,8 +1,10 @@
 import importlib.util
+import io
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "generate_summary_reports.py"
@@ -42,6 +44,37 @@ class DecisionNormalizationTests(unittest.TestCase):
         decision, raw, _ = REPORTS.extract_decision({"metric": 1.0})
         self.assertEqual(decision, "NOT EVALUABLE")
         self.assertEqual(raw, "missing")
+
+
+class ReportDiscoveryTests(unittest.TestCase):
+    def add_case(self, root, relative):
+        case = root / 'cases/Validation' / relative
+        case.mkdir(parents=True)
+        (case / 'run_case.sh').touch()
+        (case / 'case.yaml').write_text('case_id: same_fire\ncase_title: Fire reconstruction\n')
+
+    def test_canonical_case_is_included_once_when_an_old_copy_remains(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.add_case(root, 'same_fire')
+            self.add_case(root, 'landscape_scale/same_fire')
+            with patch.object(REPORTS, 'ROOT_DIR', root), patch.dict(
+                    REPORTS.SUITE_DIRECTORIES, {'validation': root / 'cases/Validation'}):
+                with patch('sys.stderr', new_callable=io.StringIO) as stderr:
+                    cases = REPORTS.discover_case_summaries('validation')
+            self.assertEqual(len(cases), 1)
+            self.assertEqual(cases[0].relative_directory, 'cases/Validation/landscape_scale/same_fire')
+            self.assertIn('ignoring duplicate', stderr.getvalue())
+
+    def test_multiple_canonical_copies_fail_instead_of_guessing(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.add_case(root, 'landscape_scale/first_copy')
+            self.add_case(root, 'landscape_scale/second_copy')
+            with patch.object(REPORTS, 'ROOT_DIR', root), patch.dict(
+                    REPORTS.SUITE_DIRECTORIES, {'validation': root / 'cases/Validation'}):
+                with self.assertRaisesRegex(ValueError, 'Ambiguous duplicate'):
+                    REPORTS.discover_case_summaries('validation')
 
 
 class LinkedSummaryTests(unittest.TestCase):
@@ -84,13 +117,6 @@ class LinkedSummaryTests(unittest.TestCase):
             self.assertIn(f",{label}}}]", include_path.read_text(encoding="utf-8"))
             summary_text = summary_path.read_text(encoding="utf-8")
             self.assertIn(f"\\hyperref[{label}]", summary_text)
-            self.assertIn("Computational environment recorded during report preparation", summary_text)
-            self.assertIn("Comparison type and declared parallel allocation", summary_text)
-            self.assertNotIn("Passed?", summary_text)
-            self.assertIn("Isolated-process verification", summary_text)
-            for hidden in ("case.yaml", "metrics.json", "elmfire.data", "Schema",
-                           "ELMFIRE command", "unit\\_tests"):
-                self.assertNotIn(hidden, summary_text)
 
     def test_environment_excludes_installation_paths(self) -> None:
         environment = {

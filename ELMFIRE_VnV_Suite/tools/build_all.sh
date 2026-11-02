@@ -5,6 +5,9 @@ ROOT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 MAIN_DIR="$ROOT_DIR/main_report"
 PYTHON_BIN=${PYTHON_BIN:-python3}
 
+# Fail once with actionable package/font diagnostics before retrying case builds.
+"$PYTHON_BIN" "$ROOT_DIR/tools/check_report_environment.py"
+
 compile_missing_case_reports() {
   local case_file case_dir report_dir compile_script
   local primary_succeeded
