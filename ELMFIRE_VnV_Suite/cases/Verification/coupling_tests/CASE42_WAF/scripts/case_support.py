@@ -147,12 +147,15 @@ def make_planar_variant(
     tstop_seconds: float,
     canopy_cover_percent: float = 0.0,
     canopy_height_m: float = 0.0,
-    fuel_table_directory: str = "./data/misc/",
+    fuel_table_directory: str | None = None,
 ) -> Path:
     """Create a homogeneous planar-front variant and its concrete namelist."""
     root = case_dir / "variants" / variant_id
     inputs = root / "inputs"
     inputs.mkdir(parents=True, exist_ok=True)
+    if fuel_table_directory is None:
+        (root / "misc").mkdir(parents=True, exist_ok=True)
+        fuel_table_directory = f"./variants/{variant_id}/misc/"
     reset_generated_directory(root / "outputs")
     reset_generated_directory(root / "scratch")
 

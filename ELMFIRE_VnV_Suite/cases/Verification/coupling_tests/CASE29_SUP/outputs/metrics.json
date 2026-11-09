@@ -15,8 +15,8 @@
         {
           "name": "time at simulation end",
           "target": 88200.0,
-          "measured": 0.0,
-          "percent_error": -100.0,
+          "measured": 249984.0,
+          "percent_error": 183.42857142857142,
           "units": "s",
           "status": "FAIL"
         }
@@ -31,8 +31,8 @@
         {
           "name": "fraction contained",
           "target": 0.54,
-          "measured": 0.5785,
-          "percent_error": 7.129629629629625,
+          "measured": 0.5885,
+          "percent_error": 8.98148148148148,
           "units": "-",
           "status": "PASS"
         }

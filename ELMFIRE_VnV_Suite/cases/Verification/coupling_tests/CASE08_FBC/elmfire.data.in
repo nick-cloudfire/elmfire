@@ -93,8 +93,7 @@ USE_BLDG_SPREAD_MODEL=.FALSE.
 
 &MISCELLANEOUS
 MISCELLANEOUS_INPUTS_DIRECTORY='./data/misc'
-FUEL_MODEL_FILE='fuel_models.csv'
-BUILDING_FUEL_MODEL_FILE='building_fuel_models.csv'
+! Use ELMFIRE built-in fuel models; no external fuel CSV is required.
 PATH_TO_GDAL='auto'
 SCRATCH='./logs/scratch'
 /

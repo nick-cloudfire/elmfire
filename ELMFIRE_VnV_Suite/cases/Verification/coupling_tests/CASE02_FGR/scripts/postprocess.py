@@ -253,12 +253,12 @@ def main() -> None:
         "generationratepcspers": "10.0",
         "residencetimes": "10.0",
         "expectedtotal": "100.0",
-        "fineobservedtotal": value("dt0p13", "observed_total_firebrands"),
-        "finetotalrelativeerror": value("dt0p13", "total_relative_error", ".3e"),
-        "fineprofileloneerror": value("dt0p13", "profile_l1_relative_error", ".3e"),
-        "coarseobservedtotal": value("dt12p7", "observed_total_firebrands"),
-        "coarsetotalrelativeerror": value("dt12p7", "total_relative_error", ".3e"),
-        "coarseprofileloneerror": value("dt12p7", "profile_l1_relative_error", ".3e"),
+        "fineobservedtotal": value("dt0p1875", "observed_total_firebrands"),
+        "finetotalrelativeerror": value("dt0p1875", "total_relative_error", ".3e"),
+        "fineprofileloneerror": value("dt0p1875", "profile_l1_relative_error", ".3e"),
+        "coarseobservedtotal": value("dt12", "observed_total_firebrands"),
+        "coarsetotalrelativeerror": value("dt12", "total_relative_error", ".3e"),
+        "coarseprofileloneerror": value("dt12", "profile_l1_relative_error", ".3e"),
         "numvariants": len(serializable),
         "numvariantscomputed": len(computed),
     }
@@ -273,5 +273,5 @@ if __name__ == "__main__":
     main()
     generate_spatial_evidence(
         CASE_DIR, output_preference=("ember_flux", "time_of_arrival"),
-        preferred_variant="dt0p13", strip_width_m=1.0,
+        preferred_variant="dt0p1875", strip_width_m=1.0,
     )

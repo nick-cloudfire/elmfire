@@ -1,0 +1,2 @@
+fname,fyear,fire_id,t_start_utc,t_end_utc,t_first_perim_utc,duration_h,n_timesteps,west,south,east,north,center_lon,center_lat,t_ign_utc,ign_lon,ign_lat,n_ignitions,utm_epsg,local_tz,local_tzGMT,acres_official,final_area_km2
+SCU Lightning Complex,2020,SCU_Lightning_Complex_2020,2020-08-16T11:00:00Z,2020-08-31T03:00:00Z,2020-08-16T17:00:00Z,352.0,347,-121.86096,37.10356,-121.16656,37.5918,-121.51376,37.34768,2020-08-16T16:00:00Z,-121.76304,37.47477,5,32610,America/Los_Angeles,Etc/GMT+8,396625,1525.799

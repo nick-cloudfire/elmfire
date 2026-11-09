@@ -18,7 +18,11 @@
     "wind_speed_units": "mph at 20 ft (inferred from current ELMFIRE source and archived flags)",
     "wind_direction_units": "degrees",
     "dead_fuel_moisture_units": "percent",
-    "topography_units": {"dem": "m (archive convention; upstream metadata absent)", "slp": "degrees", "asp": "degrees"}
+    "topography_units": {
+      "dem": "m (archive convention; upstream metadata absent)",
+      "slp": "degrees",
+      "asp": "degrees"
+    }
   },
   "observation": {
     "description": "VIIRS 375 m active-fire point detections with NASA FIRMS-compatible fields",
@@ -29,13 +33,41 @@
     "geometry": "Point",
     "comparison_cutoff_utc": "2017-10-09T16:45:00Z",
     "files": [
-      {"relative_path": "data/viirs_observation/viirs_tubbs.cpg", "size": 5, "sha256": "3ad3031f5503a4404af825262ee8232cc04d4ea6683d42c5dd0a2f2a27ac9824"},
-      {"relative_path": "data/viirs_observation/viirs_tubbs.dbf", "size": 300690, "sha256": "7ae966daebdfc5605c11033be70b229c9d3aa10c1bec358ea45b1483de3eafe7"},
-      {"relative_path": "data/viirs_observation/viirs_tubbs.prj", "size": 145, "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"},
-      {"relative_path": "data/viirs_observation/viirs_tubbs.qix", "size": 85912, "sha256": "47c7c7343bdfd94fa90528ca7d3bd6721a6a75954fb246db2e37ff445670ec59"},
-      {"relative_path": "data/viirs_observation/viirs_tubbs.qmd", "size": 1528, "sha256": "ab6402ac07e9cdd755f95144613d5d853371c3f93b946b1f7a4c7299434409c2"},
-      {"relative_path": "data/viirs_observation/viirs_tubbs.shp", "size": 32804, "sha256": "40ce3c64ad01f7f0b2f46d3edd18ca9d4df1496abe31d95e321deae64c6570f2"},
-      {"relative_path": "data/viirs_observation/viirs_tubbs.shx", "size": 9444, "sha256": "55656c51d48ef38cf8187cca07b510d29d3ed0f64050bbf8d20798c0f94622fc"}
+      {
+        "relative_path": "data/observation/viirs_tubbs.cpg",
+        "size": 5,
+        "sha256": "3ad3031f5503a4404af825262ee8232cc04d4ea6683d42c5dd0a2f2a27ac9824"
+      },
+      {
+        "relative_path": "data/observation/viirs_tubbs.dbf",
+        "size": 300690,
+        "sha256": "7ae966daebdfc5605c11033be70b229c9d3aa10c1bec358ea45b1483de3eafe7"
+      },
+      {
+        "relative_path": "data/observation/viirs_tubbs.prj",
+        "size": 145,
+        "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
+      },
+      {
+        "relative_path": "data/observation/viirs_tubbs.qix",
+        "size": 85912,
+        "sha256": "47c7c7343bdfd94fa90528ca7d3bd6721a6a75954fb246db2e37ff445670ec59"
+      },
+      {
+        "relative_path": "data/observation/viirs_tubbs.qmd",
+        "size": 1528,
+        "sha256": "ab6402ac07e9cdd755f95144613d5d853371c3f93b946b1f7a4c7299434409c2"
+      },
+      {
+        "relative_path": "data/observation/viirs_tubbs.shp",
+        "size": 32804,
+        "sha256": "40ce3c64ad01f7f0b2f46d3edd18ca9d4df1496abe31d95e321deae64c6570f2"
+      },
+      {
+        "relative_path": "data/observation/viirs_tubbs.shx",
+        "size": 9444,
+        "sha256": "55656c51d48ef38cf8187cca07b510d29d3ed0f64050bbf8d20798c0f94622fc"
+      }
     ]
   },
   "known_provenance_gaps": [
@@ -43,5 +75,10 @@
     "The local VIIRS files do not record the exact FIRMS collection/granules, download URL, acquisition date, filtering history, or license.",
     "The archive contains 16 alternate modified-building rasters that are not selected by the active namelist; they remain preserved in the original RAR.",
     "The archive does not state whether model parameters were calibrated against this event."
-  ]
+  ],
+  "generation": {
+    "input_scripts": null,
+    "observation_scripts": null,
+    "limitations": "No original script was supplied for generating the observation data. Input generation, where supplied, requires external source data and service access; frozen-file equivalence is unverified."
+  }
 }

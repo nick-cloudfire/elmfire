@@ -1,0 +1,88 @@
+{
+  "worksheet_format": "human review fields; not a Zenodo API payload",
+  "resource_type": "Dataset",
+  "title": "ELMFIRE validation inputs and observations for 31 wildfires",
+  "version": "2.2.0",
+  "publication_date": "2026-10-22",
+  "creators": [
+    {
+      "name": "Chris Lautenberger",
+      "affiliation": "Cloudfire, Inc.",
+      "orcid": "unknown"
+    },
+    {
+      "name": "Daniel San Martin",
+      "affiliation": "University of California, Berkeley",
+      "orcid": "unknown"
+    },
+    {
+      "name": "Dwi M. J. Purnomo",
+      "affiliation": "University of California, Berkeley",
+      "orcid": "unknown"
+    },
+    {
+      "name": "Maria Theodori",
+      "affiliation": "Cloudfire, Inc.",
+      "orcid": "unknown"
+    },
+    {
+      "name": "Kasra Shamsaei",
+      "affiliation": "Cloudfire, Inc.",
+      "orcid": "0000-0003-3396-7683"
+    }
+  ],
+  "license": "CC-BY-4.0",
+  "description": "This collection contains input rasters, required input tables, fire observations and data-generation source for 31 wildfires used in ELMFIRE validation studies. 31 datasets support implemented validation cases. Each fire has a separate archive containing input and observation bundles and data-generation scripts where supplied, file inventories, checksums, a README, and a Python restoration script. Historical model outputs, runners and model configurations are excluded. Camp, Thomas, and Tubbs contain VIIRS active-fire observations; the other 28 fires contain GOFER-derived arrival-time TIFFs and PNG previews, plus CAL FIRE final-perimeter GeoPackages and aligned 30 m mask TIFFs. The GeoPackages retain CAL FIRE records and the final GOFER perimeter. Input preparation and CAL FIRE perimeter-generation sources are included. All 28 GOFER fires also include supplementary ws_gust.tif rasters and updated case-local gust-generation scripts. NOAA RTMA 10-m gusts were converted to mph at 20 ft and bilinearly interpolated onto each weather grid. Regular wind rasters are retained; gust selection is controlled by the model configuration.\n\nChris Lautenberger and Daniel San Martin are credited for the 28 GOFER-related fire datasets. Dwi M. J. Purnomo, Maria Theodori, and Kasra Shamsaei are credited for Camp, Thomas, and Tubbs.\n\nGOFER source attribution: Liu, Tianjia; Randerson, James T.; Chen, Yang; Morton, Douglas C.; Wiggins, Elizabeth B.; Smyth, Padhraic; Foufoula-Georgiou, Efi; Nadler, Roy; Nevo, Omer. GOES-Observed Fire Event Representation (GOFER) product for 28 California wildfires from 2019-2021. Zenodo, https://doi.org/10.5281/zenodo.8327264 (all versions). The supplied observations are derived arrival-time rasters; the exact source version and complete transformation history remain unverified. GOFER source license: CC BY 4.0, https://creativecommons.org/licenses/by/4.0/. License evidence was checked against version 0.2 (2025), https://doi.org/10.5281/zenodo.14642378; this does not establish which version was used for the supplied rasters.\n\nKnown limitations: the exact GOFER source version and complete transformation history remain unverified. Upstream products and the exact VIIRS collections for Camp, Thomas, and Tubbs are incompletely identified. Redistribution terms for separately supplied model inputs and other third-party material remain under review. These limitations are documented in the per-fire metadata and source metadata. File integrity does not establish model accuracy.\n\nAcknowledgement: OpenAI Codex assisted with archive preparation, metadata organization, and drafting the accompanying documentation.",
+  "keywords": [
+    "ELMFIRE",
+    "wildfire",
+    "validation",
+    "GOFER",
+    "VIIRS"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/berkeley-firelab/ELMFIRE_VnV_Suite",
+      "relation": "is supplement to",
+      "resource_type": "Software"
+    },
+    {
+      "identifier": "https://doi.org/10.5281/zenodo.8327264",
+      "relation": "is derived from",
+      "resource_type": "Dataset"
+    },
+    {
+      "identifier": "https://doi.org/10.5194/essd-16-1395-2024",
+      "relation": "references",
+      "resource_type": "Publication"
+    }
+  ],
+  "redistribution_permission_evidence": {
+    "GOFER": {
+      "status": "partial; GOFER source license verified, complete bundle permissions unresolved",
+      "checked_on": "2026-10-22",
+      "source_record": "https://zenodo.org/records/14642378",
+      "source_doi": "10.5281/zenodo.14642378",
+      "source_title": "GOES-Observed Fire Event Representation (GOFER) product for 28 California wildfires from 2019-2021",
+      "source_version": "0.2",
+      "source_publication_date": "2025-01-13",
+      "source_license": "CC-BY-4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "coverage": "GOFER source observations may be redistributed and adapted with attribution, a license link, and an indication of changes.",
+      "attribution": "Liu, T.; Randerson, J. T.; Chen, Y.; Morton, D. C.; Wiggins, E. B.; Smyth, P.; Foufoula-Georgiou, E.; Nadler, R.; Nevo, O. (2025). GOES-Observed Fire Event Representation (GOFER) product for 28 California wildfires from 2019-2021, version 0.2. Zenodo. https://doi.org/10.5281/zenodo.14642378",
+      "limitations": [
+        "The exact GOFER version used to prepare the supplied observation rasters has not been verified; this record is license evidence, not confirmation that local rasters derive from version 0.2.",
+        "This record does not establish redistribution permission for separately supplied model inputs, historical outputs, or other third-party material."
+      ],
+      "next_steps": "Confirm the source version and transformation history with the archive preparer; obtain product-specific licenses or written redistribution permission from the rights holders for all remaining bundled material.",
+      "CAL_FIRE": {
+        "source_identification": "California Historic Fire Perimeters (2026-05-26), as identified by supplied exploratory.py",
+        "provider": "CAL FIRE FRAP",
+        "coverage": "Final-perimeter GeoPackage layers and raster masks, excluding the GOFER layer",
+        "status": "License and redistribution evidence were not supplied in the referenced directory."
+      }
+    },
+    "other_sources": "See per-fire metadata worksheets and source manifests; unresolved."
+  },
+  "review_status": "draft; complete-bundle redistribution review pending"
+}

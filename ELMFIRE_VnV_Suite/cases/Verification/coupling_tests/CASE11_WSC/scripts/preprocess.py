@@ -279,11 +279,9 @@ def write_variant(case_dir, template, case, spec, feature_available):
     write_tif(input_dir / "structure_id.tif", structure_ids, dx, np.int16)
     write_tif(input_dir / "structure_fraction.tif", fractions, dx, np.float32)
 
-    fuel_models = case_dir / "data" / "misc" / "fuel_models.csv"
     building_models = case_dir / "data" / "misc" / "building_fuel_models.csv"
-    if not fuel_models.exists() or not building_models.exists():
+    if not building_models.exists():
         raise FileNotFoundError("Case-local ELMFIRE fuel-model tables are unavailable.")
-    shutil.copyfile(fuel_models, misc_dir / "fuel_models.csv")
     row, hrr_peak, hardening = building_model_row(case)
     existing = building_models.read_text(encoding="utf-8").rstrip()
     (misc_dir / "building_fuel_models.csv").write_text(

@@ -1,0 +1,18 @@
+\newcommand{\CaseID}{kincade\_2019}
+\newcommand{\CaseTitle}{2019 Kincade Fire Reconstruction against GOFER Hourly Perimeters}
+\newcommand{\FireName}{Kincade Fire}
+\newcommand{\FireYear}{2019}
+\newcommand{\EventStart}{24 October 2019 at 04:00~UTC}
+\newcommand{\EventEnd}{29 October 2019 at 18:00~UTC}
+\newcommand{\DurationHours}{134}
+\newcommand{\CRSName}{UTM zone 10N (EPSG:32610)}
+\newcommand{\FuelVersionText}{LANDFIRE release 2.0.0\_2019}
+\newcommand{\FireSummary}{GOFER records the Kincade Fire from 24 October 2019 at 04:00~UTC to 29 October 2019 at 18:00~UTC with 134 hourly perimeters, a final perimeter area of 347~km$^2$ and an official size of 77,758~ac, and 1 ignition point(s).}
+\newcommand{\IgnitionMoveNote}{no point required moving}
+\newcommand{\OffshoreNote}{}
+\newcommand{\CalibrationNote}{The firebrand-spotting configuration was changed after the case owner inspected comparisons of this fire with GOFER, so results for this fire are not independent of that choice.}
+\newcommand{\ConfigurationText}{The domain is the 30-m landscape grid in UTM zone 10N (EPSG:32610).  The simulation starts at the first GOFER ignition point and runs 134~h, to the last GOFER perimeter, with a single point ignition.  Weather and fuel moisture are read hourly and interpolated in time.  Surface spread follows the Rothermel model with the Scott and Burgan fuel models.  Crown fire uses the ELMFIRE default treatment: initiation when surface fireline intensity exceeds the critical intensity of Van Wagner \cite{vanwagner1977}, and active-crown spread rate from Cruz et al. \cite{cruz2005}, capped at 250~ft~min$^{-1}$, with a constant foliar moisture of 90\%.  Firebrand spotting is enabled with every other spotting setting at its ELMFIRE default, so firebrands are generated only by crown-fire cells.  The level-set equation is advanced with an adaptive timestep targeting a Courant--Friedrichs--Lewy (CFL) number of 0.2, starting at 1~s and limited to 600~s.  The run is a single deterministic member with a fixed random seed; arrival time, spread rate, fireline intensity and fire-size statistics are recorded at the stop time.}
+\newcommand{\WeatherOffsetText}{0~h after the GOES ignition hour; all results are reported in hours since the GOES ignition hour.}
+\newcommand{\RevisionText}{No simulation results are retained in this dataset. New results must record the executable identity and configuration used.}
+\newcommand{\CaseInterpretation}{}
+\newcommand{\ElmfireRevision}{5ea7460d514b}

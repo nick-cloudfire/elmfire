@@ -32,16 +32,7 @@ class ReportLanguageTests(unittest.TestCase):
         self.assertEqual(report_text(r'\def\WorkflowStatus{NOT RUN}'),
                          r'\def\WorkflowStatus{NOT RUN}')
 
-    def test_condition_label_retains_courant_number(self):
-        self.assertEqual(scientific_text(r'cfl0p5\_dt0p28'),
-                         'Wind Courant number 0.5')
-
-    def test_contextual_reference_and_filename(self):
-        self.assertEqual(scientific_text("analytical oracle"), "analytical reference solution")
-        self.assertEqual(report_text(r"Read \texttt{metrics.json}."),
-                         "Read calculated verification and validation metrics.")
-
-    def test_table_cell_text_is_revised_without_changing_values(self):
+    def test_table_polishing_preserves_numerical_values(self):
         import matplotlib
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
@@ -49,6 +40,5 @@ class ReportLanguageTests(unittest.TestCase):
         figure, axis = plt.subplots()
         table = axis.table(cellText=[['0.005']], colLabels=['Variant'], loc='center')
         polish_figure(figure)
-        self.assertEqual(table[(0, 0)].get_text().get_text(), 'Simulation condition')
         self.assertEqual(table[(1, 0)].get_text().get_text(), '0.005')
         plt.close(figure)

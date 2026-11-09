@@ -8,16 +8,16 @@
   "required_outputs_complete": true,
   "required_variant_count": 7,
   "completed_variant_count": 7,
-  "runtime_input_fingerprint_sha256": "1785c84ce84d2647c8daf520c134f64b3e82d50d1561ee376120cce8ed1cdf69",
-  "oracle_artifact_fingerprint_sha256": "1ca1265308e8c82900f62f064aa06bb799ea6906dfd00536d8c05e86650c02d6",
+  "runtime_input_fingerprint_sha256": "adf700c0be781b4705414a928b4dfdd314184b60e37420a6f2c9bb84ed1e902f",
+  "oracle_artifact_fingerprint_sha256": "e8606a6b39d7378cc9c03d32aa8db9047615275fd9b8be64144e1adf3254e689",
   "preflight": "outputs/source_selector_preflight.json",
   "selector_preflight_status": "NOT EVALUABLE",
   "selector_gate_passed": false,
   "reason": "One or more intended heat/FTP transition checks failed; optional FLIN-shortcut diagnostics do not control this decision.",
   "executable": {
-    "resolved_path": "/workspaces/elmfire-nick/ELMFIRE_VnV_Suite/diagnostics/CASE43_CASE49/bin/elmfire",
-    "sha256": "bc2d27483ed3cf409cea0a04fd879e290cfe5b57a0c84b215282ff9d18c458a9",
-    "version": "ELMFIRE 2025.1002"
+    "resolved_path": "/global/home/users/yirenqin712/applications/elmfire/elmfire-main/build/linux/bin/elmfire_debug_",
+    "sha256": "2b58920716af28891d9166c5f1046174214994eb20e820981017e4f2d166b001",
+    "version": "ELMFIRE Reading &MISCELLANEOUS namelist group"
   },
   "metrics": [
     {
@@ -56,8 +56,8 @@
       "name": "intended W-to-U receiver heat exposure",
       "expected": "positive DFC+radiation at sufficient-heat receivers",
       "calculated": {
-        "contiguous_above": 84.52081632614136,
-        "isolated_d1_sufficient": 61.923187255859375
+        "contiguous_above": 61.923182010650635,
+        "isolated_d1_sufficient": 61.923182010650635
       },
       "units": "kW/m2",
       "status": "PASS"
@@ -66,19 +66,19 @@
       "name": "intended W-to-U finite ignition delay",
       "expected": "finite target TOA with delay > 0 s",
       "calculated": {
-        "contiguous_above": 49.0,
-        "isolated_d1_sufficient": 51.0
+        "contiguous_above": null,
+        "isolated_d1_sufficient": null
       },
       "units": "s",
-      "status": "PASS"
+      "status": "FAIL"
     },
     {
       "name": "contiguous strict-threshold matrix",
       "expected": "below=false, equal=false, above=true",
       "calculated": {
-        "contiguous_below": true,
-        "contiguous_equal": true,
-        "contiguous_above": true
+        "contiguous_below": false,
+        "contiguous_equal": false,
+        "contiguous_above": false
       },
       "units": "--",
       "status": "NOT EVALUABLE"
@@ -87,8 +87,8 @@
       "name": "isolated distance/threshold matrix",
       "expected": "d1-insufficient=false, d1-sufficient=true, d2-sufficient=false",
       "calculated": {
-        "isolated_d1_insufficient": true,
-        "isolated_d1_sufficient": true,
+        "isolated_d1_insufficient": false,
+        "isolated_d1_sufficient": false,
         "isolated_d2_sufficient": false
       },
       "units": "--",
@@ -99,12 +99,12 @@
       "expected": "eligible target TOA=0 s and target-source delay=0 s",
       "calculated": {
         "contiguous_above": {
-          "target_toa_s": 49.0,
-          "target_source_delay_s": 49.0
+          "target_toa_s": null,
+          "target_source_delay_s": null
         },
         "isolated_d1_sufficient": {
-          "target_toa_s": 51.0,
-          "target_source_delay_s": 51.0
+          "target_toa_s": null,
+          "target_source_delay_s": null
         }
       },
       "units": "s",
@@ -131,10 +131,10 @@
         12
       ],
       "requested_source_flin_kw_m": 999.0,
-      "adj_float32": 38.43002700805664,
+      "adj_float32": 38.430023193359375,
       "designed_source_flin_kw_m": 999.0,
       "binary32_input_design": {
-        "adjustment_float32": 38.43002700805664,
+        "adjustment_float32": 38.430023193359375,
         "surface_ros_ft_min": 187.21087646484375,
         "source_flin_kw_m": 999.0
       },
@@ -145,21 +145,21 @@
       "expected_target_toa_s": null,
       "expected_target_terminal_phi": "> 0",
       "expected_source_toa_s": 0.0,
-      "runtime_input_fingerprint_sha256": "772faa08e61605b372d61f490f25bf006ca63361d83be023b580cf67f8ed3442",
+      "runtime_input_fingerprint_sha256": "2a925a636e79a1748bf5e73524d365e4e1009647a8b0fa5d549498c9f498a577",
       "measured_source_flin_kw_m": 0.0,
       "source_flin_abs_error_kw_m": 999.0,
       "source_toa_s": 0.0,
       "source_toa_all_zero": true,
-      "target_terminal_phi": -0.1328601837158203,
-      "target_toa_s": 49.0,
-      "target_phi_burning": true,
-      "target_toa_finite": true,
+      "target_terminal_phi": 0.18151870369911194,
+      "target_toa_s": null,
+      "target_phi_burning": false,
+      "target_toa_finite": false,
       "target_state_consistent": true,
-      "target_ignited_observation": true,
-      "transition_ignition_delay_s": 49.0,
-      "target_peak_dfc_kw_m2": 80.12958526611328,
-      "target_peak_radiation_kw_m2": 4.279073715209961,
-      "target_peak_total_heat_kw_m2": 84.40865898132324,
+      "target_ignited_observation": false,
+      "transition_ignition_delay_s": null,
+      "target_peak_dfc_kw_m2": 57.589332580566406,
+      "target_peak_radiation_kw_m2": 4.210125923156738,
+      "target_peak_total_heat_kw_m2": 61.799458503723145,
       "dump_ledger": {
         "path": "variants/contiguous_below/outputs/dump_times_0000001.csv",
         "row_count": 61,
@@ -191,10 +191,10 @@
         12
       ],
       "requested_source_flin_kw_m": 1000.0,
-      "adj_float32": 38.4684944152832,
+      "adj_float32": 38.46849060058594,
       "designed_source_flin_kw_m": 1000.0,
       "binary32_input_design": {
-        "adjustment_float32": 38.4684944152832,
+        "adjustment_float32": 38.46849060058594,
         "surface_ros_ft_min": 187.3982696533203,
         "source_flin_kw_m": 1000.0
       },
@@ -205,21 +205,21 @@
       "expected_target_toa_s": null,
       "expected_target_terminal_phi": "> 0",
       "expected_source_toa_s": 0.0,
-      "runtime_input_fingerprint_sha256": "2995081f8617b6ee0ad6fb2f04d560afc751748408fdc71a7aeea74e1239662b",
+      "runtime_input_fingerprint_sha256": "003551c9d56653657fae45802d93b3ee34616a3e48180bce0bf1e52742947f12",
       "measured_source_flin_kw_m": 0.0,
       "source_flin_abs_error_kw_m": 1000.0,
       "source_toa_s": 0.0,
       "source_toa_all_zero": true,
-      "target_terminal_phi": -0.13375575840473175,
-      "target_toa_s": 49.0,
-      "target_phi_burning": true,
-      "target_toa_finite": true,
+      "target_terminal_phi": 0.18120421469211578,
+      "target_toa_s": null,
+      "target_phi_burning": false,
+      "target_toa_finite": false,
       "target_state_consistent": true,
-      "target_ignited_observation": true,
-      "transition_ignition_delay_s": 49.0,
-      "target_peak_dfc_kw_m2": 80.18146514892578,
-      "target_peak_radiation_kw_m2": 4.283287048339844,
-      "target_peak_total_heat_kw_m2": 84.46475219726562,
+      "target_ignited_observation": false,
+      "transition_ignition_delay_s": null,
+      "target_peak_dfc_kw_m2": 57.64698791503906,
+      "target_peak_radiation_kw_m2": 4.2143402099609375,
+      "target_peak_total_heat_kw_m2": 61.861328125,
       "dump_ledger": {
         "path": "variants/contiguous_equal/outputs/dump_times_0000001.csv",
         "row_count": 61,
@@ -251,10 +251,10 @@
         12
       ],
       "requested_source_flin_kw_m": 1001.0,
-      "adj_float32": 38.506961822509766,
+      "adj_float32": 38.5069580078125,
       "designed_source_flin_kw_m": 1001.0,
       "binary32_input_design": {
-        "adjustment_float32": 38.506961822509766,
+        "adjustment_float32": 38.5069580078125,
         "surface_ros_ft_min": 187.58566284179688,
         "source_flin_kw_m": 1001.0
       },
@@ -265,21 +265,21 @@
       "expected_target_toa_s": 0.0,
       "expected_target_terminal_phi": "<= 0",
       "expected_source_toa_s": 0.0,
-      "runtime_input_fingerprint_sha256": "09224abceaf733ea4e0e60f9cea573c5bd7a2ccc85ec8764c11a2a43cb2c8e1f",
+      "runtime_input_fingerprint_sha256": "a5129c1debe74ce1a075cc1f3a3fc6d7292a84cf2359b1bf733be4363aa3068b",
       "measured_source_flin_kw_m": 0.0,
       "source_flin_abs_error_kw_m": 1001.0,
       "source_toa_s": 0.0,
       "source_toa_all_zero": true,
-      "target_terminal_phi": -0.13597047328948975,
-      "target_toa_s": 49.0,
-      "target_phi_burning": true,
-      "target_toa_finite": true,
+      "target_terminal_phi": 0.18025362491607666,
+      "target_toa_s": null,
+      "target_phi_burning": false,
+      "target_toa_finite": false,
       "target_state_consistent": true,
-      "target_ignited_observation": true,
-      "transition_ignition_delay_s": 49.0,
-      "target_peak_dfc_kw_m2": 80.23331451416016,
-      "target_peak_radiation_kw_m2": 4.287501811981201,
-      "target_peak_total_heat_kw_m2": 84.52081632614136,
+      "target_ignited_observation": false,
+      "transition_ignition_delay_s": null,
+      "target_peak_dfc_kw_m2": 57.704627990722656,
+      "target_peak_radiation_kw_m2": 4.2185540199279785,
+      "target_peak_total_heat_kw_m2": 61.923182010650635,
       "dump_ledger": {
         "path": "variants/contiguous_above/outputs/dump_times_0000001.csv",
         "row_count": 61,
@@ -311,10 +311,10 @@
         12
       ],
       "requested_source_flin_kw_m": 999.0,
-      "adj_float32": 38.43002700805664,
+      "adj_float32": 38.430023193359375,
       "designed_source_flin_kw_m": 999.0,
       "binary32_input_design": {
-        "adjustment_float32": 38.43002700805664,
+        "adjustment_float32": 38.430023193359375,
         "surface_ros_ft_min": 187.21087646484375,
         "source_flin_kw_m": 999.0
       },
@@ -325,21 +325,21 @@
       "expected_target_toa_s": null,
       "expected_target_terminal_phi": "> 0",
       "expected_source_toa_s": 0.0,
-      "runtime_input_fingerprint_sha256": "e080b1981e54a9374445bc7373588df0ed293ab515dd0db6a7a1ee0af60d56b5",
+      "runtime_input_fingerprint_sha256": "4f232f2195c39684b770b6ed3fb145d5ade2d20323dbe8d8b409c1720ffaaef1",
       "measured_source_flin_kw_m": 0.0,
       "source_flin_abs_error_kw_m": 999.0,
       "source_toa_s": 0.0,
       "source_toa_all_zero": true,
-      "target_terminal_phi": -0.06527474522590637,
-      "target_toa_s": 52.0,
-      "target_phi_burning": true,
-      "target_toa_finite": true,
+      "target_terminal_phi": 0.18021076917648315,
+      "target_toa_s": null,
+      "target_phi_burning": false,
+      "target_toa_finite": false,
       "target_state_consistent": true,
-      "target_ignited_observation": true,
-      "transition_ignition_delay_s": 52.0,
-      "target_peak_dfc_kw_m2": 57.5893440246582,
-      "target_peak_radiation_kw_m2": 4.210126876831055,
-      "target_peak_total_heat_kw_m2": 61.79947090148926,
+      "target_ignited_observation": false,
+      "transition_ignition_delay_s": null,
+      "target_peak_dfc_kw_m2": 57.589332580566406,
+      "target_peak_radiation_kw_m2": 4.210125923156738,
+      "target_peak_total_heat_kw_m2": 61.799458503723145,
       "dump_ledger": {
         "path": "variants/isolated_d1_insufficient/outputs/dump_times_0000001.csv",
         "row_count": 61,
@@ -371,10 +371,10 @@
         12
       ],
       "requested_source_flin_kw_m": 1001.0,
-      "adj_float32": 38.506961822509766,
+      "adj_float32": 38.5069580078125,
       "designed_source_flin_kw_m": 1001.0,
       "binary32_input_design": {
-        "adjustment_float32": 38.506961822509766,
+        "adjustment_float32": 38.5069580078125,
         "surface_ros_ft_min": 187.58566284179688,
         "source_flin_kw_m": 1001.0
       },
@@ -385,21 +385,21 @@
       "expected_target_toa_s": 0.0,
       "expected_target_terminal_phi": "<= 0",
       "expected_source_toa_s": 0.0,
-      "runtime_input_fingerprint_sha256": "7f67929a8d154dfaae28e571937068fd6e8c535baea46c0d811b4fd165bee4fe",
+      "runtime_input_fingerprint_sha256": "8a4d564330615220d46e6ead3bb0c0768ce69bd566b762976f1abf54de7b9855",
       "measured_source_flin_kw_m": 0.0,
       "source_flin_abs_error_kw_m": 1001.0,
       "source_toa_s": 0.0,
       "source_toa_all_zero": true,
-      "target_terminal_phi": -0.0707964152097702,
-      "target_toa_s": 51.0,
-      "target_phi_burning": true,
-      "target_toa_finite": true,
+      "target_terminal_phi": 0.17843976616859436,
+      "target_toa_s": null,
+      "target_phi_burning": false,
+      "target_toa_finite": false,
       "target_state_consistent": true,
-      "target_ignited_observation": true,
-      "transition_ignition_delay_s": 51.0,
-      "target_peak_dfc_kw_m2": 57.70463180541992,
-      "target_peak_radiation_kw_m2": 4.218555450439453,
-      "target_peak_total_heat_kw_m2": 61.923187255859375,
+      "target_ignited_observation": false,
+      "transition_ignition_delay_s": null,
+      "target_peak_dfc_kw_m2": 57.704627990722656,
+      "target_peak_radiation_kw_m2": 4.2185540199279785,
+      "target_peak_total_heat_kw_m2": 61.923182010650635,
       "dump_ledger": {
         "path": "variants/isolated_d1_sufficient/outputs/dump_times_0000001.csv",
         "row_count": 61,
@@ -431,10 +431,10 @@
         13
       ],
       "requested_source_flin_kw_m": 1001.0,
-      "adj_float32": 38.506961822509766,
+      "adj_float32": 38.5069580078125,
       "designed_source_flin_kw_m": 1001.0,
       "binary32_input_design": {
-        "adjustment_float32": 38.506961822509766,
+        "adjustment_float32": 38.5069580078125,
         "surface_ros_ft_min": 187.58566284179688,
         "source_flin_kw_m": 1001.0
       },
@@ -445,21 +445,21 @@
       "expected_target_toa_s": null,
       "expected_target_terminal_phi": "> 0",
       "expected_source_toa_s": 0.0,
-      "runtime_input_fingerprint_sha256": "0f6e81bb5bf578b604c626b4dcd032c10b9c6ae573d503a74b2e56cab103d08e",
+      "runtime_input_fingerprint_sha256": "612fdef33c607cbcf8bbbf2de40b37f7ac65aa5d89ae39cf0baa8ac1acdab0bd",
       "measured_source_flin_kw_m": 0.0,
       "source_flin_abs_error_kw_m": 1001.0,
       "source_toa_s": 0.0,
       "source_toa_all_zero": true,
-      "target_terminal_phi": 0.9998418688774109,
+      "target_terminal_phi": 0.998956024646759,
       "target_toa_s": null,
       "target_phi_burning": false,
       "target_toa_finite": false,
       "target_state_consistent": true,
       "target_ignited_observation": false,
       "transition_ignition_delay_s": null,
-      "target_peak_dfc_kw_m2": 14.376708984375,
-      "target_peak_radiation_kw_m2": 1.9652786254882812,
-      "target_peak_total_heat_kw_m2": 16.34198760986328,
+      "target_peak_dfc_kw_m2": 14.376707077026367,
+      "target_peak_radiation_kw_m2": 1.9652785062789917,
+      "target_peak_total_heat_kw_m2": 16.34198558330536,
       "dump_ledger": {
         "path": "variants/isolated_d2_sufficient/outputs/dump_times_0000001.csv",
         "row_count": 61,

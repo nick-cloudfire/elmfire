@@ -1,0 +1,248 @@
+{
+  "schema_version": 1,
+  "case_id": "thomas_fire",
+  "dataset_version": "2.2.0",
+  "source_revision": "bddc2cef6107f4be8c0c2b4ef08a1d547efe339e",
+  "source_state": "working tree snapshot; file hashes are authoritative",
+  "archive_scope": "input data, observations and data-generation source only",
+  "source_metadata": {
+    "schema_version": 1,
+    "case_id": "thomas_fire",
+    "event_start_utc": "2017-12-05T02:30:00Z",
+    "comparison_time_s": 61200,
+    "comparison_time_utc": "2017-12-05T19:30:00Z",
+    "model_inputs": {
+      "source": "Thomas_VAL.rar, received in the 3_FIRES collection identified only as 'From Dwi'",
+      "archive_namelist_sha256": "a99b7d2c751685b26a30489e96069c7b7e533ceee321e792d2e84ced894a2ea8",
+      "upstream_products": "unknown",
+      "provider": "unknown",
+      "acquisition_dates": "unknown",
+      "license": "unknown"
+    },
+    "analysis": {
+      "weather_bands_used": 25,
+      "weather_interval_s": 3600,
+      "wind_speed_units": "mph at 20 ft (inferred from current ELMFIRE source and archived flags)",
+      "wind_direction_units": "degrees",
+      "dead_fuel_moisture_units": "percent",
+      "topography_units": {
+        "dem": "m (archive convention; upstream metadata absent)",
+        "slp": "degrees",
+        "asp": "degrees"
+      }
+    },
+    "observation": {
+      "description": "VIIRS 375 m active-fire point detections with NASA FIRMS-compatible fields",
+      "source_attribution": "NASA FIRMS / VIIRS active-fire product inferred from field schema; exact collection, granules, download URL, acquisition date, and chain of custody are not recorded locally",
+      "source_url": "https://firms.modaps.eosdis.nasa.gov/active_fire/",
+      "product_reference_url": "https://www.earthdata.nasa.gov/data/catalog/lancemodis-vnp14img-nrt-2",
+      "crs": "EPSG:4326",
+      "geometry": "Point",
+      "comparison_cutoff_utc": "2017-12-05T19:30:00Z",
+      "files": [
+        {
+          "relative_path": "data/observation/viirs_thomas.cpg",
+          "size": 5,
+          "sha256": "3ad3031f5503a4404af825262ee8232cc04d4ea6683d42c5dd0a2f2a27ac9824"
+        },
+        {
+          "relative_path": "data/observation/viirs_thomas.dbf",
+          "size": 1749142,
+          "sha256": "3f5dff1df0dd6fc06999be0955e760062f412dffb36bf5d852a2ddd4db60eb8f"
+        },
+        {
+          "relative_path": "data/observation/viirs_thomas.prj",
+          "size": 145,
+          "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
+        },
+        {
+          "relative_path": "data/observation/viirs_thomas.shp",
+          "size": 190612,
+          "sha256": "dcd6512e479fca09aa46f0fce7a6a11dedcd104159fbdd54fea5f22d316a9d4a"
+        },
+        {
+          "relative_path": "data/observation/viirs_thomas.shx",
+          "size": 54532,
+          "sha256": "f03355eaaacb5c0d3c9a9a91668d334f2924041d65e0c5d2f6137dd04edfb00a"
+        }
+      ]
+    },
+    "known_provenance_gaps": [
+      "Upstream fuel, terrain, weather, moisture, WUI, and ignition products are not identified in the received archive.",
+      "The local VIIRS files do not record the exact FIRMS collection/granules, download URL, acquisition date, filtering history, or license.",
+      "The archive does not state whether model parameters were calibrated against this event."
+    ],
+    "generation": {
+      "input_scripts": null,
+      "observation_scripts": null,
+      "limitations": "No original script was supplied for generating the observation data. Input generation, where supplied, requires external source data and service access; frozen-file equivalence is unverified."
+    }
+  },
+  "zenodo": {
+    "record_id": null,
+    "version_doi": null,
+    "concept_doi": null
+  },
+  "bundles": [
+    {
+      "role": "inputs",
+      "filename": "inputs.tar.gz",
+      "required": true,
+      "size": 21783925,
+      "sha256": "8ab722640c358ed69c3fa415d06c9e072a2547aaf2b23159b2cb1a8b224aabe3",
+      "url": null,
+      "files": [
+        {
+          "path": "data/weather/m1.tif",
+          "size": 25272433,
+          "sha256": "1e3347ef3a177a2663f18ce0b767b3b1fd4921e3fd40caad10439a8050f1e1ef"
+        },
+        {
+          "path": "data/weather/m10.tif",
+          "size": 25109978,
+          "sha256": "567c9c995df2f79258153d08c91166a1c5327283e44306e6dc29f9b31f16ed2d"
+        },
+        {
+          "path": "data/weather/m100.tif",
+          "size": 24637091,
+          "sha256": "491d985fc9b3cf481b88f409f13763592f2b8328bd80ba45a57f090975a3b50c"
+        },
+        {
+          "path": "data/weather/wd.tif",
+          "size": 6331126,
+          "sha256": "5e847e3ab51a64471614d3f9dbea968e8759fd29dda2ec6159ccc37cff37a265"
+        },
+        {
+          "path": "data/weather/ws.tif",
+          "size": 8376401,
+          "sha256": "0533bbf61b387363f2692a400dd36fdc07d0af10f6abde108a2ba6c607232532"
+        },
+        {
+          "path": "data/fuels_and_topography/adj.tif",
+          "size": 103638,
+          "sha256": "a159083c52040a261a76bb87fa3de8b59c61119178234d0e6e861135b7aeca16"
+        },
+        {
+          "path": "data/fuels_and_topography/asp.tif",
+          "size": 3749316,
+          "sha256": "1a7791cc246f4eab36704b3cf591a0644ea6c786705cfbe74f47ac91d1c228b8"
+        },
+        {
+          "path": "data/fuels_and_topography/baa_m.tif",
+          "size": 17737006,
+          "sha256": "3b775efe8f00c1892ff1c1f307fb20f73bb6a8e75d8abcb9d9029c653b766f65"
+        },
+        {
+          "path": "data/fuels_and_topography/bfm13.tif",
+          "size": 8874028,
+          "sha256": "b634c63caff253cc657e9b5aa2fb2e17f03537b60403a839912fa7c71a0740b7"
+        },
+        {
+          "path": "data/fuels_and_topography/cbd.tif",
+          "size": 598553,
+          "sha256": "d0f4188cae8f1e936d34f90fd834bf50842abce8bba38483e1dad5a3bfc77115"
+        },
+        {
+          "path": "data/fuels_and_topography/cbh.tif",
+          "size": 729812,
+          "sha256": "97edfe18f95eacb0e97a0a46aa5fd181cda6abeaaaf222e47e7eef7334adaeea"
+        },
+        {
+          "path": "data/fuels_and_topography/cc.tif",
+          "size": 633795,
+          "sha256": "1840317795b8a3e243bc96a13eb410b0c97a6d55d4e706480a9d10d494531631"
+        },
+        {
+          "path": "data/fuels_and_topography/ch.tif",
+          "size": 788995,
+          "sha256": "3d2b9376bed8dfe970a04c0ad91182418a7af171ee84c1b0d105da5b73450e82"
+        },
+        {
+          "path": "data/fuels_and_topography/dem.tif",
+          "size": 3997756,
+          "sha256": "efd05c2d1f13522a0caa0a262092c513b9a020c058aaa3427d368fd322bca9e2"
+        },
+        {
+          "path": "data/fuels_and_topography/fbfm40b.tif",
+          "size": 989281,
+          "sha256": "7bbd0672fd1702bf0e2b4d8f9ea59fe8166ea8cb066e48870d9c663c4188acb8"
+        },
+        {
+          "path": "data/fuels_and_topography/ff.tif",
+          "size": 17737006,
+          "sha256": "eb5d900e02b0422b765d2c120bcfeb27cdf970cf38e6dac7dad37bf472d3e592"
+        },
+        {
+          "path": "data/fuels_and_topography/ignition_mask.tif",
+          "size": 95364,
+          "sha256": "4bb9c6015c88076a63ce30357cb7b35b87e765cf4dbe6c7583f5bbb5334497ea"
+        },
+        {
+          "path": "data/fuels_and_topography/nbf.tif",
+          "size": 17737006,
+          "sha256": "5a8d650453599b589809573494fe4f9b91edf3e723395a4a4a43cc94d8b7e109"
+        },
+        {
+          "path": "data/fuels_and_topography/phi.tif",
+          "size": 103638,
+          "sha256": "a159083c52040a261a76bb87fa3de8b59c61119178234d0e6e861135b7aeca16"
+        },
+        {
+          "path": "data/fuels_and_topography/slp.tif",
+          "size": 2379329,
+          "sha256": "17ecbdd5c9da6b73bd5124e1a80fd6b0f145572c24b29e0445a18dde3e023cbb"
+        },
+        {
+          "path": "data/fuels_and_topography/ssd_min.tif",
+          "size": 17737006,
+          "sha256": "b7bbdde7b01e5fa94110275a13f3a33499e756be22085ef6b48d49340113a458"
+        },
+        {
+          "path": "data/misc/building_fuel_models.csv",
+          "size": 1180,
+          "sha256": "ade4d3c620b0261a42ecd907f19aca3e06a816ec3accf208859dec109a50dd66"
+        },
+        {
+          "path": "data/misc/fuel_models.csv",
+          "size": 3886,
+          "sha256": "22b50f3b3dc3b95d1372601a02ff998e197745aff8ee4f96f2c513865e724acb"
+        }
+      ]
+    },
+    {
+      "role": "observations",
+      "filename": "observations.tar.gz",
+      "required": true,
+      "size": 239965,
+      "sha256": "f34527887963de4e0c80902617aeba5155af19083006021b0e815a553ea9c61d",
+      "url": null,
+      "files": [
+        {
+          "path": "data/observation/viirs_thomas.cpg",
+          "size": 5,
+          "sha256": "3ad3031f5503a4404af825262ee8232cc04d4ea6683d42c5dd0a2f2a27ac9824"
+        },
+        {
+          "path": "data/observation/viirs_thomas.dbf",
+          "size": 1749142,
+          "sha256": "3f5dff1df0dd6fc06999be0955e760062f412dffb36bf5d852a2ddd4db60eb8f"
+        },
+        {
+          "path": "data/observation/viirs_thomas.prj",
+          "size": 145,
+          "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
+        },
+        {
+          "path": "data/observation/viirs_thomas.shp",
+          "size": 190612,
+          "sha256": "dcd6512e479fca09aa46f0fce7a6a11dedcd104159fbdd54fea5f22d316a9d4a"
+        },
+        {
+          "path": "data/observation/viirs_thomas.shx",
+          "size": 54532,
+          "sha256": "f03355eaaacb5c0d3c9a9a91668d334f2924041d65e0c5d2f6137dd04edfb00a"
+        }
+      ]
+    }
+  ]
+}

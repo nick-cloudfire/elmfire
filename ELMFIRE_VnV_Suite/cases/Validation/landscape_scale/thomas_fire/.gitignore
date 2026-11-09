@@ -1,0 +1,17 @@
+# Source tables are restored from the checksummed dataset archives.
+/data/fuels_and_topography/adj.tif
+/data/fuels_and_topography/asp.tif
+/data/fuels_and_topography/cbd.tif
+/data/fuels_and_topography/cbh.tif
+/data/fuels_and_topography/cc.tif
+/data/fuels_and_topography/ch.tif
+/data/fuels_and_topography/dem.tif
+/data/fuels_and_topography/ignition_mask.tif
+/data/fuels_and_topography/phi.tif
+/data/fuels_and_topography/slp.tif
+/data/weather/m1.tif
+/data/weather/m10.tif
+/data/weather/m100.tif
+/data/weather/wd.tif
+/data/weather/ws.tif
+/data/misc/fuel_models.csv

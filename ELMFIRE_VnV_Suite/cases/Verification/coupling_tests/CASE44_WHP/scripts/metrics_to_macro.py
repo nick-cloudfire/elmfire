@@ -18,7 +18,7 @@ EXPECTED_NAMES = {
     "maximum radiation full-stack normalized L1 error",
     "spatial nonburnable scaling error",
     "target-table absorptivity scaling error",
-    "HRR_ELLIPSE_ADJ inverse-square error",
+    "DFC HRR_ELLIPSE_ADJ inverse-square error",
     "maximum radiation outside source cutoff",
     "maximum transient-to-total integration error",
     "two-source superposition error",

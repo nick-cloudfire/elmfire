@@ -18,7 +18,11 @@
     "wind_speed_units": "mph at 20 ft (inferred from current ELMFIRE source and archived flags)",
     "wind_direction_units": "degrees",
     "dead_fuel_moisture_units": "percent",
-    "topography_units": {"dem": "m (archive convention; upstream metadata absent)", "slp": "degrees", "asp": "degrees"}
+    "topography_units": {
+      "dem": "m (archive convention; upstream metadata absent)",
+      "slp": "degrees",
+      "asp": "degrees"
+    }
   },
   "observation": {
     "description": "VIIRS 375 m active-fire point detections with NASA FIRMS-compatible fields",
@@ -29,17 +33,46 @@
     "geometry": "Point",
     "comparison_cutoff_utc": "2018-11-10T10:00:00Z",
     "files": [
-      {"relative_path": "data/viirs_observation/viirs_camp.cpg", "size": 5, "sha256": "3ad3031f5503a4404af825262ee8232cc04d4ea6683d42c5dd0a2f2a27ac9824"},
-      {"relative_path": "data/viirs_observation/viirs_camp.dbf", "size": 581334, "sha256": "c8717446b0d91bcd7930c63fab2f9a254563800129b5baf904c6e2e46087a0d9"},
-      {"relative_path": "data/viirs_observation/viirs_camp.prj", "size": 145, "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"},
-      {"relative_path": "data/viirs_observation/viirs_camp.qmd", "size": 1623, "sha256": "e8dd30fbe4e3dfb933702ce596796ec442c09a05fdb587fd38460872910a312c"},
-      {"relative_path": "data/viirs_observation/viirs_camp.shp", "size": 63380, "sha256": "3cee20171a2dfe2859ae2cb82a3c1be5900133bdd4385db67ffbb49807c24fb6"},
-      {"relative_path": "data/viirs_observation/viirs_camp.shx", "size": 18180, "sha256": "3f0e0962e2b3ab644a4e81b5223013538c26bce1f819ec3558b4ce2094768566"}
+      {
+        "relative_path": "data/observation/viirs_camp.cpg",
+        "size": 5,
+        "sha256": "3ad3031f5503a4404af825262ee8232cc04d4ea6683d42c5dd0a2f2a27ac9824"
+      },
+      {
+        "relative_path": "data/observation/viirs_camp.dbf",
+        "size": 581334,
+        "sha256": "c8717446b0d91bcd7930c63fab2f9a254563800129b5baf904c6e2e46087a0d9"
+      },
+      {
+        "relative_path": "data/observation/viirs_camp.prj",
+        "size": 145,
+        "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
+      },
+      {
+        "relative_path": "data/observation/viirs_camp.qmd",
+        "size": 1623,
+        "sha256": "e8dd30fbe4e3dfb933702ce596796ec442c09a05fdb587fd38460872910a312c"
+      },
+      {
+        "relative_path": "data/observation/viirs_camp.shp",
+        "size": 63380,
+        "sha256": "3cee20171a2dfe2859ae2cb82a3c1be5900133bdd4385db67ffbb49807c24fb6"
+      },
+      {
+        "relative_path": "data/observation/viirs_camp.shx",
+        "size": 18180,
+        "sha256": "3f0e0962e2b3ab644a4e81b5223013538c26bce1f819ec3558b4ce2094768566"
+      }
     ]
   },
   "known_provenance_gaps": [
     "Upstream fuel, terrain, weather, moisture, WUI, and ignition products are not identified in the received archive.",
     "The local VIIRS files do not record the exact FIRMS collection/granules, download URL, acquisition date, filtering history, or license.",
     "The archive does not state whether model parameters were calibrated against this event."
-  ]
+  ],
+  "generation": {
+    "input_scripts": null,
+    "observation_scripts": null,
+    "limitations": "No original script was supplied for generating the observation data. Input generation, where supplied, requires external source data and service access; frozen-file equivalence is unverified."
+  }
 }

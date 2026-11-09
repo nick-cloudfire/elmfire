@@ -1,0 +1,2 @@
+fname,fyear,fire_id,t_start_utc,t_end_utc,t_first_perim_utc,duration_h,n_timesteps,west,south,east,north,center_lon,center_lat,t_ign_utc,ign_lon,ign_lat,n_ignitions,utm_epsg,local_tz,local_tzGMT,acres_official,final_area_km2
+Zogg,2020,Zogg_2020,2020-09-27T21:00:00Z,2020-09-30T20:00:00Z,2020-09-27T22:00:00Z,71.0,71,-122.72289,40.29528,-122.52931,40.55848,-122.6261,40.42688,2020-09-27T21:00:00Z,-122.56156,40.53476,1,32610,America/Los_Angeles,Etc/GMT+8,56338,222.818

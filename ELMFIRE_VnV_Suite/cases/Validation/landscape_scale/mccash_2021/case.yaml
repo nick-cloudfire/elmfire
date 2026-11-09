@@ -1,0 +1,56 @@
+case_id: mccash_2021
+case_title: 2021 McCash fire reconstruction against GOFER observations
+case_type: validation
+category: landscape_scale
+elmfire:
+  bin: ${ELMFIRE_BIN:-elmfire}
+  config: elmfire.data.in
+  mpi_ranks: 1
+validation:
+  observation: GOFER arrival-time raster; CAL FIRE supporting final extent
+  event_start_utc: '2021-08-01T02:00:00Z'
+  event_end_utc: '2021-09-24T08:00:00Z'
+  comparison_times_h:
+  - 24
+  - 48
+  - 72
+  - final GOFER arrival
+postprocess:
+  metrics: outputs/metrics.json
+  figures:
+  - figures/observation_summary.pdf
+  - figures/final_perimeter_summary.pdf
+  - figures/input_overview.pdf
+  - figures/input_distributions.pdf
+  - figures/weather_time_series.pdf
+  - figures/weather_summary.pdf
+  - figures/burned_area_growth.pdf
+  - figures/comparison_current.pdf
+  - figures/arrival_current.pdf
+  - figures/fields_current.pdf
+namelist_contract:
+  schema_version: 1
+  report: report/case_body.tex
+  files:
+  - path: elmfire.data.in
+    invariants:
+      OUTPUTS.OUTPUTS_DIRECTORY: ./outputs
+      OUTPUTS.DTDUMP: 4669200.0
+      OUTPUTS.DUMP_TIME_OF_ARRIVAL: true
+      OUTPUTS.CONVERT_TO_GEOTIFF: true
+      TIME_CONTROL.SIMULATION_DT: 1.0
+      TIME_CONTROL.TARGET_CFL: 0.2
+      TIME_CONTROL.SIMULATION_TSTOP: 4669200.0
+      MONTE_CARLO.NUM_METEOROLOGY_TIMES: 1298
+      SIMULATOR.CROWN_FIRE_MODEL: 1
+      SIMULATOR.NUM_IGNITIONS: 3
+      SIMULATOR.X_IGN(1): 466658.527
+      SIMULATOR.Y_IGN(1): 4601307.626
+      SIMULATOR.T_IGN(1): 0.0
+      SIMULATOR.X_IGN(2): 472561.739
+      SIMULATOR.Y_IGN(2): 4604860.477
+      SIMULATOR.T_IGN(2): 2426400.0
+      SIMULATOR.X_IGN(3): 475106.857
+      SIMULATOR.Y_IGN(3): 4610191.844
+      SIMULATOR.T_IGN(3): 2566800.0
+      SPOTTING.ENABLE_SPOTTING: true

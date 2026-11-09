@@ -1,0 +1,55 @@
+{
+  "worksheet_format": "human review fields; not a Zenodo API payload",
+  "case_id": "thomas_fire",
+  "resource_type": "Dataset",
+  "title": "ELMFIRE validation inputs and observations for thomas fire",
+  "version": "2.2.0",
+  "creators": [
+    {
+      "name": "Dwi M. J. Purnomo",
+      "affiliation": "University of California, Berkeley",
+      "orcid": "unknown"
+    },
+    {
+      "name": "Maria Theodori",
+      "affiliation": "Cloudfire, Inc.",
+      "orcid": "unknown"
+    },
+    {
+      "name": "Kasra Shamsaei",
+      "affiliation": "Cloudfire, Inc.",
+      "orcid": "0000-0003-3396-7683"
+    }
+  ],
+  "publication_date": "2026-10-22",
+  "license": "CC-BY-4.0",
+  "redistribution_permission_evidence": {
+    "status": "unknown; source permissions unresolved",
+    "checked_on": "2026-10-22",
+    "record_checked": "https://zenodo.org/records/14642378",
+    "record_scope": "GOFER observations for 28 California wildfires from 2019-2021; this record does not cover Camp (2018), Thomas (2017), or Tubbs (2017).",
+    "next_steps": "Ask the supplied creators/archive providers for the original input product names, versions, license URLs, and written permission from the rights holders to redistribute the bundled files. For VIIRS observations, identify the exact NASA FIRMS product and collection and retain its applicable use and attribution terms."
+  },
+  "description": "Input rasters, necessary fuel-model and ignition tables, comparison observations, and supplied data-generation source for thomas_fire. Historical model outputs, runners, original model configurations and reports are excluded. Source limitations and attribution are retained in the metadata. No original data-generation scripts were supplied.",
+  "keywords": [
+    "ELMFIRE",
+    "wildfire",
+    "validation",
+    "thomas_fire"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/berkeley-firelab/ELMFIRE_VnV_Suite",
+      "relation": "is supplement to",
+      "resource_type": "Software"
+    }
+  ],
+  "source_license_statement": "unknown",
+  "known_provenance_gaps": [
+    "Upstream fuel, terrain, weather, moisture, WUI, and ignition products are not identified in the received archive.",
+    "The local VIIRS files do not record the exact FIRMS collection/granules, download URL, acquisition date, filtering history, or license.",
+    "The archive does not state whether model parameters were calibrated against this event."
+  ],
+  "review_status": "creators supplied; affiliation, ORCID and complete-bundle redistribution review pending",
+  "license_scope": "Selected license for this prepared dataset, subject to completion of upstream rights review. Existing third-party licenses and attribution requirements remain applicable; this selection does not establish permission for unidentified source products."
+}

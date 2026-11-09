@@ -2,7 +2,6 @@ case_id: "tubbs_fire"
 case_title: "2017 Tubbs Fire landscape reconstruction"
 case_type: "validation"
 category: "landscape_scale"
-source_archive: "../../3_FIRES/Tubbs_VAL.rar"
 
 elmfire:
   bin: "elmfire"
@@ -34,6 +33,7 @@ namelist_contract:
   files:
     - path: "elmfire.data.in"
       invariants:
+        OUTPUTS.OUTPUTS_DIRECTORY: "./outputs"
         TIME_CONTROL.SIMULATION_TSTOP: 43200.0
         TIME_CONTROL.TARGET_CFL: 0.45
         SIMULATOR.NUM_IGNITIONS: 0

@@ -1,0 +1,2 @@
+fname,fyear,fire_id,t_start_utc,t_end_utc,t_first_perim_utc,duration_h,n_timesteps,west,south,east,north,center_lon,center_lat,t_ign_utc,ign_lon,ign_lat,n_ignitions,utm_epsg,local_tz,local_tzGMT,acres_official,final_area_km2
+LNU Lightning Complex,2020,LNU_Lightning_Complex_2020,2020-08-17T13:00:00Z,2020-08-28T21:00:00Z,2020-08-17T16:00:00Z,272.0,270,-123.10872,38.29383,-121.98538,38.94421,-122.54705,38.61902,2020-08-17T15:00:00Z,-122.32056,38.50106,10,32610,America/Los_Angeles,Etc/GMT+8,363220,1538.751

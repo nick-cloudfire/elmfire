@@ -1,0 +1,2 @@
+fname,fyear,fire_id,t_start_utc,t_end_utc,t_first_perim_utc,duration_h,n_timesteps,west,south,east,north,center_lon,center_lat,t_ign_utc,ign_lon,ign_lat,n_ignitions,utm_epsg,local_tz,local_tzGMT,acres_official,final_area_km2
+Kincade,2019,Kincade_2019,2019-10-24T04:00:00Z,2019-10-29T18:00:00Z,2019-10-24T05:00:00Z,134.0,134,-122.89133,38.53952,-122.65552,38.80767,-122.77342,38.6736,2019-10-24T04:00:00Z,-122.77551,38.79229,1,32610,America/Los_Angeles,Etc/GMT+8,77758,346.757

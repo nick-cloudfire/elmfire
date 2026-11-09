@@ -42,6 +42,7 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
       python3-rasterio python3-fiona python3-shapely python3-geopandas \
       # quality-of-life + tools used by suite/scripts
       bc csvkit jq nano pigz sudo wget make locales \
+      latexmk texlive-luatex texlive-latex-extra texlive-science fonts-texgyre fontconfig \
     && locale-gen en_US.UTF-8 \
     && rm -rf /var/lib/apt/lists/*
 

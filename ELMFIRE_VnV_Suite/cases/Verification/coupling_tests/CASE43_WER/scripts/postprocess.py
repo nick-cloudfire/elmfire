@@ -220,6 +220,8 @@ def load_variant(
             hamada_a_m=float(variant["hamada_a_m"]),
             hamada_d_m=float(variant["hamada_d_m"]),
             hrrpua_kw_m2=hrr_transient(float(time_s)),
+            source_fuel_factor=float(variant.get("source_fuel_factor", 1.0)),
+            source_is_vegetation=bool(variant.get("source_is_vegetation", False)),
         )
         for time_s in times_array
     ]

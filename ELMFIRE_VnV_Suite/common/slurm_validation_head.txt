@@ -2,14 +2,13 @@
 # Keeping all ranks on one Savio4 node avoids unnecessary cross-node shared-state
 # traffic; savio4_htc nodes provide 56 cores, so the 50-rank request fits.
 #SBATCH --job-name=elmfire-validation
-#SBATCH --account=co_gollner
+#SBATCH --account=fc_wildfire
 #SBATCH --partition=savio4_htc
-#SBATCH --qos=gollner_htc4_normal
 #SBATCH --nodes=1
 #SBATCH --ntasks=50
 #SBATCH --ntasks-per-node=50
 #SBATCH --cpus-per-task=1
-#SBATCH --time=10-01:00:00
+#SBATCH --time=3-00:00:00
 #SBATCH --output=slurm-%x-%j.stdout
 #SBATCH --error=slurm-%x-%j.stderr
 

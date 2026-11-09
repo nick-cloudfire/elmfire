@@ -1,0 +1,87 @@
+&INPUTS
+FUELS_AND_TOPOGRAPHY_DIRECTORY = './data/fuels_and_topography'
+LANDSCAPE_FILENAME             = 'landscape'
+ADJ_FILENAME                   = 'adj'
+PHI_FILENAME                   = 'phi'
+DT_METEOROLOGY                 = 3600.0
+WEATHER_DIRECTORY              = './data/weather'
+WS_FILENAME                    = 'ws'
+WD_FILENAME                    = 'wd'
+M1_FILENAME                    = 'm1'
+M10_FILENAME                   = 'm10'
+M100_FILENAME                  = 'm100'
+USE_CONSTANT_LH                = .FALSE.
+MLH_FILENAME                   = 'lh'
+USE_CONSTANT_LW                = .FALSE.
+MLW_FILENAME                   = 'lw'
+/
+
+&OUTPUTS
+OUTPUTS_DIRECTORY    = './outputs'
+DTDUMP               = 5274000.0
+DUMP_FLIN            = .TRUE.
+DUMP_SPREAD_RATE     = .TRUE.
+DUMP_TIME_OF_ARRIVAL = .TRUE.
+DUMP_FIRE_SIZE_STATS = .TRUE.
+CONVERT_TO_GEOTIFF   = .TRUE.
+/
+
+&TIME_CONTROL
+SIMULATION_DT    = 1.0
+TARGET_CFL       = 0.2
+SIMULATION_TSTOP = 5274000.0
+/
+
+&MONTE_CARLO
+NUM_METEOROLOGY_TIMES = 1466
+/
+
+&SIMULATOR
+CROWN_FIRE_MODEL = 1
+NUM_IGNITIONS = 12
+X_IGN(1) = 527037.971
+Y_IGN(1) = 4402206.742
+T_IGN(1) = 0.0
+X_IGN(2) = 519703.354
+Y_IGN(2) = 4391303.413
+T_IGN(2) = 187200.0
+X_IGN(3) = 530354.590
+Y_IGN(3) = 4384025.183
+T_IGN(3) = 201600.0
+X_IGN(4) = 521518.770
+Y_IGN(4) = 4440799.168
+T_IGN(4) = 223200.0
+X_IGN(5) = 528506.714
+Y_IGN(5) = 4417958.713
+T_IGN(5) = 262800.0
+X_IGN(6) = 523234.953
+Y_IGN(6) = 4376051.369
+T_IGN(6) = 266400.0
+X_IGN(7) = 509079.426
+Y_IGN(7) = 4420877.641
+T_IGN(7) = 270000.0
+X_IGN(8) = 506630.188
+Y_IGN(8) = 4375853.480
+T_IGN(8) = 277200.0
+X_IGN(9) = 518968.001
+Y_IGN(9) = 4379438.284
+T_IGN(9) = 280800.0
+X_IGN(10) = 494587.663
+Y_IGN(10) = 4440114.066
+T_IGN(10) = 334800.0
+X_IGN(11) = 505547.440
+Y_IGN(11) = 4434158.300
+T_IGN(11) = 2404800.0
+X_IGN(12) = 492108.967
+Y_IGN(12) = 4381081.103
+T_IGN(12) = 2422800.0
+/
+
+&SPOTTING
+ENABLE_SPOTTING = .TRUE.
+/
+
+&MISCELLANEOUS
+PATH_TO_GDAL                   = 'auto'
+SCRATCH                        = './logs/scratch'
+/

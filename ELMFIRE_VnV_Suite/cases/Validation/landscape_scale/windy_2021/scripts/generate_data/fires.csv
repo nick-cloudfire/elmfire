@@ -1,0 +1,2 @@
+fname,fyear,fire_id,t_start_utc,t_end_utc,t_first_perim_utc,duration_h,n_timesteps,west,south,east,north,center_lon,center_lat,t_ign_utc,ign_lon,ign_lat,n_ignitions,utm_epsg,local_tz,local_tzGMT,acres_official,final_area_km2
+Windy,2021,Windy_2021,2021-09-10T00:00:00Z,2021-10-06T01:00:00Z,2021-09-10T03:00:00Z,625.0,623,-118.72404,35.83739,-118.47476,36.10688,-118.5994,35.97214,2021-09-10T02:00:00Z,-118.63211,36.05013,1,32611,America/Los_Angeles,Etc/GMT+8,97528,427.142

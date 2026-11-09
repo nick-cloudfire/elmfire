@@ -1,0 +1,282 @@
+{
+  "schema_version": 1,
+  "case_id": "red_salmon_complex_2020",
+  "fire_id": "Red_Salmon_Complex_2020",
+  "generation_files": [
+    {
+      "path": "scripts/generate_data/README.txt",
+      "size": 3398,
+      "sha256": "c912d095af4668b608b39cbeff24baaef14cb23bfc13913720b7284a5aa1f232"
+    },
+    {
+      "path": "scripts/generate_data/fires.csv",
+      "size": 503,
+      "sha256": "9ce5a0179d372461d3bbed4fb626e35b80f1fe590735bd2c50934916dcb15771"
+    },
+    {
+      "path": "scripts/generate_data/generate_observations.py",
+      "size": 3360,
+      "sha256": "504622c5a2c99679a5fab3b49b9c77bb5e6531ac48313bd381d5e9c957810ad1"
+    },
+    {
+      "path": "scripts/generate_data/make_fires.py",
+      "size": 3674,
+      "sha256": "db102eaee83a12ee43cc5430db56f9ac2f98e215a97b1eda473a5f22d640350b"
+    },
+    {
+      "path": "scripts/generate_data/prepare_inputs.py",
+      "size": 11872,
+      "sha256": "71ce2e3df4c5afcc3bca8d3762580ff61ab76b6d7bdecf917e6aa54df2f20693"
+    },
+    {
+      "path": "scripts/generate_data/rtma_gusts.py",
+      "size": 9949,
+      "sha256": "dbcb0529bc2c1fb4d8c4fb0ca2f4492064f4af1c9269a5d5f52d848e8660c05a"
+    },
+    {
+      "path": "scripts/generate_data/source/exploratory.py",
+      "size": 21531,
+      "sha256": "3ce3f69eb0bab864adbaab85d1032934c9bcdcc89c8e41cf6ef6f354b7ab851e"
+    },
+    {
+      "path": "scripts/generate_data/source/make_fires.py",
+      "size": 3167,
+      "sha256": "a6f8dd87475483086a939c308770b10d19790456a0d6ece569ff0d3b020cfb94"
+    },
+    {
+      "path": "scripts/generate_data/source/prepare_inputs.py",
+      "size": 17423,
+      "sha256": "d6cda9ee410a239161ea216cdf090dc00153c4fb5fc3c9fd719b509e6dbf6c96"
+    },
+    {
+      "path": "scripts/generate_data/source/rtma_gusts.py",
+      "size": 7499,
+      "sha256": "e27a383239f441b8785234e7785490287ea3769a21fe660068fbe2d9717ae347"
+    },
+    {
+      "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign.py",
+      "size": 15656,
+      "sha256": "15520e8dcf4e666e234a6a1d789f2b13be555e414ce3f9910fceaa80f440a96f"
+    },
+    {
+      "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign_pb2.py",
+      "size": 2623,
+      "sha256": "e86063cc2999ca121bd3cc35330c66c31ac5ea6a8a78d119e1a2220b981db8d6"
+    },
+    {
+      "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign_pb2.pyi",
+      "size": 3441,
+      "sha256": "e4d1df13858c591316fc077d2d5d1fbafcb9a7c03540eaba1e92156e41f94eac"
+    },
+    {
+      "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign_pb2_grpc.py",
+      "size": 3384,
+      "sha256": "e36e6f35b1fe672a57e9e6535b4cd79cadced48016b473d2dc3a0dbb2487b8ee"
+    }
+  ],
+  "previous_source_archive": {
+    "filename": "ELMFIRE_GOFER_validation.tar.gz",
+    "size": 7038832441,
+    "sha256": "714b9f2b3c3417336ea200bfc6f2bba2955376bf3088d675a811a11d28b0fffe",
+    "files": 583,
+    "skipped_macos_metadata": 682,
+    "received_date_utc": "2026-10-21",
+    "provider": "User-supplied archive",
+    "license": "Not documented in the supplied archive; upstream access and redistribution terms still apply."
+  },
+  "source_directory": {
+    "name": "ELMFIRE_GOFER_validation",
+    "received_date": "2026-10-22",
+    "selected_files_sha256": "67c095d885efa4ebff4e048901c7165f764dae4ed41ef8927270e96e923eb5e1"
+  },
+  "generation_sources": [
+    {
+      "source_relative_path": "make_fires.py",
+      "sha256": "a6f8dd87475483086a939c308770b10d19790456a0d6ece569ff0d3b020cfb94",
+      "size": 3167
+    },
+    {
+      "source_relative_path": "exploratory.py",
+      "sha256": "3ce3f69eb0bab864adbaab85d1032934c9bcdcc89c8e41cf6ef6f354b7ab851e",
+      "size": 21531
+    },
+    {
+      "source_relative_path": "prepare_inputs.py",
+      "sha256": "d6cda9ee410a239161ea216cdf090dc00153c4fb5fc3c9fd719b509e6dbf6c96",
+      "size": 17423,
+      "source_directory": "ELMFIRE_GOFER_validation 2"
+    },
+    {
+      "source_relative_path": "rtma_gusts.py",
+      "sha256": "e27a383239f441b8785234e7785490287ea3769a21fe660068fbe2d9717ae347",
+      "size": 7499,
+      "source_directory": "ELMFIRE_GOFER_validation 2"
+    }
+  ],
+  "files": [
+    {
+      "path": "data/fuels_and_topography/adj.tif",
+      "role": "inputs",
+      "size": 71443,
+      "sha256": "cb9a419576975a3f83e37976e690ae00e9c2d8e2a9d053351069ed124eeecc9b",
+      "source_relative_path": "Red_Salmon_Complex_2020/inputs/adj.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/misc/fuel_models.csv",
+      "role": "inputs",
+      "size": 3948,
+      "sha256": "bf32ba154b230bf16e38941d662c9a49e72652307ffe5e1468a511b514eaaf5b",
+      "source_relative_path": "Red_Salmon_Complex_2020/inputs/fuel_models.csv",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/fuels_and_topography/ignition_mask.tif",
+      "role": "inputs",
+      "size": 65283,
+      "sha256": "3192bda6d7d687f7ef9fd1cac0597308b0a547aeea044159cd7ea02228554b92",
+      "source_relative_path": "Red_Salmon_Complex_2020/inputs/ignition_mask.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/misc/ignitions.csv",
+      "role": "inputs",
+      "size": 294,
+      "sha256": "06ea4f9821837139d2c6a471a56d90b386c71f592538e605c3fce659af0082f2",
+      "source_relative_path": "Red_Salmon_Complex_2020/inputs/ignitions.csv",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/fuels_and_topography/landscape.tif",
+      "role": "inputs",
+      "size": 15993887,
+      "sha256": "dfebd4d196a145c94e69fe59177ed720ea59adf2d8f35bf0308490999bc5937a",
+      "source_relative_path": "Red_Salmon_Complex_2020/inputs/landscape.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/lh.tif",
+      "role": "inputs",
+      "size": 38052464,
+      "sha256": "c9a83d315da19006adce2c9f208e718ddb1c360c5499455b8ff8c08a253d6e76",
+      "source_relative_path": "Red_Salmon_Complex_2020/inputs/lh.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/lw.tif",
+      "role": "inputs",
+      "size": 37061129,
+      "sha256": "f833648bc4096bab54bac4013edf887c41a217fffa05f9ebf136da7e6d374f77",
+      "source_relative_path": "Red_Salmon_Complex_2020/inputs/lw.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/m1.tif",
+      "role": "inputs",
+      "size": 67613401,
+      "sha256": "9cbbe3b7099c5a2d8c69252e32cd5981c6ae0bd1cc1f3318f9f4500f00aa52ae",
+      "source_relative_path": "Red_Salmon_Complex_2020/inputs/m1.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/m10.tif",
+      "role": "inputs",
+      "size": 67418616,
+      "sha256": "fa5198d8baf57e4be33fb1e5a333aae972b432bf2d954ff92be41c193d09ee6f",
+      "source_relative_path": "Red_Salmon_Complex_2020/inputs/m10.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/m100.tif",
+      "role": "inputs",
+      "size": 67290666,
+      "sha256": "da10d25563733a2faf8e562c6a7a311570106f3e3d9c48ba15792c650b9be86b",
+      "source_relative_path": "Red_Salmon_Complex_2020/inputs/m100.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/fuels_and_topography/phi.tif",
+      "role": "inputs",
+      "size": 71443,
+      "sha256": "cb9a419576975a3f83e37976e690ae00e9c2d8e2a9d053351069ed124eeecc9b",
+      "source_relative_path": "Red_Salmon_Complex_2020/inputs/phi.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/wd.tif",
+      "role": "inputs",
+      "size": 9976217,
+      "sha256": "e11d24601a77cccbf47980e5d95ff801d8e70c85b7b2e85ab9b571cf0624b32d",
+      "source_relative_path": "Red_Salmon_Complex_2020/inputs/wd.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/ws.tif",
+      "role": "inputs",
+      "size": 69360783,
+      "sha256": "b170a3479319647baa1dbf788ecb3d83247a972c381c1387dd90200f97b08478",
+      "source_relative_path": "Red_Salmon_Complex_2020/inputs/ws.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/observation/Red_Salmon_Complex_2020_final_perimeter.gpkg",
+      "role": "observations",
+      "size": 1052672,
+      "sha256": "a30c95c045bbf63d165672e6fcd9143bcad0ef7274faf38e9ec3453d66d1a1e8",
+      "source_relative_path": "Red_Salmon_Complex_2020/observations/Red_Salmon_Complex_2020_final_perimeter.gpkg",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/observation/Red_Salmon_Complex_2020_final_perimeter_30m.tif",
+      "role": "observations",
+      "size": 15843,
+      "sha256": "00c73c6d2e5679da227cc2dad9ad3e0e74bfa10efe607b16919d17870d49b67b",
+      "source_relative_path": "Red_Salmon_Complex_2020/observations/Red_Salmon_Complex_2020_final_perimeter_30m.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/observation/Red_Salmon_Complex_2020_toa.png",
+      "role": "observations",
+      "size": 231681,
+      "sha256": "1b46f4c2cae00af3c2d5ca4bc95aeacb7ff44201b99d3a2b82a66b50084ce85c",
+      "source_relative_path": "Red_Salmon_Complex_2020/observations/Red_Salmon_Complex_2020_toa.png",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/observation/Red_Salmon_Complex_2020_toa.tif",
+      "role": "observations",
+      "size": 43710,
+      "sha256": "0086fc62e334c0a16f0e49e8c18cc3d229c4175d204b7ae963967245ef054bcc",
+      "source_relative_path": "Red_Salmon_Complex_2020/observations/Red_Salmon_Complex_2020_toa.tif",
+      "processing": "copied unchanged from the user-supplied updated directory"
+    },
+    {
+      "path": "data/weather/ws_gust.tif",
+      "size": 68791520,
+      "sha256": "f09234d55ce687e2d3e4381f5ddd1d81e58acda0d80eacb1b9a05824047e181b",
+      "role": "inputs",
+      "source_relative_path": "Red_Salmon_Complex_2020/inputs/ws_gust.tif",
+      "processing": "copied unchanged from user-supplied ELMFIRE_GOFER_validation 2",
+      "used_by_current_simulation": false
+    }
+  ],
+  "generation_source_history": [
+    {
+      "source_directory": "ELMFIRE_GOFER_validation",
+      "files": [
+        {
+          "source_relative_path": "prepare_inputs.py",
+          "sha256": "02428b42cc3ea1f92b61afd7a1293fb004b1d2e670100e32460b33a40dfadc2c",
+          "size": 16402
+        }
+      ]
+    }
+  ],
+  "source_updates": [
+    {
+      "name": "ELMFIRE_GOFER_validation 2",
+      "received_date": "2026-10-22",
+      "scope": "supplementary ws_gust.tif and updated gust/input generation sources; existing data and wind selection unchanged"
+    }
+  ]
+}

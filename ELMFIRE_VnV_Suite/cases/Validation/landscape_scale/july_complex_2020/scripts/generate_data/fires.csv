@@ -1,0 +1,2 @@
+fname,fyear,fire_id,t_start_utc,t_end_utc,t_first_perim_utc,duration_h,n_timesteps,west,south,east,north,center_lon,center_lat,t_ign_utc,ign_lon,ign_lat,n_ignitions,utm_epsg,local_tz,local_tzGMT,acres_official,final_area_km2
+July Complex,2020,July_Complex_2020,2020-07-22T17:00:00Z,2020-07-31T03:00:00Z,2020-07-22T22:00:00Z,202.0,198,-121.55553,41.34945,-121.07134,41.82152,-121.31344,41.58549,2020-07-22T21:00:00Z,-121.47507,41.68886,3,32610,America/Los_Angeles,Etc/GMT+8,83261,173.948

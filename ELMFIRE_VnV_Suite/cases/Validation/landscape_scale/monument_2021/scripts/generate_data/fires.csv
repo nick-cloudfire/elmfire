@@ -1,0 +1,2 @@
+fname,fyear,fire_id,t_start_utc,t_end_utc,t_first_perim_utc,duration_h,n_timesteps,west,south,east,north,center_lon,center_lat,t_ign_utc,ign_lon,ign_lat,n_ignitions,utm_epsg,local_tz,local_tzGMT,acres_official,final_area_km2
+Monument,2021,Monument_2021,2021-07-31T01:00:00Z,2021-09-17T20:00:00Z,2021-07-31T05:00:00Z,1171.0,1168,-123.48601,40.53468,-123.02203,40.91961,-123.25402,40.72715,2021-07-31T04:00:00Z,-123.33432,40.75347,1,32610,America/Los_Angeles,Etc/GMT+8,223124,922.504

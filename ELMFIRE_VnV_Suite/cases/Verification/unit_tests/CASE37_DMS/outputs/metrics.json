@@ -11,28 +11,28 @@
     {
       "name": "maximum direct-ROS relative error",
       "expected": "<= 0.02",
-      "calculated": 3.6685936084796748e-06,
+      "calculated": 4.4384642542055885e-06,
       "units": "fraction",
       "status": "PASS"
     },
     {
       "name": "maximum reaction-intensity relative error",
       "expected": "<= 0.01",
-      "calculated": 3.3158708481373744e-06,
+      "calculated": 4.163783121958245e-06,
       "units": "fraction",
       "status": "PASS"
     },
     {
       "name": "maximum near-extinction reaction-intensity absolute error",
       "expected": "<= 0.001",
-      "calculated": 0.00026390285317615353,
+      "calculated": 0.0004827491062955626,
       "units": "kW/m2",
       "status": "PASS"
     },
     {
       "name": "maximum TOA-ROS relative error",
       "expected": "<= 0.05",
-      "calculated": 0.028024048992562913,
+      "calculated": 0.02802404899256158,
       "units": "fraction",
       "status": "PASS"
     },
@@ -72,14 +72,14 @@
         "ilh_percent": 90.0
       },
       "toa_required": true,
-      "measured_ros_m_min": 2.1788506507873535,
-      "measured_ir_kw_m2": 693.9341430664062,
-      "toa_ros_m_min": 2.172464733655828,
+      "measured_ros_m_min": 2.1788508892059326,
+      "measured_ir_kw_m2": 693.9342041015625,
+      "toa_ros_m_min": 2.1724647336558234,
       "toa_r2": 0.9999938440207852,
-      "ros_relative_error": 6.017140743763108e-08,
-      "ir_relative_error": 1.676355100622253e-07,
-      "ir_absolute_error_kw_m2": 0.00011632802352323779,
-      "toa_ros_relative_error": 0.0029308050136238046,
+      "ros_relative_error": 1.6959542572056782e-07,
+      "ir_relative_error": 7.968026729432523e-08,
+      "ir_absolute_error_kw_m2": 5.529286727323779e-05,
+      "toa_ros_relative_error": 0.002930805013625843,
       "terminal_evidence": {
         "mode": "regular",
         "configured_tstop_s": 8268.0,
@@ -121,14 +121,14 @@
         "ilh_percent": 90.0
       },
       "toa_required": true,
-      "measured_ros_m_min": 1.4813470840454102,
+      "measured_ros_m_min": 1.4813469648361206,
       "measured_ir_kw_m2": 542.8372802734375,
-      "toa_ros_m_min": 1.5000000000000027,
+      "toa_ros_m_min": 1.4999999999999998,
       "toa_r2": 1.0,
-      "ros_relative_error": 3.421863409291916e-08,
+      "ros_relative_error": 1.1469220220907841e-07,
       "ir_relative_error": 1.7236851785715215e-07,
       "ir_absolute_error_kw_m2": 9.356807356653007e-05,
-      "toa_ros_relative_error": 0.012591825931639376,
+      "toa_ros_relative_error": 0.012591825931637426,
       "terminal_evidence": {
         "mode": "regular",
         "configured_tstop_s": 12160.0,
@@ -172,12 +172,12 @@
       "toa_required": true,
       "measured_ros_m_min": 1.0694552659988403,
       "measured_ir_kw_m2": 477.3888854980469,
-      "toa_ros_m_min": 1.072377212809136,
+      "toa_ros_m_min": 1.0723772128091342,
       "toa_r2": 0.9999972392081312,
       "ros_relative_error": 2.713237674732719e-07,
       "ir_relative_error": 2.2301023495140233e-08,
       "ir_absolute_error_kw_m2": 1.064626098923327e-05,
-      "toa_ros_relative_error": 0.0027324544229457965,
+      "toa_ros_relative_error": 0.0027324544229441355,
       "terminal_evidence": {
         "mode": "regular",
         "configured_tstop_s": 16856.0,
@@ -219,14 +219,14 @@
         "ilh_percent": 90.0
       },
       "toa_required": true,
-      "measured_ros_m_min": 0.8337773680686951,
-      "measured_ir_kw_m2": 425.5053405761719,
-      "toa_ros_m_min": 0.8571428571428591,
+      "measured_ros_m_min": 0.8337771892547607,
+      "measured_ir_kw_m2": 425.50531005859375,
+      "toa_ros_m_min": 0.857142857142858,
       "toa_r2": 1.0,
-      "ros_relative_error": 3.8352706378687734e-07,
-      "ir_relative_error": 8.846496698783067e-08,
-      "ir_absolute_error_kw_m2": 3.764231257719075e-05,
-      "toa_ros_relative_error": 0.028024048992562913,
+      "ros_relative_error": 1.6906453487421613e-07,
+      "ir_relative_error": 1.6744173111511662e-08,
+      "ir_absolute_error_kw_m2": 7.124734452190751e-06,
+      "toa_ros_relative_error": 0.02802404899256158,
       "terminal_evidence": {
         "mode": "regular",
         "configured_tstop_s": 21595.0,
@@ -268,14 +268,14 @@
         "ilh_percent": 90.0
       },
       "toa_required": true,
-      "measured_ros_m_min": 0.518179714679718,
-      "measured_ir_kw_m2": 289.2979431152344,
-      "toa_ros_m_min": 0.526315789473684,
+      "measured_ros_m_min": 0.5181793570518494,
+      "measured_ir_kw_m2": 289.2977600097656,
+      "toa_ros_m_min": 0.5263157894736855,
       "toa_r2": 1.0,
-      "ros_relative_error": 1.2037992101647334e-06,
-      "ir_relative_error": 9.403870512967607e-07,
-      "ir_absolute_error_kw_m2": 0.00027205178383837847,
-      "toa_ros_relative_error": 0.015702483408727857,
+      "ros_relative_error": 5.136365329446568e-07,
+      "ir_relative_error": 3.074560357206271e-07,
+      "ir_absolute_error_kw_m2": 8.894631508837847e-05,
+      "toa_ros_relative_error": 0.015702483408730858,
       "terminal_evidence": {
         "mode": "regular",
         "configured_tstop_s": 21603.0,
@@ -317,14 +317,14 @@
         "ilh_percent": 90.0
       },
       "toa_required": true,
-      "measured_ros_m_min": 0.19874709844589233,
-      "measured_ir_kw_m2": 117.31470489501953,
-      "toa_ros_m_min": 0.20216606498194947,
+      "measured_ros_m_min": 0.19874677062034607,
+      "measured_ir_kw_m2": 117.31452178955078,
+      "toa_ros_m_min": 0.20216606498194986,
       "toa_r2": 0.9999609028827607,
-      "ros_relative_error": 2.179562603745017e-06,
-      "ir_relative_error": 1.9910417327610543e-06,
-      "ir_absolute_error_kw_m2": 0.00023357800824896913,
-      "toa_ros_relative_error": 0.01720481554895772,
+      "ros_relative_error": 5.300982173746252e-07,
+      "ir_relative_error": 4.3023285134687654e-07,
+      "ir_absolute_error_kw_m2": 5.047253949896913e-05,
+      "toa_ros_relative_error": 0.017204815548959678,
       "terminal_evidence": {
         "mode": "regular",
         "configured_tstop_s": 21600.0,
@@ -375,16 +375,16 @@
       "ir_absolute_error_kw_m2": 0.0002098034306712384,
       "toa_ros_relative_error": null,
       "terminal_evidence": {
-        "mode": "stalled_expected_extinction",
+        "mode": "regular",
         "configured_tstop_s": 600.0,
         "configured_timestep_s": 5.0,
         "configured_meteorology_interval_s": 9999999.0,
-        "recorded_final_time_s": 10000004.0,
-        "pre_jump_time_s": 5.0
+        "recorded_final_time_s": 600.0,
+        "pre_jump_time_s": null
       },
       "source_files": [
-        "variants/fuel_003_r_100/outputs/vs_0000001_*******.tif",
-        "variants/fuel_003_r_100/outputs/ir_0000001_*******.tif"
+        "variants/fuel_003_r_100/outputs/vs_0000001_0000600.tif",
+        "variants/fuel_003_r_100/outputs/ir_0000001_0000600.tif"
       ]
     },
     {
@@ -423,16 +423,16 @@
       "ir_absolute_error_kw_m2": 0.0,
       "toa_ros_relative_error": null,
       "terminal_evidence": {
-        "mode": "stalled_expected_extinction",
+        "mode": "regular",
         "configured_tstop_s": 600.0,
         "configured_timestep_s": 5.0,
         "configured_meteorology_interval_s": 9999999.0,
-        "recorded_final_time_s": 10000004.0,
-        "pre_jump_time_s": 5.0
+        "recorded_final_time_s": 600.0,
+        "pre_jump_time_s": null
       },
       "source_files": [
-        "variants/fuel_003_r_110/outputs/vs_0000001_*******.tif",
-        "variants/fuel_003_r_110/outputs/ir_0000001_*******.tif"
+        "variants/fuel_003_r_110/outputs/vs_0000001_0000600.tif",
+        "variants/fuel_003_r_110/outputs/ir_0000001_0000600.tif"
       ]
     },
     {
@@ -463,13 +463,13 @@
       },
       "toa_required": true,
       "measured_ros_m_min": 0.2917647361755371,
-      "measured_ir_kw_m2": 532.2379760742188,
-      "toa_ros_m_min": 0.2941176470588239,
+      "measured_ir_kw_m2": 532.238037109375,
+      "toa_ros_m_min": 0.2941176470588237,
       "toa_r2": 1.0,
       "ros_relative_error": 3.7785607595042737e-07,
-      "ir_relative_error": 7.862978478777573e-08,
-      "ir_absolute_error_kw_m2": 4.184976080523484e-05,
-      "toa_ros_relative_error": 0.008064792367543273,
+      "ir_relative_error": 3.604664604681706e-08,
+      "ir_absolute_error_kw_m2": 1.9185395444765163e-05,
+      "toa_ros_relative_error": 0.008064792367542702,
       "terminal_evidence": {
         "mode": "regular",
         "configured_tstop_s": 21624.0,
@@ -511,14 +511,14 @@
         "ilh_percent": 90.0
       },
       "toa_required": true,
-      "measured_ros_m_min": 0.19836367666721344,
-      "measured_ir_kw_m2": 416.3487548828125,
-      "toa_ros_m_min": 0.2004653660282801,
+      "measured_ros_m_min": 0.19836369156837463,
+      "measured_ir_kw_m2": 416.3487854003906,
+      "toa_ros_m_min": 0.2004653660282804,
       "toa_r2": 0.9999513050253214,
-      "ros_relative_error": 2.483854521989476e-07,
-      "ir_relative_error": 7.97423902077629e-08,
-      "ir_absolute_error_kw_m2": 3.3200647521880455e-05,
-      "toa_ros_relative_error": 0.010595383131929233,
+      "ros_relative_error": 3.235058832447907e-07,
+      "ir_relative_error": 6.4442829513955866e-09,
+      "ir_absolute_error_kw_m2": 2.6830693968804553e-06,
+      "toa_ros_relative_error": 0.010595383131930772,
       "terminal_evidence": {
         "mode": "regular",
         "configured_tstop_s": 21744.0,
@@ -560,14 +560,14 @@
         "ilh_percent": 90.0
       },
       "toa_required": true,
-      "measured_ros_m_min": 0.14320820569992065,
-      "measured_ir_kw_m2": 366.1507568359375,
-      "toa_ros_m_min": 0.1457265683821922,
-      "toa_r2": 0.999922704318252,
-      "ros_relative_error": 4.564941876887421e-07,
-      "ir_relative_error": 1.35423021043617e-07,
-      "ir_absolute_error_kw_m2": 4.958523493314715e-05,
-      "toa_ros_relative_error": 0.017585788421091812,
+      "measured_ros_m_min": 0.14320823550224304,
+      "measured_ir_kw_m2": 366.1507873535156,
+      "toa_ros_m_min": 0.14572656838219225,
+      "toa_r2": 0.9999227043182521,
+      "ros_relative_error": 6.645991342358015e-07,
+      "ir_relative_error": 2.18770062359325e-07,
+      "ir_absolute_error_kw_m2": 8.010281305814715e-05,
+      "toa_ros_relative_error": 0.0175857884210922,
       "terminal_evidence": {
         "mode": "regular",
         "configured_tstop_s": 21736.0,
@@ -609,14 +609,14 @@
         "ilh_percent": 90.0
       },
       "toa_required": true,
-      "measured_ros_m_min": 0.11164914816617966,
-      "measured_ir_kw_m2": 326.3567810058594,
-      "toa_ros_m_min": 0.11422479439537017,
+      "measured_ros_m_min": 0.11164911836385727,
+      "measured_ir_kw_m2": 326.35675048828125,
+      "toa_ros_m_min": 0.11422479439537012,
       "toa_r2": 0.9998958875585632,
-      "ros_relative_error": 6.40858467544708e-07,
-      "ir_relative_error": 2.2994643255494197e-07,
-      "ir_absolute_error_kw_m2": 7.504456027618289e-05,
-      "toa_ros_relative_error": 0.0230697633920456,
+      "ros_relative_error": 3.739299510601229e-07,
+      "ir_relative_error": 1.3643654730496976e-07,
+      "ir_absolute_error_kw_m2": 4.452698215118289e-05,
+      "toa_ros_relative_error": 0.0230697633920451,
       "terminal_evidence": {
         "mode": "regular",
         "configured_tstop_s": 21708.0,
@@ -658,13 +658,13 @@
         "ilh_percent": 90.0
       },
       "toa_required": false,
-      "measured_ros_m_min": 0.06938821077346802,
-      "measured_ir_kw_m2": 221.8875732421875,
+      "measured_ros_m_min": 0.06938815861940384,
+      "measured_ir_kw_m2": 221.8874053955078,
       "toa_ros_m_min": null,
       "toa_r2": null,
-      "ros_relative_error": 1.392211302862508e-06,
-      "ir_relative_error": 1.1025787874567567e-06,
-      "ir_absolute_error_kw_m2": 0.0002446482617131096,
+      "ros_relative_error": 6.405830910008089e-07,
+      "ir_relative_error": 3.461287425122124e-07,
+      "ir_absolute_error_kw_m2": 7.68015820256096e-05,
       "toa_ros_relative_error": null,
       "terminal_evidence": {
         "mode": "regular",
@@ -706,13 +706,13 @@
         "ilh_percent": 90.0
       },
       "toa_required": false,
-      "measured_ros_m_min": 0.026613784953951836,
-      "measured_ir_kw_m2": 89.9788818359375,
+      "measured_ros_m_min": 0.026613805443048477,
+      "measured_ir_kw_m2": 89.97895812988281,
       "toa_ros_m_min": null,
       "toa_r2": null,
-      "ros_relative_error": 3.6685936084796748e-06,
-      "ir_relative_error": 3.3158708481373744e-06,
-      "ir_absolute_error_kw_m2": 0.000298357361913304,
+      "ros_relative_error": 4.4384642542055885e-06,
+      "ir_relative_error": 4.163783121958245e-06,
+      "ir_absolute_error_kw_m2": 0.000374651307225804,
       "toa_ros_relative_error": null,
       "terminal_evidence": {
         "mode": "regular",
@@ -755,24 +755,24 @@
       },
       "toa_required": false,
       "measured_ros_m_min": 0.0,
-      "measured_ir_kw_m2": 0.0002639028534758836,
+      "measured_ir_kw_m2": 0.0004827491065952927,
       "toa_ros_m_min": null,
       "toa_r2": null,
       "ros_relative_error": 8.631573513671963e-09,
       "ir_relative_error": null,
-      "ir_absolute_error_kw_m2": 0.00026390285317615353,
+      "ir_absolute_error_kw_m2": 0.0004827491062955626,
       "toa_ros_relative_error": null,
       "terminal_evidence": {
-        "mode": "stalled_expected_extinction",
+        "mode": "regular",
         "configured_tstop_s": 600.0,
         "configured_timestep_s": 5.0,
         "configured_meteorology_interval_s": 9999999.0,
-        "recorded_final_time_s": 10000004.0,
-        "pre_jump_time_s": 5.0
+        "recorded_final_time_s": 600.0,
+        "pre_jump_time_s": null
       },
       "source_files": [
-        "variants/fuel_186_r_100/outputs/vs_0000001_*******.tif",
-        "variants/fuel_186_r_100/outputs/ir_0000001_*******.tif"
+        "variants/fuel_186_r_100/outputs/vs_0000001_0000600.tif",
+        "variants/fuel_186_r_100/outputs/ir_0000001_0000600.tif"
       ]
     },
     {
@@ -811,16 +811,16 @@
       "ir_absolute_error_kw_m2": 0.0,
       "toa_ros_relative_error": null,
       "terminal_evidence": {
-        "mode": "stalled_expected_extinction",
+        "mode": "regular",
         "configured_tstop_s": 600.0,
         "configured_timestep_s": 5.0,
         "configured_meteorology_interval_s": 9999999.0,
-        "recorded_final_time_s": 10000004.0,
-        "pre_jump_time_s": 5.0
+        "recorded_final_time_s": 600.0,
+        "pre_jump_time_s": null
       },
       "source_files": [
-        "variants/fuel_186_r_110/outputs/vs_0000001_*******.tif",
-        "variants/fuel_186_r_110/outputs/ir_0000001_*******.tif"
+        "variants/fuel_186_r_110/outputs/vs_0000001_0000600.tif",
+        "variants/fuel_186_r_110/outputs/ir_0000001_0000600.tif"
       ]
     }
   ],

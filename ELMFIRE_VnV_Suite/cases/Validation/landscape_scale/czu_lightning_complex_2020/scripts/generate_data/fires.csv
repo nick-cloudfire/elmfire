@@ -1,0 +1,2 @@
+fname,fyear,fire_id,t_start_utc,t_end_utc,t_first_perim_utc,duration_h,n_timesteps,west,south,east,north,center_lon,center_lat,t_ign_utc,ign_lon,ign_lat,n_ignitions,utm_epsg,local_tz,local_tzGMT,acres_official,final_area_km2
+CZU Lightning Complex,2020,CZU_Lightning_Complex_2020,2020-08-16T15:00:00Z,2020-08-22T05:00:00Z,2020-08-17T01:00:00Z,134.0,125,-122.34291,37.03619,-122.12237,37.26885,-122.23264,37.15252,2020-08-17T00:00:00Z,-122.28494,37.25448,3,32610,America/Los_Angeles,Etc/GMT+8,86509,282.963

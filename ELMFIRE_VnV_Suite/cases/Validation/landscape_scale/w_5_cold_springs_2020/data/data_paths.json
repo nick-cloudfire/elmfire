@@ -1,0 +1,11 @@
+{
+  "observation": "data/observation/W_5_Cold_Springs_2020_toa.tif",
+  "simulations": [],
+  "fuels_and_topography": "data/fuels_and_topography",
+  "weather": "data/weather",
+  "misc": "data/misc",
+  "gofer_preview": "data/observation/W_5_Cold_Springs_2020_toa.png",
+  "final_perimeter": "data/observation/W_5_Cold_Springs_2020_final_perimeter.gpkg",
+  "final_perimeter_mask": "data/observation/W_5_Cold_Springs_2020_final_perimeter_30m.tif",
+  "supplementary_wind_gust": "data/weather/ws_gust.tif"
+}

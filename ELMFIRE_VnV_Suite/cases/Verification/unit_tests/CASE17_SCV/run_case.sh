@@ -23,3 +23,15 @@ done
 
 "$PYTHON_BIN" "$CASE_DIR/scripts/postprocess.py"
 "$CASE_DIR/compile_case.sh"
+
+# A completed report is not a passing verification decision.
+"$PYTHON_BIN" - "$CASE_DIR/outputs/metrics.json" <<'CHECK_STATUS'
+import json
+import sys
+from pathlib import Path
+
+result = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+if result.get("overall_status") != "PASS":
+    print(f"[ERROR] Verification decision: {result.get('overall_status')}", file=sys.stderr)
+    raise SystemExit(1)
+CHECK_STATUS

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+PYTHON_BIN=${PYTHON_BIN:-python3}
 
 # --- Configuration ---
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
@@ -10,7 +11,7 @@ METRICS_JSON="$CASE_DIR/outputs/metrics.json"
 MACROS_TEX="$CASE_DIR/report/metrics_macros.tex"
 
 echo "[INFO] Creating $MACROS_TEX from $METRICS_JSON"
-python3 "$CASE_DIR/scripts/metrics_to_macro.py"
+"$PYTHON_BIN" "$CASE_DIR/scripts/metrics_to_macro.py"
 
 # --- Build case report PDF ---
 ( cd "$CASE_DIR/report" && latexmk -lualatex -silent case_report.tex )

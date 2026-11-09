@@ -1,0 +1,83 @@
+case_id: august_complex_2020
+case_title: 2020 August Complex fire reconstruction against GOFER observations
+case_type: validation
+category: landscape_scale
+elmfire:
+  bin: ${ELMFIRE_BIN:-elmfire}
+  config: elmfire.data.in
+  mpi_ranks: 1
+validation:
+  observation: GOFER arrival-time raster; CAL FIRE supporting final extent
+  event_start_utc: '2020-08-16T21:00:00Z'
+  event_end_utc: '2020-10-16T22:00:00Z'
+  comparison_times_h:
+  - 24
+  - 48
+  - 72
+  - final GOFER arrival
+postprocess:
+  metrics: outputs/metrics.json
+  figures:
+  - figures/observation_summary.pdf
+  - figures/final_perimeter_summary.pdf
+  - figures/input_overview.pdf
+  - figures/input_distributions.pdf
+  - figures/weather_time_series.pdf
+  - figures/weather_summary.pdf
+  - figures/burned_area_growth.pdf
+  - figures/comparison_current.pdf
+  - figures/arrival_current.pdf
+  - figures/fields_current.pdf
+namelist_contract:
+  schema_version: 1
+  report: report/case_body.tex
+  files:
+  - path: elmfire.data.in
+    invariants:
+      OUTPUTS.OUTPUTS_DIRECTORY: ./outputs
+      OUTPUTS.DTDUMP: 5274000.0
+      OUTPUTS.DUMP_TIME_OF_ARRIVAL: true
+      OUTPUTS.CONVERT_TO_GEOTIFF: true
+      TIME_CONTROL.SIMULATION_DT: 1.0
+      TIME_CONTROL.TARGET_CFL: 0.2
+      TIME_CONTROL.SIMULATION_TSTOP: 5274000.0
+      MONTE_CARLO.NUM_METEOROLOGY_TIMES: 1466
+      SIMULATOR.CROWN_FIRE_MODEL: 1
+      SIMULATOR.NUM_IGNITIONS: 12
+      SIMULATOR.X_IGN(1): 527037.971
+      SIMULATOR.Y_IGN(1): 4402206.742
+      SIMULATOR.T_IGN(1): 0.0
+      SIMULATOR.X_IGN(2): 519703.354
+      SIMULATOR.Y_IGN(2): 4391303.413
+      SIMULATOR.T_IGN(2): 187200.0
+      SIMULATOR.X_IGN(3): 530354.59
+      SIMULATOR.Y_IGN(3): 4384025.183
+      SIMULATOR.T_IGN(3): 201600.0
+      SIMULATOR.X_IGN(4): 521518.77
+      SIMULATOR.Y_IGN(4): 4440799.168
+      SIMULATOR.T_IGN(4): 223200.0
+      SIMULATOR.X_IGN(5): 528506.714
+      SIMULATOR.Y_IGN(5): 4417958.713
+      SIMULATOR.T_IGN(5): 262800.0
+      SIMULATOR.X_IGN(6): 523234.953
+      SIMULATOR.Y_IGN(6): 4376051.369
+      SIMULATOR.T_IGN(6): 266400.0
+      SIMULATOR.X_IGN(7): 509079.426
+      SIMULATOR.Y_IGN(7): 4420877.641
+      SIMULATOR.T_IGN(7): 270000.0
+      SIMULATOR.X_IGN(8): 506630.188
+      SIMULATOR.Y_IGN(8): 4375853.48
+      SIMULATOR.T_IGN(8): 277200.0
+      SIMULATOR.X_IGN(9): 518968.001
+      SIMULATOR.Y_IGN(9): 4379438.284
+      SIMULATOR.T_IGN(9): 280800.0
+      SIMULATOR.X_IGN(10): 494587.663
+      SIMULATOR.Y_IGN(10): 4440114.066
+      SIMULATOR.T_IGN(10): 334800.0
+      SIMULATOR.X_IGN(11): 505547.44
+      SIMULATOR.Y_IGN(11): 4434158.3
+      SIMULATOR.T_IGN(11): 2404800.0
+      SIMULATOR.X_IGN(12): 492108.967
+      SIMULATOR.Y_IGN(12): 4381081.103
+      SIMULATOR.T_IGN(12): 2422800.0
+      SPOTTING.ENABLE_SPOTTING: true

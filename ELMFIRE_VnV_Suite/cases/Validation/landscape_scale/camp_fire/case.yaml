@@ -2,7 +2,6 @@ case_id: "camp_fire"
 case_title: "2018 Camp Fire landscape reconstruction"
 case_type: "validation"
 category: "landscape_scale"
-source_archive: "../../3_FIRES/Camp_VAL.rar"
 
 elmfire:
   bin: "elmfire"
@@ -34,6 +33,7 @@ namelist_contract:
   files:
     - path: "elmfire.data.in"
       invariants:
+        OUTPUTS.OUTPUTS_DIRECTORY: "./outputs"
         TIME_CONTROL.SIMULATION_TSTOP: 129600.0
         TIME_CONTROL.TARGET_CFL: 0.45
         SIMULATOR.CROWN_FIRE_MODEL: 2

@@ -8,29 +8,29 @@
     {
       "resolution": 128,
       "dx_m": 2.0,
-      "radius_m": 24.46267794816202,
-      "absolute_error_m": 0.2747259481620219,
+      "radius_m": 24.462677654887006,
+      "absolute_error_m": 0.27472565488700695,
       "source": "data/128/outputs/phi_0000001_d0000006.tif"
     },
     {
       "resolution": 256,
       "dx_m": 1.0,
-      "radius_m": 24.447865975397573,
-      "absolute_error_m": 0.25991397539757344,
+      "radius_m": 24.447865726528477,
+      "absolute_error_m": 0.25991372652847744,
       "source": "data/256/outputs/phi_0000001_d0000006.tif"
     },
     {
       "resolution": 512,
       "dx_m": 0.5,
-      "radius_m": 24.41664767060875,
-      "absolute_error_m": 0.22869567060875085,
+      "radius_m": 24.416647467490794,
+      "absolute_error_m": 0.2286954674907946,
       "source": "data/512/outputs/phi_0000001_d0000006.tif"
     },
     {
       "resolution": 1024,
       "dx_m": 0.25,
-      "radius_m": 24.367048478067908,
-      "absolute_error_m": 0.1790964780679083,
+      "radius_m": 24.36704833945793,
+      "absolute_error_m": 0.17909633945793146,
       "source": "data/1024/outputs/phi_0000001_d0000006.tif"
     }
   ],
@@ -38,7 +38,7 @@
     {
       "name": "observed spatial order",
       "expected": 0.8,
-      "calculated": 0.20363737958209976,
+      "calculated": 0.20363724251413698,
       "units": "-",
       "tolerance": ">= threshold",
       "status": "FAIL"
@@ -46,7 +46,7 @@
     {
       "name": "finest-grid radius error",
       "expected": 0.0,
-      "calculated": 0.1790964780679083,
+      "calculated": 0.17909633945793146,
       "units": "m",
       "tolerance": "<= 1",
       "status": "PASS"

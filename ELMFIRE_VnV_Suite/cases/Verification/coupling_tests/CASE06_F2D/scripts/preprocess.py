@@ -117,10 +117,6 @@ def main():
     write_tif(inp / 'wd.tif', wd, np.float32)
     for name in ('m1', 'm10', 'm100'):
         write_tif(inp / f'{name}.tif', np.zeros_like(ws), np.float32)
-    for fn in ('fuel_models.csv', 'building_fuel_models.csv'):
-        src = CASE_DIR / 'data' / 'misc' / fn
-        if not src.is_file():
-            raise FileNotFoundError(src)
     for d in ('outputs', 'figures', 'logs/scratch'):
         (CASE_DIR / d).mkdir(parents=True, exist_ok=True)
     vmax = math.hypot(U_MEAN_MPS + U_AMPLITUDE_MPS, V_MEAN_MPS + V_AMPLITUDE_MPS)

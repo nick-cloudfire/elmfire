@@ -326,6 +326,16 @@ def main():
                 print(f"  - {rel} (cd {case_dir} && bash ./run_case.sh)")
         sys.exit(0)
 
+    # Use the executable built beside a source checkout when available.  An
+    # explicit ELMFIRE_BIN always wins; standalone suite clones keep PATH lookup.
+    if not os.getenv("ELMFIRE_BIN"):
+        local_bin = os.path.abspath(
+            os.path.join(root_dir, "..", "build", "linux", "elmfire", "elmfire")
+        )
+        if os.path.isfile(local_bin) and os.access(local_bin, os.X_OK):
+            os.environ["ELMFIRE_BIN"] = local_bin
+            print(f"[INFO] ELMFIRE executable: {local_bin}")
+
     # Actual execution
     if args.slurm:
         conda_env = os.getenv("ELMFIRE_VNV_CONDA_ENV", "").strip()

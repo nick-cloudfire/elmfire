@@ -1,8 +1,13 @@
 .PHONY: new run run-all run-verification run-validation build-all \
 	report-inputs verification-report validation-report reports main clean \
-	prepare-run configure
+	prepare-run configure test test-reports test-all report-check
+
+.PHONY: zenodo-build zenodo-verify zenodo-collection-build zenodo-collection-verify
+DATASET_VERSION ?= 2.1.0
+ZENODO_OUTPUT ?= $(ROOT_DIR)/zenodo/dist/$(DATASET_VERSION)
 
 SUITE ?= all
+PYTHON_BIN ?= python3
 ROOT_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 
 # Find all ELMFIRE config files
@@ -37,12 +42,15 @@ build-all:
 
 # Generate aggregate include lists and scientific decision tables.
 report-inputs:
-	@python3 ./tools/generate_summary_reports.py
+	@$(PYTHON_BIN) ./tools/generate_summary_reports.py
 
-verification-report: report-inputs
+report-check:
+	@$(PYTHON_BIN) ./tools/check_report_environment.py
+
+verification-report: report-check report-inputs
 	@cd main_report && latexmk -lualatex -silent verification_report.tex
 
-validation-report: report-inputs
+validation-report: report-check report-inputs
 	@cd main_report && latexmk -lualatex -silent validation_report.tex
 
 reports: verification-report validation-report
@@ -75,3 +83,26 @@ configure:
 	@echo "[INFO] Restoring user-executable permission on suite shell scripts..."
 	@find "$(ROOT_DIR)" -path "$(ROOT_DIR)/.git" -prune -o \
 		-type f -name "*.sh" -exec chmod u+x {} +
+
+# Developer checks do not execute ELMFIRE or modify case evidence.
+test:
+	@PYTHONDONTWRITEBYTECODE=1 "$(PYTHON_BIN)" -m unittest discover -s tools/tests -p 'test_*.py' -v
+
+# Optional report typography, structure, and house-style wording checks.
+test-reports:
+	@PYTHONDONTWRITEBYTECODE=1 "$(PYTHON_BIN)" -m unittest discover -s tools/tests -p '*_checks.py' -v
+
+test-all: test test-reports
+
+# Prepare local upload files only; no upload, publication or data removal.
+zenodo-build:
+	@$(PYTHON_BIN) tools/prepare_zenodo.py build --case "$(if $(CASE),$(CASE),all)" --version "$(DATASET_VERSION)" --output "$(ZENODO_OUTPUT)"
+
+zenodo-verify:
+	@$(PYTHON_BIN) tools/prepare_zenodo.py verify --case "$(if $(CASE),$(CASE),all)" --output "$(ZENODO_OUTPUT)"
+
+zenodo-collection-build:
+	@$(PYTHON_BIN) tools/prepare_zenodo_collection.py build --version "$(DATASET_VERSION)"
+
+zenodo-collection-verify:
+	@$(PYTHON_BIN) tools/prepare_zenodo_collection.py verify --version "$(DATASET_VERSION)"

@@ -6,7 +6,7 @@
   "cell_size_m": 1.0,
   "source_files": [
     "data/outputs/phi_0000001_d0000010.tif",
-    "data/outputs/vs_0000001_0003601.tif"
+    "data/outputs/vs_0000001_0000010.tif"
   ],
   "metrics": [
     {

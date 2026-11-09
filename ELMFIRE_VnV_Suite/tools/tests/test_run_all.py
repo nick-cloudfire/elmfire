@@ -1,4 +1,10 @@
 import importlib.util
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -63,7 +69,7 @@ class DiscoverCasesTests(unittest.TestCase):
             header.write_text(
                 "#SBATCH --job-name=elmfire-generic\n"
                 "#SBATCH --ntasks=1\n"
-                "module purge\n",
+                "module() { :; }\nmodule purge\n",
                 encoding="utf-8",
             )
 
@@ -74,8 +80,13 @@ class DiscoverCasesTests(unittest.TestCase):
             self.assertNotIn("elmfire-generic", text)
             self.assertEqual(text.count("#SBATCH --job-name="), 1)
             self.assertIn("#SBATCH --job-name=elmfire-case-with-spaces", text)
-            self.assertIn(f"cd -- '{case}'", text)
-            self.assertIn(f"exec bash '{case / 'run_case.sh'}'", text)
+            # Replacing the original runner after generation proves the wrapper
+            # executes that file and propagates its working directory and exit code.
+            (case / "run_case.sh").write_text('printf "%s\\n" "$PWD"; exit 23\n')
+            result = subprocess.run(["bash", str(wrapper)], cwd=root,
+                                    capture_output=True, text=True)
+            self.assertEqual(result.returncode, 23, result.stderr)
+            self.assertEqual(Path(result.stdout.strip()).resolve(), case.resolve())
             self.assertTrue(wrapper.stat().st_mode & 0o100)
 
     def test_suite_specific_slurm_headers(self) -> None:
@@ -106,31 +117,98 @@ class DiscoverCasesTests(unittest.TestCase):
         )
 
     def test_validation_slurm_header_uses_one_rank_per_member(self) -> None:
-        root = MODULE_PATH.parents[1]
-        header = (root / "common/slurm_validation_head.txt").read_text(
-            encoding="utf-8"
-        )
+        header = MODULE_PATH.parents[1] / "common/slurm_validation_head.txt"
+        directives = dict(re.findall(r"(?m)^#SBATCH\s+--([\w-]+)=(\S+)", header.read_text()))
+        self.assertEqual({key: directives[key] for key in ("nodes", "ntasks", "ntasks-per-node")},
+                         {"nodes": "1", "ntasks": "50", "ntasks-per-node": "50"})
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            base, active = root / "base", root / "active"
+            (base / "etc/profile.d").mkdir(parents=True)
+            (base / "etc/profile.d/conda.sh").touch()
+            (active / "bin").mkdir(parents=True)
+            python = active / "bin/python"
+            python.write_text("#!/usr/bin/env bash\nexit 0\n")
+            python.chmod(0o700)
+            for allocation in (None, "12"):
+                with self.subTest(slurm_tasks=allocation):
+                    env = dict(os.environ, TEST_BASE=str(base), TEST_ACTIVE=str(active),
+                               TEST_HEADER=str(header), ELMFIRE_VNV_CONDA_ENV="test-env",
+                               ELMFIRE_MPI_RANKS="51", PROJ_NETWORK="ON")
+                    env.pop("SLURM_NTASKS", None)
+                    if allocation is not None:
+                        env["SLURM_NTASKS"] = allocation
+                    script = ("module() { :; }\n"
+                              'conda() { if [[ "$1" == info ]]; then echo "$TEST_BASE"; '
+                              'else export CONDA_PREFIX="$TEST_ACTIVE"; fi; }\n'
+                              'source "$TEST_HEADER"\nenv\n')
+                    result = subprocess.run(["bash", "-c", script], env=env,
+                                            capture_output=True, text=True)
+                    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                    observed = dict(line.split("=", 1) for line in result.stdout.splitlines() if "=" in line)
+                    self.assertEqual(observed["ELMFIRE_MPI_RANKS"], allocation or "50")
+                    self.assertEqual(observed["PROJ_NETWORK"], "OFF")
+                    self.assertEqual(observed["PYTHONNOUSERSITE"], "1")
+                    self.assertEqual(observed["PYTHON_BIN"], str(python))
 
-        self.assertIn("#SBATCH --nodes=1", header)
-        self.assertIn("#SBATCH --ntasks=50", header)
-        self.assertIn("#SBATCH --ntasks-per-node=50", header)
-        self.assertIn("export PROJ_NETWORK=OFF", header)
-        self.assertIn('export ELMFIRE_MPI_RANKS="${SLURM_NTASKS:-50}"', header)
-        self.assertNotIn('ELMFIRE_MPI_RANKS:-${SLURM_NTASKS', header)
-        self.assertNotIn("#SBATCH --ntasks=51", header)
-
-    def test_landscape_runners_do_not_require_compile_script_execute_bit(self) -> None:
-        root = MODULE_PATH.parents[1]
-        cases = root / "cases/Validation/landscape_scale"
-
+    def test_landscape_runners_launch_and_compile_from_another_directory(self) -> None:
+        cases = MODULE_PATH.parents[1] / "cases/Validation/landscape_scale"
         for case_id in ("camp_fire", "thomas_fire", "tubbs_fire"):
-            runner = (cases / case_id / "run_case.sh").read_text(encoding="utf-8")
-            with self.subTest(case_id=case_id):
-                self.assertIn('if [[ -n "${SLURM_NTASKS:-}" ]]', runner)
-                self.assertIn("ELMFIRE_MPI_RANKS=$SLURM_NTASKS", runner)
-                self.assertIn('ELMFIRE_MPI_RANKS=${ELMFIRE_MPI_RANKS:-50}', runner)
-                self.assertIn('bash "$CASE_DIR/compile_case.sh"', runner)
-                self.assertIn("export PROJ_NETWORK=OFF", runner)
+            for ranks in (None, "1", "4", "0", "51", "invalid"):
+                with self.subTest(case=case_id, ranks=ranks), tempfile.TemporaryDirectory() as directory:
+                    root = Path(directory).resolve()
+                    case, bins = root / "case with spaces", root / "bin"
+                    case.mkdir()
+                    bins.mkdir()
+                    shutil.copy2(cases / case_id / "run_case.sh", case / "run_case.sh")
+                    compile_script = case / "compile_case.sh"
+                    compile_script.write_text('echo compiled > "$TEST_COMPILE_MARKER"\n')
+                    compile_script.chmod(0o600)  # Explicitly require invocation via Bash.
+                    trace, marker = root / "trace.jsonl", root / "compiled"
+                    for name in ("python-probe", "elmfire", "custom-elmfire", "mpirun"):
+                        executable = bins / name
+                        executable.write_text(
+                            f"#!{sys.executable}\n"
+                            "import json, os, sys\nfrom pathlib import Path\n"
+                            "name = Path(sys.argv[0]).name\n"
+                            "with open(os.environ['TEST_TRACE'], 'a') as stream:\n"
+                            " stream.write(json.dumps({'program': name, 'args': sys.argv[1:], "
+                            "'cwd': os.getcwd(), 'proj': os.environ.get('PROJ_NETWORK')}) + '\\n')\n"
+                            "if name == 'mpirun': os.execvp(sys.argv[3], sys.argv[3:])\n"
+                        )
+                        executable.chmod(0o700)
+                    env = dict(os.environ, PATH=str(bins) + os.pathsep + os.environ["PATH"],
+                               PYTHON_BIN=str(bins / "python-probe"), TEST_TRACE=str(trace),
+                               TEST_COMPILE_MARKER=str(marker), PROJ_NETWORK="ON")
+                    env.pop("ELMFIRE_MPI_RANKS", None)
+                    env.pop("ELMFIRE_BIN", None)
+                    if ranks is not None:
+                        env["ELMFIRE_MPI_RANKS"] = ranks
+                        env["ELMFIRE_BIN"] = str(bins / "custom-elmfire")
+                    result = subprocess.run(["bash", str(case / "run_case.sh")], cwd=root,
+                                            env=env, capture_output=True, text=True)
+                    if ranks in ("0", "51", "invalid"):
+                        self.assertEqual(result.returncode, 2)
+                        self.assertFalse(trace.exists())
+                        self.assertFalse(marker.exists())
+                        continue
+                    error_log = case / "logs/elmfire.stderr"
+                    self.assertEqual(result.returncode, 0, result.stdout + result.stderr
+                                     + (error_log.read_text() if error_log.exists() else ""))
+                    events = [json.loads(line) for line in trace.read_text().splitlines()]
+                    programs = [event["program"] for event in events]
+                    binary = "elmfire" if ranks is None else "custom-elmfire"
+                    self.assertEqual(programs, ["python-probe"] + ([] if ranks == "1" else ["mpirun"])
+                                     + [binary, "python-probe"])
+                    self.assertEqual(events[0]["args"], [str(case / "scripts/preprocess.py")])
+                    self.assertEqual(events[-1]["args"], [str(case / "scripts/postprocess.py")])
+                    model = next(event for event in events if event["program"] == binary)
+                    self.assertEqual(model["args"], ["elmfire.data.in"])
+                    self.assertEqual(Path(model["cwd"]).resolve(), case)
+                    self.assertTrue(all(event["proj"] == "OFF" for event in events))
+                    if ranks != "1":
+                        self.assertEqual(events[1]["args"][:2], ["-np", ranks or "50"])
+                    self.assertTrue(marker.is_file())
 
 
 if __name__ == "__main__":

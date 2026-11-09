@@ -33,14 +33,14 @@
     {
       "metric": "CFL 10 analytical-load maximum error",
       "limit": "<= 0.001",
-      "calculated": 0.8269027331309461,
+      "calculated": 1.4070328501124307,
       "status": "FAIL",
       "note": ""
     },
     {
       "metric": "CFL 200 analytical-load maximum error",
       "limit": "<= 0.1",
-      "calculated": 0.8392707849919627,
+      "calculated": 3.773834558784232,
       "status": "FAIL",
       "note": ""
     },
@@ -54,31 +54,31 @@
     {
       "metric": "CFL 10 ignition-time mean relative error",
       "limit": "<= 0.001",
-      "calculated": 0.013257912643702388,
+      "calculated": 0.028036884124068556,
       "status": "FAIL",
       "note": ""
     },
     {
       "metric": "CFL 1 accumulation-history NRMSE",
       "limit": "<= 0.05",
-      "calculated": 0.008465921503353038,
+      "calculated": 0.008465923689525074,
       "status": "PASS",
       "note": ""
     },
     {
       "metric": "CFL 10 accumulation-history NRMSE",
       "limit": "<= 0.05",
-      "calculated": 0.008442530409417021,
-      "status": "PASS",
+      "calculated": 0.6244419885397547,
+      "status": "FAIL",
       "note": ""
     }
   ],
   "diagnostics": {
     "cfl_1_mean_ignition_relative_error": 0.007294913351744227,
     "cfl_1_mean_first_deposition_relative_error": 0.0005589714923551332,
-    "cfl_10_mean_ignition_relative_error": 0.013257912643702388,
+    "cfl_10_mean_ignition_relative_error": 0.028036884124068556,
     "cfl_10_mean_first_deposition_relative_error": 0.006148707864630079,
-    "cfl_200_mean_ignition_relative_error": 0.05733302272355939,
+    "cfl_200_mean_ignition_relative_error": 0.057565180601829816,
     "cfl_200_mean_first_deposition_relative_error": 0.11794298967387835
   },
   "normalization": "deposited ember count divided by the 10 m by 10 m physical structure footprint",

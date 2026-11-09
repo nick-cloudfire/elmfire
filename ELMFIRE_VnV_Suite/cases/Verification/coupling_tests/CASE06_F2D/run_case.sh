@@ -37,7 +37,7 @@ echo "[INFO] Postprocessing $(basename "$CASE_DIR")"
 echo "[INFO] Compiling report/case_report.pdf"
 (
   cd "$CASE_DIR/report"
-  latexmk -pdf -interaction=nonstopmode -halt-on-error -file-line-error \
+  latexmk -lualatex -interaction=nonstopmode -halt-on-error -file-line-error \
     case_report.tex
 )
 

@@ -18,7 +18,11 @@
     "wind_speed_units": "mph at 20 ft (inferred from current ELMFIRE source and archived flags)",
     "wind_direction_units": "degrees",
     "dead_fuel_moisture_units": "percent",
-    "topography_units": {"dem": "m (archive convention; upstream metadata absent)", "slp": "degrees", "asp": "degrees"}
+    "topography_units": {
+      "dem": "m (archive convention; upstream metadata absent)",
+      "slp": "degrees",
+      "asp": "degrees"
+    }
   },
   "observation": {
     "description": "VIIRS 375 m active-fire point detections with NASA FIRMS-compatible fields",
@@ -29,16 +33,41 @@
     "geometry": "Point",
     "comparison_cutoff_utc": "2017-12-05T19:30:00Z",
     "files": [
-      {"relative_path": "data/viirs_observation/viirs_thomas.cpg", "size": 5, "sha256": "3ad3031f5503a4404af825262ee8232cc04d4ea6683d42c5dd0a2f2a27ac9824"},
-      {"relative_path": "data/viirs_observation/viirs_thomas.dbf", "size": 1749142, "sha256": "3f5dff1df0dd6fc06999be0955e760062f412dffb36bf5d852a2ddd4db60eb8f"},
-      {"relative_path": "data/viirs_observation/viirs_thomas.prj", "size": 145, "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"},
-      {"relative_path": "data/viirs_observation/viirs_thomas.shp", "size": 190612, "sha256": "dcd6512e479fca09aa46f0fce7a6a11dedcd104159fbdd54fea5f22d316a9d4a"},
-      {"relative_path": "data/viirs_observation/viirs_thomas.shx", "size": 54532, "sha256": "f03355eaaacb5c0d3c9a9a91668d334f2924041d65e0c5d2f6137dd04edfb00a"}
+      {
+        "relative_path": "data/observation/viirs_thomas.cpg",
+        "size": 5,
+        "sha256": "3ad3031f5503a4404af825262ee8232cc04d4ea6683d42c5dd0a2f2a27ac9824"
+      },
+      {
+        "relative_path": "data/observation/viirs_thomas.dbf",
+        "size": 1749142,
+        "sha256": "3f5dff1df0dd6fc06999be0955e760062f412dffb36bf5d852a2ddd4db60eb8f"
+      },
+      {
+        "relative_path": "data/observation/viirs_thomas.prj",
+        "size": 145,
+        "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
+      },
+      {
+        "relative_path": "data/observation/viirs_thomas.shp",
+        "size": 190612,
+        "sha256": "dcd6512e479fca09aa46f0fce7a6a11dedcd104159fbdd54fea5f22d316a9d4a"
+      },
+      {
+        "relative_path": "data/observation/viirs_thomas.shx",
+        "size": 54532,
+        "sha256": "f03355eaaacb5c0d3c9a9a91668d334f2924041d65e0c5d2f6137dd04edfb00a"
+      }
     ]
   },
   "known_provenance_gaps": [
     "Upstream fuel, terrain, weather, moisture, WUI, and ignition products are not identified in the received archive.",
     "The local VIIRS files do not record the exact FIRMS collection/granules, download URL, acquisition date, filtering history, or license.",
     "The archive does not state whether model parameters were calibrated against this event."
-  ]
+  ],
+  "generation": {
+    "input_scripts": null,
+    "observation_scripts": null,
+    "limitations": "No original script was supplied for generating the observation data. Input generation, where supplied, requires external source data and service access; frozen-file equivalence is unverified."
+  }
 }

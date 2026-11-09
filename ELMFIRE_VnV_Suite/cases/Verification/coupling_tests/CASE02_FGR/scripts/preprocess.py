@@ -21,7 +21,7 @@ CELL_SIZE_M = 10.0
 PHYSICAL_LENGTH_M = 500.0
 PHYSICAL_WIDTH_M = 60.0
 BUFFER_CELLS = 2
-TIMESTEPS_S = (0.13, 12.7)
+TIMESTEPS_S = (0.1875, 12.0)
 SIMULATION_TSTOP_S = 120.0
 WIND_SPEED_MPH = 10.0
 WIND_DIRECTION_DEG = 270.0
@@ -65,7 +65,7 @@ def write_tif(path: Path, array: np.ndarray, dtype: int) -> None:
 
 
 def write_inputs(input_dir: Path, nx: int, ny: int, ignition_row: int) -> None:
-    """Generate one isolated variant, including aligned rasters, local tables, namelist, and metadata."""
+    """Generate aligned input rasters for one isolated variant."""
     zeros = np.zeros((ny, nx), dtype=np.float32)
     ones = np.ones((ny, nx), dtype=np.float32)
     phi = ones.copy()
@@ -98,12 +98,11 @@ def main() -> None:
     ignition_column = BUFFER_CELLS
 
     template = (CASE_DIR / "elmfire.data.in").read_text(encoding="utf-8")
-    fuel_source = CASE_DIR / "data" / "misc"
     VARIANTS_DIR.mkdir(parents=True, exist_ok=True)
     manifest = []
 
     for dt in TIMESTEPS_S:
-        name = "dt0p13" if math.isclose(dt, 0.13) else "dt12p7"
+        name = "dt0p1875" if math.isclose(dt, 0.1875) else "dt12"
         variant_dir = VARIANTS_DIR / name
         for relative in ("data/inputs", "data/misc", "outputs", "logs"):
             target = variant_dir / relative
@@ -113,14 +112,12 @@ def main() -> None:
             (variant_dir / relative).mkdir(parents=True, exist_ok=True)
 
         write_inputs(variant_dir / "data/inputs", nx, ny, ignition_row)
-        for filename in ("fuel_models.csv", "building_fuel_models.csv"):
-            source = fuel_source / filename
-            if not source.is_file():
-                raise FileNotFoundError(f"Missing required case-local table: {source}")
-            shutil.copy2(source, variant_dir / "data/misc" / filename)
-
-        step_count = int(math.ceil(SIMULATION_TSTOP_S / dt - 1.0e-12))
+        step_count = round(SIMULATION_TSTOP_S / dt)
         simulation_tstop_s = step_count * dt
+        if simulation_tstop_s != SIMULATION_TSTOP_S:
+            raise ValueError(
+                f"Simulation stop {SIMULATION_TSTOP_S:g} s is not an exact multiple of dt={dt:g} s"
+            )
         config = replace_assignment(template, "SIMULATION_DT", f"{dt:.17g}")
         config = replace_assignment(config, "SIMULATION_DTMAX", f"{dt:.17g}")
         config = replace_assignment(config, "DTDUMP", f"{simulation_tstop_s:.17g}")

@@ -2,14 +2,14 @@
   "schema_version": 3,
   "suite": "verification",
   "aggregate_environment": {
-    "Captured at (UTC)": "2026-09-15T18:02:20+00:00",
-    "Repository revision": "f0f117f51b13",
+    "Captured at (UTC)": "2026-10-22T05:27:03+00:00",
+    "Repository revision": "51453eb80806",
     "Repository state": "dirty",
     "Host platform": "macOS-15.7.7-arm64-arm-64bit",
     "Processor architecture": "arm64",
     "Fortran compiler": "GNU Fortran (Homebrew GCC 14.2.0_1) 14.2.0",
     "Python version": "CPython 3.12.9",
-    "Python runtime": "CPython 3.12.9 (/opt/homebrew/anaconda3/bin/python3)",
+    "Python runtime": "CPython 3.12.9 (/opt/homebrew/anaconda3/bin/python)",
     "Conda environment": "not active",
     "ELMFIRE command": "elmfire",
     "ELMFIRE resolved path": "not found on PATH",
@@ -22,9 +22,9 @@
   },
   "case_count": 49,
   "decision_counts": {
-    "FAIL": 12,
+    "FAIL": 11,
     "NOT EVALUABLE": 7,
-    "PASS": 30
+    "PASS": 31
   },
   "cases": [
     {
@@ -91,9 +91,9 @@
       "report_available": true,
       "metrics_file": "cases/Verification/coupling_tests/CASE04_STI/outputs/metrics.json",
       "metrics_available": true,
-      "raw_status": "pass",
+      "raw_status": "PASS",
       "decision": "PASS",
-      "detail": "Decision normalized from metrics.json field 'status'."
+      "detail": "all required metrics were evaluated"
     },
     {
       "case_id": "CASE05_TDW",
@@ -210,7 +210,7 @@
       "report_available": true,
       "metrics_file": "cases/Verification/coupling_tests/CASE11_WSC/outputs/metrics.json",
       "metrics_available": true,
-      "raw_status": "NOT RUN",
+      "raw_status": "NOT EVALUABLE",
       "decision": "NOT EVALUABLE",
       "detail": "Decision normalized from metrics.json field 'overall_status'."
     },
@@ -346,9 +346,9 @@
       "report_available": true,
       "metrics_file": "cases/Verification/coupling_tests/CASE19_WTH/outputs/metrics.json",
       "metrics_available": true,
-      "raw_status": "PASS",
-      "decision": "PASS",
-      "detail": "Decision normalized from metrics.json field 'overall_status'."
+      "raw_status": "NOT EVALUABLE",
+      "decision": "NOT EVALUABLE",
+      "detail": "no active center HRR source was found"
     },
     {
       "case_id": "CASE20_PIG",
@@ -754,9 +754,9 @@
       "report_available": true,
       "metrics_file": "cases/Verification/coupling_tests/CASE43_WER/outputs/metrics.json",
       "metrics_available": true,
-      "raw_status": "NOT EVALUABLE",
-      "decision": "NOT EVALUABLE",
-      "detail": "ELMFIRE execution was attempted, but no variant has complete current evidence."
+      "raw_status": "PASS",
+      "decision": "PASS",
+      "detail": "All required variants and acceptance metrics passed."
     },
     {
       "case_id": "CASE44_WHP",
@@ -771,9 +771,9 @@
       "report_available": true,
       "metrics_file": "cases/Verification/coupling_tests/CASE44_WHP/outputs/metrics.json",
       "metrics_available": true,
-      "raw_status": "NOT EVALUABLE",
-      "decision": "NOT EVALUABLE",
-      "detail": "ELMFIRE execution was attempted, but no variant has complete current evidence."
+      "raw_status": "FAIL",
+      "decision": "FAIL",
+      "detail": "One or more acceptance metrics failed."
     },
     {
       "case_id": "CASE45_HRS",
@@ -788,9 +788,9 @@
       "report_available": true,
       "metrics_file": "cases/Verification/coupling_tests/CASE45_HRS/outputs/metrics.json",
       "metrics_available": true,
-      "raw_status": "FAIL",
-      "decision": "FAIL",
-      "detail": "All required run evidence was complete, but one or more scientific metrics failed."
+      "raw_status": "PASS",
+      "decision": "PASS",
+      "detail": "All required run evidence was complete; every scientific metric passed."
     },
     {
       "case_id": "CASE46_WUT",
@@ -839,9 +839,9 @@
       "report_available": true,
       "metrics_file": "cases/Verification/coupling_tests/CASE48_WGC/outputs/metrics.json",
       "metrics_available": true,
-      "raw_status": "FAIL",
-      "decision": "FAIL",
-      "detail": "One or more spatial-convergence acceptance components failed."
+      "raw_status": "NOT EVALUABLE",
+      "decision": "NOT EVALUABLE",
+      "detail": "ELMFIRE execution was attempted, but one or more current-fingerprint variants lack valid required evidence."
     },
     {
       "case_id": "CASE49_WTC",

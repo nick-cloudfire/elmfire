@@ -5,19 +5,19 @@
 \newcommand{\SelectorStatus}{NOT EVALUABLE}
 \newcommand{\RequiredVariants}{7}
 \newcommand{\CompletedVariants}{7}
-\newcommand{\RuntimeFingerprint}{1785c84c\allowbreak{}e84d2647\allowbreak{}c8daf520\allowbreak{}c134f64b\allowbreak{}3e82d50d\allowbreak{}1561ee37\allowbreak{}6120cce8\allowbreak{}ed1cdf69\allowbreak{}}
-\newcommand{\OracleFingerprint}{1ca12653\allowbreak{}08e8c829\allowbreak{}00f62f06\allowbreak{}4aa06bb7\allowbreak{}99ea6906\allowbreak{}dfd00536\allowbreak{}d8c05e86\allowbreak{}650c02d6\allowbreak{}}
-\newcommand{\ExecutablePath}{/\allowbreak{}workspac\allowbreak{}es/\allowbreak{}elmfire-\allowbreak{}nick/\allowbreak{}ELMFIRE\_\allowbreak{}VnV\_Suit\allowbreak{}e/\allowbreak{}diagnost\allowbreak{}ics/\allowbreak{}CASE43\_C\allowbreak{}ASE49/\allowbreak{}bin/\allowbreak{}elmfire}
-\newcommand{\ExecutableHash}{bc2d2748\allowbreak{}3ed3cf40\allowbreak{}9cea0a04\allowbreak{}fd879e29\allowbreak{}0cfe5b57\allowbreak{}a0c84b21\allowbreak{}5282ff9d\allowbreak{}18c458a9\allowbreak{}}
-\newcommand{\ExecutableVersion}{ELMFIRE 2025.1002}
+\newcommand{\RuntimeFingerprint}{adf700c0\allowbreak{}be781b47\allowbreak{}05414a92\allowbreak{}8b4dfdd3\allowbreak{}14184b60\allowbreak{}e37420a6\allowbreak{}f2c9bb84\allowbreak{}ed1e902f\allowbreak{}}
+\newcommand{\OracleFingerprint}{e8606a6b\allowbreak{}39d7378c\allowbreak{}c9c03d32\allowbreak{}aa8db904\allowbreak{}7615275f\allowbreak{}d9b8be64\allowbreak{}144e1adf\allowbreak{}3254e689\allowbreak{}}
+\newcommand{\ExecutablePath}{/\allowbreak{}global/\allowbreak{}home/\allowbreak{}users/\allowbreak{}yirenqin\allowbreak{}712/\allowbreak{}applicat\allowbreak{}ions/\allowbreak{}elmfire/\allowbreak{}elmfire-\allowbreak{}main/\allowbreak{}build/\allowbreak{}linux/\allowbreak{}bin/\allowbreak{}elmfire\_\allowbreak{}debug\_}
+\newcommand{\ExecutableHash}{2b589207\allowbreak{}16af2889\allowbreak{}1d9166c5\allowbreak{}f1046174\allowbreak{}214994eb\allowbreak{}20e82098\allowbreak{}1017e4f2\allowbreak{}d166b001\allowbreak{}}
+\newcommand{\ExecutableVersion}{ELMFIRE Reading \&MISCELLANEOUS namelist group}
 \newcommand{\MetricRows}{%
 evidence and exact dump ledger & 61 rows: indices 1..61, times 0..60 s, only row 61 final & 7/7 exact; FLIN/TOA time stamp 0000060; PHI dump index d0000061 & PASS \\
 source fireline-intensity setup & maximum absolute error \ensuremath{\leq}0.5 kW/m and source TOA=0 s & \{"all\_source\_toa\_zero":true,"max\_abs\_error\_kw\_m":1001.0\} kW/m & FAIL \\
 terminal PHI/TOA state consistency & PHI\ensuremath{\leq}0 iff TOA is finite at each designated target & \{"contiguous\_above":true,"contiguous\_below":true,"contiguous\_equal":true,"isolated\_d1\_insufficient":true,"isolated\_d1\_sufficient":true,"isolated\_d2\_sufficient":true,"zero\_control":true\} & PASS \\
-intended W-to-U receiver heat exposure & positive DFC+radiation at sufficient-heat receivers & \{"contiguous\_above":84.52081632614136,"isolated\_d1\_sufficient":61.923187255859375\} kW/m2 & PASS \\
-intended W-to-U finite ignition delay & finite target TOA with delay \ensuremath{>} 0 s & \{"contiguous\_above":49.0,"isolated\_d1\_sufficient":51.0\} s & PASS \\
-contiguous strict-threshold matrix & below=false, equal=false, above=true & \{"contiguous\_above":true,"contiguous\_below":true,"contiguous\_equal":true\} & NOT EVALUABLE \\
-isolated distance/threshold matrix & d1-insufficient=false, d1-sufficient=true, d2-sufficient=false & \{"isolated\_d1\_insufficient":true,"isolated\_d1\_sufficient":true,"isolated\_d2\_sufficient":false\} & NOT EVALUABLE \\
-first-update transition timing & eligible target TOA=0 s and target-source delay=0 s & \{"contiguous\_above":\{"target\_source\_delay\_s":49.0,"target\_toa\_s":49.0\},"isolated\_d1\_sufficient":\{"target\_source\_delay\_s":51.0,"target\_toa\_s":51.0\}\} s & NOT EVALUABLE \\
+intended W-to-U receiver heat exposure & positive DFC+radiation at sufficient-heat receivers & \{"contiguous\_above":61.923182010650635,"isolated\_d1\_sufficient":61.923182010650635\} kW/m2 & PASS \\
+intended W-to-U finite ignition delay & finite target TOA with delay \ensuremath{>} 0 s & \{"contiguous\_above":null,"isolated\_d1\_sufficient":null\} s & FAIL \\
+contiguous strict-threshold matrix & below=false, equal=false, above=true & \{"contiguous\_above":false,"contiguous\_below":false,"contiguous\_equal":false\} & NOT EVALUABLE \\
+isolated distance/threshold matrix & d1-insufficient=false, d1-sufficient=true, d2-sufficient=false & \{"isolated\_d1\_insufficient":false,"isolated\_d1\_sufficient":false,"isolated\_d2\_sufficient":false\} & NOT EVALUABLE \\
+first-update transition timing & eligible target TOA=0 s and target-source delay=0 s & \{"contiguous\_above":\{"target\_source\_delay\_s":null,"target\_toa\_s":null\},"isolated\_d1\_sufficient":\{"target\_source\_delay\_s":null,"target\_toa\_s":null\}\} s & NOT EVALUABLE \\
 zero-source control & target remains PHI\ensuremath{>}0 with nodata TOA & \{"target\_phi":0.5502481460571289,"target\_toa\_s":null\} & PASS \\
 }

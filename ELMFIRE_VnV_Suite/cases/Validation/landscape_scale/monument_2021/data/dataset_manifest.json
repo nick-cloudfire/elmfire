@@ -1,0 +1,524 @@
+{
+  "schema_version": 1,
+  "case_id": "monument_2021",
+  "dataset_version": "2.2.0",
+  "source_revision": "bddc2cef6107f4be8c0c2b4ef08a1d547efe339e",
+  "source_state": "working tree snapshot; file hashes are authoritative",
+  "archive_scope": "input data, observations and data-generation source only",
+  "source_metadata": {
+    "schema_version": 1,
+    "case_id": "monument_2021",
+    "fire_id": "Monument_2021",
+    "case_status": "implemented validation case; simulation not run",
+    "model_inputs": {
+      "source": {
+        "kind": "user-supplied directory",
+        "name": "ELMFIRE_GOFER_validation",
+        "received_date": "2026-10-22",
+        "provider": "User-supplied updated directory",
+        "license": "Not documented in the supplied directory; upstream access and redistribution terms still apply."
+      },
+      "processing": "unchanged file contents; case-relative paths normalized",
+      "updated_source": {
+        "kind": "user-supplied directory",
+        "name": "ELMFIRE_GOFER_validation",
+        "received_date": "2026-10-22"
+      },
+      "previous_source_archive": {
+        "filename": "ELMFIRE_GOFER_validation.tar.gz",
+        "size": 7038832441,
+        "sha256": "714b9f2b3c3417336ea200bfc6f2bba2955376bf3088d675a811a11d28b0fffe",
+        "files": 583,
+        "skipped_macos_metadata": 682,
+        "received_date_utc": "2026-10-21",
+        "provider": "User-supplied archive",
+        "license": "Not documented in the supplied archive; upstream access and redistribution terms still apply."
+      },
+      "provider": "CloudFire historical fuel, weather and ignition service",
+      "fuel_source": "LANDFIRE",
+      "fuel_version": "2.2.0",
+      "weather_source": "Historical weather supplied through CloudFire; underlying analysis product not identified in the supplied preparation source",
+      "offshore_cells_filled": null,
+      "files": [
+        {
+          "name": "adj.tif",
+          "path": "data/fuels_and_topography/adj.tif",
+          "size": 89976,
+          "sha256": "4906d4f6a66525756f24be45b523ea41272b40f8c3cf4b08b7a958b78397e633",
+          "source_relative_path": "Monument_2021/inputs/adj.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "name": "fuel_models.csv",
+          "path": "data/misc/fuel_models.csv",
+          "size": 3948,
+          "sha256": "bf32ba154b230bf16e38941d662c9a49e72652307ffe5e1468a511b514eaaf5b",
+          "source_relative_path": "Monument_2021/inputs/fuel_models.csv",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "name": "ignition_mask.tif",
+          "path": "data/fuels_and_topography/ignition_mask.tif",
+          "size": 77953,
+          "sha256": "d2afa02cafb54503f2a4beedfb107cbe96b390b1182ad2ecd475ab7c1ec3f6f9",
+          "source_relative_path": "Monument_2021/inputs/ignition_mask.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "name": "ignitions.csv",
+          "path": "data/misc/ignitions.csv",
+          "size": 170,
+          "sha256": "e4cf4d9e9d2c0f3d586a20d34bba0c643f7aa5533136008adfd3693ccfe902b9",
+          "source_relative_path": "Monument_2021/inputs/ignitions.csv",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "name": "landscape.tif",
+          "path": "data/fuels_and_topography/landscape.tif",
+          "size": 23362585,
+          "sha256": "33d06b0d438a3e942832799fc015491a132f99150550e263b37593dd2dd8cca5",
+          "source_relative_path": "Monument_2021/inputs/landscape.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "name": "lh.tif",
+          "path": "data/weather/lh.tif",
+          "size": 14387617,
+          "sha256": "5b6c8537691d57b845edb5a8870637ef3c93b94138e7d0447391e8811c4ba3a9",
+          "source_relative_path": "Monument_2021/inputs/lh.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "name": "lw.tif",
+          "path": "data/weather/lw.tif",
+          "size": 13906730,
+          "sha256": "b98932b39c74157005dc7c94e194b9991101face731e0449f8bb45c99adc40ca",
+          "source_relative_path": "Monument_2021/inputs/lw.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "name": "m1.tif",
+          "path": "data/weather/m1.tif",
+          "size": 61000335,
+          "sha256": "c6fbba15aeed86493839da352d75979173e3ea7a67143fc1459a9c7f9387c1d8",
+          "source_relative_path": "Monument_2021/inputs/m1.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "name": "m10.tif",
+          "path": "data/weather/m10.tif",
+          "size": 60912023,
+          "sha256": "a98f04c9d725fd409914c5701beb67670a588954786e5a52a62b05b9d1f4518e",
+          "source_relative_path": "Monument_2021/inputs/m10.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "name": "m100.tif",
+          "path": "data/weather/m100.tif",
+          "size": 60964279,
+          "sha256": "e79e2be66bf353c115b8b812f1e237a19b1419f1a3db969204a98de0d6a65cef",
+          "source_relative_path": "Monument_2021/inputs/m100.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "name": "phi.tif",
+          "path": "data/fuels_and_topography/phi.tif",
+          "size": 89976,
+          "sha256": "4906d4f6a66525756f24be45b523ea41272b40f8c3cf4b08b7a958b78397e633",
+          "source_relative_path": "Monument_2021/inputs/phi.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "name": "wd.tif",
+          "path": "data/weather/wd.tif",
+          "size": 8818327,
+          "sha256": "e6ac0e2f9f9d486ff5ce019755376b9a677c48e9d91bda33f4f1f5fe77c864ff",
+          "source_relative_path": "Monument_2021/inputs/wd.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "name": "ws.tif",
+          "path": "data/weather/ws.tif",
+          "size": 62893329,
+          "sha256": "330ad22f3c78d714595f2811bf7b9e5779867b2800177182ca21b3cd83319377",
+          "source_relative_path": "Monument_2021/inputs/ws.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        }
+      ]
+    },
+    "observation": {
+      "product": "GOFER arrival-time rasters and previews, plus CAL FIRE final-perimeter GeoPackages and aligned raster masks",
+      "source_dataset": "https://doi.org/10.5281/zenodo.8327264",
+      "reference": "https://doi.org/10.5194/essd-16-1395-2024",
+      "files": [
+        {
+          "path": "data/observation/Monument_2021_final_perimeter.gpkg",
+          "size": 970752,
+          "sha256": "054493d64cff1f9f5d45fbe71e3d54e1493bdc2d8c4ad020eb600e942d7c5df7",
+          "source_relative_path": "Monument_2021/observations/Monument_2021_final_perimeter.gpkg",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "path": "data/observation/Monument_2021_final_perimeter_30m.tif",
+          "size": 20937,
+          "sha256": "d4d1c3c631aa6c4362831ba27b4c1ec6c8400a101f9b36602a4af010f232503c",
+          "source_relative_path": "Monument_2021/observations/Monument_2021_final_perimeter_30m.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "path": "data/observation/Monument_2021_toa.png",
+          "size": 237432,
+          "sha256": "223acedb9bdf94cdbece0f8fc3380b7ec0954e3a9df48b9a636016926f372ae5",
+          "source_relative_path": "Monument_2021/observations/Monument_2021_toa.png",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        },
+        {
+          "path": "data/observation/Monument_2021_toa.tif",
+          "size": 76334,
+          "sha256": "a192fe8508e0a0ba4859ffbe338efcebd3b65bde8fe726f4114b1b53231e69e2",
+          "source_relative_path": "Monument_2021/observations/Monument_2021_toa.tif",
+          "processing": "copied unchanged from the user-supplied updated directory"
+        }
+      ],
+      "products": {
+        "gofer_arrival": "data/observation/Monument_2021_toa.tif",
+        "gofer_preview": "data/observation/Monument_2021_toa.png",
+        "final_perimeter": "data/observation/Monument_2021_final_perimeter.gpkg",
+        "final_perimeter_mask": "data/observation/Monument_2021_final_perimeter_30m.tif"
+      },
+      "final_perimeter_source": {
+        "provider": "CAL FIRE FRAP",
+        "source_identification": "California Historic Fire Perimeters (2026-05-26), as identified by the supplied exploratory.py",
+        "generator": "scripts/generate_data/source/exploratory.py",
+        "layers": [
+          "calfire_final",
+          "calfire_records",
+          "gofer_final"
+        ],
+        "matching": "year, name/complex name, and more than 20 percent of each CAL FIRE record overlapping the final GOFER perimeter",
+        "mask": "cell-centre rasterization on the input landscape grid; burned=1, unburned=0, nodata=255",
+        "license_evidence": "not supplied in the referenced directory"
+      },
+      "gofer_final_area_km2": 922.504,
+      "hourly_perimeters": 1168,
+      "derivation": "supplied arrival-time raster; upstream raster-generation code was not supplied",
+      "area_series_basis": "growth calculated from this case arrival-time raster; no separate hourly vector-area series was supplied"
+    },
+    "known_provenance_gaps": [
+      "Upstream access and redistribution terms remain undocumented.",
+      "Exact GOFER version and arrival-time raster transformation history are unverified.",
+      "Original calibration history and independently predeclared acceptance thresholds are not documented.",
+      "Underlying historical weather product and moisture derivation are not identified in the supplied preparation source."
+    ],
+    "generation": {
+      "input_scripts": "scripts/generate_data/prepare_inputs.py",
+      "observation_scripts": "scripts/generate_data/generate_observations.py",
+      "supplied_sources": "scripts/generate_data/source",
+      "limitations": "CAL FIRE final-perimeter generation is supplied in exploratory.py; GOFER arrival-time TIFF/PNG generation code is absent. Upstream CAL FIRE/GOFER files and CloudFire service access are external requirements.",
+      "gust_scripts": "scripts/generate_data/rtma_gusts.py",
+      "gust_usage": "prepare_inputs.py --gusts or standalone rtma_gusts.py --output-file NEW_FILE; existing files and model configuration are preserved",
+      "frozen_archive_note": "Zenodo 2.2.0 includes supplementary gust rasters and updated generation scripts; 2.1.0 predates them."
+    },
+    "fire_name": "Monument",
+    "fire_year": 2021,
+    "event_start_utc": "2021-07-31T01:00:00Z",
+    "event_end_utc": "2021-09-17T20:00:00Z",
+    "official_size_ac": 223124.0,
+    "model_domain": {
+      "crs": "EPSG:32610",
+      "crs_name": "UTM zone 10N (EPSG:32610)",
+      "cell_size_m": 30.0,
+      "extent": [
+        448548.604599976,
+        4476509.8643884,
+        508548.604599976,
+        4540499.8643884
+      ],
+      "width": 2000,
+      "height": 2133,
+      "margin_km": 10.0
+    },
+    "weather": {
+      "first_time_utc": "2021-07-31T04:00:00Z",
+      "band_count": 1169,
+      "interval_s": 3600,
+      "offset_from_event_start_h": 3.0,
+      "units_basis": "supplied exploratory.py: 20-ft wind speed mph, wind direction from degrees, moisture percent"
+    },
+    "ignitions": [
+      {
+        "t_utc": "2021-07-31T04:00:00Z",
+        "lon": -123.33431608018083,
+        "lat": 40.7534672057518,
+        "x": 471778.98,
+        "y": 4511443.918,
+        "t_ign_s": 0.0,
+        "moved_m": 0.0
+      }
+    ],
+    "elmfire_source": {
+      "provided_source_path": "/Users/yiren/Desktop/MyResearch/ELMFIRE/ELMFIRE_Git/elmfire-nick/build/source",
+      "branch": "yiren",
+      "git_commit": "8981f14e0170ced6cc28c4d308d4545ba925f5ef",
+      "repository_dirty": true,
+      "source_directory_dirty": false,
+      "files_sha256": {
+        "elmfire.f90": "f1820f890123c2808a15eafaeade82d172b8603041255d0f367ebcce4e9a401f",
+        "elmfire_calibration.f90": "75838a14439ba25661e1ad90a90e37ac25e5776d81326df8f3d8fdb04aad5cb5",
+        "elmfire_ignition.f90": "2586ece44726ab93eb5170169cf25b4098f90888ee11fea4da17dd3bb25b1bea",
+        "elmfire_init.f90": "fcf37a2ca392ca6c6af901c53cdcc64a3dfd44f632e31980be9b8a63cd94047d",
+        "elmfire_io.f90": "e5a54c76c7e71b18ce2751eb839724843fee0e1f90823c8544a9ce9fc10550a6",
+        "elmfire_level_set.f90": "148c1ce043f3b3d0041f2b1b27abe4bace8f4fcb635f03931bec180bfb39c9cf",
+        "elmfire_namelists.f90": "07a5429d45036ba0363cc42ad2df69e1c572b8244687a3fe80ad9214572aa517",
+        "elmfire_post.f90": "bcd8346451840a5b877dd88efef98087f20da497acc775ebcae6ed47cf546311",
+        "elmfire_spotting.f90": "b0f1adb1dd80c889a42819bcee187c5a0d800f927a1af99d1166aa03137dcd5f",
+        "elmfire_spotting_superseded.f90": "1f1d69667327fd3737ac3555b272410769987a16cb99708306d519b22dab1a43",
+        "elmfire_spread_rate.f90": "f5783d6db2d2677c2ff9834d610c2055dd5f7d31764d10296459d390d2d1117e",
+        "elmfire_subs.f90": "180e0e2bd1c6b0801fed92a2d70491fae525137e85ae6d42cf7332b0980bd8a5",
+        "elmfire_suppression.f90": "1eb8e309f78d9706e299e620cf18b51a35686b4e8edca12779f405035d9bd6a2",
+        "elmfire_vars.f90": "5b7a9e00798216d6516922e2a27bde8907a4e518dbfb68b8f4be42dd1841f215"
+      }
+    },
+    "configuration": {
+      "supplied_source_relative_path": "Monument_2021/inputs/elmfire.data",
+      "supplied_sha256": "ef2a17573396dec93bb13fa193814954c6b5cc391d639210f044380eb138b008",
+      "adapted_sha256": "e47225f82f9b8d16e90b772f73487b349daf7e571bb05a5dd15b0e8d1817a27c",
+      "changed_assignments": [
+        "INPUTS.FUELS_AND_TOPOGRAPHY_DIRECTORY",
+        "INPUTS.WEATHER_DIRECTORY",
+        "MISCELLANEOUS.SCRATCH"
+      ],
+      "scientific_assignments_preserved": true
+    },
+    "supplementary_weather": {
+      "source_directory": "ELMFIRE_GOFER_validation 2",
+      "received_date": "2026-10-22",
+      "files": [
+        {
+          "path": "data/weather/ws_gust.tif",
+          "size": 62704246,
+          "sha256": "f68da934621cf339a01ab7677b982292d1df74d0980f15f326ecb81b078f10be",
+          "source_relative_path": "Monument_2021/inputs/ws_gust.tif",
+          "processing": "copied unchanged from user-supplied ELMFIRE_GOFER_validation 2",
+          "used_by_current_simulation": false,
+          "name": "ws_gust.tif"
+        }
+      ],
+      "role": "supplementary; not selected by current ELMFIRE namelist",
+      "source": "NOAA RTMA 2.5 km GUST at 10 m, as identified by supplied raster tags and source script",
+      "units": "mph at 20 ft",
+      "conversion": "0.87 * 2.23694 * GUST[m/s at 10 m]",
+      "resampling": "bilinear onto the ws.tif grid",
+      "first_time_utc": "2021-07-31T04:00:00Z",
+      "interval_s": 3600,
+      "band_count": 1169,
+      "time_basis": "band order and first UTC hour from supplied inputs_log.csv; per-band timestamps were not supplied in the TIFF",
+      "import_checks": {
+        "grid_and_band_count_match_ws": true,
+        "missing_cells": 0,
+        "negative_cells": 0,
+        "minimum_mph": 0.0,
+        "maximum_mph": 40.35673522949219,
+        "mean_mph": 7.552441042778986
+      },
+      "regeneration_verified": false
+    }
+  },
+  "zenodo": {
+    "record_id": null,
+    "version_doi": null,
+    "concept_doi": null
+  },
+  "bundles": [
+    {
+      "role": "inputs",
+      "filename": "inputs.tar.gz",
+      "required": true,
+      "size": 341687411,
+      "sha256": "e357000bf9a2506da0ed90aad195c179a08398587e37cc308a2578ef04cf8abb",
+      "url": null,
+      "files": [
+        {
+          "path": "data/weather/lh.tif",
+          "size": 14387617,
+          "sha256": "5b6c8537691d57b845edb5a8870637ef3c93b94138e7d0447391e8811c4ba3a9"
+        },
+        {
+          "path": "data/weather/lw.tif",
+          "size": 13906730,
+          "sha256": "b98932b39c74157005dc7c94e194b9991101face731e0449f8bb45c99adc40ca"
+        },
+        {
+          "path": "data/weather/m1.tif",
+          "size": 61000335,
+          "sha256": "c6fbba15aeed86493839da352d75979173e3ea7a67143fc1459a9c7f9387c1d8"
+        },
+        {
+          "path": "data/weather/m10.tif",
+          "size": 60912023,
+          "sha256": "a98f04c9d725fd409914c5701beb67670a588954786e5a52a62b05b9d1f4518e"
+        },
+        {
+          "path": "data/weather/m100.tif",
+          "size": 60964279,
+          "sha256": "e79e2be66bf353c115b8b812f1e237a19b1419f1a3db969204a98de0d6a65cef"
+        },
+        {
+          "path": "data/weather/wd.tif",
+          "size": 8818327,
+          "sha256": "e6ac0e2f9f9d486ff5ce019755376b9a677c48e9d91bda33f4f1f5fe77c864ff"
+        },
+        {
+          "path": "data/weather/ws.tif",
+          "size": 62893329,
+          "sha256": "330ad22f3c78d714595f2811bf7b9e5779867b2800177182ca21b3cd83319377"
+        },
+        {
+          "path": "data/weather/ws_gust.tif",
+          "size": 62704246,
+          "sha256": "f68da934621cf339a01ab7677b982292d1df74d0980f15f326ecb81b078f10be"
+        },
+        {
+          "path": "data/fuels_and_topography/adj.tif",
+          "size": 89976,
+          "sha256": "4906d4f6a66525756f24be45b523ea41272b40f8c3cf4b08b7a958b78397e633"
+        },
+        {
+          "path": "data/fuels_and_topography/ignition_mask.tif",
+          "size": 77953,
+          "sha256": "d2afa02cafb54503f2a4beedfb107cbe96b390b1182ad2ecd475ab7c1ec3f6f9"
+        },
+        {
+          "path": "data/fuels_and_topography/landscape.tif",
+          "size": 23362585,
+          "sha256": "33d06b0d438a3e942832799fc015491a132f99150550e263b37593dd2dd8cca5"
+        },
+        {
+          "path": "data/fuels_and_topography/phi.tif",
+          "size": 89976,
+          "sha256": "4906d4f6a66525756f24be45b523ea41272b40f8c3cf4b08b7a958b78397e633"
+        },
+        {
+          "path": "data/misc/fuel_models.csv",
+          "size": 3948,
+          "sha256": "bf32ba154b230bf16e38941d662c9a49e72652307ffe5e1468a511b514eaaf5b"
+        },
+        {
+          "path": "data/misc/ignitions.csv",
+          "size": 170,
+          "sha256": "e4cf4d9e9d2c0f3d586a20d34bba0c643f7aa5533136008adfd3693ccfe902b9"
+        }
+      ]
+    },
+    {
+      "role": "observations",
+      "filename": "observations.tar.gz",
+      "required": true,
+      "size": 951170,
+      "sha256": "265d8833656eb15c8d6d46e266b01ef66c13f1f551dc871ba1c18cb24cac352c",
+      "url": null,
+      "files": [
+        {
+          "path": "data/observation/Monument_2021_final_perimeter.gpkg",
+          "size": 970752,
+          "sha256": "054493d64cff1f9f5d45fbe71e3d54e1493bdc2d8c4ad020eb600e942d7c5df7"
+        },
+        {
+          "path": "data/observation/Monument_2021_final_perimeter_30m.tif",
+          "size": 20937,
+          "sha256": "d4d1c3c631aa6c4362831ba27b4c1ec6c8400a101f9b36602a4af010f232503c"
+        },
+        {
+          "path": "data/observation/Monument_2021_toa.png",
+          "size": 237432,
+          "sha256": "223acedb9bdf94cdbece0f8fc3380b7ec0954e3a9df48b9a636016926f372ae5"
+        },
+        {
+          "path": "data/observation/Monument_2021_toa.tif",
+          "size": 76334,
+          "sha256": "a192fe8508e0a0ba4859ffbe338efcebd3b65bde8fe726f4114b1b53231e69e2"
+        }
+      ]
+    },
+    {
+      "role": "generation",
+      "filename": "generation.tar.gz",
+      "required": true,
+      "size": 32665,
+      "sha256": "4f61b5cf9a528e452eac0ff21d4ceb69d79c70caeb55905850e02d78e79b93ac",
+      "url": null,
+      "files": [
+        {
+          "path": "scripts/generate_data/README.txt",
+          "size": 3398,
+          "sha256": "c912d095af4668b608b39cbeff24baaef14cb23bfc13913720b7284a5aa1f232"
+        },
+        {
+          "path": "scripts/generate_data/fires.csv",
+          "size": 484,
+          "sha256": "82d78f6f9670da614373fd081c064ba8b8362fd783de4490c19ae63a93699652"
+        },
+        {
+          "path": "scripts/generate_data/generate_observations.py",
+          "size": 3360,
+          "sha256": "504622c5a2c99679a5fab3b49b9c77bb5e6531ac48313bd381d5e9c957810ad1"
+        },
+        {
+          "path": "scripts/generate_data/make_fires.py",
+          "size": 3674,
+          "sha256": "db102eaee83a12ee43cc5430db56f9ac2f98e215a97b1eda473a5f22d640350b"
+        },
+        {
+          "path": "scripts/generate_data/prepare_inputs.py",
+          "size": 11872,
+          "sha256": "71ce2e3df4c5afcc3bca8d3762580ff61ab76b6d7bdecf917e6aa54df2f20693"
+        },
+        {
+          "path": "scripts/generate_data/rtma_gusts.py",
+          "size": 9949,
+          "sha256": "dbcb0529bc2c1fb4d8c4fb0ca2f4492064f4af1c9269a5d5f52d848e8660c05a"
+        },
+        {
+          "path": "scripts/generate_data/source/exploratory.py",
+          "size": 21531,
+          "sha256": "3ce3f69eb0bab864adbaab85d1032934c9bcdcc89c8e41cf6ef6f354b7ab851e"
+        },
+        {
+          "path": "scripts/generate_data/source/make_fires.py",
+          "size": 3167,
+          "sha256": "a6f8dd87475483086a939c308770b10d19790456a0d6ece569ff0d3b020cfb94"
+        },
+        {
+          "path": "scripts/generate_data/source/prepare_inputs.py",
+          "size": 17423,
+          "sha256": "d6cda9ee410a239161ea216cdf090dc00153c4fb5fc3c9fd719b509e6dbf6c96"
+        },
+        {
+          "path": "scripts/generate_data/source/rtma_gusts.py",
+          "size": 7499,
+          "sha256": "e27a383239f441b8785234e7785490287ea3769a21fe660068fbe2d9717ae347"
+        },
+        {
+          "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign.py",
+          "size": 15656,
+          "sha256": "15520e8dcf4e666e234a6a1d789f2b13be555e414ce3f9910fceaa80f440a96f"
+        },
+        {
+          "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign_pb2.py",
+          "size": 2623,
+          "sha256": "e86063cc2999ca121bd3cc35330c66c31ac5ea6a8a78d119e1a2220b981db8d6"
+        },
+        {
+          "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign_pb2.pyi",
+          "size": 3441,
+          "sha256": "e4d1df13858c591316fc077d2d5d1fbafcb9a7c03540eaba1e92156e41f94eac"
+        },
+        {
+          "path": "scripts/generate_data/tools/cloudfire/fuel_wx_ign_pb2_grpc.py",
+          "size": 3384,
+          "sha256": "e36e6f35b1fe672a57e9e6535b4cd79cadced48016b473d2dc3a0dbb2487b8ee"
+        }
+      ]
+    }
+  ]
+}

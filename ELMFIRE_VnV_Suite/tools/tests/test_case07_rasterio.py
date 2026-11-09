@@ -9,6 +9,7 @@ import sys
 import tempfile
 import types
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 import rasterio
@@ -30,7 +31,8 @@ def load_module(name: str, filename: str, stub_spatial_evidence: bool = False):
         spec = importlib.util.spec_from_file_location(name, SCRIPT_DIR / filename)
         module = importlib.util.module_from_spec(spec)
         assert spec.loader is not None
-        spec.loader.exec_module(module)
+        with patch.object(sys, "path", [str(SCRIPT_DIR), *sys.path]):
+            spec.loader.exec_module(module)
         return module
     finally:
         if stub_spatial_evidence:

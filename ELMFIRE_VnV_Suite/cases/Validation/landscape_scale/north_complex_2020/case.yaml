@@ -1,0 +1,65 @@
+case_id: north_complex_2020
+case_title: 2020 North Complex fire reconstruction against GOFER observations
+case_type: validation
+category: landscape_scale
+elmfire:
+  bin: ${ELMFIRE_BIN:-elmfire}
+  config: elmfire.data.in
+  mpi_ranks: 1
+validation:
+  observation: GOFER arrival-time raster; CAL FIRE supporting final extent
+  event_start_utc: '2020-08-17T16:00:00Z'
+  event_end_utc: '2020-10-01T16:00:00Z'
+  comparison_times_h:
+  - 24
+  - 48
+  - 72
+  - final GOFER arrival
+postprocess:
+  metrics: outputs/metrics.json
+  figures:
+  - figures/observation_summary.pdf
+  - figures/final_perimeter_summary.pdf
+  - figures/input_overview.pdf
+  - figures/input_distributions.pdf
+  - figures/weather_time_series.pdf
+  - figures/weather_summary.pdf
+  - figures/burned_area_growth.pdf
+  - figures/comparison_current.pdf
+  - figures/arrival_current.pdf
+  - figures/fields_current.pdf
+namelist_contract:
+  schema_version: 1
+  report: report/case_body.tex
+  files:
+  - path: elmfire.data.in
+    invariants:
+      OUTPUTS.OUTPUTS_DIRECTORY: ./outputs
+      OUTPUTS.DTDUMP: 3870000.0
+      OUTPUTS.DUMP_TIME_OF_ARRIVAL: true
+      OUTPUTS.CONVERT_TO_GEOTIFF: true
+      TIME_CONTROL.SIMULATION_DT: 1.0
+      TIME_CONTROL.TARGET_CFL: 0.2
+      TIME_CONTROL.SIMULATION_TSTOP: 3870000.0
+      MONTE_CARLO.NUM_METEOROLOGY_TIMES: 1076
+      SIMULATOR.CROWN_FIRE_MODEL: 1
+      SIMULATOR.NUM_IGNITIONS: 6
+      SIMULATOR.X_IGN(1): 677728.185
+      SIMULATOR.Y_IGN(1): 4412443.027
+      SIMULATOR.T_IGN(1): 0.0
+      SIMULATOR.X_IGN(2): 663101.223
+      SIMULATOR.Y_IGN(2): 4408998.873
+      SIMULATOR.T_IGN(2): 579600.0
+      SIMULATOR.X_IGN(3): 658474.668
+      SIMULATOR.Y_IGN(3): 4406682.762
+      SIMULATOR.T_IGN(3): 1033200.0
+      SIMULATOR.X_IGN(4): 671554.669
+      SIMULATOR.Y_IGN(4): 4413550.142
+      SIMULATOR.T_IGN(4): 1598400.0
+      SIMULATOR.X_IGN(5): 670616.01
+      SIMULATOR.Y_IGN(5): 4413214.27
+      SIMULATOR.T_IGN(5): 1598400.0
+      SIMULATOR.X_IGN(6): 656211.988
+      SIMULATOR.Y_IGN(6): 4395106.443
+      SIMULATOR.T_IGN(6): 1911600.0
+      SPOTTING.ENABLE_SPOTTING: true

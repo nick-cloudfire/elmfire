@@ -1,0 +1,2 @@
+fname,fyear,fire_id,t_start_utc,t_end_utc,t_first_perim_utc,duration_h,n_timesteps,west,south,east,north,center_lon,center_lat,t_ign_utc,ign_lon,ign_lat,n_ignitions,utm_epsg,local_tz,local_tzGMT,acres_official,final_area_km2
+W-5 Cold Springs,2020,W_5_Cold_Springs_2020,2020-08-18T18:00:00Z,2020-08-29T20:00:00Z,2020-08-18T21:00:00Z,266.0,264,-120.29654,40.98653,-119.92779,41.23492,-120.11217,41.11072,2020-08-18T20:00:00Z,-120.28166,41.03668,2,32610,America/Los_Angeles,Etc/GMT+8,84817,364.235

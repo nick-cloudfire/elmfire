@@ -1,0 +1,56 @@
+case_id: july_complex_2020
+case_title: 2020 July Complex fire reconstruction against GOFER observations
+case_type: validation
+category: landscape_scale
+elmfire:
+  bin: ${ELMFIRE_BIN:-elmfire}
+  config: elmfire.data.in
+  mpi_ranks: 1
+validation:
+  observation: GOFER arrival-time raster; CAL FIRE supporting final extent
+  event_start_utc: '2020-07-22T17:00:00Z'
+  event_end_utc: '2020-07-31T03:00:00Z'
+  comparison_times_h:
+  - 24
+  - 48
+  - 72
+  - final GOFER arrival
+postprocess:
+  metrics: outputs/metrics.json
+  figures:
+  - figures/observation_summary.pdf
+  - figures/final_perimeter_summary.pdf
+  - figures/input_overview.pdf
+  - figures/input_distributions.pdf
+  - figures/weather_time_series.pdf
+  - figures/weather_summary.pdf
+  - figures/burned_area_growth.pdf
+  - figures/comparison_current.pdf
+  - figures/arrival_current.pdf
+  - figures/fields_current.pdf
+namelist_contract:
+  schema_version: 1
+  report: report/case_body.tex
+  files:
+  - path: elmfire.data.in
+    invariants:
+      OUTPUTS.OUTPUTS_DIRECTORY: ./outputs
+      OUTPUTS.DTDUMP: 712800.0
+      OUTPUTS.DUMP_TIME_OF_ARRIVAL: true
+      OUTPUTS.CONVERT_TO_GEOTIFF: true
+      TIME_CONTROL.SIMULATION_DT: 1.0
+      TIME_CONTROL.TARGET_CFL: 0.2
+      TIME_CONTROL.SIMULATION_TSTOP: 712800.0
+      MONTE_CARLO.NUM_METEOROLOGY_TIMES: 199
+      SIMULATOR.CROWN_FIRE_MODEL: 1
+      SIMULATOR.NUM_IGNITIONS: 3
+      SIMULATOR.X_IGN(1): 626906.315
+      SIMULATOR.Y_IGN(1): 4616355.234
+      SIMULATOR.T_IGN(1): 0.0
+      SIMULATOR.X_IGN(2): 660083.594
+      SIMULATOR.Y_IGN(2): 4579958.017
+      SIMULATOR.T_IGN(2): 79200.0
+      SIMULATOR.X_IGN(3): 625523.421
+      SIMULATOR.Y_IGN(3): 4630808.548
+      SIMULATOR.T_IGN(3): 417600.0
+      SPOTTING.ENABLE_SPOTTING: true

@@ -108,12 +108,6 @@ def main() -> None:
             ignition_row, ignition_column = write_inputs(
                 variant_dir / "data" / "inputs", dx, nx, ny
             )
-            for filename in ("fuel_models.csv", "building_fuel_models.csv"):
-                source = source_dir / filename
-                if not source.is_file():
-                    raise FileNotFoundError(source)
-                shutil.copy2(source, variant_dir / "data" / "misc" / filename)
-
             dt = wind_cfl * dx / WIND_SPEED_MPS
             step_count = int(math.ceil(SIMULATION_TSTOP_S / dt - 1.0e-12))
             simulation_tstop_s = step_count * dt

@@ -1,0 +1,56 @@
+case_id: bobcat_2020
+case_title: 2020 Bobcat fire reconstruction against GOFER observations
+case_type: validation
+category: landscape_scale
+elmfire:
+  bin: ${ELMFIRE_BIN:-elmfire}
+  config: elmfire.data.in
+  mpi_ranks: 1
+validation:
+  observation: GOFER arrival-time raster; CAL FIRE supporting final extent
+  event_start_utc: '2020-09-06T19:00:00Z'
+  event_end_utc: '2020-09-24T20:00:00Z'
+  comparison_times_h:
+  - 24
+  - 48
+  - 72
+  - final GOFER arrival
+postprocess:
+  metrics: outputs/metrics.json
+  figures:
+  - figures/observation_summary.pdf
+  - figures/final_perimeter_summary.pdf
+  - figures/input_overview.pdf
+  - figures/input_distributions.pdf
+  - figures/weather_time_series.pdf
+  - figures/weather_summary.pdf
+  - figures/burned_area_growth.pdf
+  - figures/comparison_current.pdf
+  - figures/arrival_current.pdf
+  - figures/fields_current.pdf
+namelist_contract:
+  schema_version: 1
+  report: report/case_body.tex
+  files:
+  - path: elmfire.data.in
+    invariants:
+      OUTPUTS.OUTPUTS_DIRECTORY: ./outputs
+      OUTPUTS.DTDUMP: 1558800.0
+      OUTPUTS.DUMP_TIME_OF_ARRIVAL: true
+      OUTPUTS.CONVERT_TO_GEOTIFF: true
+      TIME_CONTROL.SIMULATION_DT: 1.0
+      TIME_CONTROL.TARGET_CFL: 0.2
+      TIME_CONTROL.SIMULATION_TSTOP: 1558800.0
+      MONTE_CARLO.NUM_METEOROLOGY_TIMES: 434
+      SIMULATOR.CROWN_FIRE_MODEL: 1
+      SIMULATOR.NUM_IGNITIONS: 3
+      SIMULATOR.X_IGN(1): 411136.878
+      SIMULATOR.Y_IGN(1): 3790042.221
+      SIMULATOR.T_IGN(1): 0.0
+      SIMULATOR.X_IGN(2): 410378.743
+      SIMULATOR.Y_IGN(2): 3814014.396
+      SIMULATOR.T_IGN(2): 1051200.0
+      SIMULATOR.X_IGN(3): 426347.055
+      SIMULATOR.Y_IGN(3): 3810647.466
+      SIMULATOR.T_IGN(3): 1054800.0
+      SPOTTING.ENABLE_SPOTTING: true

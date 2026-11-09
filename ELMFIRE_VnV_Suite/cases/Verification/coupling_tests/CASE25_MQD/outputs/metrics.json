@@ -31,8 +31,8 @@
         {
           "name": "ROS @ 18%",
           "target": 0.801,
-          "measured": 0.801066517829895,
-          "percent_error": 0.00830434830149491,
+          "measured": 0.8010662794113159,
+          "percent_error": 0.008274583185502206,
           "units": "m/min",
           "status": "PASS"
         },

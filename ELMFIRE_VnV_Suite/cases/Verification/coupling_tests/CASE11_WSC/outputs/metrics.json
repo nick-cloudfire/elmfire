@@ -1,40 +1,39 @@
 {
   "case_id": "CASE11_WSC",
-  "overall_status": "NOT RUN",
+  "overall_status": "NOT EVALUABLE",
   "completed_variants": [
-    "no_surface"
+    "no_surface",
+    "surface_coupled"
   ],
-  "unrun_variants": [
-    "surface_coupled_dx2p5"
-  ],
+  "unrun_variants": [],
   "metrics": [
     {
       "metric": "Output completeness",
       "limit": "2 current-fingerprint variants",
-      "calculated": "1/2",
-      "status": "FAIL",
+      "calculated": "2/2",
+      "status": "PASS",
       "note": ""
     },
     {
       "metric": "Coupled earlier-ignition cell fraction",
       "limit": ">= 0.75",
-      "calculated": "N/A",
-      "status": "NOT EVALUABLE",
-      "note": "The required finite comparison was unavailable."
+      "calculated": "1",
+      "status": "PASS",
+      "note": ""
     },
     {
       "metric": "Coupled median ignition-time ratio",
       "limit": "<= 0.9",
-      "calculated": "N/A",
-      "status": "NOT EVALUABLE",
-      "note": "The required finite comparison was unavailable."
+      "calculated": "0.0046648",
+      "status": "PASS",
+      "note": ""
     },
     {
       "metric": "Coupled/no-surface ignition-span ratio",
       "limit": "<= 0.5",
-      "calculated": "N/A",
-      "status": "NOT EVALUABLE",
-      "note": "The required finite comparison was unavailable."
+      "calculated": "0.015563",
+      "status": "PASS",
+      "note": ""
     },
     {
       "metric": "Coupled/no-surface mean-ROS ratio",
@@ -46,11 +45,20 @@
     {
       "metric": "Coupled within-structure load relative range",
       "limit": ">= 0.05",
-      "calculated": "N/A",
-      "status": "NOT EVALUABLE",
-      "note": "The required finite comparison was unavailable."
+      "calculated": "0.87126",
+      "status": "PASS",
+      "note": ""
     }
   ],
-  "diagnostics": {},
+  "diagnostics": {
+    "matched_downstream_structure_cells": 4,
+    "no_surface_mean_ros_m_s": null,
+    "surface_coupled_mean_ros_m_s": 1.2123118718813921,
+    "reference_surface_ros_reference_m_s": 0.34,
+    "no_surface_median_ignition_span_s": 1980.80712890625,
+    "surface_coupled_median_ignition_span_s": 32.645286560058594,
+    "no_surface_median_load_relative_range": 0.6414604112994249,
+    "surface_coupled_median_load_relative_range": 0.8712643104040264
+  },
   "controlled_difference": "NO_SURFACE_FIRE=.TRUE. for no-surface reference and .FALSE. for surface-coupled variant; all generated rasters and other namelist controls are identical"
 }

@@ -62,16 +62,16 @@ reference and compares it directly with the final accumulated firebrand depositi
 
 % BEGIN EXPLICIT EXPECTED-RESULT DERIVATION
 The two time integrations can be reproduced explicitly.  For
-\(\Delta t=0.13~\mathrm{s}\), 76 complete steps cover
-\(76(0.13)=9.88~\mathrm{s}\) and the final overlap is
-\(10-9.88=0.12~\mathrm{s}\), so
+\(\Delta t=0.1875~\mathrm{s}\), 53 complete steps cover
+\(53(0.1875)=9.9375~\mathrm{s}\) and the final overlap is
+\(10-9.9375=0.0625~\mathrm{s}\), so
 \[
- N_{\mathrm{fine}}=10[76(0.13)+0.12]=100.
+ N_{\mathrm{fine}}=10[53(0.1875)+0.0625]=100.
 \]
-For the \(\Delta t=12.7~\mathrm{s}\) member, the first step spans the complete
+For the \(\Delta t=12.0~\mathrm{s}\) member, the first step spans the complete
 source interval and
 \[
- \Delta t_{\mathrm{active}}=\min(12.7,10)-\max(0,0)=10~\mathrm{s},
+ \Delta t_{\mathrm{active}}=\min(12.0,10)-\max(0,0)=10~\mathrm{s},
  \qquad N_{\mathrm{coarse}}=10(10)=100.
 \]
 For the spatial reference, \(z_{0.99}=2.3263479\) gives
@@ -136,7 +136,7 @@ Overall decision & Conjunction of output completeness and both errors for both t
 
 \section{Simulation configuration and predicted outcome}
 
-Figure~\ref{fig:input-configuration} records the prepared spatial inputs for a timestep of 0.13 s.
+Figure~\ref{fig:input-configuration} records the prepared spatial inputs for a timestep of 0.1875 s.
 These panels show the prepared spatial fields, remove the
 two-cell numerical buffer, and retain map coordinates in metres.  The left panel shows
 the most informative fuel or structure layout available for the case; the right panel
@@ -152,8 +152,8 @@ fuel or structure layout, and initial ignition/source geometry are identified in
 \label{fig:input-configuration}
 \end{figure}
 
-The preprocessor creates two simulation conditions with $\Delta t=0.13$~s and
-$\Delta t=12.7$~s. Because timestep variation is the quantity under test, both fractional values are retained. The requested 120-s stop is rounded upward to an exact multiple: 924 steps give 120.12~s for the 0.13-s member, and 10 steps give 127.0~s for the 12.7-s member. The dump interval is set to the same aligned stop, while the verified 10-s source duration is unchanged. Both use a 10~m grid and the same 500~m by 60~m physical
+The preprocessor creates two simulation conditions with $\Delta t=0.1875$~s and
+$\Delta t=12.0$~s. The fine step is exactly representable in binary and leaves a partial final emission step; the coarse step spans the full source lifetime. Both timesteps divide the 120-s stop exactly (640 and 10 steps), so the final dump occurs at 120~s. The verified 10-s source duration is unchanged. Both use a 10~m grid and the same 500~m by 60~m physical
 domain. This gives 50 by 6 usable cells and a 54 by 10 raster after two numerical buffer cells are added outside all four sides. A single
 ignition is placed in the first usable column and the middle usable row.
 
@@ -180,7 +180,7 @@ count is checked over the complete raster to detect misplaced firebrands.
 
 \section{Actual simulation results}
 
-Figure~\ref{fig:domain-result} shows the representative accumulated firebrand density from a timestep of 0.13 s.
+Figure~\ref{fig:domain-result} shows the representative accumulated firebrand density from a timestep of 0.1875 s.
 The displayed field is taken from the simulated results, masks missing values, and excludes
 the two-cell numerical buffer.  Firebrand counts are normalized by the cell length and the represented 1-m cross-stream strip, giving units of pcs m$^{-2}$.
 
@@ -195,13 +195,13 @@ profiles, convergence plots, ensemble statistics, and calculated acceptance metr
 
 Overall status: \textbf{\Metric{status}}. Figure~\ref{fig:generation-duration}
 first compares each actual ELMFIRE profile with the cell-integrated analytical
-distribution. Agreement for the 12.7~s simulation condition is the critical result because
+distribution. Agreement for the 12.0~s simulation condition is the critical result because
 that timestep exceeds the complete 10~s source duration.
 
 \begin{figure}[H]
   \centering
   \EvidenceFigure[width=\textwidth,height=0.62\textheight,keepaspectratio]{../figures/generation_residence_time.pdf}
-  \caption{Accumulated firebrands per downwind cell for the 0.13 and 12.7~s
+  \caption{Accumulated firebrands per downwind cell for the 0.1875 and 12.0~s
   timestep simulation conditions. Blue bars are ELMFIRE output and the red curve is the
   cell-integrated, truncated-lognormal reference for 100 generated firebrands.}
   \label{fig:generation-duration}
@@ -226,8 +226,8 @@ that timestep exceeds the complete 10~s source duration.
 \toprule
 Timestep & Observed total & Total relative error & Profile $L_1$ error \\
 \midrule
-0.13 s & \Metric{fineobservedtotal} & \Metric{finetotalrelativeerror} & \Metric{fineprofileloneerror} \\
-12.7 s & \Metric{coarseobservedtotal} & \Metric{coarsetotalrelativeerror} & \Metric{coarseprofileloneerror} \\
+0.1875 s & \Metric{fineobservedtotal} & \Metric{finetotalrelativeerror} & \Metric{fineprofileloneerror} \\
+12.0 s & \Metric{coarseobservedtotal} & \Metric{coarsetotalrelativeerror} & \Metric{coarseprofileloneerror} \\
 \bottomrule
 \end{tabular}
 \caption{Firebrand-count and spatial-distribution errors for the two timestep simulation conditions.}

@@ -12,25 +12,25 @@
   "num_variants_computed": 2,
   "variants": [
     {
-      "name": "dt0p13",
-      "dt_s": 0.13,
+      "name": "dt0p1875",
+      "dt_s": 0.1875,
       "dx_m": 10.0,
       "status": "pass",
       "expected_total_firebrands": 100.0,
       "kmax": 15,
-      "output_raster": "variants/dt0p13/outputs/ember_flux_0000001_0003641.tif",
-      "observed_total_firebrands": 99.99994802474976,
-      "total_relative_error": 5.197525024414063e-07,
-      "profile_l1_relative_error": 8.964743028877508e-07
+      "output_raster": "variants/dt0p1875/outputs/ember_flux_0000001_0000120.tif",
+      "observed_total_firebrands": 100.00001668930054,
+      "total_relative_error": 1.6689300537109374e-07,
+      "profile_l1_relative_error": 6.49649994269308e-07
     },
     {
-      "name": "dt12p7",
-      "dt_s": 12.7,
+      "name": "dt12",
+      "dt_s": 12.0,
       "dx_m": 10.0,
       "status": "pass",
       "expected_total_firebrands": 100.0,
       "kmax": 15,
-      "output_raster": "variants/dt12p7/outputs/ember_flux_0000001_0003625.tif",
+      "output_raster": "variants/dt12/outputs/ember_flux_0000001_0000120.tif",
       "observed_total_firebrands": 100.00000239908695,
       "total_relative_error": 2.3990869522094728e-08,
       "profile_l1_relative_error": 3.4492124785512335e-07

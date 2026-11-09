@@ -1,0 +1,2 @@
+fname,fyear,fire_id,t_start_utc,t_end_utc,t_first_perim_utc,duration_h,n_timesteps,west,south,east,north,center_lon,center_lat,t_ign_utc,ign_lon,ign_lat,n_ignitions,utm_epsg,local_tz,local_tzGMT,acres_official,final_area_km2
+August Complex,2020,August_Complex_2020,2020-08-16T21:00:00Z,2020-10-16T22:00:00Z,2020-08-16T22:00:00Z,1465.0,1465,-123.52958,39.43514,-122.55177,40.44485,-123.04067,39.94,2020-08-16T21:00:00Z,-122.68431,39.76936,12,32610,America/Los_Angeles,Etc/GMT+8,1032648,4342.791

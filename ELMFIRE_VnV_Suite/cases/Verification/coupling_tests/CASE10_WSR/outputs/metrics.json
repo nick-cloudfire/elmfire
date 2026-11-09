@@ -3,19 +3,24 @@
   "overall_status": "NOT EVALUABLE (capability missing)",
   "native_tests_status": "FAIL",
   "completed_variants": [
-    "baseline",
-    "native_coarse"
+    "baseline"
   ],
   "executed_variants": [
     "baseline_dx10",
-    "native_coarse_dx30"
+    "native_coarse_dx30",
+    "native_fine_dx2p5"
   ],
-  "terminal_evidence_rejected_variants": [],
-  "unrun_variants": [
+  "terminal_evidence_rejected_variants": [
     {
       "name": "native_fine_dx2p5",
-      "reason": "incomplete execution: last recorded dump at 36000.065 s; completion fingerprint absent"
+      "reason": "terminal record is neither a regular final dump nor a compatible timestep-aligned near-stop stalled final dump"
     },
+    {
+      "name": "native_coarse_dx30",
+      "reason": "terminal record is neither a regular final dump nor a compatible timestep-aligned near-stop stalled final dump"
+    }
+  ],
+  "unrun_variants": [
     {
       "name": "integrated_aligned_dx2p5",
       "reason": "NOT EVALUABLE: case metadata does not enable USE_RESOLUTION_INDEPENDENT_STRUCTURES"
@@ -36,20 +41,19 @@
     },
     "native_fine_dx2p5": {
       "selection_path": null,
-      "reason": "incomplete execution: last recorded dump at 36000.065 s; completion fingerprint absent",
-      "process_success": false,
-      "final_time_s": null,
-      "pre_jump_time_s": null,
-      "timestep_grid_residual_s": null,
-      "last_recorded_time_s": 36000.0649353936
+      "reason": "terminal record is neither a regular final dump nor a compatible timestep-aligned near-stop stalled final dump",
+      "process_success": true,
+      "final_time_s": 51861.9712411687,
+      "pre_jump_time_s": 48261.9712411687,
+      "timestep_grid_residual_s": 0.0008358358390978537
     },
     "native_coarse_dx30": {
-      "selection_path": "regular terminal dump",
-      "reason": "accepted",
+      "selection_path": null,
+      "reason": "terminal record is neither a regular final dump nor a compatible timestep-aligned near-stop stalled final dump",
       "process_success": true,
-      "final_time_s": 22000.0,
-      "pre_jump_time_s": null,
-      "timestep_grid_residual_s": null
+      "final_time_s": 25504.6939778328,
+      "pre_jump_time_s": 21904.6939778328,
+      "timestep_grid_residual_s": 0.32062213066092227
     },
     "integrated_aligned_dx2p5": {
       "selection_path": null,
@@ -100,8 +104,8 @@
     {
       "metric": "native coarse-grid variant baseline/coarse load ratio",
       "limit": "1.86 +/- 25%",
-      "calculated": "1.622",
-      "status": "PASS",
+      "calculated": "N/A",
+      "status": "NOT EVALUABLE",
       "note": ""
     },
     {

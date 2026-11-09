@@ -1,0 +1,2 @@
+fname,fyear,fire_id,t_start_utc,t_end_utc,t_first_perim_utc,duration_h,n_timesteps,west,south,east,north,center_lon,center_lat,t_ign_utc,ign_lon,ign_lat,n_ignitions,utm_epsg,local_tz,local_tzGMT,acres_official,final_area_km2
+SQF Complex,2020,SQF_Complex_2020,2020-08-19T14:00:00Z,2020-10-07T20:00:00Z,2020-08-20T21:00:00Z,1182.0,1152,-118.81837,36.06421,-118.28971,36.38536,-118.55404,36.22479,2020-08-20T20:00:00Z,-118.44873,36.1637,1,32611,America/Los_Angeles,Etc/GMT+8,175019,786.406

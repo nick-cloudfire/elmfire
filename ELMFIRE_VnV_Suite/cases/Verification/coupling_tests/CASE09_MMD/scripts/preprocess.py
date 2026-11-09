@@ -228,11 +228,6 @@ def preprocess(case_dir):
             dx,
             buffer_cells,
             wind_mph)
-        for filename in ("fuel_models.csv", "building_fuel_models.csv"):
-            source = reference_misc_dir / filename
-            if not source.is_file():
-                raise FileNotFoundError(f"Required model table is missing: {source}")
-            shutil.copyfile(source, variant_dir / "data/misc" / filename)
         namelist = configure_namelist(
             base_text, variant, dx, dt, simulation_tstop_s, generation_rate
         )

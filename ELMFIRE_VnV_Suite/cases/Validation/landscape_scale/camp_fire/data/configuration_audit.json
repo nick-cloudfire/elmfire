@@ -1,0 +1,17 @@
+{
+  "namelist": {
+    "path": "elmfire.data.in",
+    "sha256": "222ad69bf039ce99fbc440ed4d6a482b273ce757d17a12c748f86884b6cb895e"
+  },
+  "checked_invariants": 14,
+  "output_layout_check": {
+    "checked_at_utc": "2026-10-22T22:54:27.598488+00:00",
+    "schema": "schemas/elmfire/efa0b8fa-working-tree.json",
+    "schema_sha256": "cd4c61d5efbe7bdaeb380f4c2434d59b6c29291fce3535d913fa7baa501efe15",
+    "results_directory": "outputs",
+    "log_directory": "logs",
+    "scratch_directory": "logs/scratch",
+    "status": "PASS",
+    "errors": []
+  }
+}
