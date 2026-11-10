@@ -20,6 +20,7 @@ M100_FILENAME                  = 'm100'
 /
 
 &OUTPUTS
+DUMP_TIMES_CSV = .TRUE.
 OUTPUTS_DIRECTORY    = './data/outputs'
 DTDUMP = 1.0
 DUMP_PHI             = .TRUE.
