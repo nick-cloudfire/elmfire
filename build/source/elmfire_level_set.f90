@@ -1595,7 +1595,9 @@ DO
 
       ! Active WU-E structure fires can continue to emit transient heat even
       ! when the surface front has too few tagged cells to propagate.
-      IF (LIST_TAGGED%NUM_NODES .LE. 2 .AND. &
+      ! Added a delay so this check starts at least DT_METEOROLOGY time after ignition (otherwise it triggers immediately)
+      IF (T - (SIMULATION_TSTART + (IWX_BAND - 1) * DT_METEOROLOGY) .GT. DT_METEOROLOGY .AND. &
+         LIST_TAGGED%NUM_NODES .LE. 2 .AND. &
           ALL(ALREADY_IGNITED(1:MIN(NUM_IGNITIONS,100))) .AND. &
           .NOT. (USE_BLDG_SPREAD_MODEL .AND. BLDG_SPREAD_MODEL_TYPE .EQ. 2 .AND. &
                  LIST_WUI_BURNING%NUM_NODES .GT. 0)) THEN
