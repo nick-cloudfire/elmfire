@@ -1,9 +1,0 @@
-{
-  "required_feature": "USE_RESOLUTION_INDEPENDENT_STRUCTURES",
-  "required_feature_available": false,
-  "source_adapter_implemented": false,
-  "runnable_points": 0,
-  "total_points": 270,
-  "status": "NOT EVALUABLE: case metadata does not enable USE_RESOLUTION_INDEPENDENT_STRUCTURES",
-  "design_fingerprint": "251517ae2a4c8e76ca2ec7ddcb2a0c2caf375bd59ffad8749178368d6b9d3690"
-}
