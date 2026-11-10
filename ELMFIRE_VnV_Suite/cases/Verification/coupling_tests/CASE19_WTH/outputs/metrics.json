@@ -1,0 +1,8 @@
+{
+  "case_id": "CASE19_WTH",
+  "overall_status": "NOT EVALUABLE",
+  "verification_passed": false,
+  "required_outputs_complete": false,
+  "reason": "no active center HRR source was found",
+  "metrics": []
+}

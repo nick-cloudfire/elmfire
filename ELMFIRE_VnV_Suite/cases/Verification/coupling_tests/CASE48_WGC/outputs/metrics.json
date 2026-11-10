@@ -1,0 +1,27 @@
+{
+  "case_id": "CASE48_WGC",
+  "overall_status": "NOT EVALUABLE",
+  "workflow_status": "INCOMPLETE",
+  "verification_passed": false,
+  "required_outputs_complete": false,
+  "required_variant_count": 4,
+  "completed_variant_count": 0,
+  "unavailable_variants": {
+    "dx_20p0m": "one or more fixed physical landmarks did not ignite",
+    "dx_10p0m": "one or more fixed physical landmarks did not ignite",
+    "dx_5p0m": "one or more fixed physical landmarks did not ignite",
+    "dx_2p5m": "one or more fixed physical landmarks did not ignite"
+  },
+  "variants": [],
+  "reason": "ELMFIRE execution was attempted, but one or more current-fingerprint variants lack valid required evidence.",
+  "metrics": [
+    {
+      "name": "current-fingerprint output completeness",
+      "expected": 4,
+      "calculated": 0,
+      "units": "variants",
+      "status": "NOT EVALUABLE"
+    }
+  ],
+  "attempt_ledger": "logs/run_attempts.json"
+}

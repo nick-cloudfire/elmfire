@@ -1,0 +1,14 @@
+{
+  "method_version": "landscape_validation_v3",
+  "status": "NOT EVALUABLE",
+  "reason": "No current time_of_arrival GeoTIFFs were found for this case.",
+  "output_completeness": {
+    "expected_members": 50,
+    "members_found": 0,
+    "member_ids": [],
+    "latest_output_stamps_s": {},
+    "unparseable_files": [],
+    "all_members_reach_comparison_time": false
+  },
+  "ensemble_members_found": 0
+}
