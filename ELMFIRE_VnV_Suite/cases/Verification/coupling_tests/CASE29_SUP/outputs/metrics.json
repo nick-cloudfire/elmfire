@@ -31,8 +31,8 @@
         {
           "name": "fraction contained",
           "target": 0.54,
-          "measured": 0.5885,
-          "percent_error": 8.98148148148148,
+          "measured": 0.59,
+          "percent_error": 9.259259259259245,
           "units": "-",
           "status": "PASS"
         }

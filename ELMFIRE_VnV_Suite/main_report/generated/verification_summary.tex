@@ -18,14 +18,14 @@ Configuration & Recorded value \\
 \endhead
 \bottomrule
 \endlastfoot
-Recorded at (Coordinated Universal Time) & 2026-10-22T05:27:03+00:00 \\
+Recorded at (Coordinated Universal Time) & 2026-11-10T14:59:21+00:00 \\
 Declared ELMFIRE release & not declared \\
-Operating system & macOS-15.7.7-arm64-arm-64bit \\
-Processor architecture & arm64 \\
-Message Passing Interface (MPI) implementation & not available \\
-Available Fortran compiler & GNU Fortran (Homebrew GCC 14.2.0\_1) 14.2.0 \\
-Python version & CPython 3.12.9 \\
-Scientific analysis libraries & NumPy 1.26.4; \allowbreak{}Matplotlib 3.9.2; \allowbreak{}PyYAML 6.0.1; \allowbreak{}Rasterio 1.5.0; \allowbreak{}GDAL not installed; \allowbreak{}Pandas 2.2.2; \allowbreak{}GeoPandas not installed; \allowbreak{}Shapely not installed \\
+Operating system & Linux-6.18.33.2-microsoft-standard-WSL2-x86\_64-with-glibc2.39 \\
+Processor architecture & x86\_64 \\
+Message Passing Interface (MPI) implementation & mpirun (Open MPI) 4.1.6 \\
+Available Fortran compiler & GNU Fortran (Ubuntu 13.3.0-6ubuntu2\textasciitilde{}24.04.1) 13.3.0 \\
+Python version & CPython 3.11.11 \\
+Scientific analysis libraries & NumPy 2.3.5; \allowbreak{}Matplotlib 3.10.8; \allowbreak{}PyYAML 6.0.3; \allowbreak{}Rasterio 1.4.3; \allowbreak{}GDAL 3.10.0; \allowbreak{}Pandas 3.0.3; \allowbreak{}GeoPandas 1.1.1; \allowbreak{}Shapely 2.0.7 \\
 \end{longtable}
 \endgroup\ReportBodyText
 
@@ -103,8 +103,8 @@ Case & Comparison type & MPI processes \\
 The decisions below follow the established calculated metrics and case-specific acceptance criteria. Completing a simulation or preparing a report does not establish PASS. Missing or insufficient scientific evidence is reported as NOT EVALUABLE.
 
 \textbf{Total cases:} 49\quad
-\textbf{PASS:} 31\quad
-\textbf{FAIL:} 11\quad
+\textbf{PASS:} 30\quad
+\textbf{FAIL:} 12\quad
 \textbf{CHARACTERIZED:} 0\quad
 \textbf{NOT EVALUABLE:} 7
 
@@ -167,7 +167,7 @@ Case & Category & Title & Decision \\
 \hyperref[case-detail:case40-wsd]{CASE40\_WSD} & Coupled-process verification & \hyperref[case-detail:case40-wsd]{Case 40: Wind-slope vector and direction sweep} & \mbox{\textcolor{green!45!black}{\textbf{PASS}}} \\
 \hyperref[case-detail:case41-cfp]{CASE41\_CFP} & Isolated-process verification & \hyperref[case-detail:case41-cfp]{Case 41: Custom fuel-parameter Rothermel sweep} & \mbox{\textcolor{green!45!black}{\textbf{PASS}}} \\
 \hyperref[case-detail:case42-waf]{CASE42\_WAF} & Coupled-process verification & \hyperref[case-detail:case42-waf]{Case 42: Wind-adjustment-factor coupling sweep} & \mbox{\textcolor{green!45!black}{\textbf{PASS}}} \\
-\hyperref[case-detail:case43-wer]{CASE43\_WER} & Coupled-process verification & \hyperref[case-detail:case43-wer]{Case 43: WU-E ellipse response} & \mbox{\textcolor{green!45!black}{\textbf{PASS}}} \\
+\hyperref[case-detail:case43-wer]{CASE43\_WER} & Coupled-process verification & \hyperref[case-detail:case43-wer]{Case 43: WU-E ellipse response} & \mbox{\textcolor{red!75!black}{\textbf{FAIL}}} \\
 \hyperref[case-detail:case44-whp]{CASE44\_WHP} & Coupled-process verification & \hyperref[case-detail:case44-whp]{Case 44: WU-E heat-parameter response} & \mbox{\textcolor{red!75!black}{\textbf{FAIL}}} \\
 \hyperref[case-detail:case45-hrs]{CASE45\_HRS} & Coupled-process verification & \hyperref[case-detail:case45-hrs]{Case 45: WU-E heat-to-urban rate-of-spread response} & \mbox{\textcolor{green!45!black}{\textbf{PASS}}} \\
 \hyperref[case-detail:case46-wut]{CASE46\_WUT} & Coupled-process verification & \hyperref[case-detail:case46-wut]{Case 46: Wildland-to-urban WU-E transition and isolated receivers} & \mbox{\textcolor{red!75!black}{\textbf{FAIL}}} \\

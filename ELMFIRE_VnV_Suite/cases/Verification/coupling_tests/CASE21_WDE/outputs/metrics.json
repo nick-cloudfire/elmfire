@@ -15,8 +15,8 @@
         {
           "name": "head ROS",
           "target": 3.635,
-          "measured": 3.644375801086426,
-          "percent_error": 0.25793125409700124,
+          "measured": 3.6443769931793213,
+          "percent_error": 0.2579640489496975,
           "units": "m/min",
           "status": "PASS"
         },

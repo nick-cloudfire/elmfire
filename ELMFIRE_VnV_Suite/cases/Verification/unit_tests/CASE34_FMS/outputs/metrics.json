@@ -11,21 +11,21 @@
     {
       "name": "maximum direct-ROS relative error",
       "expected": "<= 0.02",
-      "calculated": 2.576112672702277e-07,
+      "calculated": 3.86590690823876e-07,
       "units": "fraction",
       "status": "PASS"
     },
     {
       "name": "maximum reaction-intensity relative error",
       "expected": "<= 0.01",
-      "calculated": 2.932792791508417e-07,
+      "calculated": 1.9890076448142555e-07,
       "units": "fraction",
       "status": "PASS"
     },
     {
       "name": "maximum TOA-ROS relative error",
       "expected": "<= 0.05",
-      "calculated": 0.011577884854770104,
+      "calculated": 0.011577884854770779,
       "units": "fraction",
       "status": "PASS"
     },
@@ -66,11 +66,11 @@
       "toa_required": true,
       "measured_ros_m_min": 0.823795735836029,
       "measured_ir_kw_m2": 675.1842041015625,
-      "toa_ros_m_min": 0.8333333333333331,
+      "toa_ros_m_min": 0.8333333333333337,
       "toa_r2": 1.0,
       "ros_relative_error": 2.576112672702277e-07,
       "ir_relative_error": 1.7941623134958706e-07,
-      "toa_ros_relative_error": 0.011577884854770104,
+      "toa_ros_relative_error": 0.011577884854770779,
       "source_files": [
         "variants/fuel_002/outputs/vs_0000001_0021600.tif",
         "variants/fuel_002/outputs/ir_0000001_0021600.tif",
@@ -142,13 +142,13 @@
         "ilh_percent": 90.0
       },
       "toa_required": true,
-      "measured_ros_m_min": 0.22850704193115234,
-      "measured_ir_kw_m2": 186.0406036376953,
-      "toa_ros_m_min": 0.2306551705200729,
+      "measured_ros_m_min": 0.22850710153579712,
+      "measured_ir_kw_m2": 186.04063415527344,
+      "toa_ros_m_min": 0.23065517052007278,
       "toa_r2": 0.9999611836401983,
-      "ros_relative_error": 1.257468596370629e-07,
-      "ir_relative_error": 5.4807917307210724e-08,
-      "toa_ros_relative_error": 0.009400837606270042,
+      "ros_relative_error": 3.86590690823876e-07,
+      "ir_relative_error": 1.0922926519853163e-07,
+      "toa_ros_relative_error": 0.009400837606269556,
       "source_files": [
         "variants/fuel_102/outputs/vs_0000001_0021615.tif",
         "variants/fuel_102/outputs/ir_0000001_0021615.tif",
@@ -181,11 +181,11 @@
         "ilh_percent": 90.0
       },
       "toa_required": true,
-      "measured_ros_m_min": 0.32572251558303833,
+      "measured_ros_m_min": 0.3257225751876831,
       "measured_ir_kw_m2": 1595.7296142578125,
       "toa_ros_m_min": 0.32723112128146403,
       "toa_r2": 0.9999829694087492,
-      "ros_relative_error": 1.0245991384807883e-07,
+      "ros_relative_error": 2.85452025326114e-07,
       "ir_relative_error": 1.0475250914145354e-08,
       "toa_ros_relative_error": 0.004631670069837684,
       "source_files": [
@@ -220,12 +220,12 @@
         "ilh_percent": 90.0
       },
       "toa_required": true,
-      "measured_ros_m_min": 0.27524447441101074,
-      "measured_ir_kw_m2": 646.7062377929688,
+      "measured_ros_m_min": 0.27524444460868835,
+      "measured_ir_kw_m2": 646.7061767578125,
       "toa_ros_m_min": 0.27777777777777757,
       "toa_r2": 1.0,
-      "ros_relative_error": 1.196021272015472e-07,
-      "ir_relative_error": 2.932792791508417e-07,
+      "ros_relative_error": 1.1326289817745866e-08,
+      "ir_relative_error": 1.9890076448142555e-07,
       "toa_ros_relative_error": 0.009203950760504695,
       "source_files": [
         "variants/fuel_188/outputs/vs_0000001_0021600.tif",

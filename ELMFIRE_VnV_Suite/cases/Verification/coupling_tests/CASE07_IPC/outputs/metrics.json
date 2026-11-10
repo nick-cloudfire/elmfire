@@ -11,7 +11,7 @@
     2800.0
   ],
   "monotone_with_uncertainty": true,
-  "max_cross_resolution_mean_spread": 0.15259645990690973,
+  "max_cross_resolution_mean_spread": 0.1535622222789319,
   "acceptance_max_mean_spread": 0.1,
   "spread_passed": false,
   "minimum_p1_mean": 1.0004076401621753,
@@ -248,44 +248,44 @@
       "pign": 0.25,
       "n": 10,
       "mean_normalized_ros": 0.8132106373470812,
-      "sample_sd": 0.025162123378387,
-      "standard_error": 0.007956962064187372,
-      "ci95_halfwidth": 0.017998648189191835,
-      "ci95_lower": 0.7952119891578894,
-      "ci95_upper": 0.831209285536273
+      "sample_sd": 0.025162123378386917,
+      "standard_error": 0.007956962064187344,
+      "ci95_halfwidth": 0.017998648189191772,
+      "ci95_lower": 0.7952119891578895,
+      "ci95_upper": 0.8312092855362729
     },
     {
       "dx_m": 5.0,
       "pign": 0.5,
       "n": 10,
-      "mean_normalized_ros": 0.9459674592056226,
-      "sample_sd": 0.008775045334341884,
-      "standard_error": 0.0027749129827754106,
-      "ci95_halfwidth": 0.006276853167037979,
-      "ci95_lower": 0.9396906060385847,
-      "ci95_upper": 0.9522443123726606
+      "mean_normalized_ros": 0.9459674592056224,
+      "sample_sd": 0.008775045334341865,
+      "standard_error": 0.0027749129827754045,
+      "ci95_halfwidth": 0.006276853167037965,
+      "ci95_lower": 0.9396906060385845,
+      "ci95_upper": 0.9522443123726604
     },
     {
       "dx_m": 5.0,
       "pign": 0.75,
       "n": 10,
-      "mean_normalized_ros": 0.9826263197671302,
-      "sample_sd": 0.010611030286995308,
-      "standard_error": 0.0033555024027935327,
-      "ci95_halfwidth": 0.007590146435118971,
-      "ci95_lower": 0.9750361733320112,
-      "ci95_upper": 0.9902164662022492
+      "mean_normalized_ros": 0.9826263197671304,
+      "sample_sd": 0.010611030286995305,
+      "standard_error": 0.003355502402793532,
+      "ci95_halfwidth": 0.007590146435118969,
+      "ci95_lower": 0.9750361733320114,
+      "ci95_upper": 0.9902164662022495
     },
     {
       "dx_m": 5.0,
       "pign": 1.0,
       "n": 10,
-      "mean_normalized_ros": 1.000407640247665,
-      "sample_sd": 2.340555645717801e-16,
-      "standard_error": 7.401486830834377e-17,
-      "ci95_halfwidth": 1.674216321134736e-16,
-      "ci95_lower": 1.0004076402476647,
-      "ci95_upper": 1.0004076402476652
+      "mean_normalized_ros": 1.0004076402476654,
+      "sample_sd": 0.0,
+      "standard_error": 0.0,
+      "ci95_halfwidth": 0.0,
+      "ci95_lower": 1.0004076402476654,
+      "ci95_upper": 1.0004076402476654
     },
     {
       "dx_m": 10.0,
@@ -303,9 +303,9 @@
       "pign": 0.25,
       "n": 10,
       "mean_normalized_ros": 0.7668758716339816,
-      "sample_sd": 0.028690609309454454,
-      "standard_error": 0.009072767287590674,
-      "ci95_halfwidth": 0.020522599604530106,
+      "sample_sd": 0.028690609309454464,
+      "standard_error": 0.009072767287590678,
+      "ci95_halfwidth": 0.020522599604530112,
       "ci95_lower": 0.7463532720294516,
       "ci95_upper": 0.7873984712385117
     },
@@ -314,20 +314,20 @@
       "pign": 0.5,
       "n": 10,
       "mean_normalized_ros": 0.9265535600352953,
-      "sample_sd": 0.030930486490671014,
-      "standard_error": 0.00978107864475888,
-      "ci95_halfwidth": 0.02212479989444459,
-      "ci95_lower": 0.9044287601408507,
-      "ci95_upper": 0.9486783599297399
+      "sample_sd": 0.030930486490670945,
+      "standard_error": 0.009781078644758858,
+      "ci95_halfwidth": 0.022124799894444536,
+      "ci95_lower": 0.9044287601408508,
+      "ci95_upper": 0.9486783599297398
     },
     {
       "dx_m": 10.0,
       "pign": 0.75,
       "n": 10,
       "mean_normalized_ros": 0.9734650143896788,
-      "sample_sd": 0.008422617376823888,
-      "standard_error": 0.0026634654770876175,
-      "ci95_halfwidth": 0.0060247589091721905,
+      "sample_sd": 0.008422617376823961,
+      "standard_error": 0.002663465477087641,
+      "ci95_halfwidth": 0.006024758909172243,
       "ci95_lower": 0.9674402554805066,
       "ci95_upper": 0.979489773298851
     },
@@ -336,11 +336,11 @@
       "pign": 1.0,
       "n": 10,
       "mean_normalized_ros": 1.0004076401621753,
-      "sample_sd": 2.340555645717801e-16,
-      "standard_error": 7.401486830834377e-17,
-      "ci95_halfwidth": 1.674216321134736e-16,
-      "ci95_lower": 1.000407640162175,
-      "ci95_upper": 1.0004076401621755
+      "sample_sd": 0.0,
+      "standard_error": 0.0,
+      "ci95_halfwidth": 0.0,
+      "ci95_lower": 1.0004076401621753,
+      "ci95_upper": 1.0004076401621753
     },
     {
       "dx_m": 20.0,
@@ -357,45 +357,45 @@
       "dx_m": 20.0,
       "pign": 0.25,
       "n": 10,
-      "mean_normalized_ros": 0.6646127036310905,
-      "sample_sd": 0.05432930125462597,
-      "standard_error": 0.01718043356500616,
-      "ci95_halfwidth": 0.03886214072404393,
-      "ci95_lower": 0.6257505629070466,
-      "ci95_upper": 0.7034748443551344
+      "mean_normalized_ros": 0.6646127036310904,
+      "sample_sd": 0.054329301254625914,
+      "standard_error": 0.01718043356500614,
+      "ci95_halfwidth": 0.03886214072404389,
+      "ci95_lower": 0.6257505629070464,
+      "ci95_upper": 0.7034748443551343
     },
     {
       "dx_m": 20.0,
       "pign": 0.5,
       "n": 10,
-      "mean_normalized_ros": 0.9008186339537788,
-      "sample_sd": 0.024437799773901384,
-      "standard_error": 0.007727910828867621,
-      "ci95_halfwidth": 0.01748053429489856,
-      "ci95_lower": 0.8833380996588802,
-      "ci95_upper": 0.9182991682486774
+      "mean_normalized_ros": 0.900818633953779,
+      "sample_sd": 0.02443779977390139,
+      "standard_error": 0.007727910828867623,
+      "ci95_halfwidth": 0.017480534294898563,
+      "ci95_lower": 0.8833380996588804,
+      "ci95_upper": 0.9182991682486776
     },
     {
       "dx_m": 20.0,
       "pign": 0.75,
       "n": 10,
-      "mean_normalized_ros": 0.972891570935696,
-      "sample_sd": 0.01891462258847695,
-      "standard_error": 0.005981328846205686,
-      "ci95_halfwidth": 0.013529765850117262,
-      "ci95_lower": 0.9593618050855788,
-      "ci95_upper": 0.9864213367858132
+      "mean_normalized_ros": 0.9728915709356961,
+      "sample_sd": 0.018914622588476888,
+      "standard_error": 0.0059813288462056665,
+      "ci95_halfwidth": 0.013529765850117217,
+      "ci95_lower": 0.9593618050855789,
+      "ci95_upper": 0.9864213367858133
     },
     {
       "dx_m": 20.0,
       "pign": 1.0,
       "n": 10,
-      "mean_normalized_ros": 1.0009013445810075,
+      "mean_normalized_ros": 1.000901344581008,
       "sample_sd": 0.0,
       "standard_error": 0.0,
       "ci95_halfwidth": 0.0,
-      "ci95_lower": 1.0009013445810075,
-      "ci95_upper": 1.0009013445810075
+      "ci95_lower": 1.000901344581008,
+      "ci95_upper": 1.000901344581008
     },
     {
       "dx_m": 30.0,
@@ -412,23 +412,23 @@
       "dx_m": 30.0,
       "pign": 0.25,
       "n": 10,
-      "mean_normalized_ros": 0.6606141774401715,
-      "sample_sd": 0.09552694647806274,
-      "standard_error": 0.030208272879167823,
-      "ci95_halfwidth": 0.06833111325267761,
-      "ci95_lower": 0.5922830641874939,
-      "ci95_upper": 0.7289452906928491
+      "mean_normalized_ros": 0.6596484150681493,
+      "sample_sd": 0.09741482712778846,
+      "standard_error": 0.030805273159537003,
+      "ci95_halfwidth": 0.06968152788687271,
+      "ci95_lower": 0.5899668871812767,
+      "ci95_upper": 0.729329942955022
     },
     {
       "dx_m": 30.0,
       "pign": 0.5,
       "n": 10,
       "mean_normalized_ros": 0.8377726829637042,
-      "sample_sd": 0.05772467117104888,
-      "standard_error": 0.018254143808477355,
-      "ci95_halfwidth": 0.04129087329477578,
-      "ci95_lower": 0.7964818096689285,
-      "ci95_upper": 0.87906355625848
+      "sample_sd": 0.057724671171049,
+      "standard_error": 0.018254143808477393,
+      "ci95_halfwidth": 0.04129087329477586,
+      "ci95_lower": 0.7964818096689283,
+      "ci95_upper": 0.8790635562584801
     },
     {
       "dx_m": 30.0,
@@ -445,12 +445,12 @@
       "dx_m": 30.0,
       "pign": 1.0,
       "n": 10,
-      "mean_normalized_ros": 1.0066212908935732,
+      "mean_normalized_ros": 1.0066212908935728,
       "sample_sd": 0.0,
       "standard_error": 0.0,
       "ci95_halfwidth": 0.0,
-      "ci95_lower": 1.0066212908935732,
-      "ci95_upper": 1.0066212908935732
+      "ci95_lower": 1.0066212908935728,
+      "ci95_upper": 1.0066212908935728
     }
   ],
   "monotonicity_checks": [
@@ -459,31 +459,31 @@
       "pign_low": 0.0,
       "pign_high": 0.25,
       "mean_difference": 0.8132106373470812,
-      "pooled_ci95_halfwidth": 0.017998648189191835,
+      "pooled_ci95_halfwidth": 0.017998648189191772,
       "passed": true
     },
     {
       "dx_m": 5.0,
       "pign_low": 0.25,
       "pign_high": 0.5,
-      "mean_difference": 0.13275682185854143,
-      "pooled_ci95_halfwidth": 0.019061747619744975,
+      "mean_difference": 0.1327568218585412,
+      "pooled_ci95_halfwidth": 0.019061747619744912,
       "passed": true
     },
     {
       "dx_m": 5.0,
       "pign_low": 0.5,
       "pign_high": 0.75,
-      "mean_difference": 0.03665886056150758,
-      "pooled_ci95_halfwidth": 0.009849325285881462,
+      "mean_difference": 0.03665886056150802,
+      "pooled_ci95_halfwidth": 0.009849325285881451,
       "passed": true
     },
     {
       "dx_m": 5.0,
       "pign_low": 0.75,
       "pign_high": 1.0,
-      "mean_difference": 0.017781320480534712,
-      "pooled_ci95_halfwidth": 0.007590146435118971,
+      "mean_difference": 0.017781320480534935,
+      "pooled_ci95_halfwidth": 0.007590146435118969,
       "passed": true
     },
     {
@@ -491,7 +491,7 @@
       "pign_low": 0.0,
       "pign_high": 0.25,
       "mean_difference": 0.7668758716339816,
-      "pooled_ci95_halfwidth": 0.020522599604530106,
+      "pooled_ci95_halfwidth": 0.020522599604530112,
       "passed": true
     },
     {
@@ -499,7 +499,7 @@
       "pign_low": 0.25,
       "pign_high": 0.5,
       "mean_difference": 0.1596776884013137,
-      "pooled_ci95_halfwidth": 0.030177539079538518,
+      "pooled_ci95_halfwidth": 0.030177539079538487,
       "passed": true
     },
     {
@@ -507,7 +507,7 @@
       "pign_low": 0.5,
       "pign_high": 0.75,
       "mean_difference": 0.046911454354383486,
-      "pooled_ci95_halfwidth": 0.022930427171835785,
+      "pooled_ci95_halfwidth": 0.02293042717183575,
       "passed": true
     },
     {
@@ -515,55 +515,55 @@
       "pign_low": 0.75,
       "pign_high": 1.0,
       "mean_difference": 0.02694262577249651,
-      "pooled_ci95_halfwidth": 0.0060247589091721905,
+      "pooled_ci95_halfwidth": 0.006024758909172243,
       "passed": true
     },
     {
       "dx_m": 20.0,
       "pign_low": 0.0,
       "pign_high": 0.25,
-      "mean_difference": 0.6646127036310905,
-      "pooled_ci95_halfwidth": 0.03886214072404393,
+      "mean_difference": 0.6646127036310904,
+      "pooled_ci95_halfwidth": 0.03886214072404389,
       "passed": true
     },
     {
       "dx_m": 20.0,
       "pign_low": 0.25,
       "pign_high": 0.5,
-      "mean_difference": 0.23620593032268833,
-      "pooled_ci95_halfwidth": 0.042612616217389404,
+      "mean_difference": 0.23620593032268866,
+      "pooled_ci95_halfwidth": 0.04261261621738937,
       "passed": true
     },
     {
       "dx_m": 20.0,
       "pign_low": 0.5,
       "pign_high": 0.75,
-      "mean_difference": 0.07207293698191719,
-      "pooled_ci95_halfwidth": 0.022104833027963,
+      "mean_difference": 0.07207293698191708,
+      "pooled_ci95_halfwidth": 0.022104833027962976,
       "passed": true
     },
     {
       "dx_m": 20.0,
       "pign_low": 0.75,
       "pign_high": 1.0,
-      "mean_difference": 0.028009773645311542,
-      "pooled_ci95_halfwidth": 0.013529765850117262,
+      "mean_difference": 0.028009773645311875,
+      "pooled_ci95_halfwidth": 0.013529765850117217,
       "passed": true
     },
     {
       "dx_m": 30.0,
       "pign_low": 0.0,
       "pign_high": 0.25,
-      "mean_difference": 0.6606141774401715,
-      "pooled_ci95_halfwidth": 0.06833111325267761,
+      "mean_difference": 0.6596484150681493,
+      "pooled_ci95_halfwidth": 0.06968152788687271,
       "passed": true
     },
     {
       "dx_m": 30.0,
       "pign_low": 0.25,
       "pign_high": 0.5,
-      "mean_difference": 0.17715850552353274,
-      "pooled_ci95_halfwidth": 0.07983781845588894,
+      "mean_difference": 0.1781242678955549,
+      "pooled_ci95_halfwidth": 0.0809966144113089,
       "passed": true
     },
     {
@@ -571,14 +571,14 @@
       "pign_low": 0.5,
       "pign_high": 0.75,
       "mean_difference": 0.09957935270065021,
-      "pooled_ci95_halfwidth": 0.044038250288076695,
+      "pooled_ci95_halfwidth": 0.04403825028807677,
       "passed": true
     },
     {
       "dx_m": 30.0,
       "pign_low": 0.75,
       "pign_high": 1.0,
-      "mean_difference": 0.06926925522921878,
+      "mean_difference": 0.06926925522921834,
       "pooled_ci95_halfwidth": 0.015311148584938344,
       "passed": true
     }
@@ -592,25 +592,25 @@
     },
     {
       "pign": 0.25,
-      "mean_spread": 0.15259645990690973,
+      "mean_spread": 0.1535622222789319,
       "limit": 0.1,
       "passed": false
     },
     {
       "pign": 0.5,
-      "mean_spread": 0.10819477624191842,
+      "mean_spread": 0.1081947762419182,
       "limit": 0.1,
       "passed": false
     },
     {
       "pign": 0.75,
-      "mean_spread": 0.045274284102775786,
+      "mean_spread": 0.04527428410277601,
       "limit": 0.1,
       "passed": true
     },
     {
       "pign": 1.0,
-      "mean_spread": 0.006213650731397902,
+      "mean_spread": 0.006213650731397458,
       "limit": 0.1,
       "passed": true
     }
@@ -624,7 +624,7 @@
       "seed": 51400,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003632.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx5_pign0_r02",
@@ -634,7 +634,7 @@
       "seed": 51401,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003632.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx5_pign0_r03",
@@ -644,7 +644,7 @@
       "seed": 51402,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003632.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx5_pign0_r04",
@@ -654,7 +654,7 @@
       "seed": 51403,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003632.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx5_pign0_r05",
@@ -664,7 +664,7 @@
       "seed": 51404,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003632.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx5_pign0_r06",
@@ -674,7 +674,7 @@
       "seed": 51405,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003632.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx5_pign0_r07",
@@ -684,7 +684,7 @@
       "seed": 51406,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003632.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx5_pign0_r08",
@@ -694,7 +694,7 @@
       "seed": 51407,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003632.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx5_pign0_r09",
@@ -704,7 +704,7 @@
       "seed": 51408,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003632.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx5_pign0_r10",
@@ -714,7 +714,7 @@
       "seed": 51409,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003632.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx5_pign0p25_r01",
@@ -722,7 +722,7 @@
       "pign": 0.25,
       "member": 1,
       "seed": 51400,
-      "normalized_ros": 0.8139275120811421,
+      "normalized_ros": 0.8139275120811418,
       "fit_cells": 253,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -732,7 +732,7 @@
       "pign": 0.25,
       "member": 2,
       "seed": 51401,
-      "normalized_ros": 0.8141078264200062,
+      "normalized_ros": 0.8141078264200065,
       "fit_cells": 235,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -742,7 +742,7 @@
       "pign": 0.25,
       "member": 3,
       "seed": 51402,
-      "normalized_ros": 0.8327257368313323,
+      "normalized_ros": 0.832725736831332,
       "fit_cells": 243,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -752,7 +752,7 @@
       "pign": 0.25,
       "member": 4,
       "seed": 51403,
-      "normalized_ros": 0.836983424290876,
+      "normalized_ros": 0.8369834242908764,
       "fit_cells": 242,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -762,7 +762,7 @@
       "pign": 0.25,
       "member": 5,
       "seed": 51404,
-      "normalized_ros": 0.7896983238297703,
+      "normalized_ros": 0.7896983238297705,
       "fit_cells": 239,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -772,7 +772,7 @@
       "pign": 0.25,
       "member": 6,
       "seed": 51405,
-      "normalized_ros": 0.8095783796325738,
+      "normalized_ros": 0.8095783796325742,
       "fit_cells": 230,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -792,7 +792,7 @@
       "pign": 0.25,
       "member": 8,
       "seed": 51407,
-      "normalized_ros": 0.8538624795114068,
+      "normalized_ros": 0.8538624795114066,
       "fit_cells": 250,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -802,7 +802,7 @@
       "pign": 0.25,
       "member": 9,
       "seed": 51408,
-      "normalized_ros": 0.8240474465686226,
+      "normalized_ros": 0.8240474465686227,
       "fit_cells": 246,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -812,7 +812,7 @@
       "pign": 0.25,
       "member": 10,
       "seed": 51409,
-      "normalized_ros": 0.7756421628683771,
+      "normalized_ros": 0.7756421628683773,
       "fit_cells": 227,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -822,7 +822,7 @@
       "pign": 0.5,
       "member": 1,
       "seed": 51400,
-      "normalized_ros": 0.9410149438854741,
+      "normalized_ros": 0.9410149438854747,
       "fit_cells": 274,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -832,7 +832,7 @@
       "pign": 0.5,
       "member": 2,
       "seed": 51401,
-      "normalized_ros": 0.9467968713586709,
+      "normalized_ros": 0.9467968713586711,
       "fit_cells": 269,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -842,7 +842,7 @@
       "pign": 0.5,
       "member": 3,
       "seed": 51402,
-      "normalized_ros": 0.9509874637887283,
+      "normalized_ros": 0.9509874637887284,
       "fit_cells": 275,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -852,7 +852,7 @@
       "pign": 0.5,
       "member": 4,
       "seed": 51403,
-      "normalized_ros": 0.927750342031217,
+      "normalized_ros": 0.9277503420312166,
       "fit_cells": 277,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -862,7 +862,7 @@
       "pign": 0.5,
       "member": 5,
       "seed": 51404,
-      "normalized_ros": 0.9469088402140945,
+      "normalized_ros": 0.9469088402140953,
       "fit_cells": 278,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -872,7 +872,7 @@
       "pign": 0.5,
       "member": 6,
       "seed": 51405,
-      "normalized_ros": 0.9513179216600273,
+      "normalized_ros": 0.9513179216600265,
       "fit_cells": 271,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -882,7 +882,7 @@
       "pign": 0.5,
       "member": 7,
       "seed": 51406,
-      "normalized_ros": 0.9455567694027823,
+      "normalized_ros": 0.9455567694027815,
       "fit_cells": 284,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -902,7 +902,7 @@
       "pign": 0.5,
       "member": 9,
       "seed": 51408,
-      "normalized_ros": 0.9601907549382177,
+      "normalized_ros": 0.9601907549382176,
       "fit_cells": 273,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -912,7 +912,7 @@
       "pign": 0.5,
       "member": 10,
       "seed": 51409,
-      "normalized_ros": 0.9384567961499654,
+      "normalized_ros": 0.9384567961499655,
       "fit_cells": 278,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -922,7 +922,7 @@
       "pign": 0.75,
       "member": 1,
       "seed": 51400,
-      "normalized_ros": 0.9867178013949852,
+      "normalized_ros": 0.9867178013949857,
       "fit_cells": 289,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -932,7 +932,7 @@
       "pign": 0.75,
       "member": 2,
       "seed": 51401,
-      "normalized_ros": 0.972400780029667,
+      "normalized_ros": 0.9724007800296668,
       "fit_cells": 291,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -942,7 +942,7 @@
       "pign": 0.75,
       "member": 3,
       "seed": 51402,
-      "normalized_ros": 1.0008801944660854,
+      "normalized_ros": 1.000880194466086,
       "fit_cells": 297,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -952,7 +952,7 @@
       "pign": 0.75,
       "member": 4,
       "seed": 51403,
-      "normalized_ros": 0.9745486170971881,
+      "normalized_ros": 0.9745486170971879,
       "fit_cells": 292,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -962,7 +962,7 @@
       "pign": 0.75,
       "member": 5,
       "seed": 51404,
-      "normalized_ros": 0.9681443734385408,
+      "normalized_ros": 0.9681443734385416,
       "fit_cells": 290,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -972,7 +972,7 @@
       "pign": 0.75,
       "member": 6,
       "seed": 51405,
-      "normalized_ros": 0.9831364428147703,
+      "normalized_ros": 0.9831364428147706,
       "fit_cells": 291,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -982,7 +982,7 @@
       "pign": 0.75,
       "member": 7,
       "seed": 51406,
-      "normalized_ros": 0.981958243894389,
+      "normalized_ros": 0.9819582438943887,
       "fit_cells": 292,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1002,7 +1002,7 @@
       "pign": 0.75,
       "member": 9,
       "seed": 51408,
-      "normalized_ros": 0.9750579847348384,
+      "normalized_ros": 0.9750579847348382,
       "fit_cells": 292,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1012,7 +1012,7 @@
       "pign": 0.75,
       "member": 10,
       "seed": 51409,
-      "normalized_ros": 0.9861924247306448,
+      "normalized_ros": 0.9861924247306438,
       "fit_cells": 287,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1022,7 +1022,7 @@
       "pign": 1.0,
       "member": 1,
       "seed": 51400,
-      "normalized_ros": 1.0004076402476647,
+      "normalized_ros": 1.0004076402476654,
       "fit_cells": 303,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1032,7 +1032,7 @@
       "pign": 1.0,
       "member": 2,
       "seed": 51401,
-      "normalized_ros": 1.0004076402476647,
+      "normalized_ros": 1.0004076402476654,
       "fit_cells": 303,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1042,7 +1042,7 @@
       "pign": 1.0,
       "member": 3,
       "seed": 51402,
-      "normalized_ros": 1.0004076402476647,
+      "normalized_ros": 1.0004076402476654,
       "fit_cells": 303,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1052,7 +1052,7 @@
       "pign": 1.0,
       "member": 4,
       "seed": 51403,
-      "normalized_ros": 1.0004076402476647,
+      "normalized_ros": 1.0004076402476654,
       "fit_cells": 303,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1062,7 +1062,7 @@
       "pign": 1.0,
       "member": 5,
       "seed": 51404,
-      "normalized_ros": 1.0004076402476647,
+      "normalized_ros": 1.0004076402476654,
       "fit_cells": 303,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1072,7 +1072,7 @@
       "pign": 1.0,
       "member": 6,
       "seed": 51405,
-      "normalized_ros": 1.0004076402476647,
+      "normalized_ros": 1.0004076402476654,
       "fit_cells": 303,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1082,7 +1082,7 @@
       "pign": 1.0,
       "member": 7,
       "seed": 51406,
-      "normalized_ros": 1.0004076402476647,
+      "normalized_ros": 1.0004076402476654,
       "fit_cells": 303,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1092,7 +1092,7 @@
       "pign": 1.0,
       "member": 8,
       "seed": 51407,
-      "normalized_ros": 1.0004076402476647,
+      "normalized_ros": 1.0004076402476654,
       "fit_cells": 303,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1102,7 +1102,7 @@
       "pign": 1.0,
       "member": 9,
       "seed": 51408,
-      "normalized_ros": 1.0004076402476647,
+      "normalized_ros": 1.0004076402476654,
       "fit_cells": 303,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1112,7 +1112,7 @@
       "pign": 1.0,
       "member": 10,
       "seed": 51409,
-      "normalized_ros": 1.0004076402476647,
+      "normalized_ros": 1.0004076402476654,
       "fit_cells": 303,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1124,7 +1124,7 @@
       "seed": 51400,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003631.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx10_pign0_r02",
@@ -1134,7 +1134,7 @@
       "seed": 51401,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003631.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx10_pign0_r03",
@@ -1144,7 +1144,7 @@
       "seed": 51402,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003631.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx10_pign0_r04",
@@ -1154,7 +1154,7 @@
       "seed": 51403,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003631.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx10_pign0_r05",
@@ -1164,7 +1164,7 @@
       "seed": 51404,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003631.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx10_pign0_r06",
@@ -1174,7 +1174,7 @@
       "seed": 51405,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003631.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx10_pign0_r07",
@@ -1184,7 +1184,7 @@
       "seed": 51406,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003631.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx10_pign0_r08",
@@ -1194,7 +1194,7 @@
       "seed": 51407,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003631.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx10_pign0_r09",
@@ -1204,7 +1204,7 @@
       "seed": 51408,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003631.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx10_pign0_r10",
@@ -1214,7 +1214,7 @@
       "seed": 51409,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003631.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx10_pign0p25_r01",
@@ -1232,7 +1232,7 @@
       "pign": 0.25,
       "member": 2,
       "seed": 51401,
-      "normalized_ros": 0.7986287215050419,
+      "normalized_ros": 0.7986287215050423,
       "fit_cells": 117,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1242,7 +1242,7 @@
       "pign": 0.25,
       "member": 3,
       "seed": 51402,
-      "normalized_ros": 0.7923557549480883,
+      "normalized_ros": 0.7923557549480881,
       "fit_cells": 116,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1252,7 +1252,7 @@
       "pign": 0.25,
       "member": 4,
       "seed": 51403,
-      "normalized_ros": 0.7742557578970537,
+      "normalized_ros": 0.7742557578970539,
       "fit_cells": 112,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1262,7 +1262,7 @@
       "pign": 0.25,
       "member": 5,
       "seed": 51404,
-      "normalized_ros": 0.793006162851969,
+      "normalized_ros": 0.7930061628519688,
       "fit_cells": 114,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1272,7 +1272,7 @@
       "pign": 0.25,
       "member": 6,
       "seed": 51405,
-      "normalized_ros": 0.7537720719274007,
+      "normalized_ros": 0.7537720719274001,
       "fit_cells": 114,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1282,7 +1282,7 @@
       "pign": 0.25,
       "member": 7,
       "seed": 51406,
-      "normalized_ros": 0.7746306272430498,
+      "normalized_ros": 0.7746306272430495,
       "fit_cells": 116,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1302,7 +1302,7 @@
       "pign": 0.25,
       "member": 9,
       "seed": 51408,
-      "normalized_ros": 0.7186677291709805,
+      "normalized_ros": 0.7186677291709807,
       "fit_cells": 109,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1312,7 +1312,7 @@
       "pign": 0.25,
       "member": 10,
       "seed": 51409,
-      "normalized_ros": 0.7852292057350633,
+      "normalized_ros": 0.7852292057350634,
       "fit_cells": 103,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1342,7 +1342,7 @@
       "pign": 0.5,
       "member": 3,
       "seed": 51402,
-      "normalized_ros": 0.9008638219212879,
+      "normalized_ros": 0.9008638219212878,
       "fit_cells": 131,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1352,7 +1352,7 @@
       "pign": 0.5,
       "member": 4,
       "seed": 51403,
-      "normalized_ros": 0.9326086011110822,
+      "normalized_ros": 0.9326086011110829,
       "fit_cells": 133,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1362,7 +1362,7 @@
       "pign": 0.5,
       "member": 5,
       "seed": 51404,
-      "normalized_ros": 0.9201147990918483,
+      "normalized_ros": 0.9201147990918489,
       "fit_cells": 134,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1372,7 +1372,7 @@
       "pign": 0.5,
       "member": 6,
       "seed": 51405,
-      "normalized_ros": 0.9420771642433289,
+      "normalized_ros": 0.9420771642433288,
       "fit_cells": 138,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1382,7 +1382,7 @@
       "pign": 0.5,
       "member": 7,
       "seed": 51406,
-      "normalized_ros": 0.9169996861137913,
+      "normalized_ros": 0.9169996861137912,
       "fit_cells": 135,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1392,7 +1392,7 @@
       "pign": 0.5,
       "member": 8,
       "seed": 51407,
-      "normalized_ros": 0.9582083816243733,
+      "normalized_ros": 0.9582083816243725,
       "fit_cells": 141,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1402,7 +1402,7 @@
       "pign": 0.5,
       "member": 9,
       "seed": 51408,
-      "normalized_ros": 0.8560191054178241,
+      "normalized_ros": 0.856019105417824,
       "fit_cells": 127,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1412,7 +1412,7 @@
       "pign": 0.5,
       "member": 10,
       "seed": 51409,
-      "normalized_ros": 0.9565829844797984,
+      "normalized_ros": 0.9565829844797983,
       "fit_cells": 137,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1422,7 +1422,7 @@
       "pign": 0.75,
       "member": 1,
       "seed": 51400,
-      "normalized_ros": 0.9779784197104555,
+      "normalized_ros": 0.9779784197104554,
       "fit_cells": 145,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1432,7 +1432,7 @@
       "pign": 0.75,
       "member": 2,
       "seed": 51401,
-      "normalized_ros": 0.9779899667516756,
+      "normalized_ros": 0.9779899667516762,
       "fit_cells": 147,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1442,7 +1442,7 @@
       "pign": 0.75,
       "member": 3,
       "seed": 51402,
-      "normalized_ros": 0.9641754989534019,
+      "normalized_ros": 0.9641754989534014,
       "fit_cells": 142,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1462,7 +1462,7 @@
       "pign": 0.75,
       "member": 5,
       "seed": 51404,
-      "normalized_ros": 0.9804173445097165,
+      "normalized_ros": 0.9804173445097166,
       "fit_cells": 147,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1472,7 +1472,7 @@
       "pign": 0.75,
       "member": 6,
       "seed": 51405,
-      "normalized_ros": 0.9686630024259275,
+      "normalized_ros": 0.9686630024259282,
       "fit_cells": 144,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1512,7 +1512,7 @@
       "pign": 0.75,
       "member": 10,
       "seed": 51409,
-      "normalized_ros": 0.9656999450228496,
+      "normalized_ros": 0.9656999450228495,
       "fit_cells": 140,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1522,7 +1522,7 @@
       "pign": 1.0,
       "member": 1,
       "seed": 51400,
-      "normalized_ros": 1.0004076401621755,
+      "normalized_ros": 1.0004076401621753,
       "fit_cells": 152,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1532,7 +1532,7 @@
       "pign": 1.0,
       "member": 2,
       "seed": 51401,
-      "normalized_ros": 1.0004076401621755,
+      "normalized_ros": 1.0004076401621753,
       "fit_cells": 152,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1542,7 +1542,7 @@
       "pign": 1.0,
       "member": 3,
       "seed": 51402,
-      "normalized_ros": 1.0004076401621755,
+      "normalized_ros": 1.0004076401621753,
       "fit_cells": 152,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1552,7 +1552,7 @@
       "pign": 1.0,
       "member": 4,
       "seed": 51403,
-      "normalized_ros": 1.0004076401621755,
+      "normalized_ros": 1.0004076401621753,
       "fit_cells": 152,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1562,7 +1562,7 @@
       "pign": 1.0,
       "member": 5,
       "seed": 51404,
-      "normalized_ros": 1.0004076401621755,
+      "normalized_ros": 1.0004076401621753,
       "fit_cells": 152,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1572,7 +1572,7 @@
       "pign": 1.0,
       "member": 6,
       "seed": 51405,
-      "normalized_ros": 1.0004076401621755,
+      "normalized_ros": 1.0004076401621753,
       "fit_cells": 152,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1582,7 +1582,7 @@
       "pign": 1.0,
       "member": 7,
       "seed": 51406,
-      "normalized_ros": 1.0004076401621755,
+      "normalized_ros": 1.0004076401621753,
       "fit_cells": 152,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1592,7 +1592,7 @@
       "pign": 1.0,
       "member": 8,
       "seed": 51407,
-      "normalized_ros": 1.0004076401621755,
+      "normalized_ros": 1.0004076401621753,
       "fit_cells": 152,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1602,7 +1602,7 @@
       "pign": 1.0,
       "member": 9,
       "seed": 51408,
-      "normalized_ros": 1.0004076401621755,
+      "normalized_ros": 1.0004076401621753,
       "fit_cells": 152,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1612,7 +1612,7 @@
       "pign": 1.0,
       "member": 10,
       "seed": 51409,
-      "normalized_ros": 1.0004076401621755,
+      "normalized_ros": 1.0004076401621753,
       "fit_cells": 152,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1624,7 +1624,7 @@
       "seed": 51400,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003631.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx20_pign0_r02",
@@ -1634,7 +1634,7 @@
       "seed": 51401,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003631.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx20_pign0_r03",
@@ -1644,7 +1644,7 @@
       "seed": 51402,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003631.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx20_pign0_r04",
@@ -1654,7 +1654,7 @@
       "seed": 51403,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003631.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx20_pign0_r05",
@@ -1664,7 +1664,7 @@
       "seed": 51404,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003631.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx20_pign0_r06",
@@ -1674,7 +1674,7 @@
       "seed": 51405,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003631.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx20_pign0_r07",
@@ -1684,7 +1684,7 @@
       "seed": 51406,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003631.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx20_pign0_r08",
@@ -1694,7 +1694,7 @@
       "seed": 51407,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003631.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx20_pign0_r09",
@@ -1704,7 +1704,7 @@
       "seed": 51408,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003631.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx20_pign0_r10",
@@ -1714,7 +1714,7 @@
       "seed": 51409,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003631.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx20_pign0p25_r01",
@@ -1722,7 +1722,7 @@
       "pign": 0.25,
       "member": 1,
       "seed": 51400,
-      "normalized_ros": 0.6313971119075239,
+      "normalized_ros": 0.631397111907524,
       "fit_cells": 49,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1732,7 +1732,7 @@
       "pign": 0.25,
       "member": 2,
       "seed": 51401,
-      "normalized_ros": 0.6709741120210394,
+      "normalized_ros": 0.6709741120210392,
       "fit_cells": 48,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1742,7 +1742,7 @@
       "pign": 0.25,
       "member": 3,
       "seed": 51402,
-      "normalized_ros": 0.6966839481503901,
+      "normalized_ros": 0.6966839481503899,
       "fit_cells": 52,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1762,7 +1762,7 @@
       "pign": 0.25,
       "member": 5,
       "seed": 51404,
-      "normalized_ros": 0.6203713975830005,
+      "normalized_ros": 0.6203713975830004,
       "fit_cells": 45,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1772,7 +1772,7 @@
       "pign": 0.25,
       "member": 6,
       "seed": 51405,
-      "normalized_ros": 0.7059107771248966,
+      "normalized_ros": 0.7059107771248964,
       "fit_cells": 53,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1802,7 +1802,7 @@
       "pign": 0.25,
       "member": 9,
       "seed": 51408,
-      "normalized_ros": 0.7297773845678172,
+      "normalized_ros": 0.729777384567817,
       "fit_cells": 54,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1812,7 +1812,7 @@
       "pign": 0.25,
       "member": 10,
       "seed": 51409,
-      "normalized_ros": 0.6657307520457828,
+      "normalized_ros": 0.6657307520457822,
       "fit_cells": 50,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1822,7 +1822,7 @@
       "pign": 0.5,
       "member": 1,
       "seed": 51400,
-      "normalized_ros": 0.9296375610144222,
+      "normalized_ros": 0.9296375610144226,
       "fit_cells": 70,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1842,7 +1842,7 @@
       "pign": 0.5,
       "member": 3,
       "seed": 51402,
-      "normalized_ros": 0.8680449142620185,
+      "normalized_ros": 0.8680449142620187,
       "fit_cells": 61,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1852,7 +1852,7 @@
       "pign": 0.5,
       "member": 4,
       "seed": 51403,
-      "normalized_ros": 0.8817560274310301,
+      "normalized_ros": 0.8817560274310302,
       "fit_cells": 67,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1862,7 +1862,7 @@
       "pign": 0.5,
       "member": 5,
       "seed": 51404,
-      "normalized_ros": 0.8806702049175152,
+      "normalized_ros": 0.8806702049175157,
       "fit_cells": 63,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1882,7 +1882,7 @@
       "pign": 0.5,
       "member": 7,
       "seed": 51406,
-      "normalized_ros": 0.91925663714916,
+      "normalized_ros": 0.9192566371491602,
       "fit_cells": 72,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1892,7 +1892,7 @@
       "pign": 0.5,
       "member": 8,
       "seed": 51407,
-      "normalized_ros": 0.8963317774330866,
+      "normalized_ros": 0.8963317774330869,
       "fit_cells": 68,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1902,7 +1902,7 @@
       "pign": 0.5,
       "member": 9,
       "seed": 51408,
-      "normalized_ros": 0.896733234167073,
+      "normalized_ros": 0.8967332341670724,
       "fit_cells": 63,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1912,7 +1912,7 @@
       "pign": 0.5,
       "member": 10,
       "seed": 51409,
-      "normalized_ros": 0.8814920548589011,
+      "normalized_ros": 0.881492054858901,
       "fit_cells": 65,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1922,7 +1922,7 @@
       "pign": 0.75,
       "member": 1,
       "seed": 51400,
-      "normalized_ros": 0.9531611969022779,
+      "normalized_ros": 0.9531611969022783,
       "fit_cells": 73,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1932,7 +1932,7 @@
       "pign": 0.75,
       "member": 2,
       "seed": 51401,
-      "normalized_ros": 1.0030437990317236,
+      "normalized_ros": 1.003043799031724,
       "fit_cells": 75,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1942,7 +1942,7 @@
       "pign": 0.75,
       "member": 3,
       "seed": 51402,
-      "normalized_ros": 0.9521966939427683,
+      "normalized_ros": 0.9521966939427686,
       "fit_cells": 71,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1952,7 +1952,7 @@
       "pign": 0.75,
       "member": 4,
       "seed": 51403,
-      "normalized_ros": 0.9754623197223257,
+      "normalized_ros": 0.9754623197223254,
       "fit_cells": 75,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1962,7 +1962,7 @@
       "pign": 0.75,
       "member": 5,
       "seed": 51404,
-      "normalized_ros": 0.957205080712869,
+      "normalized_ros": 0.9572050807128694,
       "fit_cells": 74,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1972,7 +1972,7 @@
       "pign": 0.75,
       "member": 6,
       "seed": 51405,
-      "normalized_ros": 1.0010534642826205,
+      "normalized_ros": 1.0010534642826208,
       "fit_cells": 75,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -1982,7 +1982,7 @@
       "pign": 0.75,
       "member": 7,
       "seed": 51406,
-      "normalized_ros": 0.9650874192045278,
+      "normalized_ros": 0.9650874192045277,
       "fit_cells": 74,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2002,7 +2002,7 @@
       "pign": 0.75,
       "member": 9,
       "seed": 51408,
-      "normalized_ros": 0.9779409483927777,
+      "normalized_ros": 0.9779409483927776,
       "fit_cells": 72,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2012,7 +2012,7 @@
       "pign": 0.75,
       "member": 10,
       "seed": 51409,
-      "normalized_ros": 0.9584857663941516,
+      "normalized_ros": 0.9584857663941523,
       "fit_cells": 71,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2022,7 +2022,7 @@
       "pign": 1.0,
       "member": 1,
       "seed": 51400,
-      "normalized_ros": 1.0009013445810075,
+      "normalized_ros": 1.000901344581008,
       "fit_cells": 77,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2032,7 +2032,7 @@
       "pign": 1.0,
       "member": 2,
       "seed": 51401,
-      "normalized_ros": 1.0009013445810075,
+      "normalized_ros": 1.000901344581008,
       "fit_cells": 77,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2042,7 +2042,7 @@
       "pign": 1.0,
       "member": 3,
       "seed": 51402,
-      "normalized_ros": 1.0009013445810075,
+      "normalized_ros": 1.000901344581008,
       "fit_cells": 77,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2052,7 +2052,7 @@
       "pign": 1.0,
       "member": 4,
       "seed": 51403,
-      "normalized_ros": 1.0009013445810075,
+      "normalized_ros": 1.000901344581008,
       "fit_cells": 77,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2062,7 +2062,7 @@
       "pign": 1.0,
       "member": 5,
       "seed": 51404,
-      "normalized_ros": 1.0009013445810075,
+      "normalized_ros": 1.000901344581008,
       "fit_cells": 77,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2072,7 +2072,7 @@
       "pign": 1.0,
       "member": 6,
       "seed": 51405,
-      "normalized_ros": 1.0009013445810075,
+      "normalized_ros": 1.000901344581008,
       "fit_cells": 77,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2082,7 +2082,7 @@
       "pign": 1.0,
       "member": 7,
       "seed": 51406,
-      "normalized_ros": 1.0009013445810075,
+      "normalized_ros": 1.000901344581008,
       "fit_cells": 77,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2092,7 +2092,7 @@
       "pign": 1.0,
       "member": 8,
       "seed": 51407,
-      "normalized_ros": 1.0009013445810075,
+      "normalized_ros": 1.000901344581008,
       "fit_cells": 77,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2102,7 +2102,7 @@
       "pign": 1.0,
       "member": 9,
       "seed": 51408,
-      "normalized_ros": 1.0009013445810075,
+      "normalized_ros": 1.000901344581008,
       "fit_cells": 77,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2112,7 +2112,7 @@
       "pign": 1.0,
       "member": 10,
       "seed": 51409,
-      "normalized_ros": 1.0009013445810075,
+      "normalized_ros": 1.000901344581008,
       "fit_cells": 77,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2124,7 +2124,7 @@
       "seed": 51400,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003629.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx30_pign0_r02",
@@ -2134,7 +2134,7 @@
       "seed": 51401,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003629.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx30_pign0_r03",
@@ -2144,7 +2144,7 @@
       "seed": 51402,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003629.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx30_pign0_r04",
@@ -2154,7 +2154,7 @@
       "seed": 51403,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003629.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx30_pign0_r05",
@@ -2164,7 +2164,7 @@
       "seed": 51404,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003629.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx30_pign0_r06",
@@ -2174,7 +2174,7 @@
       "seed": 51405,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003629.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx30_pign0_r07",
@@ -2184,7 +2184,7 @@
       "seed": 51406,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003629.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx30_pign0_r08",
@@ -2194,7 +2194,7 @@
       "seed": 51407,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003629.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx30_pign0_r09",
@@ -2204,7 +2204,7 @@
       "seed": 51408,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003629.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx30_pign0_r10",
@@ -2214,7 +2214,7 @@
       "seed": 51409,
       "normalized_ros": 0.0,
       "fit_cells": 0,
-      "toa_file": "time_of_arrival_0000001_0003629.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx30_pign0p25_r01",
@@ -2222,9 +2222,9 @@
       "pign": 0.25,
       "member": 1,
       "seed": 51400,
-      "normalized_ros": 0.5501757045108407,
+      "normalized_ros": 0.5501757045108406,
       "fit_cells": 25,
-      "toa_file": "time_of_arrival_0000001_0003822.tif"
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx30_pign0p25_r02",
@@ -2232,7 +2232,7 @@
       "pign": 0.25,
       "member": 2,
       "seed": 51401,
-      "normalized_ros": 0.7197839532920934,
+      "normalized_ros": 0.7197839532920929,
       "fit_cells": 37,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2242,7 +2242,7 @@
       "pign": 0.25,
       "member": 3,
       "seed": 51402,
-      "normalized_ros": 0.665741711990887,
+      "normalized_ros": 0.6657417119908874,
       "fit_cells": 38,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2252,9 +2252,9 @@
       "pign": 0.25,
       "member": 4,
       "seed": 51403,
-      "normalized_ros": 0.49523619552465686,
-      "fit_cells": 4,
-      "toa_file": "time_of_arrival_0000001_0003669.tif"
+      "normalized_ros": 0.4855785718044363,
+      "fit_cells": 25,
+      "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
     {
       "name": "dx30_pign0p25_r05",
@@ -2262,7 +2262,7 @@
       "pign": 0.25,
       "member": 5,
       "seed": 51404,
-      "normalized_ros": 0.7431774269891561,
+      "normalized_ros": 0.7431774269891562,
       "fit_cells": 39,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2322,7 +2322,7 @@
       "pign": 0.5,
       "member": 1,
       "seed": 51400,
-      "normalized_ros": 0.8163955529407707,
+      "normalized_ros": 0.8163955529407705,
       "fit_cells": 38,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2332,7 +2332,7 @@
       "pign": 0.5,
       "member": 2,
       "seed": 51401,
-      "normalized_ros": 0.8015849943384613,
+      "normalized_ros": 0.8015849943384611,
       "fit_cells": 40,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2352,7 +2352,7 @@
       "pign": 0.5,
       "member": 4,
       "seed": 51403,
-      "normalized_ros": 0.826342187807099,
+      "normalized_ros": 0.8263421878070991,
       "fit_cells": 41,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2372,7 +2372,7 @@
       "pign": 0.5,
       "member": 6,
       "seed": 51405,
-      "normalized_ros": 0.7513676929704572,
+      "normalized_ros": 0.7513676929704571,
       "fit_cells": 39,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2382,7 +2382,7 @@
       "pign": 0.5,
       "member": 7,
       "seed": 51406,
-      "normalized_ros": 0.7835004714566466,
+      "normalized_ros": 0.7835004714566465,
       "fit_cells": 39,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2412,7 +2412,7 @@
       "pign": 0.5,
       "member": 10,
       "seed": 51409,
-      "normalized_ros": 0.9445370474076583,
+      "normalized_ros": 0.9445370474076586,
       "fit_cells": 47,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2432,7 +2432,7 @@
       "pign": 0.75,
       "member": 2,
       "seed": 51401,
-      "normalized_ros": 0.9414982932710723,
+      "normalized_ros": 0.941498293271072,
       "fit_cells": 49,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2442,7 +2442,7 @@
       "pign": 0.75,
       "member": 3,
       "seed": 51402,
-      "normalized_ros": 0.9037573679436111,
+      "normalized_ros": 0.903757367943611,
       "fit_cells": 45,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2452,7 +2452,7 @@
       "pign": 0.75,
       "member": 4,
       "seed": 51403,
-      "normalized_ros": 0.9201817558199192,
+      "normalized_ros": 0.920181755819919,
       "fit_cells": 48,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2472,7 +2472,7 @@
       "pign": 0.75,
       "member": 6,
       "seed": 51405,
-      "normalized_ros": 0.963403025970075,
+      "normalized_ros": 0.9634030259700755,
       "fit_cells": 48,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2482,7 +2482,7 @@
       "pign": 0.75,
       "member": 7,
       "seed": 51406,
-      "normalized_ros": 0.9607763356851036,
+      "normalized_ros": 0.9607763356851035,
       "fit_cells": 46,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2492,7 +2492,7 @@
       "pign": 0.75,
       "member": 8,
       "seed": 51407,
-      "normalized_ros": 0.954976946584378,
+      "normalized_ros": 0.9549769465843777,
       "fit_cells": 46,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2502,7 +2502,7 @@
       "pign": 0.75,
       "member": 9,
       "seed": 51408,
-      "normalized_ros": 0.9090410956730112,
+      "normalized_ros": 0.9090410956730116,
       "fit_cells": 44,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2522,7 +2522,7 @@
       "pign": 1.0,
       "member": 1,
       "seed": 51400,
-      "normalized_ros": 1.0066212908935732,
+      "normalized_ros": 1.0066212908935728,
       "fit_cells": 52,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2532,7 +2532,7 @@
       "pign": 1.0,
       "member": 2,
       "seed": 51401,
-      "normalized_ros": 1.0066212908935732,
+      "normalized_ros": 1.0066212908935728,
       "fit_cells": 52,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2542,7 +2542,7 @@
       "pign": 1.0,
       "member": 3,
       "seed": 51402,
-      "normalized_ros": 1.0066212908935732,
+      "normalized_ros": 1.0066212908935728,
       "fit_cells": 52,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2552,7 +2552,7 @@
       "pign": 1.0,
       "member": 4,
       "seed": 51403,
-      "normalized_ros": 1.0066212908935732,
+      "normalized_ros": 1.0066212908935728,
       "fit_cells": 52,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2562,7 +2562,7 @@
       "pign": 1.0,
       "member": 5,
       "seed": 51404,
-      "normalized_ros": 1.0066212908935732,
+      "normalized_ros": 1.0066212908935728,
       "fit_cells": 52,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2572,7 +2572,7 @@
       "pign": 1.0,
       "member": 6,
       "seed": 51405,
-      "normalized_ros": 1.0066212908935732,
+      "normalized_ros": 1.0066212908935728,
       "fit_cells": 52,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2582,7 +2582,7 @@
       "pign": 1.0,
       "member": 7,
       "seed": 51406,
-      "normalized_ros": 1.0066212908935732,
+      "normalized_ros": 1.0066212908935728,
       "fit_cells": 52,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2592,7 +2592,7 @@
       "pign": 1.0,
       "member": 8,
       "seed": 51407,
-      "normalized_ros": 1.0066212908935732,
+      "normalized_ros": 1.0066212908935728,
       "fit_cells": 52,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2602,7 +2602,7 @@
       "pign": 1.0,
       "member": 9,
       "seed": 51408,
-      "normalized_ros": 1.0066212908935732,
+      "normalized_ros": 1.0066212908935728,
       "fit_cells": 52,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     },
@@ -2612,7 +2612,7 @@
       "pign": 1.0,
       "member": 10,
       "seed": 51409,
-      "normalized_ros": 1.0066212908935732,
+      "normalized_ros": 1.0066212908935728,
       "fit_cells": 52,
       "toa_file": "time_of_arrival_0000001_0000240.tif"
     }

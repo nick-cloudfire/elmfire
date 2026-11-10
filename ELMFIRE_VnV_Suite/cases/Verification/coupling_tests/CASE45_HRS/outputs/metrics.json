@@ -8,20 +8,20 @@
   "required_variant_count": 12,
   "completed_variant_count": 12,
   "reason": "All required run evidence was complete; every scientific metric passed.",
-  "runtime_input_fingerprint_sha256": "e37779a4d19df8fda8a04dd78fa2f60b15ab60a5982209f76b040e9d2145c893",
-  "oracle_manifest_sha256": "2dfe4df51088e6334268df69888e932bc8651b48cd5f643df5facb3e98b6ae61",
+  "runtime_input_fingerprint_sha256": "6324d41aaa3247772c8839f9774a2c0b017b72153c25c1e9798a61669eeae105",
+  "oracle_manifest_sha256": "d8780a7e52fba5f20e98ab234fb9bb84d79fa298b8f8063dd49ad070eaab486d",
   "oracle_evaluator_sha256": "2b399eac24c6e99155cdd259083defbe15bb625d59538034960120c0df3ce4c6",
   "executed_binary": {
-    "resolved_path": "/global/home/users/yirenqin712/applications/elmfire/elmfire-main/build/linux/bin/elmfire_debug_",
-    "sha256": "2b58920716af28891d9166c5f1046174214994eb20e820981017e4f2d166b001",
-    "size_bytes": 2651528
+    "resolved_path": "/home/nick/elmfire/elmfire/build/linux/bin/elmfire_1.1",
+    "sha256": "b7c9bb4dc72f01cd2c18e518b7dbd8fd76871728905e68423b103684f537a90a",
+    "size_bytes": 928144
   },
   "oracle_semantics": "recorded transient heat is an input stimulus; the downstream UMD_UCB_BLDG_SPREAD mapping is recomputed independently",
   "metrics": [
     {
       "name": "recorded heat-to-ROS oracle relative error",
       "expected": "<= 0.005",
-      "calculated": 0.0002078364881096828,
+      "calculated": 0.00020759404361037163,
       "units": "fraction",
       "status": "PASS"
     },
@@ -35,14 +35,14 @@
     {
       "name": "fixed-FTP continuity across 30000 kJ",
       "expected": "normalized speed spread <= 0.005",
-      "calculated": 4.004319840008374e-08,
+      "calculated": 1.0864299103842322e-07,
       "units": "fraction",
       "status": "PASS"
     },
     {
       "name": "wind continuity across 35 mph",
       "expected": "oracle error <= 0.005",
-      "calculated": 5.65950131564213e-08,
+      "calculated": 3.5760616040060373e-07,
       "units": "fraction",
       "status": "PASS"
     },
@@ -56,7 +56,7 @@
     {
       "name": "head/back/side response",
       "expected": "matched-wind maximum relative error <= 0.005",
-      "calculated": 0.0002078364881096828,
+      "calculated": 0.00020759404361037163,
       "units": "fraction",
       "status": "PASS"
     },
@@ -137,15 +137,15 @@
       "normal_displacement_per_step_m": 0.3092685777190907,
       "receiver_phi_upper_bound": 0.0015,
       "target_cfl_displacement_limit_m": 2.0,
-      "runtime_input_fingerprint_sha256": "0c3b55045016d453439f40cd0f9e61bda808dead58c1583f52a4172dec4d7dde",
-      "recorded_peak_heat_kw_m2": 74.75,
-      "recorded_step_energy_kj": 29900.0,
+      "runtime_input_fingerprint_sha256": "08215b21ced390a5144eda3b9b2fc6e23436bc3f1586bf65f00dbf4cf7f76a83",
+      "recorded_peak_heat_kw_m2": 74.75010681152344,
+      "recorded_step_energy_kj": 29900.042724609375,
       "receiver_toa_s": 1.0,
       "selected_heat_time_s": 1.0,
       "selected_heat_dump_index": 2,
-      "measured_vs_ft_min": 60.879638671875,
-      "oracle_vs_ft_min": 60.87964012642745,
-      "ros_relative_error": 2.3892264203084148e-08,
+      "measured_vs_ft_min": 60.879737854003906,
+      "oracle_vs_ft_min": 60.879727118362,
+      "ros_relative_error": 1.7634182043929817e-07,
       "selected_files": {
         "dfc": "variants/energy_below/outputs/hf_dfc_transient_0000001_d0000002.tif",
         "radiation": "variants/energy_below/outputs/hf_rad_transient_0000001_d0000002.tif",
@@ -157,10 +157,10 @@
       "terminal_time_stamp_s": 4,
       "run_evidence": {
         "completion_marker": "variants/energy_below/outputs/run_complete.json",
-        "executable_resolved": "/global/home/users/yirenqin712/applications/elmfire/elmfire-main/build/linux/bin/elmfire_debug_",
-        "executable_sha256": "2b58920716af28891d9166c5f1046174214994eb20e820981017e4f2d166b001",
-        "log_snapshot_sha256": "9679cd6f7e9cd56c3f8450ac56aa26930ba3559772f053172ad6dabee9429a42",
-        "output_snapshot_sha256": "4af31d38d81646c6916d045cf88a7c2cef48a9358649be6b89e22814d4d5e024"
+        "executable_resolved": "/home/nick/elmfire/elmfire/build/linux/bin/elmfire_1.1",
+        "executable_sha256": "b7c9bb4dc72f01cd2c18e518b7dbd8fd76871728905e68423b103684f537a90a",
+        "log_snapshot_sha256": "3982d544e0b1737f67c1d73738a27b48469d9129c819b9db3e6c7bcbf3a9b601",
+        "output_snapshot_sha256": "a14ec287f5b1cee8e63c9f6cac1f3a81c88ab947027d662b7982c52f58639be8"
       }
     },
     {
@@ -231,15 +231,15 @@
       "normal_displacement_per_step_m": 0.31030292078838534,
       "receiver_phi_upper_bound": 0.0015,
       "target_cfl_displacement_limit_m": 2.0,
-      "runtime_input_fingerprint_sha256": "63da142bcc89d9de5097e2eaa04c280cb1d787ca63c5aa1a98da876792c1e6dc",
-      "recorded_peak_heat_kw_m2": 75.0,
-      "recorded_step_energy_kj": 30000.0,
+      "runtime_input_fingerprint_sha256": "a5502614521baf329b6d021bc2e196224b88874a4328378e1e8febb6624fc2ac",
+      "recorded_peak_heat_kw_m2": 75.0000991821289,
+      "recorded_step_energy_kj": 30000.039672851562,
       "receiver_toa_s": 1.0,
       "selected_heat_time_s": 1.0,
       "selected_heat_dump_index": 2,
-      "measured_vs_ft_min": 61.083248138427734,
-      "oracle_vs_ft_min": 61.08325096297067,
-      "ros_relative_error": 4.624087445521232e-08,
+      "measured_vs_ft_min": 61.083335876464844,
+      "oracle_vs_ft_min": 61.08333174119562,
+      "ros_relative_error": 6.769881576993109e-08,
       "selected_files": {
         "dfc": "variants/energy_equal/outputs/hf_dfc_transient_0000001_d0000002.tif",
         "radiation": "variants/energy_equal/outputs/hf_rad_transient_0000001_d0000002.tif",
@@ -251,10 +251,10 @@
       "terminal_time_stamp_s": 4,
       "run_evidence": {
         "completion_marker": "variants/energy_equal/outputs/run_complete.json",
-        "executable_resolved": "/global/home/users/yirenqin712/applications/elmfire/elmfire-main/build/linux/bin/elmfire_debug_",
-        "executable_sha256": "2b58920716af28891d9166c5f1046174214994eb20e820981017e4f2d166b001",
-        "log_snapshot_sha256": "66a5a52163e0eea15304406b0ee43b15f8e9375d5796f01c87b03c2b395215bc",
-        "output_snapshot_sha256": "eeca3b8f0b746a0b5e5c9899ce4743400406bec194b5adb2b3f3ef27f8055ac4"
+        "executable_resolved": "/home/nick/elmfire/elmfire/build/linux/bin/elmfire_1.1",
+        "executable_sha256": "b7c9bb4dc72f01cd2c18e518b7dbd8fd76871728905e68423b103684f537a90a",
+        "log_snapshot_sha256": "267a31a26d02017c7a6e34a0bb262b8deeb44ce6bb0cbd672ed88790b4ac7980",
+        "output_snapshot_sha256": "3ec224a87474f1b6839065636270d9fe1b3df70cbf5c7b785883e863cbe5482f"
       }
     },
     {
@@ -325,15 +325,15 @@
       "normal_displacement_per_step_m": 0.3113372638576799,
       "receiver_phi_upper_bound": 0.0015,
       "target_cfl_displacement_limit_m": 2.0,
-      "runtime_input_fingerprint_sha256": "9dd3edbc8bddf6ef4a9a263cb4b59972ba204c4a7118869173c97b02134e8b43",
-      "recorded_peak_heat_kw_m2": 75.25,
-      "recorded_step_energy_kj": 30100.0,
+      "runtime_input_fingerprint_sha256": "6fd5105fc48cc506ce8462f72724e480dbd9b47d7252cbe21e00992e4c809e2c",
+      "recorded_peak_heat_kw_m2": 75.25010681152344,
+      "recorded_step_energy_kj": 30100.042724609375,
       "receiver_toa_s": 1.0,
       "selected_heat_time_s": 1.0,
       "selected_heat_dump_index": 2,
-      "measured_vs_ft_min": 61.286861419677734,
-      "oracle_vs_ft_min": 61.28686179951391,
-      "ros_relative_error": 6.197676990275589e-09,
+      "measured_vs_ft_min": 61.286956787109375,
+      "oracle_vs_ft_min": 61.28694879144847,
+      "ros_relative_error": 1.30462701540024e-07,
       "selected_files": {
         "dfc": "variants/energy_above/outputs/hf_dfc_transient_0000001_d0000002.tif",
         "radiation": "variants/energy_above/outputs/hf_rad_transient_0000001_d0000002.tif",
@@ -345,10 +345,10 @@
       "terminal_time_stamp_s": 4,
       "run_evidence": {
         "completion_marker": "variants/energy_above/outputs/run_complete.json",
-        "executable_resolved": "/global/home/users/yirenqin712/applications/elmfire/elmfire-main/build/linux/bin/elmfire_debug_",
-        "executable_sha256": "2b58920716af28891d9166c5f1046174214994eb20e820981017e4f2d166b001",
-        "log_snapshot_sha256": "ee92bd2484a75dab631606d25188518da5a97f162a5a2e7033e0fc2f6da7415a",
-        "output_snapshot_sha256": "8445c697a337c955a5a19eceab866fd410a257ce0b5c546e5baac61d01c47884"
+        "executable_resolved": "/home/nick/elmfire/elmfire/build/linux/bin/elmfire_1.1",
+        "executable_sha256": "b7c9bb4dc72f01cd2c18e518b7dbd8fd76871728905e68423b103684f537a90a",
+        "log_snapshot_sha256": "5d5a8b693c47fb87fd81b53f76bc79c3810b35794fc81fc4f62a1fcbb3df9d1b",
+        "output_snapshot_sha256": "f7c75026091326d579b2bd34c8e26d59efeb19cbac6889e0f0f3313f046e67e3"
       }
     },
     {
@@ -419,15 +419,15 @@
       "normal_displacement_per_step_m": 0.31119878616142377,
       "receiver_phi_upper_bound": 0.0015,
       "target_cfl_displacement_limit_m": 2.0,
-      "runtime_input_fingerprint_sha256": "2d5ccbb7e6b2078d34d8636e06a60fe09cef5323d34cc10642b9d104f45062a1",
-      "recorded_peak_heat_kw_m2": 75.25,
-      "recorded_step_energy_kj": 30100.0,
+      "runtime_input_fingerprint_sha256": "04fd91ce1e10445dace69de02a11ee119e9501809d3bcf6c1f164f38353b2b01",
+      "recorded_peak_heat_kw_m2": 75.2500991821289,
+      "recorded_step_energy_kj": 30100.039672851562,
       "receiver_toa_s": 1.0,
       "selected_heat_time_s": 1.0,
       "selected_heat_dump_index": 2,
-      "measured_vs_ft_min": 61.25959396362305,
-      "oracle_vs_ft_min": 61.25959049663572,
-      "ros_relative_error": 5.65950131564213e-08,
+      "measured_vs_ft_min": 61.25969314575195,
+      "oracle_vs_ft_min": 61.259671238916134,
+      "ros_relative_error": 3.5760616040060373e-07,
       "selected_files": {
         "dfc": "variants/wind_below_35/outputs/hf_dfc_transient_0000001_d0000002.tif",
         "radiation": "variants/wind_below_35/outputs/hf_rad_transient_0000001_d0000002.tif",
@@ -439,10 +439,10 @@
       "terminal_time_stamp_s": 4,
       "run_evidence": {
         "completion_marker": "variants/wind_below_35/outputs/run_complete.json",
-        "executable_resolved": "/global/home/users/yirenqin712/applications/elmfire/elmfire-main/build/linux/bin/elmfire_debug_",
-        "executable_sha256": "2b58920716af28891d9166c5f1046174214994eb20e820981017e4f2d166b001",
-        "log_snapshot_sha256": "3895a109d911ce1d79f5d4de481ba6266af0704b0313bb2f010ce18d04310bde",
-        "output_snapshot_sha256": "d1c54fcc67f4247d4d443f0631cd3992b9cc29ed0527ad048751e71c97a14542"
+        "executable_resolved": "/home/nick/elmfire/elmfire/build/linux/bin/elmfire_1.1",
+        "executable_sha256": "b7c9bb4dc72f01cd2c18e518b7dbd8fd76871728905e68423b103684f537a90a",
+        "log_snapshot_sha256": "74a6204b0edea472c1596f5de8908516480326209215198f72dc6c96721a7fbb",
+        "output_snapshot_sha256": "0e5139fcb5c63d8221d3438a03f6b2c58f26c98242f4346a5b18f3c2037a89fa"
       }
     },
     {
@@ -513,15 +513,15 @@
       "normal_displacement_per_step_m": 0.31118374442808966,
       "receiver_phi_upper_bound": 0.0015,
       "target_cfl_displacement_limit_m": 2.0,
-      "runtime_input_fingerprint_sha256": "477667292b046f98ead499be77f04a5725d513f8d511be33bd9304485c7db321",
-      "recorded_peak_heat_kw_m2": 75.25,
-      "recorded_step_energy_kj": 30100.0,
+      "runtime_input_fingerprint_sha256": "2885f427bae5bb995549ab1dd2edc3e1267ba735fd056318a08eb6d2a8c35e11",
+      "recorded_peak_heat_kw_m2": 75.25005340576172,
+      "recorded_step_energy_kj": 30100.021362304688,
       "receiver_toa_s": 1.0,
       "selected_heat_time_s": 1.0,
       "selected_heat_dump_index": 2,
-      "measured_vs_ft_min": 61.25663757324219,
-      "oracle_vs_ft_min": 61.25663660408514,
-      "ros_relative_error": 1.582125796405965e-08,
+      "measured_vs_ft_min": 61.256683349609375,
+      "oracle_vs_ft_min": 61.256680078601256,
+      "ros_relative_error": 5.339839041866274e-08,
       "selected_files": {
         "dfc": "variants/wind_equal_35/outputs/hf_dfc_transient_0000001_d0000002.tif",
         "radiation": "variants/wind_equal_35/outputs/hf_rad_transient_0000001_d0000002.tif",
@@ -533,10 +533,10 @@
       "terminal_time_stamp_s": 4,
       "run_evidence": {
         "completion_marker": "variants/wind_equal_35/outputs/run_complete.json",
-        "executable_resolved": "/global/home/users/yirenqin712/applications/elmfire/elmfire-main/build/linux/bin/elmfire_debug_",
-        "executable_sha256": "2b58920716af28891d9166c5f1046174214994eb20e820981017e4f2d166b001",
-        "log_snapshot_sha256": "1c7a030b5c2912e9b81f780ccb0cb9ac0fa8e1235ee9413d1b6a24ec25c188cf",
-        "output_snapshot_sha256": "509908d31ede9bbf3fde5a5250f8fae2c41bac5e617edbc00c6cb709b700ed47"
+        "executable_resolved": "/home/nick/elmfire/elmfire/build/linux/bin/elmfire_1.1",
+        "executable_sha256": "b7c9bb4dc72f01cd2c18e518b7dbd8fd76871728905e68423b103684f537a90a",
+        "log_snapshot_sha256": "3bcbf050aa846449d034895b25602a0a413b120d96b3cc082fdbf606cd028de6",
+        "output_snapshot_sha256": "24b002e4a37ba9b1159907779e454e2041c15413794f0dff710f843d1b7a5771"
       }
     },
     {
@@ -607,15 +607,15 @@
       "normal_displacement_per_step_m": 0.31116878284868943,
       "receiver_phi_upper_bound": 0.0015,
       "target_cfl_displacement_limit_m": 2.0,
-      "runtime_input_fingerprint_sha256": "115c4c5d0237863520cfa23410aa094455622d5e60808204b6ece4d5c79dbe49",
-      "recorded_peak_heat_kw_m2": 75.25,
-      "recorded_step_energy_kj": 30100.0,
+      "runtime_input_fingerprint_sha256": "cbe4664fafa57531237bf584d75caf493af81e27ad6a46e5a30ad66689193713",
+      "recorded_peak_heat_kw_m2": 75.25009155273438,
+      "recorded_step_energy_kj": 30100.03662109375,
       "receiver_toa_s": 1.0,
       "selected_heat_time_s": 1.0,
       "selected_heat_dump_index": 2,
-      "measured_vs_ft_min": 61.253692626953125,
-      "oracle_vs_ft_min": 61.25369019119264,
-      "ros_relative_error": 3.976512236487274e-08,
+      "measured_vs_ft_min": 61.253780364990234,
+      "oracle_vs_ft_min": 61.253764715349824,
+      "ros_relative_error": 2.554886296859662e-07,
       "selected_files": {
         "dfc": "variants/wind_above_35/outputs/hf_dfc_transient_0000001_d0000002.tif",
         "radiation": "variants/wind_above_35/outputs/hf_rad_transient_0000001_d0000002.tif",
@@ -627,10 +627,10 @@
       "terminal_time_stamp_s": 4,
       "run_evidence": {
         "completion_marker": "variants/wind_above_35/outputs/run_complete.json",
-        "executable_resolved": "/global/home/users/yirenqin712/applications/elmfire/elmfire-main/build/linux/bin/elmfire_debug_",
-        "executable_sha256": "2b58920716af28891d9166c5f1046174214994eb20e820981017e4f2d166b001",
-        "log_snapshot_sha256": "5ff8928bd464e2bd2db57a249a01d7724b7206f7a666694af567aed5fb3a2cb3",
-        "output_snapshot_sha256": "52e9d3561b6a2a2f15eada9eceb5deaf4eec231bf8dc6b21e139994a89a77f82"
+        "executable_resolved": "/home/nick/elmfire/elmfire/build/linux/bin/elmfire_1.1",
+        "executable_sha256": "b7c9bb4dc72f01cd2c18e518b7dbd8fd76871728905e68423b103684f537a90a",
+        "log_snapshot_sha256": "467d064c4eb62b955b0286a858c6b96d5fab3c60d459d2eb9bb30460751d75b8",
+        "output_snapshot_sha256": "1b8eca4601184443a26e838be5f200f93cdd7a0f175e7038852941db7c830268"
       }
     },
     {
@@ -701,15 +701,15 @@
       "normal_displacement_per_step_m": 0.10372791480936325,
       "receiver_phi_upper_bound": 0.0015,
       "target_cfl_displacement_limit_m": 2.0,
-      "runtime_input_fingerprint_sha256": "7eea0a14903b06e407765a929994d39ba152eab5552be08d18bf91e454be512b",
-      "recorded_peak_heat_kw_m2": 75.25000095367432,
-      "recorded_step_energy_kj": 30100.000381469727,
+      "runtime_input_fingerprint_sha256": "467c6c26215db3624cdda66f27e3f498181249ffe7aae8a392b5719cd97df4b1",
+      "recorded_peak_heat_kw_m2": 75.25005102157593,
+      "recorded_step_energy_kj": 30100.02040863037,
       "receiver_toa_s": 1.0,
       "selected_heat_time_s": 1.0,
       "selected_heat_dump_index": 2,
-      "measured_vs_ft_min": 20.41887664794922,
-      "oracle_vs_ft_min": 20.418879126805265,
-      "ros_relative_error": 1.2140020180619368e-07,
+      "measured_vs_ft_min": 20.418895721435547,
+      "oracle_vs_ft_min": 20.418892712591553,
+      "ros_relative_error": 1.4735588436964143e-07,
       "selected_files": {
         "dfc": "variants/normal_back/outputs/hf_dfc_transient_0000001_d0000002.tif",
         "radiation": "variants/normal_back/outputs/hf_rad_transient_0000001_d0000002.tif",
@@ -721,10 +721,10 @@
       "terminal_time_stamp_s": 4,
       "run_evidence": {
         "completion_marker": "variants/normal_back/outputs/run_complete.json",
-        "executable_resolved": "/global/home/users/yirenqin712/applications/elmfire/elmfire-main/build/linux/bin/elmfire_debug_",
-        "executable_sha256": "2b58920716af28891d9166c5f1046174214994eb20e820981017e4f2d166b001",
-        "log_snapshot_sha256": "c502a90221638178f0673ee983c3ed1c58c1c20f45702b06bb3706c99b7adea1",
-        "output_snapshot_sha256": "a0141658ec60ae54f696d3c1793d2779c3a513310145b088d81cf34a6762a1b3"
+        "executable_resolved": "/home/nick/elmfire/elmfire/build/linux/bin/elmfire_1.1",
+        "executable_sha256": "b7c9bb4dc72f01cd2c18e518b7dbd8fd76871728905e68423b103684f537a90a",
+        "log_snapshot_sha256": "90305741122d0fab2ca7469e783f3a0b8f7897d261d1b53cbffaf7b1d2c80fbe",
+        "output_snapshot_sha256": "c13767eeda5c904fe67e730d948969450ef153d5f6fa022562a238d71d84b8b0"
       }
     },
     {
@@ -795,15 +795,15 @@
       "normal_displacement_per_step_m": 0.08675500742921388,
       "receiver_phi_upper_bound": 0.0015,
       "target_cfl_displacement_limit_m": 2.0,
-      "runtime_input_fingerprint_sha256": "be05057aa42c0e50a077e656a06269556760a4f10f29bd2bf3fdcee6c9f66a04",
-      "recorded_peak_heat_kw_m2": 75.25000190734863,
-      "recorded_step_energy_kj": 30100.000762939453,
+      "runtime_input_fingerprint_sha256": "c6b6871a16ac81c61085abd5a40356e96a2ac8d98729ab3000f3b1326d9192a3",
+      "recorded_peak_heat_kw_m2": 75.25006866455078,
+      "recorded_step_energy_kj": 30100.027465820312,
       "receiver_toa_s": 1.0,
       "selected_heat_time_s": 1.0,
       "selected_heat_dump_index": 2,
-      "measured_vs_ft_min": 26.624711990356445,
-      "oracle_vs_ft_min": 26.619179553561672,
-      "ros_relative_error": 0.0002078364881096828,
+      "measured_vs_ft_min": 26.62472915649414,
+      "oracle_vs_ft_min": 26.61920316847071,
+      "ros_relative_error": 0.00020759404361037163,
       "selected_files": {
         "dfc": "variants/normal_side/outputs/hf_dfc_transient_0000001_d0000002.tif",
         "radiation": "variants/normal_side/outputs/hf_rad_transient_0000001_d0000002.tif",
@@ -815,10 +815,10 @@
       "terminal_time_stamp_s": 4,
       "run_evidence": {
         "completion_marker": "variants/normal_side/outputs/run_complete.json",
-        "executable_resolved": "/global/home/users/yirenqin712/applications/elmfire/elmfire-main/build/linux/bin/elmfire_debug_",
-        "executable_sha256": "2b58920716af28891d9166c5f1046174214994eb20e820981017e4f2d166b001",
-        "log_snapshot_sha256": "17b65f1b77d25cc2ad938d2c3f5180e5676488c29be7b095333066a73e6dc3e4",
-        "output_snapshot_sha256": "634326c367bcfc3f1b62d0a0ad04efb231034ed7fc2e01e31113911fabf6da9c"
+        "executable_resolved": "/home/nick/elmfire/elmfire/build/linux/bin/elmfire_1.1",
+        "executable_sha256": "b7c9bb4dc72f01cd2c18e518b7dbd8fd76871728905e68423b103684f537a90a",
+        "log_snapshot_sha256": "e25e47738262aa394b5ca87228c87a84caa1687d5fe1c52912fd2c3d81e6d4e1",
+        "output_snapshot_sha256": "b047bac10c6a6efb85d3b5c6e4217b7fa926681ce8348b3bf59065c4b09fefd4"
       }
     },
     {
@@ -889,15 +889,15 @@
       "normal_displacement_per_step_m": 0.15559187221404483,
       "receiver_phi_upper_bound": 0.0015,
       "target_cfl_displacement_limit_m": 2.0,
-      "runtime_input_fingerprint_sha256": "055073825a00b679d0aa3d3947ce4195dc5785b61e84c6832649170c1be548df",
-      "recorded_peak_heat_kw_m2": 37.625,
-      "recorded_step_energy_kj": 15050.0,
+      "runtime_input_fingerprint_sha256": "f2adf0492afcdef8d72c8b64da32d38a9e82da625df94fe1b1993a575358a066",
+      "recorded_peak_heat_kw_m2": 37.62502670288086,
+      "recorded_step_energy_kj": 15050.010681152344,
       "receiver_toa_s": 1.0,
       "selected_heat_time_s": 1.0,
       "selected_heat_dump_index": 2,
-      "measured_vs_ft_min": 30.628318786621094,
-      "oracle_vs_ft_min": 30.62831830204257,
-      "ros_relative_error": 1.582125796405965e-08,
+      "measured_vs_ft_min": 30.628341674804688,
+      "oracle_vs_ft_min": 30.628340039300628,
+      "ros_relative_error": 5.339839041866274e-08,
       "selected_files": {
         "dfc": "variants/hrr_half/outputs/hf_dfc_transient_0000001_d0000002.tif",
         "radiation": "variants/hrr_half/outputs/hf_rad_transient_0000001_d0000002.tif",
@@ -909,10 +909,10 @@
       "terminal_time_stamp_s": 4,
       "run_evidence": {
         "completion_marker": "variants/hrr_half/outputs/run_complete.json",
-        "executable_resolved": "/global/home/users/yirenqin712/applications/elmfire/elmfire-main/build/linux/bin/elmfire_debug_",
-        "executable_sha256": "2b58920716af28891d9166c5f1046174214994eb20e820981017e4f2d166b001",
-        "log_snapshot_sha256": "31fd5a089964ac6c3199ad7686776d08b83e1c0fb7ba467423c5e086e549cd71",
-        "output_snapshot_sha256": "14ebd5147508a90926ad01642fa4b12444084c8f219c9743b1443001153cf245"
+        "executable_resolved": "/home/nick/elmfire/elmfire/build/linux/bin/elmfire_1.1",
+        "executable_sha256": "b7c9bb4dc72f01cd2c18e518b7dbd8fd76871728905e68423b103684f537a90a",
+        "log_snapshot_sha256": "fbd32659e442fa79ae7fa6c3f5afde25c7a35cdede3a10ec305332396bf676dd",
+        "output_snapshot_sha256": "2c107c4ebfabde5ec67c879169d4fff8759104ef375b36094fd8a93ea6898623"
       }
     },
     {
@@ -983,15 +983,15 @@
       "normal_displacement_per_step_m": 0.6223674888561793,
       "receiver_phi_upper_bound": 0.0015,
       "target_cfl_displacement_limit_m": 2.0,
-      "runtime_input_fingerprint_sha256": "ef6a48f2ae5b93b9d944417ef19d34121ffffa2cc7184208db51fccf165f4483",
-      "recorded_peak_heat_kw_m2": 150.5,
-      "recorded_step_energy_kj": 60200.0,
+      "runtime_input_fingerprint_sha256": "7c8e41096bee62d2ff5b5a4768f7dce96438a11775266cf2e2d22344cc38dcb1",
+      "recorded_peak_heat_kw_m2": 150.50010681152344,
+      "recorded_step_energy_kj": 60200.042724609375,
       "receiver_toa_s": 1.0,
       "selected_heat_time_s": 1.0,
       "selected_heat_dump_index": 2,
-      "measured_vs_ft_min": 122.51327514648438,
-      "oracle_vs_ft_min": 122.51327320817028,
-      "ros_relative_error": 1.582125796405965e-08,
+      "measured_vs_ft_min": 122.51336669921875,
+      "oracle_vs_ft_min": 122.51336015720251,
+      "ros_relative_error": 5.339839041866274e-08,
       "selected_files": {
         "dfc": "variants/hrr_double/outputs/hf_dfc_transient_0000001_d0000002.tif",
         "radiation": "variants/hrr_double/outputs/hf_rad_transient_0000001_d0000002.tif",
@@ -1003,10 +1003,10 @@
       "terminal_time_stamp_s": 4,
       "run_evidence": {
         "completion_marker": "variants/hrr_double/outputs/run_complete.json",
-        "executable_resolved": "/global/home/users/yirenqin712/applications/elmfire/elmfire-main/build/linux/bin/elmfire_debug_",
-        "executable_sha256": "2b58920716af28891d9166c5f1046174214994eb20e820981017e4f2d166b001",
-        "log_snapshot_sha256": "8949dc477cc3521cb13af3542e98a0e8ea7c0f7cb483ea0ab4563e560b022823",
-        "output_snapshot_sha256": "dee65adb7cf33dc92946ebb6c67444f2b692d2f70802ed6bc9d2fb31738f04f6"
+        "executable_resolved": "/home/nick/elmfire/elmfire/build/linux/bin/elmfire_1.1",
+        "executable_sha256": "b7c9bb4dc72f01cd2c18e518b7dbd8fd76871728905e68423b103684f537a90a",
+        "log_snapshot_sha256": "f7af746b93d9f754e994eb656f82b875391b06a774ff98855f509b518358256d",
+        "output_snapshot_sha256": "d3be4470aaac42dbf958c85a3770477de81ee5edf6046985002bb82ecd18281f"
       }
     },
     {
@@ -1077,15 +1077,15 @@
       "normal_displacement_per_step_m": 0.31118374442808966,
       "receiver_phi_upper_bound": 0.0015,
       "target_cfl_displacement_limit_m": 2.0,
-      "runtime_input_fingerprint_sha256": "880982a7d3fcc23e7b2c8bd9df6315c76944ddcd6a01ca6e0d81bb8614deba6a",
-      "recorded_peak_heat_kw_m2": 75.25,
-      "recorded_step_energy_kj": 30100.0,
+      "runtime_input_fingerprint_sha256": "a5ea3916a41888ae6455a255822dc4c4ec7cd6bccfbcb4e0dc5b6a84ea23ff48",
+      "recorded_peak_heat_kw_m2": 75.25005340576172,
+      "recorded_step_energy_kj": 30100.021362304688,
       "receiver_toa_s": 1.0,
       "selected_heat_time_s": 1.0,
       "selected_heat_dump_index": 2,
-      "measured_vs_ft_min": 61.25663757324219,
-      "oracle_vs_ft_min": 61.25663660408514,
-      "ros_relative_error": 1.582125796405965e-08,
+      "measured_vs_ft_min": 61.256683349609375,
+      "oracle_vs_ft_min": 61.256680078601256,
+      "ros_relative_error": 5.339839041866274e-08,
       "selected_files": {
         "dfc": "variants/ftp_low/outputs/hf_dfc_transient_0000001_d0000002.tif",
         "radiation": "variants/ftp_low/outputs/hf_rad_transient_0000001_d0000002.tif",
@@ -1097,10 +1097,10 @@
       "terminal_time_stamp_s": 4,
       "run_evidence": {
         "completion_marker": "variants/ftp_low/outputs/run_complete.json",
-        "executable_resolved": "/global/home/users/yirenqin712/applications/elmfire/elmfire-main/build/linux/bin/elmfire_debug_",
-        "executable_sha256": "2b58920716af28891d9166c5f1046174214994eb20e820981017e4f2d166b001",
-        "log_snapshot_sha256": "82db6f08b9c1c4cd229b289190469e7d8e1e5c86d01d7a42c56c9a0190a086fe",
-        "output_snapshot_sha256": "5e0f1603694d45cd124cf5d1ce852abc650a42248f385d317d70c80e26dda730"
+        "executable_resolved": "/home/nick/elmfire/elmfire/build/linux/bin/elmfire_1.1",
+        "executable_sha256": "b7c9bb4dc72f01cd2c18e518b7dbd8fd76871728905e68423b103684f537a90a",
+        "log_snapshot_sha256": "7c9775eef4247536b4c319c603e1bcd73e9265d01a1778a19ae70f0d401b41be",
+        "output_snapshot_sha256": "b163442cb34663cfaf9b8386ae4b5af5d526244c5c5b4f74c1e71e88f683edce"
       }
     },
     {
@@ -1171,15 +1171,15 @@
       "normal_displacement_per_step_m": 0.15559187221404483,
       "receiver_phi_upper_bound": 0.0015,
       "target_cfl_displacement_limit_m": 2.0,
-      "runtime_input_fingerprint_sha256": "1075d19a5e282b95f4b498d8e233936452593e47af7006a25cba079d591f6fcd",
-      "recorded_peak_heat_kw_m2": 75.25,
-      "recorded_step_energy_kj": 30100.0,
+      "runtime_input_fingerprint_sha256": "a0d3f571e5d4b4cda3cbd4e583b4238caeb5b8a6d14f9e56a51b508539e369ff",
+      "recorded_peak_heat_kw_m2": 75.25005340576172,
+      "recorded_step_energy_kj": 30100.021362304688,
       "receiver_toa_s": 1.0,
       "selected_heat_time_s": 1.0,
       "selected_heat_dump_index": 2,
-      "measured_vs_ft_min": 30.628318786621094,
-      "oracle_vs_ft_min": 30.62831830204257,
-      "ros_relative_error": 1.582125796405965e-08,
+      "measured_vs_ft_min": 30.628341674804688,
+      "oracle_vs_ft_min": 30.628340039300628,
+      "ros_relative_error": 5.339839041866274e-08,
       "selected_files": {
         "dfc": "variants/ftp_high/outputs/hf_dfc_transient_0000001_d0000002.tif",
         "radiation": "variants/ftp_high/outputs/hf_rad_transient_0000001_d0000002.tif",
@@ -1191,10 +1191,10 @@
       "terminal_time_stamp_s": 4,
       "run_evidence": {
         "completion_marker": "variants/ftp_high/outputs/run_complete.json",
-        "executable_resolved": "/global/home/users/yirenqin712/applications/elmfire/elmfire-main/build/linux/bin/elmfire_debug_",
-        "executable_sha256": "2b58920716af28891d9166c5f1046174214994eb20e820981017e4f2d166b001",
-        "log_snapshot_sha256": "d68c2a42b522ab6f55b7ffd6fab42aed767ef258d5646733ad807e0663c58af3",
-        "output_snapshot_sha256": "9daa33994eac81c43fc53eba256d0e24942f6ab91b7d3ef35fe7c2a57fa1c8fd"
+        "executable_resolved": "/home/nick/elmfire/elmfire/build/linux/bin/elmfire_1.1",
+        "executable_sha256": "b7c9bb4dc72f01cd2c18e518b7dbd8fd76871728905e68423b103684f537a90a",
+        "log_snapshot_sha256": "dec18606d2d2021b917edd242f6b008a55c61d2fd3f9c401e557f05d05819724",
+        "output_snapshot_sha256": "7035f42f03303d165245c50a7a657e74dab793a8385dbb369b6dc5ded2ce4c1e"
       }
     }
   ]

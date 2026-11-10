@@ -15,7 +15,7 @@
   "toa_invariance_passed": true,
   "minimum_active_count": 0.0,
   "nonnegative_active_counts_passed": true,
-  "dx5_normalized_l1_profile_error": 0.03634302903315291,
+  "dx5_normalized_l1_profile_error": 0.036343236378561926,
   "acceptance_dx5_normalized_l1_error": 0.15,
   "dx5_profile_passed": true,
   "ordered_profile_convergence_passed": true,
@@ -32,9 +32,9 @@
     "30": 0.0
   },
   "normalized_l1_profile_error_by_dx": {
-    "5": 0.03634302903315291,
-    "10": 0.07775442977280766,
-    "30": 0.3511005060669083
+    "5": 0.036343236378561926,
+    "10": 0.07775448082337345,
+    "30": 0.3511004689632788
   },
   "variants": [
     {
@@ -44,7 +44,7 @@
       "evaluation_time_s": 260.0,
       "consumption_enabled": false,
       "error": "",
-      "total_centerline_active_pcs": 19051.16340756789,
+      "total_centerline_active_pcs": 19051.161196880043,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000260.tif",
       "toa_file": "time_of_arrival_0000001_0000260.tif"
@@ -56,7 +56,7 @@
       "evaluation_time_s": 260.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 19051.16340756789,
+      "total_centerline_active_pcs": 19051.161196880043,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000260.tif",
       "toa_file": "time_of_arrival_0000001_0000260.tif"
@@ -68,7 +68,7 @@
       "evaluation_time_s": 50.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 3615.251698479522,
+      "total_centerline_active_pcs": 3615.251205473207,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000050.tif",
       "toa_file": "time_of_arrival_0000001_0000050.tif"
@@ -80,7 +80,7 @@
       "evaluation_time_s": 100.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 7296.190125755966,
+      "total_centerline_active_pcs": 7296.18917878205,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000100.tif",
       "toa_file": "time_of_arrival_0000001_0000100.tif"
@@ -92,7 +92,7 @@
       "evaluation_time_s": 150.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 10953.1637337422,
+      "total_centerline_active_pcs": 10953.162346066441,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000150.tif",
       "toa_file": "time_of_arrival_0000001_0000150.tif"
@@ -104,7 +104,7 @@
       "evaluation_time_s": 200.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 14629.400475007948,
+      "total_centerline_active_pcs": 14629.39863722818,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000200.tif",
       "toa_file": "time_of_arrival_0000001_0000200.tif"
@@ -116,7 +116,7 @@
       "evaluation_time_s": 250.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 18309.70970872743,
+      "total_centerline_active_pcs": 18309.707549401093,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000250.tif",
       "toa_file": "time_of_arrival_0000001_0000250.tif"
@@ -128,7 +128,7 @@
       "evaluation_time_s": 300.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 21988.794728696346,
+      "total_centerline_active_pcs": 21988.792062669992,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000300.tif",
       "toa_file": "time_of_arrival_0000001_0000300.tif"
@@ -140,7 +140,7 @@
       "evaluation_time_s": 350.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 25628.51795053482,
+      "total_centerline_active_pcs": 25628.51485955715,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000350.tif",
       "toa_file": "time_of_arrival_0000001_0000350.tif"
@@ -152,7 +152,7 @@
       "evaluation_time_s": 400.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 29229.968864440918,
+      "total_centerline_active_pcs": 29229.96538925171,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000400.tif",
       "toa_file": "time_of_arrival_0000001_0000400.tif"
@@ -164,7 +164,7 @@
       "evaluation_time_s": 450.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 32699.755818367004,
+      "total_centerline_active_pcs": 32699.752024173737,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000450.tif",
       "toa_file": "time_of_arrival_0000001_0000450.tif"
@@ -176,7 +176,7 @@
       "evaluation_time_s": 500.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 35586.8371887207,
+      "total_centerline_active_pcs": 35586.83317518234,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000500.tif",
       "toa_file": "time_of_arrival_0000001_0000500.tif"
@@ -188,7 +188,7 @@
       "evaluation_time_s": 260.0,
       "consumption_enabled": false,
       "error": "",
-      "total_centerline_active_pcs": 19224.080558866262,
+      "total_centerline_active_pcs": 19224.0739325881,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000260.tif",
       "toa_file": "time_of_arrival_0000001_0000260.tif"
@@ -200,7 +200,7 @@
       "evaluation_time_s": 260.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 19224.080558866262,
+      "total_centerline_active_pcs": 19224.0739325881,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000260.tif",
       "toa_file": "time_of_arrival_0000001_0000260.tif"
@@ -212,7 +212,7 @@
       "evaluation_time_s": 50.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 3863.640401273966,
+      "total_centerline_active_pcs": 3863.6397246718407,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000050.tif",
       "toa_file": "time_of_arrival_0000001_0000050.tif"
@@ -224,7 +224,7 @@
       "evaluation_time_s": 100.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 7467.113333836198,
+      "total_centerline_active_pcs": 7467.111455351114,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000100.tif",
       "toa_file": "time_of_arrival_0000001_0000100.tif"
@@ -236,7 +236,7 @@
       "evaluation_time_s": 150.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 11123.191312260926,
+      "total_centerline_active_pcs": 11123.188091620803,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000150.tif",
       "toa_file": "time_of_arrival_0000001_0000150.tif"
@@ -248,7 +248,7 @@
       "evaluation_time_s": 200.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 14780.26418313384,
+      "total_centerline_active_pcs": 14780.259387910366,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000200.tif",
       "toa_file": "time_of_arrival_0000001_0000200.tif"
@@ -260,7 +260,7 @@
       "evaluation_time_s": 250.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 18437.34618279338,
+      "total_centerline_active_pcs": 18437.339867293835,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000250.tif",
       "toa_file": "time_of_arrival_0000001_0000250.tif"
@@ -272,7 +272,7 @@
       "evaluation_time_s": 300.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 22063.819264888763,
+      "total_centerline_active_pcs": 22063.81125974655,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000300.tif",
       "toa_file": "time_of_arrival_0000001_0000300.tif"
@@ -284,7 +284,7 @@
       "evaluation_time_s": 350.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 25697.898922920227,
+      "total_centerline_active_pcs": 25697.8891582489,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000350.tif",
       "toa_file": "time_of_arrival_0000001_0000350.tif"
@@ -296,7 +296,7 @@
       "evaluation_time_s": 400.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 29409.751874923706,
+      "total_centerline_active_pcs": 29409.74029159546,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000400.tif",
       "toa_file": "time_of_arrival_0000001_0000400.tif"
@@ -308,7 +308,7 @@
       "evaluation_time_s": 450.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 32828.75668334961,
+      "total_centerline_active_pcs": 32828.743408203125,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000450.tif",
       "toa_file": "time_of_arrival_0000001_0000450.tif"
@@ -320,7 +320,7 @@
       "evaluation_time_s": 500.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 35516.37602233887,
+      "total_centerline_active_pcs": 35516.36117553711,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000500.tif",
       "toa_file": "time_of_arrival_0000001_0000500.tif"
@@ -332,7 +332,7 @@
       "evaluation_time_s": 260.0,
       "consumption_enabled": false,
       "error": "",
-      "total_centerline_active_pcs": 19364.171889662743,
+      "total_centerline_active_pcs": 19364.16908222437,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000260.tif",
       "toa_file": "time_of_arrival_0000001_0000260.tif"
@@ -344,7 +344,7 @@
       "evaluation_time_s": 260.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 19364.171889662743,
+      "total_centerline_active_pcs": 19364.16908222437,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000260.tif",
       "toa_file": "time_of_arrival_0000001_0000260.tif"
@@ -356,7 +356,7 @@
       "evaluation_time_s": 50.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 4126.696591973305,
+      "total_centerline_active_pcs": 4126.696290075779,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000050.tif",
       "toa_file": "time_of_arrival_0000001_0000050.tif"
@@ -368,7 +368,7 @@
       "evaluation_time_s": 100.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 7937.214585661888,
+      "total_centerline_active_pcs": 7937.213698923588,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000100.tif",
       "toa_file": "time_of_arrival_0000001_0000100.tif"
@@ -380,7 +380,7 @@
       "evaluation_time_s": 150.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 11722.024398803711,
+      "total_centerline_active_pcs": 11722.022819042206,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000150.tif",
       "toa_file": "time_of_arrival_0000001_0000150.tif"
@@ -392,7 +392,7 @@
       "evaluation_time_s": 200.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 15201.16943693161,
+      "total_centerline_active_pcs": 15201.167239189148,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000200.tif",
       "toa_file": "time_of_arrival_0000001_0000200.tif"
@@ -404,7 +404,7 @@
       "evaluation_time_s": 250.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 18820.415650248528,
+      "total_centerline_active_pcs": 18820.41285920143,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000250.tif",
       "toa_file": "time_of_arrival_0000001_0000250.tif"
@@ -416,7 +416,7 @@
       "evaluation_time_s": 300.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 22258.927322864532,
+      "total_centerline_active_pcs": 22258.924229621887,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000300.tif",
       "toa_file": "time_of_arrival_0000001_0000300.tif"
@@ -428,7 +428,7 @@
       "evaluation_time_s": 350.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 26027.26459312439,
+      "total_centerline_active_pcs": 26027.261121749878,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000350.tif",
       "toa_file": "time_of_arrival_0000001_0000350.tif"
@@ -440,7 +440,7 @@
       "evaluation_time_s": 400.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 29383.48285293579,
+      "total_centerline_active_pcs": 29383.479095458984,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000400.tif",
       "toa_file": "time_of_arrival_0000001_0000400.tif"
@@ -452,7 +452,7 @@
       "evaluation_time_s": 450.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 32894.9757232666,
+      "total_centerline_active_pcs": 32894.971618652344,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000450.tif",
       "toa_file": "time_of_arrival_0000001_0000450.tif"
@@ -464,7 +464,7 @@
       "evaluation_time_s": 500.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 35312.17175292969,
+      "total_centerline_active_pcs": 35312.16729736328,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000500.tif",
       "toa_file": "time_of_arrival_0000001_0000500.tif"
@@ -476,7 +476,7 @@
       "evaluation_time_s": 260.0,
       "consumption_enabled": false,
       "error": "",
-      "total_centerline_active_pcs": 21219.36627960205,
+      "total_centerline_active_pcs": 21219.364654541016,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000260.tif",
       "toa_file": "time_of_arrival_0000001_0000260.tif"
@@ -488,7 +488,7 @@
       "evaluation_time_s": 260.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 21219.36627960205,
+      "total_centerline_active_pcs": 21219.364654541016,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000260.tif",
       "toa_file": "time_of_arrival_0000001_0000260.tif"
@@ -500,7 +500,7 @@
       "evaluation_time_s": 50.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 3072.859101295471,
+      "total_centerline_active_pcs": 3072.858314037323,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000050.tif",
       "toa_file": "time_of_arrival_0000001_0000050.tif"
@@ -512,7 +512,7 @@
       "evaluation_time_s": 100.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 8509.754282951355,
+      "total_centerline_active_pcs": 8509.75331401825,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000100.tif",
       "toa_file": "time_of_arrival_0000001_0000100.tif"
@@ -524,7 +524,7 @@
       "evaluation_time_s": 150.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 12878.142652988434,
+      "total_centerline_active_pcs": 12878.142240047455,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000150.tif",
       "toa_file": "time_of_arrival_0000001_0000150.tif"
@@ -536,7 +536,7 @@
       "evaluation_time_s": 200.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 16687.127623558044,
+      "total_centerline_active_pcs": 16687.126363754272,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000200.tif",
       "toa_file": "time_of_arrival_0000001_0000200.tif"
@@ -548,7 +548,7 @@
       "evaluation_time_s": 250.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 20491.432483673096,
+      "total_centerline_active_pcs": 20491.43087387085,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000250.tif",
       "toa_file": "time_of_arrival_0000001_0000250.tif"
@@ -560,7 +560,7 @@
       "evaluation_time_s": 300.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 24266.724250793457,
+      "total_centerline_active_pcs": 24266.722396850586,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000300.tif",
       "toa_file": "time_of_arrival_0000001_0000300.tif"
@@ -572,7 +572,7 @@
       "evaluation_time_s": 350.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 27261.802490234375,
+      "total_centerline_active_pcs": 27261.80044555664,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000350.tif",
       "toa_file": "time_of_arrival_0000001_0000350.tif"
@@ -584,7 +584,7 @@
       "evaluation_time_s": 400.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 30807.173828125,
+      "total_centerline_active_pcs": 30807.171630859375,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000400.tif",
       "toa_file": "time_of_arrival_0000001_0000400.tif"
@@ -596,7 +596,7 @@
       "evaluation_time_s": 450.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 33418.016845703125,
+      "total_centerline_active_pcs": 33418.0146484375,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000450.tif",
       "toa_file": "time_of_arrival_0000001_0000450.tif"
@@ -608,7 +608,7 @@
       "evaluation_time_s": 500.0,
       "consumption_enabled": true,
       "error": "",
-      "total_centerline_active_pcs": 33418.016845703125,
+      "total_centerline_active_pcs": 33418.0146484375,
       "minimum_full_raster_count": 0.0,
       "ember_file": "ember_flux_0000001_0000500.tif",
       "toa_file": "time_of_arrival_0000001_0000500.tif"

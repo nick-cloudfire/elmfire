@@ -2,29 +2,29 @@
   "schema_version": 3,
   "suite": "verification",
   "aggregate_environment": {
-    "Captured at (UTC)": "2026-10-22T05:27:03+00:00",
-    "Repository revision": "51453eb80806",
+    "Captured at (UTC)": "2026-11-10T14:59:21+00:00",
+    "Repository revision": "cccb083553a0",
     "Repository state": "dirty",
-    "Host platform": "macOS-15.7.7-arm64-arm-64bit",
-    "Processor architecture": "arm64",
-    "Fortran compiler": "GNU Fortran (Homebrew GCC 14.2.0_1) 14.2.0",
-    "Python version": "CPython 3.12.9",
-    "Python runtime": "CPython 3.12.9 (/opt/homebrew/anaconda3/bin/python)",
-    "Conda environment": "not active",
+    "Host platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "Processor architecture": "x86_64",
+    "Fortran compiler": "GNU Fortran (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+    "Python version": "CPython 3.11.11",
+    "Python runtime": "CPython 3.11.11 (/home/nick/miniconda3/envs/elmfire/bin/python3)",
+    "Conda environment": "elmfire / /home/nick/miniconda3/envs/elmfire",
     "ELMFIRE command": "elmfire",
-    "ELMFIRE resolved path": "not found on PATH",
+    "ELMFIRE resolved path": "/home/nick/elmfire/elmfire/build/linux/bin/elmfire",
     "ELMFIRE version declaration": "not declared",
-    "ELMFIRE executable SHA-256": "not available",
-    "MPI launcher": "not available",
+    "ELMFIRE executable SHA-256": "b7c9bb4dc72f01cd2c18e518b7dbd8fd76871728905e68423b103684f537a90a",
+    "MPI launcher": "mpirun (Open MPI) 4.1.6",
     "Slurm allocation": "not a Slurm build job",
     "Loaded modules": "not recorded",
-    "Python packages": "NumPy 1.26.4; Matplotlib 3.9.2; PyYAML 6.0.1; Rasterio 1.5.0; GDAL not installed; Pandas 2.2.2; GeoPandas not installed; Shapely not installed"
+    "Python packages": "NumPy 2.3.5; Matplotlib 3.10.8; PyYAML 6.0.3; Rasterio 1.4.3; GDAL 3.10.0; Pandas 3.0.3; GeoPandas 1.1.1; Shapely 2.0.7"
   },
   "case_count": 49,
   "decision_counts": {
-    "FAIL": 11,
+    "FAIL": 12,
     "NOT EVALUABLE": 7,
-    "PASS": 31
+    "PASS": 30
   },
   "cases": [
     {
@@ -754,9 +754,9 @@
       "report_available": true,
       "metrics_file": "cases/Verification/coupling_tests/CASE43_WER/outputs/metrics.json",
       "metrics_available": true,
-      "raw_status": "PASS",
-      "decision": "PASS",
-      "detail": "All required variants and acceptance metrics passed."
+      "raw_status": "FAIL",
+      "decision": "FAIL",
+      "detail": "One or more acceptance metrics failed."
     },
     {
       "case_id": "CASE44_WHP",

@@ -6,9 +6,9 @@
 \newcommand{\InputMetric}[1]{\ifcsname inputmetric@#1\endcsname\csname inputmetric@#1\endcsname\else\textbf{MISSING}\fi}
 \makeatother
 
-\DefineMetric{status}{NOT EVALUABLE}
-\DefineMetric{reason}{No simulation result is available for this case.}
-\DefineMetric{simulations_found}{0}
+\DefineMetric{status}{CHARACTERIZED}
+\DefineMetric{reason}{Metrics are descriptive because no independent predeclared acceptance thresholds are available.}
+\DefineMetric{simulations_found}{1}
 \DefineInputMetric{dem_minimum}{1{,}175}
 \DefineInputMetric{dem_mean}{1{,}558}
 \DefineInputMetric{dem_median}{1{,}489}
@@ -108,14 +108,66 @@
 \DefineInputMetric{max_ignition_move_m}{0}
 
 \newcommand{\SimulationFields}{%
-\textbf{No simulation.} No ELMFIRE result is available for this fire yet. Input and observation characterization is complete, but no footprint, arrival-time or growth metric can be calculated until the case configuration is simulated.
+\subsection*{Current case configuration}
+
+Configuration description not documented in the available case materials.
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.98\textwidth,height=0.42\textheight,keepaspectratio]{comparison_current.pdf}
+\caption{Current case configuration: simulated and GOFER-derived footprints at the fixed comparison times (hours since the GOES ignition hour) on the 30-m model grid: cells burned in both (green), only in the simulation (red), and only in the GOFER observation (blue). Stars mark the configured ignition points.}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.98\textwidth,height=0.42\textheight,keepaspectratio]{arrival_current.pdf}
+\caption{Current case configuration: simulated arrival time, GOFER-derived arrival time and their difference where both burned through the final comparison time, all in hours since the GOES ignition hour. The difference color scale is symmetric and clipped at the 95th percentile of its magnitude.}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.98\textwidth,height=0.42\textheight,keepaspectratio]{fields_current.pdf}
+\caption{Current case configuration: simulated spread rate and fireline intensity recorded when each cell burned, for the single simulation member at its final output time; color scales are clipped at the 99th percentile.}
+\end{figure}
+
 }
 
 \newcommand{\SimulationMetrics}{%
-\textbf{No simulation.} No ELMFIRE result is available for this fire yet. Input and observation characterization is complete, but no footprint, arrival-time or growth metric can be calculated until the case configuration is simulated.
+\subsection*{Current case configuration}
+
+\begin{table}[H]\centering{\small
+\begin{tabular}{@{}rrrrrrrr@{}}\toprule
+Time (h) & GOFER (km$^2$) & Simulated (km$^2$) & Area ratio & Jaccard & Precision & Recall & $F_1$ \\ \midrule
+24 & 3.4 & 0.329 & 0.0965 & 0.097 & 1 & 0.097 & 0.18 \\
+48 & 14.2 & 3.01 & 0.212 & 0.15 & 0.75 & 0.16 & 0.26 \\
+72 & 25.6 & 7.57 & 0.296 & 0.18 & 0.66 & 0.2 & 0.3 \\
+945 & 600 & 896 & 1.49 & 0.27 & 0.35 & 0.53 & 0.42 \\
+\bottomrule\end{tabular}}
+\caption{Footprint metrics of the current case configuration against the GOFER-derived footprint at fixed times since the GOES ignition hour, evaluated on the 30-m model grid over valid landscape cells. Time is the comparison instant; areas are burned areas through that instant.}
+\end{table}\ReportBodyText
+
+\begin{table}[H]\centering{\small
+\begin{tabular}{@{}lr@{}}\toprule
+Quantity & Value \\ \midrule
+Cells burned in both by 945~h & 352{,}276 \\
+Mean arrival-time difference, simulated minus GOFER (h) & 64.3 \\
+Median arrival-time difference (h) & 107 \\
+Mean absolute arrival-time difference (h) & 158 \\
+Root-mean-square arrival-time difference (h) & 177 \\
+Simulated end since GOES ignition (h) & 945 \\
+Propagation stalled before the planned end & no \\
+First contact with domain boundary (h) & none \\
+Final simulated area (ac) & 221{,}476 \\
+Final crown-fire area (ac) & 25{,}416 \\
+\bottomrule\end{tabular}}
+\caption{Arrival-time and integrated statistics of the current case configuration. Arrival-time differences use cells burned in both the simulation and the GOFER observation by the final comparison time.}
+\end{table}\ReportBodyText
+
+Recall exceeds precision at the final comparison time, so most of the observed footprint is reached but a larger share of the simulated footprint lies outside it: the simulation overgrows the observation. The simulated burned area is 1.5 times the observed area at 945~h. Where both burned, the simulated fire arrives on average 64.3~h later than the observed fire (mean absolute difference 157.8~h).
+
 }
 
 \newcommand{\IntegratedResults}{%
-\textbf{No simulation.} Integrated growth and overlap histories require at least one simulation result.
+\begin{figure}[H]\centering
+\includegraphics[width=0.98\textwidth,height=0.42\textheight,keepaspectratio]{burned_area_growth.pdf}
+\caption{Observed (GOFER) and simulated burned-area growth, and the Jaccard overlap of each simulation with the GOFER footprint, evaluated hourly since the GOES ignition hour. Dotted lines mark the time each simulated fire first reaches the model-domain boundary.}
+\end{figure}
 }
 

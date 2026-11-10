@@ -28,7 +28,7 @@
       "physical_columns": 12,
       "source_cell_count": 8,
       "source_area_m2": 3200.0,
-      "input_fingerprint": "0a6b6d09f3fcec4ca8cdab57c57cfb0da20fb275193dc2d79a52609c445e6451",
+      "input_fingerprint": "e57d85b17565fbc3f2a44cb7c188799b1b851e7d2073d8b21e24f16bf0541ec6",
       "final_time_s": 300.0,
       "landmark_toa_s": [
         null,
@@ -44,7 +44,7 @@
       "logged_solver_step_count": 75,
       "maximum_logged_step_deviation_s": 0.0,
       "completion_receipt": "variants/subthreshold_dt_4p0s/logs/completion_marker.json",
-      "executable_sha256": "ab47c5e338a3bc3b325df659b0764ce47d5b071e22d07817e4b5cab9f87da672",
+      "executable_sha256": "b7c9bb4dc72f01cd2c18e518b7dbd8fd76871728905e68423b103684f537a90a",
       "profile_x_m": [
         10.0,
         30.0,
@@ -99,7 +99,7 @@
       "physical_columns": 12,
       "source_cell_count": 8,
       "source_area_m2": 3200.0,
-      "input_fingerprint": "34006fd3ff3b2313f7222ca441b78810b93ff65af97ad3a62efd61dc08a34913",
+      "input_fingerprint": "5dc4c5bfffe6708f38b41d3fd22d409acfa508b6d36934b61a830f15be3ad073",
       "final_time_s": 300.0,
       "landmark_toa_s": [
         null,
@@ -115,7 +115,7 @@
       "logged_solver_step_count": 150,
       "maximum_logged_step_deviation_s": 0.0,
       "completion_receipt": "variants/subthreshold_dt_2p0s/logs/completion_marker.json",
-      "executable_sha256": "ab47c5e338a3bc3b325df659b0764ce47d5b071e22d07817e4b5cab9f87da672",
+      "executable_sha256": "b7c9bb4dc72f01cd2c18e518b7dbd8fd76871728905e68423b103684f537a90a",
       "profile_x_m": [
         10.0,
         30.0,
@@ -170,7 +170,7 @@
       "physical_columns": 12,
       "source_cell_count": 8,
       "source_area_m2": 3200.0,
-      "input_fingerprint": "13d815bbe500167caa3a628c8a48f20a6fb597535f081aa1040b566f9f3cdda3",
+      "input_fingerprint": "2e6ed6a4415f2e648b2f028f6de022f7ddd4f413a21683d07d811e06347fecdd",
       "final_time_s": 300.0,
       "landmark_toa_s": [
         null,
@@ -186,7 +186,7 @@
       "logged_solver_step_count": 300,
       "maximum_logged_step_deviation_s": 0.0,
       "completion_receipt": "variants/subthreshold_dt_1p0s/logs/completion_marker.json",
-      "executable_sha256": "ab47c5e338a3bc3b325df659b0764ce47d5b071e22d07817e4b5cab9f87da672",
+      "executable_sha256": "b7c9bb4dc72f01cd2c18e518b7dbd8fd76871728905e68423b103684f537a90a",
       "profile_x_m": [
         10.0,
         30.0,
@@ -241,7 +241,7 @@
       "physical_columns": 12,
       "source_cell_count": 8,
       "source_area_m2": 3200.0,
-      "input_fingerprint": "c77610075e9e7d65de66725138412eccb8d90fcd95c8e572a23db72658f963e4",
+      "input_fingerprint": "c904b6dba4530fadd272c263e07e6836bf9566a83450e53991592b3286172503",
       "final_time_s": 300.0,
       "landmark_toa_s": [
         null,
@@ -257,7 +257,7 @@
       "logged_solver_step_count": 600,
       "maximum_logged_step_deviation_s": 0.0,
       "completion_receipt": "variants/subthreshold_dt_0p5s/logs/completion_marker.json",
-      "executable_sha256": "ab47c5e338a3bc3b325df659b0764ce47d5b071e22d07817e4b5cab9f87da672",
+      "executable_sha256": "b7c9bb4dc72f01cd2c18e518b7dbd8fd76871728905e68423b103684f537a90a",
       "profile_x_m": [
         10.0,
         30.0,
@@ -312,7 +312,7 @@
       "physical_columns": 12,
       "source_cell_count": 8,
       "source_area_m2": 3200.0,
-      "input_fingerprint": "5be0a11f22d0996f09fe33ed4ad0ad30dc71ff95ad474a1c99931c8c1b0071b9",
+      "input_fingerprint": "33e4227715c1886ed6a1c1ef1c547b24fb8885e57ce111fce2845151e5e72be8",
       "final_time_s": 300.0,
       "landmark_toa_s": [
         84.0,
@@ -328,7 +328,7 @@
       "logged_solver_step_count": 75,
       "maximum_logged_step_deviation_s": 0.0,
       "completion_receipt": "variants/threshold_stress_dt_4p0s/logs/completion_marker.json",
-      "executable_sha256": "ab47c5e338a3bc3b325df659b0764ce47d5b071e22d07817e4b5cab9f87da672",
+      "executable_sha256": "b7c9bb4dc72f01cd2c18e518b7dbd8fd76871728905e68423b103684f537a90a",
       "profile_x_m": [
         10.0,
         30.0,
@@ -383,7 +383,7 @@
       "physical_columns": 12,
       "source_cell_count": 8,
       "source_area_m2": 3200.0,
-      "input_fingerprint": "fcf8910845a8a810c436a2307df6e4708997b8bf0cd2ed814f2a40d30bdf5525",
+      "input_fingerprint": "7757840a4ff86f7930dcf034d9b8a334677dfcb76c804f53e912163eb50ec190",
       "final_time_s": 300.0,
       "landmark_toa_s": [
         84.0,
@@ -399,7 +399,7 @@
       "logged_solver_step_count": 150,
       "maximum_logged_step_deviation_s": 0.0,
       "completion_receipt": "variants/threshold_stress_dt_2p0s/logs/completion_marker.json",
-      "executable_sha256": "ab47c5e338a3bc3b325df659b0764ce47d5b071e22d07817e4b5cab9f87da672",
+      "executable_sha256": "b7c9bb4dc72f01cd2c18e518b7dbd8fd76871728905e68423b103684f537a90a",
       "profile_x_m": [
         10.0,
         30.0,
@@ -454,7 +454,7 @@
       "physical_columns": 12,
       "source_cell_count": 8,
       "source_area_m2": 3200.0,
-      "input_fingerprint": "4bf6750d3532bb02d52db05f3ce2c9ff4408445171d66bb7c1d7d04f11d687b2",
+      "input_fingerprint": "97f6d896c69fafd268993e95912b4d133aeea8a6a31cb6542a3e9643030188f0",
       "final_time_s": 300.0,
       "landmark_toa_s": [
         84.0,
@@ -470,7 +470,7 @@
       "logged_solver_step_count": 300,
       "maximum_logged_step_deviation_s": 0.0,
       "completion_receipt": "variants/threshold_stress_dt_1p0s/logs/completion_marker.json",
-      "executable_sha256": "ab47c5e338a3bc3b325df659b0764ce47d5b071e22d07817e4b5cab9f87da672",
+      "executable_sha256": "b7c9bb4dc72f01cd2c18e518b7dbd8fd76871728905e68423b103684f537a90a",
       "profile_x_m": [
         10.0,
         30.0,
@@ -525,7 +525,7 @@
       "physical_columns": 12,
       "source_cell_count": 8,
       "source_area_m2": 3200.0,
-      "input_fingerprint": "7f492a0729f6d8c03f46b0a4153cc9a055581028e057a9e44b01880cacff1213",
+      "input_fingerprint": "98b361272ef76395574d119b2a11b5ce301c77edf29a5ad146e0e1db0415df4c",
       "final_time_s": 300.0,
       "landmark_toa_s": [
         83.5,
@@ -541,7 +541,7 @@
       "logged_solver_step_count": 600,
       "maximum_logged_step_deviation_s": 0.0,
       "completion_receipt": "variants/threshold_stress_dt_0p5s/logs/completion_marker.json",
-      "executable_sha256": "ab47c5e338a3bc3b325df659b0764ce47d5b071e22d07817e4b5cab9f87da672",
+      "executable_sha256": "b7c9bb4dc72f01cd2c18e518b7dbd8fd76871728905e68423b103684f537a90a",
       "profile_x_m": [
         10.0,
         30.0,
@@ -577,7 +577,7 @@
       }
     }
   ],
-  "executed_binary_sha256": "ab47c5e338a3bc3b325df659b0764ce47d5b071e22d07817e4b5cab9f87da672",
+  "executed_binary_sha256": "b7c9bb4dc72f01cd2c18e518b7dbd8fd76871728905e68423b103684f537a90a",
   "reason": "One or more temporal-convergence acceptance components failed.",
   "metrics": [
     {

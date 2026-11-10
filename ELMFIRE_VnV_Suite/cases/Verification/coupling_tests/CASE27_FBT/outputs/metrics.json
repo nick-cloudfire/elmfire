@@ -23,16 +23,16 @@
         {
           "name": "ln-distance mu",
           "target": 2.42,
-          "measured": 2.411192950945141,
-          "percent_error": -0.36392764689499385,
+          "measured": 2.4112417054219204,
+          "percent_error": -0.3619129990941954,
           "units": "-",
           "status": "PASS"
         },
         {
           "name": "ln-distance sigma",
           "target": 1.31,
-          "measured": 1.3002463134482802,
-          "percent_error": -0.7445562253221236,
+          "measured": 1.3000531772824324,
+          "percent_error": -0.7592994440891326,
           "units": "-",
           "status": "PASS"
         }
